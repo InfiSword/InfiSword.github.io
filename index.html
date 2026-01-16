@@ -141,18 +141,41 @@
                 <div class="mono" style="color: var(--accent-color); margin-bottom: 10px;">PROJECT REPORT: FILE_TOWER_DEFENSE</div>
                 <h1 style="font-size: 2.5rem; margin-bottom: 30px;">Architecture Redesign</h1>
 
-                <h2>1. UI(RectTransform)에서 GameObject 기반으로의 전환 이유</h2>
+                <h2>1. UI(RectTransform)에서 GameObject(Transform) 기반으로의 전환</h2>
                 <p>초기 단계에서는 윈도우 바탕화면의 느낌을 구현하고자 파일 유닛을 UI 시스템으로 구축했습니다. 하지만 프로젝트 규모가 커짐에 따라 다음과 같은 <span class="highlight">결정적인 설계적 한계</span>를 마주했습니다.</p>
                 
                 
                 
                 <ul>
-                    <li><span class="highlight">좌표계 종속성:</span> <code>RectTransform</code>은 캔버스의 앵커(Anchor)와 피벗(Pivot) 설정에 따라 월드 좌표값이 상대적으로 변합니다. 이로 인해 유닛의 절대적인 위치를 파악하는 로직이 기하급수적으로 복잡해졌습니다.</li>
-                    <li><span class="highlight">연산 비용의 증가:</span> 월드 좌표 기반의 바이러스(적)가 UI 기반의 파일을 타겟팅하거나 파티클 이펙트를 출력할 때마다 <code>WorldToScreenPoint</code> 등의 변환 함수를 매 프레임 호출해야 했습니다.</li>
-                    <li><span class="highlight">계층 구조의 복잡성:</span> 서로 다른 부모 객체(UI Hierarchy) 간의 위치 변환 로직은 코드의 가독성을 해치고 유지보수 효율을 급격히 저하시켰습니다.</li>
+                    <li><span class="highlight">좌표계 종속성:</span> <code>RectTransform</code>은 캔버스의 앵커(Anchor)와 피벗(Pivot) 설정에 따라 월드 좌표값이 상대적으로 변합니다. 이로 인해 유닛의 절대적인 위치를 파악하는 로직이 매우 복잡해졌습니다.</li>
+                    <li><span class="highlight">연산 비용의 증가:</span> 월드 좌표 기반의 바이러스(적)가 UI 기반의 파일 유닛 간의 거리 계산 및 물리적 충돌 판정 로직을 짜고자 할 때, 파일을 타겟팅하거나 파티클 이펙트를 출력할 때마다 <code>Camera.WorldToScreenPoint</code>, <code>Camera.ScreenToWorldPoint</code> 등의 변환 함수를 매 프레임 호출해야 했습니다.</li>
+                    <li><span class="highlight">계층 구조의 복잡성:</span> 서로 다른 부모 객체(UI Hierarchy) 간의 위치 변환 로직은 코드의 가독성을 해치고 복잡한 로직의 구조가 나타났습니다.</li>
                 </ul>
-                <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계를 일원화하였고, 성능과 확장성을 동시에 확보했습니다.</p>
+                <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계로 통일하여, 성능과 확장성, 로직을 간단하게 짜기 위한 이점들을 동시에 확보했습니다.</p>
 
+                <h2>2. Grid기반 유닛 배치 시스템 (FildGridManager)</h2>
+                <p>해당 UI의 구조에서 벗어나 GameObject 기반으로 바꿨기 때문에, 그에 따른 파일 유닛의 배치에 대해서도 구조를 바꿔야 했습니다.</p>
+                <p>FileGrid는 그리드 셀을 나타내는 클래스입니다. 각 그리드 셀의 상태와 동작을 관리합니다.</p>
+                <p>해당 FileGrid는 파일 디펜스 게임에서 하나의 타워를 설치할 수 있는 공간 (Place), 그리드 (Grid) 라고 볼 수 있습니다.</p>
+
+              <pre><code><span class="c-kw">public class</span> <span class="c-ty">FileGrid</span> : <span class="c-ty">MonoBehaviour</span>
+{
+    [<span class="c-ty">Header</span>(<span class="c-st">"State"</span>)]
+    <span class="c-kw">private</span> <span class="c-ty">File_Base</span> fileUnit;
+    <span class="c-kw">public int</span> GridX { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
+    <span class="c-kw">public int</span> GridY { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
+
+    [<span class="c-ty">Header</span>(<span class="c-st">"Visuals"</span>)]
+    <span class="c-kw">private</span> <span class="c-ty">Color</span> normalColor = <span class="c-kw">new</span> <span class="c-ty">Color</span>(1f, 1f, 1f, 0f);
+
+    <span class="c-cm">// 현재 그리드에 적용되고 있는 버프 소스 리스트 (중복 방지)</span>
+    <span class="c-kw">private readonly</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt; _activeBuffSources = <span class="c-kw">new</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt;(); 
+    
+    <span class="c-kw">public</span> <span class="c-ty">GameObject</span> obstacleObject { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
+     <span class="c-cm">// ... 각종 초기화 함수, 그리드 점유 파일 세팅 함수 및 제거, 버프 관리 함수들</span>
+}</code></pre>
+                
+                
                 <h2>2. 중앙 집중식 입력 시스템 (InputManager)</h2>
                 <p>수많은 유닛이 개별적으로 이벤트를 수신하지 않고, <code>InputManager</code>가 레이캐스트를 통해 입력을 통제하도록 설계했습니다.</p>
                 <div class="code-block">
