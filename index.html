@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minhyuk Lee | Systems & Rendering</title>
+    <!-- 폰트: Fira Code (기술), Inter (가독성) -->
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&family=Inter:wght@300;700&family=Noto+Sans+KR:wght@300;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -24,18 +25,22 @@
             line-height: 1.6;
         }
         .mono { font-family: 'Fira Code', monospace; }
+        
         .container { max-width: 1000px; margin: 0 auto; padding: 80px 20px; }
 
+        /* HEADER */
         header { margin-bottom: 100px; }
         .name-tag { font-size: 3.5rem; color: #f0f6fc; font-weight: 700; margin-bottom: 10px; }
         .status-line { color: var(--accent-color); font-size: 1.1rem; border-left: 3px solid var(--accent-color); padding-left: 15px; }
 
+        /* SECTION */
         .section-title {
             font-family: 'Fira Code', monospace; font-size: 1.5rem; color: #f0f6fc;
             margin: 80px 0 30px; display: flex; align-items: center;
         }
         .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border-color); margin-left: 20px; }
 
+        /* SKILLS */
         .skill-container { display: flex; flex-wrap: wrap; gap: 15px; }
         .skill-item {
             background: var(--card-bg); border: 1px solid var(--border-color);
@@ -44,6 +49,7 @@
         .skill-item:hover { border-color: var(--accent-color); transform: translateY(-3px); }
         .skill-label { font-size: 0.8rem; color: var(--accent-color); display: block; margin-bottom: 5px; }
 
+        /* PROJECT CARD */
         .project-card {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 12px; overflow: hidden; transition: 0.4s; cursor: pointer;
@@ -61,12 +67,16 @@
             background: var(--bg-color); width: 95%; max-width: 900px; max-height: 90vh;
             border: 1px solid var(--border-color); border-radius: 12px; overflow-y: auto;
         }
-        .modal-body { padding: 50px; }
+        .modal-body { padding: 60px; }
         .modal-body h2 { color: var(--accent-color); margin: 40px 0 20px; font-size: 1.5rem; border-left: 4px solid var(--accent-color); padding-left: 15px;}
+        .modal-body p { margin-bottom: 15px; color: #8b949e; }
+        .modal-body ul { margin-bottom: 20px; padding-left: 20px; color: #8b949e; }
+        .modal-body li { margin-bottom: 8px; }
         .code-block {
             background: var(--code-bg); padding: 20px; border-radius: 8px; 
             font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #d1d5da;
-            overflow-x: auto; margin: 20px 0; border: 1px solid var(--border-color);
+            overflow-x: auto; margin: 25px 0; border: 1px solid var(--border-color);
+            line-height: 1.4;
         }
 
         footer { margin-top: 100px; padding-top: 40px; border-top: 1px solid var(--border-color); }
@@ -92,7 +102,7 @@
                 </div>
                 <div class="skill-item">
                     <span class="skill-label mono">Engine/Graphics</span>
-                    <span class="mono">Unity, Unreal, DirectX 11, Computer Graphics</span>
+                    <span class="mono">Unity, Unreal, DirectX 11 (Learning), Computer Graphics</span>
                 </div>
                 <div class="skill-item">
                     <span class="skill-label mono">Specialized</span>
@@ -105,11 +115,11 @@
             <h2 class="section-title">02. Featured Project</h2>
             <article class="project-card" onclick="openModal()">
                 <div class="project-info">
-                    <span class="mono" style="color:var(--sub-accent)">Architecture & Interaction</span>
+                    <span class="mono" style="color:var(--sub-accent)">PC Desktop-Style Strategy Defense</span>
                     <h3 class="project-name">File Tower Defense</h3>
                     <p style="color: #8b949e; margin-bottom: 25px;">
-                        유니티의 좌표계 특성을 활용한 <span class="highlight">GameObject 기반 아키텍처</span> 및 
-                        중앙 집중식 <span class="highlight">Input 관리 시스템</span> 구축.
+                        유니티의 좌표계 물리적 특성을 분석하여 <span class="highlight">GameObject 기반 아키텍처</span>로 전면 재설계. 
+                        효율적인 대규모 유닛 처리를 위한 <span class="highlight">중앙 집중식 입력 시스템</span> 구축.
                     </p>
                     <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> ACCESS_CODE_LOGS</div>
                 </div>
@@ -119,64 +129,61 @@
         <footer>
             <div class="mono" style="font-size: 0.9rem;">
                 CONTACT: <a href="mailto:lioie6478@gmail.com">lioie6478@gmail.com</a><br>
-                GITHUB: <a href="https://github.com/InfiSword">github.com/InfiSword</a>
+                GITHUB: <a href="https://github.com/InfiSword" target="_blank">github.com/InfiSword</a>
             </div>
         </footer>
     </div>
 
+    <!-- MODAL -->
     <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
         <div class="modal-container" onclick="event.stopPropagation()">
             <div class="modal-body">
-                <div class="mono" style="color: var(--accent-color);">PROJECT_DATA_LOG</div>
-                <h1 style="font-size: 2.5rem; margin-top: 10px;">File Tower Defense</h1>
+                <div class="mono" style="color: var(--accent-color); margin-bottom: 10px;">PROJECT REPORT: FILE_TOWER_DEFENSE</div>
+                <h1 style="font-size: 2.5rem; margin-bottom: 30px;">Architecture Redesign</h1>
 
-                <h2>1. UI에서 GameObject 기반으로의 전환</h2>
-                <p>유닛의 절대 좌표 추적과 물리 연산의 효율성을 위해 <code>RectTransform</code> 대신 <code>Transform</code> 기반 설계를 채택했습니다.</p>
-                <div class="code-block">
-<span class="comment">// File_Base.cs: 상태 기반 관리와 Transform 활용</span>
-<span class="keyword">public enum</span> FileStatus { VisualFile, normal, locked, Dead }
-<span class="keyword">public abstract class</span> File_Base : MonoBehaviour
-{
-    <span class="keyword">public</span> FileStatus FileState {
-        <span class="keyword">get</span> => _fileState;
-        <span class="keyword">set</span> {
-            <span class="keyword">if</span> (_fileState != <span class="keyword">value</span>) {
-                _fileState = <span class="keyword">value</span>;
-                OnFileStateChanged(_fileState);
-            }
-        }
-    }
-}
-                </div>
+                <h2>1. UI(RectTransform)에서 GameObject 기반으로의 전환 이유</h2>
+                <p>초기 단계에서는 윈도우 바탕화면의 느낌을 구현하고자 유닛을 UI 시스템으로 구축했습니다. 하지만 프로젝트 규모가 커짐에 따라 다음과 같은 <span class="highlight">결정적인 설계적 한계</span>를 마주했습니다.</p>
+                
+                
+                
+                <ul>
+                    <li><span class="highlight">좌표계 종속성:</span> <code>RectTransform</code>은 캔버스의 앵커(Anchor)와 피벗(Pivot) 설정에 따라 월드 좌표값이 상대적으로 변합니다. 이로 인해 유닛의 절대적인 위치를 파악하는 로직이 기하급수적으로 복잡해졌습니다.</li>
+                    <li><span class="highlight">연산 비용의 증가:</span> 월드 좌표 기반의 바이러스(적)가 UI 기반의 파일을 타겟팅하거나 파티클 이펙트를 출력할 때마다 <code>WorldToScreenPoint</code> 등의 변환 함수를 매 프레임 호출해야 했습니다.</li>
+                    <li><span class="highlight">계층 구조의 복잡성:</span> 서로 다른 부모 객체(UI Hierarchy) 간의 위치 변환 로직은 코드의 가독성을 해치고 유지보수 효율을 급격히 저하시켰습니다.</li>
+                </ul>
+                <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계를 일원화하였고, 성능과 확장성을 동시에 확보했습니다.</p>
 
                 <h2>2. 중앙 집중식 입력 시스템 (InputManager)</h2>
-                <p>수백 개의 유닛이 개별 이벤트를 수신하지 않고 <code>InputManager</code>가 모든 입력을 가로채 상황에 맞는 객체에 전달합니다.</p>
+                <p>수많은 유닛이 개별적으로 이벤트를 수신하지 않고, <code>InputManager</code>가 레이캐스트를 통해 입력을 통제하도록 설계했습니다.</p>
                 <div class="code-block">
-<span class="comment">// InputManager.cs: 레이캐스트를 통한 유닛 검출 일원화</span>
+<span class="comment">// InputManager.cs: Raycast를 통한 중앙 집중식 상호작용 객체 탐지</span>
 <span class="keyword">private</span> IInteractable <span class="func">GetInteractableUnderMouse</span>() {
-    RaycastHit2D unitHit = Physics2D.<span class="func">Raycast</span>(m_mouseWorldPosition, Vector2.zero, 0f, unitLayerMask);
-    <span class="keyword">if</span> (unitHit.collider != <span class="keyword">null</span>) {
-        <span class="keyword">return</span> unitHit.collider.<span class="func">GetComponent</span>&lt;IInteractable&gt;();
+    <span class="comment">// 레이캐스트를 사용하여 월드 좌표상의 유닛 검출</span>
+    RaycastHit2D hit = Physics2D.<span class="func">Raycast</span>(m_mouseWorldPosition, Vector2.zero, 0f, unitLayerMask);
+    <span class="keyword">if</span> (hit.collider != <span class="keyword">null</span>) {
+        <span class="keyword">return</span> hit.collider.<span class="func">GetComponent</span>&lt;IInteractable&gt;();
     }
     <span class="keyword">return null</span>;
 }
                 </div>
 
                 <h2>3. 그리드 기반 논리 시스템 (FileGridManager)</h2>
-                <p>월드 좌표를 그리드 인덱스로 실시간 매핑하여 유닛의 배치 가능 여부와 스냅 기능을 구현했습니다.</p>
+                <p>월드 좌표를 그리드 인덱스로 실시간 매핑하여 유닛의 배치와 스냅 기능을 구현했습니다.</p>
                 <div class="code-block">
-<span class="comment">// FileGridManager.cs: 그리드 유닛 배치 시도</span>
+<span class="comment">// FileGridManager.cs: 그리드 점유 상태 및 위치 동기화</span>
 <span class="keyword">public bool</span> <span class="func">TrySetUnitAtGrid</span>(File_Base unit, FileGrid targetGrid) {
-    <span class="keyword">if</span> (targetGrid.obstacleObject != <span class="keyword">null</span>) <span class="keyword">return false</span>;
+    <span class="keyword">if</span> (targetGrid.obstacleObject != <span class="keyword">null</span>) <span class="keyword">return false</span>; <span class="comment">// 장애물 체크</span>
     
+    <span class="comment">// GameObject 기반이기에 transform.position만으로 정교한 배치 가능</span>
     unit.transform.position = targetGrid.transform.position;
-    unit.transform.<span class="func">SetParent</span>(targetGrid.transform);
     targetGrid.<span class="func">SetFileUnit</span>(unit);
     <span class="keyword">return true</span>;
 }
                 </div>
 
-                <button onclick="closeModal()" style="margin-top: 40px; background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 10px 30px; cursor: pointer; font-family: 'Fira Code';">RETURN_TO_BASE</button>
+                <button onclick="closeModal()" style="margin-top: 50px; background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 10px 30px; border-radius: 6px; cursor: pointer; font-family: 'Fira Code';">
+                    RETURN_TO_SYSTEM
+                </button>
             </div>
         </div>
     </div>
