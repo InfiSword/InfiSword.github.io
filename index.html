@@ -72,24 +72,30 @@
         .modal-body p { margin-bottom: 15px; color: #8b949e; }
         .modal-body ul { margin-bottom: 20px; padding-left: 20px; color: #8b949e; }
         .modal-body li { margin-bottom: 8px; }
+        
+        /* CODE BLOCK STYLING */
         .code-block {
-            background: var(--code-bg); padding: 20px; border-radius: 8px; 
+            background: var(--code-bg); padding: 0; border-radius: 8px; 
             font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #d1d5da;
             overflow-x: auto; margin: 25px 0; border: 1px solid var(--border-color);
-            line-height: 1.4;
+            line-height: 1.6;
         }
+        pre { margin: 0; padding: 20px; white-space: pre; }
+        code { font-family: inherit; }
 
         footer { margin-top: 100px; padding-top: 40px; border-top: 1px solid var(--border-color); }
         .highlight { color: #f0f6fc; font-weight: 700; }
         .comment { color: #6a737d; }
         .keyword { color: #f97583; }
         .func { color: #b392f0; }
+        .type { color: #79c0ff; }
+        .string { color: #a5d6ff; }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1 class="name-tag">Minhyuk Lee</h1>
+            <h1 class="name-tag head">Minhyuk Lee</h1>
             <div class="status-line mono">Gameplay & Rendering Programmer</div>
         </header>
 
@@ -141,70 +147,134 @@
                 <div class="mono" style="color: var(--accent-color); margin-bottom: 10px;">PROJECT REPORT: FILE_TOWER_DEFENSE</div>
                 <h1 style="font-size: 2.5rem; margin-bottom: 30px;">Architecture Redesign</h1>
 
-                <h2>1. UI(RectTransform)에서 GameObject(Transform) 기반으로의 전환</h2>
+                <h2>1. UI(RectTransform)에서 GameObject(Transform) 기반으로의 전환</h2>                
                 <p>초기 단계에서는 윈도우 바탕화면의 느낌을 구현하고자 파일 유닛을 UI 시스템으로 구축했습니다. 하지만 프로젝트 규모가 커짐에 따라 다음과 같은 <span class="highlight">결정적인 설계적 한계</span>를 마주했습니다.</p>
-                
-                
-                
+                                                
                 <ul>
                     <li><span class="highlight">좌표계 종속성:</span> <code>RectTransform</code>은 캔버스의 앵커(Anchor)와 피벗(Pivot) 설정에 따라 월드 좌표값이 상대적으로 변합니다. 이로 인해 유닛의 절대적인 위치를 파악하는 로직이 매우 복잡해졌습니다.</li>
-                    <li><span class="highlight">연산 비용의 증가:</span> 월드 좌표 기반의 바이러스(적)가 UI 기반의 파일 유닛 간의 거리 계산 및 물리적 충돌 판정 로직을 짜고자 할 때, 파일을 타겟팅하거나 파티클 이펙트를 출력할 때마다 <code>Camera.WorldToScreenPoint</code>, <code>Camera.ScreenToWorldPoint</code> 등의 변환 함수를 매 프레임 호출해야 했습니다.</li>
+                    <li><span class="highlight">연산 비용의 증가:</span> 월드 좌표 기반의 바이러스(적)가 UI 기반의 파일 유닛 간의 거리 계산 및 물리적 충돌 판정 로직을 짜고자 할 때, 파일을 타겟팅하거나 파티클 이펙트를 출력할 때마다 <code>Camera.WorldToScreenPoint</code>, <code>Camera.ScreenToWorldPoint</code> 등의 변환 함수관련한 로직을 추가해 줘야 했습니다.</li>
                     <li><span class="highlight">계층 구조의 복잡성:</span> 서로 다른 부모 객체(UI Hierarchy) 간의 위치 변환 로직은 코드의 가독성을 해치고 복잡한 로직의 구조가 나타났습니다.</li>
                 </ul>
                 <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계로 통일하여, 성능과 확장성, 로직을 간단하게 짜기 위한 이점들을 동시에 확보했습니다.</p>
-
-                <h2>2. Grid기반 유닛 배치 시스템 (FildGridManager)</h2>
-                <p>해당 UI의 구조에서 벗어나 GameObject 기반으로 바꿨기 때문에, 그에 따른 파일 유닛의 배치에 대해서도 구조를 바꿔야 했습니다.</p>
-                <p>FileGrid는 그리드 셀을 나타내는 클래스입니다. 각 그리드 셀의 상태와 동작을 관리합니다.</p>
-                <p>해당 FileGrid는 타워를 설치할 수 있는 최소 단위이자 게임의 논리적 공간(Slot) 역할을 합니다.</p>
                 
-     <div class="code-block">
-<pre><code><span class="c-kw">public class</span> <span class="c-ty">FileGrid</span> : <span class="c-ty">MonoBehaviour</span>
-{
-    [<span class="c-ty">Header</span>(<span class="c-st">"State"</span>)]
-    <span class="c-kw">private</span> <span class="c-ty">File_Base</span> fileUnit;
-    <span class="c-kw">public int</span> GridX { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
-    <span class="c-kw">public int</span> GridY { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
+                <h2>2. 그리드 시스템 아키텍처 (FileGridManager & FileGrid)</h2>
 
-    [<span class="c-ty">Header</span>(<span class="c-st">"Visuals"</span>)]
-    <span class="c-kw">private</span> <span class="c-ty">Color</span> normalColor = <span class="c-kw">new</span> <span class="c-ty">Color</span>(1f, 1f, 1f, 0f);
+                <h3>[FileGrid: 데이터 중심의 개별 셀 매니저]</h3>
+                <p>유닛을 <code>GameObject</code> 기반으로 전환함에 따라, 윈도우 바탕화면의 아이콘 정렬 시스템을 모방하여 유닛 배치 시스템을 구축했습니다.</p>
+                <p><code>FileGrid</code>는 타워(파일)를 설치할 수 있는 최소 단위인 'Slot' 역할을 수행하며, 해당 셀의 점유 상태와 인접 유닛 간의 시너지, 버프를 관리합니다.</p>
+                <p><code>FileGrid</code>의 기본적인 구조는 아래와 같습니다. </p>
 
-    <span class="c-cm">// 현재 그리드에 적용되고 있는 버프 소스 리스트 (중복 방지)</span>
-    <span class="c-kw">private readonly</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt; _activeBuffSources = <span class="c-kw">new</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt;(); 
-    
-    <span class="c-kw">public</span> <span class="c-ty">GameObject</span> obstacleObject { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
-
-    <span class="c-cm">// ... 각종 초기화, 점유 파일 세팅/제거, 버프 관리 로직</span>
-}</code></pre>    
-     </div>
-                
-                
-                <h2>2. 중앙 집중식 입력 시스템 (InputManager)</h2>
-                <p>수많은 유닛이 개별적으로 이벤트를 수신하지 않고, <code>InputManager</code>가 레이캐스트를 통해 입력을 통제하도록 설계했습니다.</p>
                 <div class="code-block">
-<span class="comment">// InputManager.cs: Raycast를 통한 중앙 집중식 상호작용 객체 탐지</span>
-<span class="keyword">private</span> IInteractable <span class="func">GetInteractableUnderMouse</span>() {
-    <span class="comment">// 레이캐스트를 사용하여 월드 좌표상의 유닛 검출</span>
-    RaycastHit2D hit = Physics2D.<span class="func">Raycast</span>(m_mouseWorldPosition, Vector2.zero, 0f, unitLayerMask);
-    <span class="keyword">if</span> (hit.collider != <span class="keyword">null</span>) {
-        <span class="keyword">return</span> hit.collider.<span class="func">GetComponent</span>&lt;IInteractable&gt;();
-    }
-    <span class="keyword">return null</span>;
-}
+<pre><code><span class="keyword">public class</span> <span class="type">FileGrid</span> : <span class="type">MonoBehaviour</span>
+{
+    [<span class="type">Header</span>(<span class="string">"State"</span>)]
+    <span class="keyword">private</span> <span class="type">File_Base</span> fileUnit; <span class="comment">// 현재 그리드를 점유 중인 파일 유닛</span>
+    
+    <span class="comment">//2차원 배열의 X,Y 위치값</span>
+    <span class="keyword">public int</span> GridX { <span class="keyword">get</span>; <span class="keyword">private set</span>; }
+    <span class="keyword">public int</span> GridY { <span class="keyword">get</span>; <span class="keyword">private set</span>; }
+
+    [<span class="type">Header</span>(<span class="string">"Visuals"</span>)]
+    <span class="keyword">private</span> <span class="type">Color</span> normalColor = <span class="keyword">new</span> <span class="type">Color</span>(1f, 1f, 1f, 0f);
+
+    <span class="comment">// HashSet을 활용한 버프 소스 관리 (중복 방지 및 O(1) 조회 성능 확보)</span>
+    <span class="keyword">private readonly</span> <span class="type">HashSet</span>&lt;<span class="type">File_Base</span>&gt; activeBuffSources = <span class="keyword">new</span> <span class="type">HashSet</span>&lt;<span class="type">File_Base</span>&gt;(); 
+    
+    <span class="keyword">public</span> <span class="type">GameObject</span> obstacleObject { <span class="keyword">get</span>; <span class="keyword">private set</span>; }
+
+    <span class="comment">// ... 각종 초기화, 점유 파일 세팅/제거, 동적 버프 갱신 로직</span>
+}</code></pre>    
                 </div>
 
-                <h2>3. 그리드 기반 논리 시스템 (FileGridManager)</h2>
-                <p>월드 좌표를 그리드 인덱스로 실시간 매핑하여 유닛의 배치와 스냅 기능을 구현했습니다.</p>
+  <h2>[GameObjectGridLayout: GameObject 기반 커스텀 레이아웃]</h2>
+                <p>화면 해상도에 맞춰 GameObject인 FileGrid의 간격과 셀 크기를 동적으로 계산하고, 전체 시스템의 시작 월드 좌표를 제공하는 핵심 클래스입니다.</p>
+
+<pre><code><span class="c-kw">public class</span> <span class="c-ty">GameObjectGridLayout</span> : <span class="c-ty">MonoBehaviour</span>
+{
+    [<span class="c-ty">Header</span>(<span class="c-st">"Grid Settings"</span>)]
+    <span class="c-kw">[SerializeField] private int</span> columns = <span class="string">13</span>; <span class="c-cm">// X축 그리드 수</span>
+    <span class="c-kw">[SerializeField] private int</span> rows = <span class="string">7</span>;     <span class="c-cm">// Y축 그리드 수</span>
+
+    <span class="c-kw">[SerializeField] private Vector2</span> cellSize = <span class="type">Vector2</span>.one;
+    <span class="c-kw">[SerializeField] private Vector2</span> spacing = <span class="type">Vector2</span>.zero;
+    <span class="c-kw">[SerializeField] private Vector2</span> padding = <span class="type">Vector2</span>.zero;
+
+    [<span class="c-ty">Header</span>(<span class="c-st">"Layout Settings"</span>)]
+    <span class="c-kw">[SerializeField] private bool</span> fitToScreen;
+
+    <span class="c-kw">public int</span> Columns => columns;
+    <span class="c-kw">public int</span> Rows => rows;
+    <span class="c-kw">public Vector2</span> CellSize => cellSize;
+    <span class="c-kw">public Vector2</span> Spacing => spacing;
+    <span class="c-kw">public bool</span> GetFitToScreen => fitToScreen;
+    <span class="c-kw">public Vector2</span> StartPos { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
+
+   <span class="comment">// ... </span>
+    
+    <span class="c-cm">// 카메라 해상도에 맞춰 그리드 데이터 동적 계산</span>
+    <span class="c-kw">public void</span> <span class="c-fn">FitToScreen</span>() {
+        <span class="c-ty">Camera</span> cam = <span class="c-ty">Camera</span>.main;
+        <span class="c-kw">float</span> height = cam.orthographicSize * <span class="string">2f</span>;
+        <span class="c-kw">float</span> width = height * cam.aspect;
+
+        <span class="c-cm">// 여백과 간격을 제외한 실제 가용 셀 크기 역산</span>
+        cellSize.x = (width - (padding.x * <span class="string">2</span>) - (spacing.x * (columns - <span class="string">1</span>))) / columns;
+        cellSize.y = (height - (padding.y * <span class="string">2</span>) - (spacing.y * (rows - <span class="string">1</span>))) / rows;
+
+        <span class="c-cm">// 좌상단 기준 월드 시작 좌표 설정</span>
+        StartPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(-(width / <span class="string">2</span>) + padding.x + (cellSize.x / <span class="string">2</span>), 
+                                (height / <span class="string">2</span>) - padding.y - (cellSize.y / <span class="string">2</span>));
+    }
+}</code></pre>
+                
+                <h3>[FileGridManager: 전체 시스템 조율 및 물리-논리 변환]</h3>
+                <p><code>FileGridManager</code>는 모든 셀을 2D 배열(<code>gridArray[x, y]</code>)로 관리하며, 게임 전체의 그리드 논리를 처리합니다.</p>
+                <ul>
+                    <li><span class="highlight">좌표 변환 시스템:</span> <code>WorldToGridIndex</code>를 통해 마우스 위치를 즉시 인덱스로 변환하고, <code>GetGrid</code>를 통해 주변 3x3 영역 내 가장 가까운 그리드를 탐색하는 최적화 로직을 포함합니다.</li>
+                    <li><span class="highlight">파일 유닛 배치 관리:</span> <code>TrySetUnitAtGrid</code> 함수는 유효성 검사 후 기존 그리드에서 유닛을 제거, 새 그리드에 부모-자식 관계 설정 및 <code>FileGrid.SetFileUnit()</code> 호출을 통한 <strong>버프 자동 적용</strong>까지의 트랜잭션을 보장합니다.</li>
+                    <li><span class="highlight">장애물 및 드롭 처리:</span> 땅굴(WormHole)과 같은 동적 장애물 레이어를 관리하고, 폴더 객체 위로 드롭되는 특수한 상호작용(HandleDropAt)을 총괄합니다.</li>
+                </ul>
+
                 <div class="code-block">
-<span class="comment">// FileGridManager.cs: 그리드 점유 상태 및 위치 동기화</span>
-<span class="keyword">public bool</span> <span class="func">TrySetUnitAtGrid</span>(File_Base unit, FileGrid targetGrid) {
+<pre><code><span class="comment">// FileGridManager.cs: 그리드 점유 상태 및 계층 구조 동기화</span>
+<span class="keyword">public bool</span> <span class="func">TrySetUnitAtGrid</span>(<span class="type">File_Base</span> unit, <span class="type">FileGrid</span> targetGrid) {
     <span class="keyword">if</span> (targetGrid.obstacleObject != <span class="keyword">null</span>) <span class="keyword">return false</span>; <span class="comment">// 장애물 체크</span>
     
-    <span class="comment">// GameObject 기반이기에 transform.position만으로 정교한 배치 가능</span>
+    <span class="comment">// GameObject 기반 설계로 인한 직관적인 위치 및 계층 구조 동기화</span>
     unit.transform.position = targetGrid.transform.position;
+    unit.transform.<span class="func">SetParent</span>(targetGrid.transform);
+    targetGrid.<span class="func">SetFileUnit</span>(unit); <span class="comment">// 내부에서 버프 연산 자동 수행</span>
+    <span class="keyword">return true</span>;
+}</code></pre>
+                </div>
+                
+                <h2>3. 중앙 집중식 입력 시스템 (InputManager)</h2>
+                <p>수많은 유닛이 개별적으로 이벤트를 수신하지 않고, <code>InputManager</code>가 모든 마우스 입력을 통합 관리하여 <code>IInteractable</code> 인터페이스를 구현한 객체에 전달합니다.</p>
+                <div class="code-block">
+<pre><code><span class="comment">// InputManager.cs: Raycast를 통한 중앙 집중식 상호작용 객체 탐지</span>
+<span class="keyword">private</span> <span class="type">IInteractable</span> <span class="func">GetInteractableUnderMouse</span>() {
+    <span class="comment">// 월드 좌표상의 유닛과 바이러스를 레이어로 구분하여 정교하게 검출</span>
+    <span class="type">RaycastHit2D</span> hit = <span class="type">Physics2D</span>.<span class="func">Raycast</span>(m_mouseWorldPosition, <span class="type">Vector2</span>.zero, 0f, unitLayerMask);
+    <span class="keyword">if</span> (hit.collider != <span class="keyword">null</span>) {
+        <span class="keyword">return</span> hit.collider.<span class="func">GetComponent</span>&lt;<span class="type">IInteractable</span>&gt;();
+    }
+    <span class="keyword">return null</span>;
+}</code></pre>
+                </div>
+
+                <h2>4. 동적 데이터 동기화 (FileGridManager)</h2>
+                <p>유닛 배치 시 단순히 좌표를 맞추는 것이 아니라, 그리드 데이터와 유닛의 부모-자식 관계를 동기화하여 논리적 무결성을 유지합니다.</p>
+                <div class="code-block">
+<pre><code><span class="comment">// FileGridManager.cs: 그리드 점유 상태 및 계층 구조 동기화</span>
+<span class="keyword">public bool</span> <span class="func">TrySetUnitAtGrid</span>(<span class="type">File_Base</span> unit, <span class="type">FileGrid</span> targetGrid) {
+    <span class="keyword">if</span> (targetGrid.obstacleObject != <span class="keyword">null</span>) <span class="keyword">return false</span>; <span class="comment">// 장애물 체크</span>
+    
+    <span class="comment">// Transform 기반 설계로 인한 직관적인 위치 및 계층 구조 동기화</span>
+    unit.transform.position = targetGrid.transform.position;
+    unit.transform.<span class="func">SetParent</span>(targetGrid.transform);
     targetGrid.<span class="func">SetFileUnit</span>(unit);
     <span class="keyword">return true</span>;
-}
+}</code></pre>
                 </div>
 
                 <button onclick="closeModal()" style="margin-top: 50px; background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 10px 30px; border-radius: 6px; cursor: pointer; font-family: 'Fira Code';">
