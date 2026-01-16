@@ -2,15 +2,196 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>UPTRAND</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Developer Portfolio</title>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --accent-color: #2563eb;
+            --secondary-bg: #f8fafc;
+            --border-color: #e2e8f0;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            margin-bottom: 60px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .intro {
+            font-size: 1.1rem;
+            color: #64748b;
+        }
+
+        section {
+            margin-bottom: 50px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .skill-item {
+            background: var(--secondary-bg);
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: 500;
+            border: 1px solid var(--border-color);
+        }
+
+        .project-card {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            transition: transform 0.2s;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .project-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .project-tech {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+
+        .project-description {
+            margin-bottom: 15px;
+        }
+
+        .links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .links a {
+            text-decoration: none;
+            color: var(--accent-color);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            header h1 { font-size: 2rem; }
+        }
+    </style>
 </head>
 <body>
-    <h1> UPTRAND </h1>
-    <p>UPTRAND는 동명대학교 LinQ사업단 소속의 게임 개발 동아리입니다.</p>
-</body>
-<body>
-    <h1> PipeGame </h1>
-    <p>시작지점과 끝지점을 파이프를 연결하는 게임입니다.</p>
-    <p>즐겁게 플레이해주시길 바랍니다!</p>
+
+    <div class="container">
+        <header>
+            <h1>Game Developer Portfolio</h1>
+            <p class="intro">탄탄한 기초와 최적화를 지향하는 게임 개발자입니다.</p>
+        </header>
+
+        <section id="about">
+            <h2>About Me</h2>
+            <p>
+                게임 엔진의 내부 동작 원리를 이해하고, 사용자에게 즐거운 경험을 제공하기 위한 기술적 구현에 관심이 많습니다. 
+                주로 C++, C#을 기반으로 클라이언트 개발 및 그래픽스 작업을 진행하고 있습니다.
+            </p>
+        </section>
+
+        <section id="skills">
+            <h2>Technical Skills</h2>
+            <div class="skills-grid">
+                <div class="skill-item">Unity</div>
+                <div class="skill-item">Unreal Engine</div>
+                <div class="skill-item">C++ / C#</div>
+                <div class="skill-item">DirectX 11/12</div>
+                <div class="skill-item">Shaders (HLSL)</div>
+                <div class="skill-item">Git / GitHub</div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <h2>Projects</h2>
+            
+            <div class="project-card">
+                <div class="project-title">3D Action RPG (WIP)</div>
+                <div class="project-tech">Unity, C#, URP</div>
+                <div class="project-description">
+                    데이터 중심 설계를 바탕으로 한 액션 RPG 프로젝트입니다. 
+                    효율적인 상태 머신(FSM)과 콤보 시스템 구현에 집중하고 있습니다.
+                </div>
+                <div class="links">
+                    <a href="#">Github Repository</a>
+                    <a href="#">Dev Blog</a>
+                </div>
+            </div>
+
+            <div class="project-card">
+                <div class="project-title">Custom Graphics Engine</div>
+                <div class="project-tech">C++, DirectX 11, WinAPI</div>
+                <div class="project-description">
+                    라이브러리를 사용하지 않고 밑바닥부터 구현한 그래픽 엔진입니다. 
+                    렌더 파이프라인의 이해와 쉐이더 프로그래밍 최적화를 목표로 제작했습니다.
+                </div>
+                <div class="links">
+                    <a href="#">Github Repository</a>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact">
+            <h2>Contact</h2>
+            <p>📧 Email: your-email@example.com</p>
+            <p>🔗 LinkedIn: <a href="#" style="color: var(--accent-color);">linkedin.com/in/username</a></p>
+            <p>💻 Blog: <a href="https://your-blog-url.com" style="color: var(--accent-color);">Technical Blog</a></p>
+        </section>
+
+        <footer>
+            &copy; 2026 Game Developer Portfolio. Built with GitHub Pages.
+        </footer>
+    </div>
+
 </body>
 </html>
