@@ -3,195 +3,184 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Developer Portfolio</title>
+    <title>Minhyuk Lee | Gameplay & Rendering Programmer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&family=Noto+Sans+KR:wght@300;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --accent-color: #2563eb;
-            --secondary-bg: #f8fafc;
-            --border-color: #e2e8f0;
+            --bg-color: #D4C9A8; /* Tactical Sand */
+            --text-color: #2E2D27; /* Deep Charcoal */
+            --accent-color: #3B3A32;
+            --highlight-color: #8B8362;
+            --grid-line: rgba(46, 45, 39, 0.1);
+            --modal-bg: #E8E2D0;
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
         body {
-            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
             background-color: var(--bg-color);
-            margin: 0;
-            padding: 0;
+            color: var(--text-color);
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .head { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; text-transform: uppercase; }
+        
+        /* BACKGROUND FX */
+        .bg-grid {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: linear-gradient(var(--grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px; z-index: -1;
         }
 
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        header { border-bottom: 4px solid var(--accent-color); padding-bottom: 20px; margin-bottom: 60px; }
+        .logo-title { font-size: 2.5rem; margin-bottom: 5px; }
+
+        .section-title {
+            font-family: 'Orbitron', sans-serif; font-size: 1.8rem;
+            margin: 60px 0 30px; border-left: 8px solid var(--accent-color); padding-left: 15px;
         }
 
-        header {
-            margin-bottom: 60px;
-            text-align: center;
-        }
+        /* SKILLS */
+        .skill-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .skill-card { border: 1px solid var(--accent-color); padding: 20px; background: rgba(255,255,255,0.1); }
+        .skill-card h3 { font-family: 'Orbitron', sans-serif; font-size: 1rem; margin-bottom: 15px; border-bottom: 1px dashed var(--accent-color); }
+        .tag { display: inline-block; background: var(--accent-color); color: var(--bg-color); padding: 2px 8px; font-size: 0.85rem; margin: 0 5px 5px 0; border-radius: 2px; }
 
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            color: var(--accent-color);
-        }
-
-        .intro {
-            font-size: 1.1rem;
-            color: #64748b;
-        }
-
-        section {
-            margin-bottom: 50px;
-        }
-
-        h2 {
-            font-size: 1.8rem;
-            border-bottom: 2px solid var(--accent-color);
-            padding-bottom: 8px;
-            margin-bottom: 20px;
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-        }
-
-        .skill-item {
-            background: var(--secondary-bg);
-            padding: 10px 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-weight: 500;
-            border: 1px solid var(--border-color);
-        }
-
+        /* PROJECT CARD */
         .project-card {
-            background: var(--secondary-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 25px;
-            transition: transform 0.2s;
+            border: 2px solid var(--accent-color); background: rgba(255,255,255,0.2);
+            margin-bottom: 40px; transition: 0.4s; cursor: pointer; overflow: hidden;
         }
+        .project-card:hover { transform: translate(-8px, -8px); box-shadow: 16px 16px 0 var(--accent-color); background: var(--modal-bg); }
+        .project-header { background: var(--accent-color); color: var(--bg-color); padding: 15px 25px; display: flex; justify-content: space-between; align-items: center; }
+        .project-body { padding: 30px; display: grid; grid-template-columns: 2fr 1fr; gap: 30px; }
+        .highlight-box { border: 1px dashed var(--accent-color); padding: 15px; margin: 15px 0; background: rgba(255,255,255,0.3); font-weight: bold; }
 
-        .project-card:hover {
-            transform: translateY(-5px);
+        /* MODAL */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 10000; justify-content: center; align-items: center;
         }
-
-        .project-title {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 10px;
-            color: var(--accent-color);
+        .modal-container {
+            background: var(--modal-bg); width: 90%; max-width: 900px; max-height: 85vh;
+            border: 3px solid var(--accent-color); overflow-y: auto; position: relative;
         }
-
-        .project-tech {
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-bottom: 15px;
-        }
-
-        .project-description {
-            margin-bottom: 15px;
-        }
-
-        .links {
-            display: flex;
-            gap: 15px;
-        }
-
-        .links a {
-            text-decoration: none;
-            color: var(--accent-color);
-            font-weight: bold;
-            font-size: 0.9rem;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 80px;
-            color: #94a3b8;
-            font-size: 0.9rem;
-        }
-
-        @media (max-width: 600px) {
-            header h1 { font-size: 2rem; }
-        }
+        .modal-header { background: var(--accent-color); color: var(--bg-color); padding: 20px; display: flex; justify-content: space-between; position: sticky; top: 0; }
+        .modal-body { padding: 40px; }
+        .modal-body h2 { border-bottom: 2px solid var(--accent-color); margin-bottom: 15px; font-family: 'Orbitron'; font-size: 1.2rem; margin-top: 30px;}
+        .modal-body ul { margin: 15px 0 25px 20px; }
     </style>
 </head>
 <body>
+    <div class="bg-grid"></div>
 
     <div class="container">
         <header>
-            <h1>Game Developer Portfolio</h1>
-            <p class="intro">탄탄한 기초와 최적화를 지향하는 게임 개발자입니다.</p>
+            <h1 class="logo-title head">Minhyuk Lee</h1>
+            <p class="sub-status mono">>> STATUS: GAMEPLAY & RENDERING PROGRAMMER // BUSAN_KR</p>
         </header>
 
-        <section id="about">
-            <h2>About Me</h2>
-            <p>
-                게임 엔진의 내부 동작 원리를 이해하고, 사용자에게 즐거운 경험을 제공하기 위한 기술적 구현에 관심이 많습니다. 
-                주로 C++, C#을 기반으로 클라이언트 개발 및 그래픽스 작업을 진행하고 있습니다.
-            </p>
-        </section>
-
         <section id="skills">
-            <h2>Technical Skills</h2>
-            <div class="skills-grid">
-                <div class="skill-item">Unity</div>
-                <div class="skill-item">Unreal Engine</div>
-                <div class="skill-item">C++ / C#</div>
-                <div class="skill-item">DirectX 11/12</div>
-                <div class="skill-item">Shaders (HLSL)</div>
-                <div class="skill-item">Git / GitHub</div>
+            <h2 class="section-title">Technical Capabilities</h2>
+            <div class="skill-grid">
+                <div class="skill-card">
+                    <h3 class="mono">Language</h3>
+                    <div class="tags">
+                        <span class="tag">C++</span><span class="tag">C#</span>
+                        <span class="tag">HLSL</span><span class="tag">Python</span>
+                    </div>
+                </div>
+                <div class="skill-card">
+                    <h3 class="mono">Core Tech</h3>
+                    <div class="tags">
+                        <span class="tag">Unity</span><span class="tag">Unreal Engine</span>
+                        <span class="tag">DirectX 11 (Learning)</span><span class="tag">Computer Graphics</span>
+                        <span class="tag">ML-Agents</span>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section id="projects">
-            <h2>Projects</h2>
-            
-            <div class="project-card">
-                <div class="project-title">3D Action RPG (WIP)</div>
-                <div class="project-tech">Unity, C#, URP</div>
-                <div class="project-description">
-                    데이터 중심 설계를 바탕으로 한 액션 RPG 프로젝트입니다. 
-                    효율적인 상태 머신(FSM)과 콤보 시스템 구현에 집중하고 있습니다.
+            <h2 class="section-title">Major Project</h2>
+            <article class="project-card" onclick="openModal('file_tower_defense')">
+                <div class="project-header">
+                    <span class="head">File Tower Defense (파일 타워 디펜스) ⭐</span>
+                    <span class="mono">2025.08 - 2026.01</span>
                 </div>
-                <div class="links">
-                    <a href="#">Github Repository</a>
-                    <a href="#">Dev Blog</a>
+                <div class="project-body">
+                    <div>
+                        <p>PC 데스크탑 환경을 모티브로 한 전략 타워 디펜스 게임. 시스템 아키텍처 재설계 및 중앙 집중식 상호작용 시스템 구축.</p>
+                        <div class="highlight-box mono">
+                            <p>> Unified World-Space Coordinate System</p>
+                            <p>> Centralized Input Management</p>
+                            <p>> Grid-based Logical Interaction</p>
+                        </div>
+                    </div>
+                    <div class="mono" style="font-size: 0.9rem;">
+                        <p><strong>ENGINE:</strong> Unity 2D</p>
+                        <p><strong>ROLE:</strong> Solo/Lead Programmer</p>
+                        <p><strong>FOCUS:</strong> Architecture Redesign</p>
+                    </div>
                 </div>
-            </div>
-
-            <div class="project-card">
-                <div class="project-title">Custom Graphics Engine</div>
-                <div class="project-tech">C++, DirectX 11, WinAPI</div>
-                <div class="project-description">
-                    라이브러리를 사용하지 않고 밑바닥부터 구현한 그래픽 엔진입니다. 
-                    렌더 파이프라인의 이해와 쉐이더 프로그래밍 최적화를 목표로 제작했습니다.
-                </div>
-                <div class="links">
-                    <a href="#">Github Repository</a>
-                </div>
-            </div>
+            </article>
         </section>
 
         <section id="contact">
-            <h2>Contact</h2>
-            <p>📧 Email: your-email@example.com</p>
-            <p>🔗 LinkedIn: <a href="#" style="color: var(--accent-color);">linkedin.com/in/username</a></p>
-            <p>💻 Blog: <a href="https://your-blog-url.com" style="color: var(--accent-color);">Technical Blog</a></p>
+            <h2 class="section-title">Contact</h2>
+            <div class="mono" style="text-align: center; padding: 40px; border: 1px dashed var(--accent-color);">
+                <p>EMAIL: lioie6478@gmail.com</p>
+                <div style="margin-top: 15px;">
+                    <a href="https://github.com/HyunsuYu">[GITHUB]</a> </div>
+            </div>
         </section>
-
-        <footer>
-            &copy; 2026 Game Developer Portfolio. Built with GitHub Pages.
-        </footer>
     </div>
 
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <span class="head">SYSTEM_ARCHITECTURE_LOG</span>
+                <button onclick="closeModal()" style="background:none; border:1px solid #fff; color:#fff; padding:2px 10px; cursor:pointer;">[X] CLOSE</button>
+            </div>
+            <div class="modal-body">
+                <h2>1. UI 시스템에서 GameObject 기반으로의 아키텍처 전환</h2>
+                <p>초기 유닛 설계를 <code>RectTransform</code>(UI) 기반으로 진행했으나, 적(Enemy) 유닛과의 상호작용 및 절대 좌표 추적에서 비효율성을 발견했습니다.</p>
+                
+                <ul>
+                    <li><strong>문제점:</strong> 앵커(Anchor)와 피벗(Pivot)에 종속된 UI 좌표는 월드 공간의 물리 연산 시 잦은 좌표 변환(WorldToScreen 등)을 초래하여 성능 및 유지보수성을 저하시켰습니다.</li>
+                    <li><strong>해결책:</strong> 모든 유닛을 <code>GameObject</code> 기반으로 전환하고 <code>transform.position</code>을 통해 절대 좌표를 관리하는 하이브리드 방식을 채택했습니다.</li>
+                    <li><strong>성과:</strong> 유닛 배치, 타겟팅 로직, 물리 연산 시 불필요한 좌표 변환 연산을 제거하고 시스템의 직관성을 높였습니다.</li>
+                </ul>
+
+                <h2>2. 중앙 집중식 입력 시스템 (InputManager & InteractionHandler)</h2>
+                <p>개별 유닛이 스스로 마우스 이벤트를 처리하던 구조를 탈피하여, 중앙 매니저가 입력을 통제하는 구조를 설계했습니다.</p>
+                <ul>
+                    <li><strong>상태 관리:</strong> <code>None</code>, <code>Pressing</code>, <code>DraggingObject</code>, <code>DraggingBox</code> 등 상태를 세분화하여 정교한 조작감을 구현했습니다.</li>
+                    <li><strong>UI 관통 클릭 방지:</strong> <code>EventSystem.current.IsPointerOverGameObject()</code> 및 레이캐스트 레이어 분리를 통해 UI 창 뒤의 유닛이 클릭되는 현상을 차단했습니다.</li>
+                    <li><strong>추상화:</strong> <code>IInteractable</code> 인터페이스를 통해 파일, 폴더, 적 등 다양한 객체가 동일한 핸들러를 통해 일관된 방식으로 상호작용하도록 구현했습니다.</li>
+                </ul>
+
+                <h2>3. 그리드 기반 유닛 배치 시스템 (FileGridManager)</h2>
+                <p>월드 좌표를 그리드 인덱스로 즉시 변환하고, 장애물 유무와 점유 상태를 판단하는 로직을 구축했습니다.</p>
+                <ul>
+                    <li><strong>동적 스냅:</strong> 유닛 드래그 종료 시 가장 가까운 빈 그리드(<code>NotOccupied</code>)를 탐색하여 자동으로 위치를 교정하는 로직을 구현했습니다.</li>
+                    <li><strong>장애물 관리:</strong> 땅굴(WormHole)과 같은 동적 장애물 레이어를 두어 유닛 배치가 불가능한 영역을 실시간으로 관리합니다.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) {
+            document.getElementById('modal-overlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+        function closeModal() {
+            document.getElementById('modal-overlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    </script>
 </body>
 </html>
