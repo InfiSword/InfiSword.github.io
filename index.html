@@ -13,6 +13,7 @@
             --accent-color: #58A6FF;
             --sub-accent: #238636;
             --border-color: #30363D;
+            --code-bg: #010409;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; cursor: crosshair; }
@@ -23,22 +24,18 @@
             line-height: 1.6;
         }
         .mono { font-family: 'Fira Code', monospace; }
-        
-        .container { max-width: 900px; margin: 0 auto; padding: 80px 20px; }
+        .container { max-width: 1000px; margin: 0 auto; padding: 80px 20px; }
 
-        /* HEADER */
         header { margin-bottom: 100px; }
         .name-tag { font-size: 3.5rem; color: #f0f6fc; font-weight: 700; margin-bottom: 10px; }
         .status-line { color: var(--accent-color); font-size: 1.1rem; border-left: 3px solid var(--accent-color); padding-left: 15px; }
 
-        /* SECTION */
         .section-title {
             font-family: 'Fira Code', monospace; font-size: 1.5rem; color: #f0f6fc;
             margin: 80px 0 30px; display: flex; align-items: center;
         }
         .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border-color); margin-left: 20px; }
 
-        /* SKILLS */
         .skill-container { display: flex; flex-wrap: wrap; gap: 15px; }
         .skill-item {
             background: var(--card-bg); border: 1px solid var(--border-color);
@@ -47,16 +44,13 @@
         .skill-item:hover { border-color: var(--accent-color); transform: translateY(-3px); }
         .skill-label { font-size: 0.8rem; color: var(--accent-color); display: block; margin-bottom: 5px; }
 
-        /* PROJECT CARD */
         .project-card {
             background: var(--card-bg); border: 1px solid var(--border-color);
             border-radius: 12px; overflow: hidden; transition: 0.4s; cursor: pointer;
         }
         .project-card:hover { border-color: var(--accent-color); transform: scale(1.01); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .project-info { padding: 40px; }
-        .project-tag { color: var(--sub-accent); font-size: 0.9rem; margin-bottom: 10px; display: block; }
         .project-name { font-size: 2rem; color: #f0f6fc; margin-bottom: 20px; }
-        .project-summary { margin-bottom: 25px; color: #8b949e; }
         
         /* MODAL */
         .modal-overlay {
@@ -64,16 +58,22 @@
             background: rgba(0,0,0,0.9); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(5px);
         }
         .modal-container {
-            background: var(--bg-color); width: 95%; max-width: 800px; max-height: 90vh;
+            background: var(--bg-color); width: 95%; max-width: 900px; max-height: 90vh;
             border: 1px solid var(--border-color); border-radius: 12px; overflow-y: auto;
         }
-        .modal-body { padding: 60px; }
-        .modal-body h2 { color: var(--accent-color); margin: 40px 0 20px; font-size: 1.5rem; }
-        .modal-body p { margin-bottom: 15px; color: #8b949e; }
-        .modal-body code { background: #1f242c; padding: 2px 6px; border-radius: 4px; color: #ff7b72; }
+        .modal-body { padding: 50px; }
+        .modal-body h2 { color: var(--accent-color); margin: 40px 0 20px; font-size: 1.5rem; border-left: 4px solid var(--accent-color); padding-left: 15px;}
+        .code-block {
+            background: var(--code-bg); padding: 20px; border-radius: 8px; 
+            font-family: 'Fira Code', monospace; font-size: 0.85rem; color: #d1d5da;
+            overflow-x: auto; margin: 20px 0; border: 1px solid var(--border-color);
+        }
 
-        /* UTILS */
+        footer { margin-top: 100px; padding-top: 40px; border-top: 1px solid var(--border-color); }
         .highlight { color: #f0f6fc; font-weight: 700; }
+        .comment { color: #6a737d; }
+        .keyword { color: #f97583; }
+        .func { color: #b392f0; }
     </style>
 </head>
 <body>
@@ -105,23 +105,21 @@
             <h2 class="section-title">02. Featured Project</h2>
             <article class="project-card" onclick="openModal()">
                 <div class="project-info">
-                    <span class="project-tag mono">System Architecture & Redesign</span>
+                    <span class="mono" style="color:var(--sub-accent)">Architecture & Interaction</span>
                     <h3 class="project-name">File Tower Defense</h3>
-                    <p class="project-summary">
-                        유니티 엔진의 좌표계 물리적 특성을 고려한 <span class="highlight">아키텍처 전면 재설계</span> 및 
-                        <span class="highlight">중앙 집중식 입력 시스템</span>을 구축한 타워 디펜스 프로젝트입니다.
+                    <p style="color: #8b949e; margin-bottom: 25px;">
+                        유니티의 좌표계 특성을 활용한 <span class="highlight">GameObject 기반 아키텍처</span> 및 
+                        중앙 집중식 <span class="highlight">Input 관리 시스템</span> 구축.
                     </p>
-                    <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">
-                        >> VIEW_TECHNICAL_REPORT
-                    </div>
+                    <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> ACCESS_CODE_LOGS</div>
                 </div>
             </article>
         </section>
 
-        <footer style="margin-top: 100px; padding-top: 40px; border-top: 1px solid var(--border-color);">
+        <footer>
             <div class="mono" style="font-size: 0.9rem;">
                 CONTACT: <a href="mailto:lioie6478@gmail.com">lioie6478@gmail.com</a><br>
-                GITHUB: <a href="https://github.com/HyunsuYu">github.com/MinhyukLee</a>
+                GITHUB: <a href="https://github.com/InfiSword">github.com/InfiSword</a>
             </div>
         </footer>
     </div>
@@ -129,40 +127,56 @@
     <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
         <div class="modal-container" onclick="event.stopPropagation()">
             <div class="modal-body">
-                <div class="mono" style="color: var(--accent-color); margin-bottom: 10px;">PROJECT REPORT: FILE_TOWER_DEFENSE</div>
-                <h1 style="font-size: 2.5rem; margin-bottom: 40px;">System Redesign Log</h1>
+                <div class="mono" style="color: var(--accent-color);">PROJECT_DATA_LOG</div>
+                <h1 style="font-size: 2.5rem; margin-top: 10px;">File Tower Defense</h1>
 
-                <h2>1. UI 시스템에서 GameObject 기반 아키텍처로의 전환</h2>
-                <p>
-                    초기 설계에서 <code>RectTransform</code>(UI) 기반의 유닛 배치를 시도했으나, 월드 좌표 기반의 바이러스(적)와의 상호작용 및 렌더링 순서 관리에서 한계를 직면했습니다.
-                </p>
-                
-                <p>
-                    이를 해결하기 위해 모든 유닛의 베이스를 <code>GameObject</code>로 전환했습니다. 앵커와 피벗에 종속된 UI 좌표 대신 <code>transform.position</code>이라는 <span class="highlight">절대적 월드 좌표</span>를 사용함으로써, 잦은 좌표 변환 연산을 제거하고 물리 연산의 정확도를 확보했습니다.
-                </p>
+                <h2>1. UI에서 GameObject 기반으로의 전환</h2>
+                <p>유닛의 절대 좌표 추적과 물리 연산의 효율성을 위해 <code>RectTransform</code> 대신 <code>Transform</code> 기반 설계를 채택했습니다.</p>
+                <div class="code-block">
+<span class="comment">// File_Base.cs: 상태 기반 관리와 Transform 활용</span>
+<span class="keyword">public enum</span> FileStatus { VisualFile, normal, locked, Dead }
+<span class="keyword">public abstract class</span> File_Base : MonoBehaviour
+{
+    <span class="keyword">public</span> FileStatus FileState {
+        <span class="keyword">get</span> => _fileState;
+        <span class="keyword">set</span> {
+            <span class="keyword">if</span> (_fileState != <span class="keyword">value</span>) {
+                _fileState = <span class="keyword">value</span>;
+                OnFileStateChanged(_fileState);
+            }
+        }
+    }
+}
+                </div>
 
-                <h2>2. 중앙 집중식 입력 및 상호작용 (InteractionHandler)</h2>
-                <p>
-                    수많은 파일 유닛이 개별적으로 마우스 이벤트를 수신하는 구조는 성능 저하와 입력 충돌을 야기했습니다. 이를 방지하기 위해 <code>InputManager</code>를 통한 <span class="highlight">입력 일원화</span>를 구현했습니다.
-                </p>
-                <ul>
-                    <li>드래그 시작/진입/종료 상태를 매니저에서 통합 관리</li>
-                    <li>박스 드래그 다중 선택과 단일 클릭 이동의 상태 머신(FSM) 분리</li>
-                    <li>UI 관통 방지 로직을 통해 윈도우 창 조작 시 유닛이 클릭되는 오류 차단</li>
-                </ul>
+                <h2>2. 중앙 집중식 입력 시스템 (InputManager)</h2>
+                <p>수백 개의 유닛이 개별 이벤트를 수신하지 않고 <code>InputManager</code>가 모든 입력을 가로채 상황에 맞는 객체에 전달합니다.</p>
+                <div class="code-block">
+<span class="comment">// InputManager.cs: 레이캐스트를 통한 유닛 검출 일원화</span>
+<span class="keyword">private</span> IInteractable <span class="func">GetInteractableUnderMouse</span>() {
+    RaycastHit2D unitHit = Physics2D.<span class="func">Raycast</span>(m_mouseWorldPosition, Vector2.zero, 0f, unitLayerMask);
+    <span class="keyword">if</span> (unitHit.collider != <span class="keyword">null</span>) {
+        <span class="keyword">return</span> unitHit.collider.<span class="func">GetComponent</span>&lt;IInteractable&gt;();
+    }
+    <span class="keyword">return null</span>;
+}
+                </div>
 
                 <h2>3. 그리드 기반 논리 시스템 (FileGridManager)</h2>
-                <p>
-                    바탕화면의 아이콘 정렬 방식을 재현하기 위해 월드 좌표를 그리드 인덱스로 실시간 매핑하는 시스템을 구축했습니다.
-                </p>
-                <ul>
-                    <li>유닛 드래그 종료 시 가장 가까운 <code>NotOccupied</code> 그리드 자동 탐색 및 스냅</li>
-                    <li>동적 장애물(땅굴 등) 생성 시 해당 그리드의 점유 상태를 즉시 갱신하는 논리 구조 설계</li>
-                </ul>
+                <p>월드 좌표를 그리드 인덱스로 실시간 매핑하여 유닛의 배치 가능 여부와 스냅 기능을 구현했습니다.</p>
+                <div class="code-block">
+<span class="comment">// FileGridManager.cs: 그리드 유닛 배치 시도</span>
+<span class="keyword">public bool</span> <span class="func">TrySetUnitAtGrid</span>(File_Base unit, FileGrid targetGrid) {
+    <span class="keyword">if</span> (targetGrid.obstacleObject != <span class="keyword">null</span>) <span class="keyword">return false</span>;
+    
+    unit.transform.position = targetGrid.transform.position;
+    unit.transform.<span class="func">SetParent</span>(targetGrid.transform);
+    targetGrid.<span class="func">SetFileUnit</span>(unit);
+    <span class="keyword">return true</span>;
+}
+                </div>
 
-                <button onclick="closeModal()" style="margin-top: 50px; background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 10px 30px; border-radius: 6px; cursor: pointer; font-family: 'Fira Code';">
-                    RETURN_TO_BASE
-                </button>
+                <button onclick="closeModal()" style="margin-top: 40px; background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 10px 30px; cursor: pointer; font-family: 'Fira Code';">RETURN_TO_BASE</button>
             </div>
         </div>
     </div>
