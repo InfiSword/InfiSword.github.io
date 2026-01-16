@@ -197,42 +197,7 @@
 
     <span class="c-cm">// ... 각종 초기화, 점유 파일 세팅/제거, 동적 버프 갱신 로직</span>
 }</code></pre>
-
-                <h3>[FileGridManager: 시스템 오케스트레이터]</h3>
-                <p>전체 그리드 시스템을 관리하는 핵심 매니저입니다. <code>FileGrid</code> 인스턴스들의 생명주기 관리, 좌표 변환, 조건부 탐색, 유닛 배치 트랜잭션을 총괄합니다.</p>
-                
-                <div class="skill-item mono" style="margin-bottom: 20px; background: rgba(88, 166, 255, 0.05);">
-                    <span class="skill-label">System Relationship</span>
-                    FileGridManager (매니저)<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;├─ gridArray[Width, Height] (2D 배열 데이터)<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;├─ 좌표 변환 (월드 ↔ 그리드 인덱스)<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;├─ 그리드 탐색 및 플래그 기반 검색<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;└─ 파일 배치/제거 트랜잭션 관리<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─→ FileGrid (개별 셀: 유닛 보관/버프/장애물)
-                </div>
-
-                <h3>주요 기능 로그</h3>
-                <ul>
-                    <li><span class="highlight">그리드 시스템 초기화:</span> <code>CreateGrids()</code>를 통해 프리팹 기반의 2D 레이아웃을 생성하고 <code>GameObjectGridLayout</code>과 연동하여 동적 배치를 완료합니다.</li>
-                    <li><span class="highlight">고도화된 탐색 시스템:</span> <code>FindFlagGridWorld</code> 함수를 통해 <code>Occupied</code>, <code>Obstacle</code> 등 여러 조건을 조합한 최적의 그리드를 탐색합니다.</li>
-                    <li><span class="highlight">안전한 드롭 처리:</span> <code>HandleDropAt</code> 로직을 통해 UI 폴더 창, 월드 그리드, 특수 장애물(WormHole) 간의 상호작용 우선순위를 결정합니다.</li>
-                </ul>
-
-<pre><code><span class="c-cm">// FileGridManager.cs: 그리드 점유 상태 및 계층 구조 동기화</span>
-<span class="c-kw">public bool</span> <span class="c-fn">TrySetUnitAtGrid</span>(<span class="c-ty">File_Base</span> unit, <span class="c-ty">FileGrid</span> targetGrid) {
-    <span class="c-cm">// 유효성 검사 (장애물 및 점유 여부 확인)</span>
-    <span class="c-kw">if</span> (targetGrid.obstacleObject != <span class="c-kw">null</span> || targetGrid.<span class="c-fn">GetFileUnit</span>() != <span class="c-kw">null</span>) 
-        <span class="c-kw">return false</span>;
-    
-    <span class="c-cm">// 물리적 위치 및 부모 계층 구조 동기화</span>
-    unit.transform.position = targetGrid.transform.position;
-    unit.transform.<span class="c-fn">SetParent</span>(targetGrid.transform);
-    
-    <span class="c-cm">// 논리 데이터 갱신 및 버프 시스템 트리거</span>
-    targetGrid.<span class="c-fn">SetFileUnit</span>(unit); 
-    <span class="c-kw">return true</span>;
-}</code></pre>
-
+      
                 <h3>[GameObjectGridLayout: 커스텀 레이아웃 엔진]</h3>
                 <p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하고, 전체 시스템의 시작 월드 좌표를 제공하는 핵심 컴포넌트입니다.</p>
 
@@ -272,6 +237,41 @@
     }
 }</code></pre>
 
+<h3>[FileGridManager: 시스템 오케스트레이터]</h3>
+                <p>전체 그리드 시스템을 관리하는 핵심 매니저입니다. <code>FileGrid</code> 인스턴스들의 생명주기 관리, 좌표 변환, 조건부 탐색, 유닛 배치 트랜잭션을 총괄합니다.</p>
+                
+                <div class="skill-item mono" style="margin-bottom: 20px; background: rgba(88, 166, 255, 0.05);">
+                    <span class="skill-label">System Relationship</span>
+                    FileGridManager (매니저)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;├─ gridArray[Width, Height] (2D 배열 데이터)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;├─ 좌표 변환 (월드 ↔ 그리드 인덱스)<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;├─ 그리드 탐색 및 플래그 기반 검색<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;└─ 파일 배치/제거 트랜잭션 관리<br>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─→ FileGrid (개별 셀: 유닛 보관/버프/장애물)
+                </div>
+
+                <h3>주요 기능 로그</h3>
+                <ul>
+                    <li><span class="highlight">그리드 시스템 초기화:</span> <code>CreateGrids()</code>를 통해 프리팹 기반의 2D 레이아웃을 생성하고 <code>GameObjectGridLayout</code>과 연동하여 동적 배치를 완료합니다.</li>
+                    <li><span class="highlight">고도화된 탐색 시스템:</span> <code>FindFlagGridWorld</code> 함수를 통해 <code>Occupied</code>, <code>Obstacle</code> 등 여러 조건을 조합한 최적의 그리드를 탐색합니다.</li>
+                    <li><span class="highlight">안전한 드롭 처리:</span> <code>HandleDropAt</code> 로직을 통해 UI 폴더 창, 월드 그리드, 특수 장애물(WormHole) 간의 상호작용 우선순위를 결정합니다.</li>
+                </ul>
+
+<pre><code><span class="c-cm">// FileGridManager.cs: 그리드 점유 상태 및 계층 구조 동기화</span>
+<span class="c-kw">public bool</span> <span class="c-fn">TrySetUnitAtGrid</span>(<span class="c-ty">File_Base</span> unit, <span class="c-ty">FileGrid</span> targetGrid) {
+    <span class="c-cm">// 유효성 검사 (장애물 및 점유 여부 확인)</span>
+    <span class="c-kw">if</span> (targetGrid.obstacleObject != <span class="c-kw">null</span> || targetGrid.<span class="c-fn">GetFileUnit</span>() != <span class="c-kw">null</span>) 
+        <span class="c-kw">return false</span>;
+    
+    <span class="c-cm">// 물리적 위치 및 부모 계층 구조 동기화</span>
+    unit.transform.position = targetGrid.transform.position;
+    unit.transform.<span class="c-fn">SetParent</span>(targetGrid.transform);
+    
+    <span class="c-cm">// 논리 데이터 갱신 및 버프 시스템 트리거</span>
+    targetGrid.<span class="c-fn">SetFileUnit</span>(unit); 
+    <span class="c-kw">return true</span>;
+}</code></pre>
+                
                 <h2>3. 중앙 집중식 입력 시스템 (InputManager)</h2>
                 <p>수많은 유닛이 개별 이벤트를 수신하지 않고, <code>InputManager</code>가 모든 마우스 입력을 통합 관리하여 <code>IInteractable</code> 인터페이스를 구현한 객체에 전달합니다.</p>
 <pre><code><span class="c-cm">// InputManager.cs: Raycast를 통한 중앙 집중식 상호작용 객체 탐지</span>
