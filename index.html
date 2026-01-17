@@ -1669,63 +1669,71 @@
                 <p>CSV 파일의 헤더와 데이터 클래스의 필드를 자동으로 매핑하여 동적으로 파싱하는 시스템을 구현했습니다. 
                 <span class="highlight">리플렉션(Reflection)</span>을 활용하여 타입 안전성을 보장하면서도 확장 가능한 파싱 로직을 설계했습니다.</p>
 
+                <h3>2.1 파싱 과정 개요</h3>
+                <p>CSV 파싱은 다음과 같은 단계로 진행됩니다:</p>
+                <ol>
+                    <li><span class="highlight">타입 정보 수집:</span> 리플렉션을 사용하여 제네릭 타입 T의 모든 필드 정보 추출</li>
+                    <li><span class="highlight">헤더 매핑:</span> CSV 첫 번째 줄(헤더)과 클래스 필드명을 자동으로 매핑</li>
+                    <li><span class="highlight">데이터 행 파싱:</span> 각 데이터 행을 스마트 분할하여 컬럼 단위로 분리</li>
+                    <li><span class="highlight">타입 변환 및 할당:</span> 문자열 데이터를 필드 타입에 맞게 변환하여 객체에 할당</li>
+                </ol>
+
+                <h3>2.2 핵심 파싱 로직</h3>
+                <p>제네릭 메서드를 사용하여 타입에 독립적인 파싱을 수행합니다.</p>
+
 <pre><code><span class="c-cm">// CSVParser.cs: 리플렉션 기반 CSV 파싱</span>
-<span class="c-kw">public</span> <span class="c-ty">List</span>&lt;<span class="c-ty">T</span>&gt; <span class="c-fn">parseCSV</span>&lt;<span class="c-ty">T</span>&gt;(<span class="c-kw">string</span> csvData, <span class="c-kw">bool</span> isCutColumn, <span class="c-kw">int</span> start, <span class="c-kw">int</span> end) <span class="c-kw">where T</span> : <span class="c-ty">BaseData</span>, <span class="c-kw">new</span>()
+<span class="c-kw">public</span> <span class="c-ty">List</span>&lt;<span class="c-ty">T</span>&gt; <span class="c-fn">parseCSV</span>&lt;<span class="c-ty">T</span>&gt;(<span class="c-kw">string</span> csvData) <span class="c-kw">where T</span> : <span class="c-ty">BaseData</span>, <span class="c-kw">new</span>()
 {
     <span class="c-ty">List</span>&lt;<span class="c-ty">T</span>&gt; csvDataList = <span class="c-kw">new</span> <span class="c-ty">List</span>&lt;<span class="c-ty">T</span>&gt;();
 
-    <span class="c-cm">// 리플렉션을 사용하여 타입의 모든 필드 정보 가져오기</span>
-    <span class="c-ty">FieldInfo</span>[] myFieldInfo;
+    <span class="c-cm">// 1. 리플렉션으로 타입의 모든 필드 정보 가져오기</span>
     <span class="c-ty">Type</span> myType = <span class="c-kw">typeof</span>(<span class="c-ty">T</span>);
-    myFieldInfo = myType.<span class="c-fn">GetFields</span>(<span class="c-ty">BindingFlags</span>.NonPublic | <span class="c-ty">BindingFlags</span>.Instance
-        | <span class="c-ty">BindingFlags</span>.Public | <span class="c-ty">BindingFlags</span>.Static);
+    <span class="c-ty">FieldInfo</span>[] myFieldInfo = myType.<span class="c-fn">GetFields</span>(<span class="c-ty">BindingFlags</span>.NonPublic | <span class="c-ty">BindingFlags</span>.Instance | <span class="c-ty">BindingFlags</span>.Public);
 
-    <span class="c-cm">// CSV 데이터를 줄 단위로 분리</span>
-    <span class="c-kw">string</span>[] csvIndexData = csvData.<span class="c-fn">Split</span>(<span class="c-st">'\n'</span>)
-        .<span class="c-fn">Where</span>(x => !<span class="c-ty">string</span>.<span class="c-fn">IsNullOrWhiteSpace</span>(x)).<span class="c-fn">ToArray</span>();
+    <span class="c-cm">// 2. CSV 데이터를 줄 단위로 분리 (첫 줄은 헤더)</span>
+    <span class="c-kw">string</span>[] csvLines = csvData.<span class="c-fn">Split</span>(<span class="c-st">'\n'</span>).<span class="c-fn">Where</span>(x => !<span class="c-ty">string</span>.<span class="c-fn">IsNullOrWhiteSpace</span>(x)).<span class="c-fn">ToArray</span>();
+    <span class="c-kw">string</span>[] headers = csvLines[<span class="c-st">0</span>].<span class="c-fn">Trim</span>().<span class="c-fn">Split</span>(<span class="c-st">','</span>);
 
-    <span class="c-cm">// 첫 번째 줄은 헤더(Attribute)로 사용</span>
-    <span class="c-kw">string</span>[] attributeColumnArray = csvIndexData[<span class="c-st">0</span>].<span class="c-fn">Trim</span>().<span class="c-fn">Split</span>(<span class="c-st">','</span>);
+    <span class="c-cm">// 3. CSV 헤더와 클래스 필드를 매핑 (DataIndex_Dict, Data_Dict 생성)</span>
+    <span class="c-fn">SetupFieldDict</span>(headers, myFieldInfo);
 
-    <span class="c-cm">// CSV 헤더와 클래스 필드를 매핑</span>
-    <span class="c-fn">SetupFieldDict</span>(attributeColumnArray, myFieldInfo);
-
-    <span class="c-cm">// 각 데이터 행 파싱</span>
-    <span class="c-kw">for</span> (<span class="c-kw">int</span> rowIndex = <span class="c-st">1</span>; rowIndex < csvIndexData.Length; rowIndex++) {
-        <span class="c-kw">string</span>[] column = <span class="c-fn">SmartSplit</span>(csvIndexData[rowIndex].<span class="c-fn">Trim</span>());
-        <span class="c-kw">if</span> (column.Length == <span class="c-st">0</span> || <span class="c-ty">string</span>.<span class="c-fn">IsNullOrWhiteSpace</span>(column[<span class="c-st">0</span>]))
-            <span class="c-kw">continue</span>;
-
+    <span class="c-cm">// 4. 각 데이터 행 파싱</span>
+    <span class="c-kw">for</span> (<span class="c-kw">int</span> rowIndex = <span class="c-st">1</span>; rowIndex < csvLines.Length; rowIndex++) {
+        <span class="c-kw">string</span>[] columns = <span class="c-fn">SmartSplit</span>(csvLines[rowIndex]);  <span class="c-cm">// 쉼표와 따옴표 처리</span>
         <span class="c-ty">T</span> objectData = <span class="c-ty">Activator</span>.<span class="c-fn">CreateInstance</span>&lt;<span class="c-ty">T</span>&gt;();
 
-        <span class="c-cm">// 각 컬럼 데이터를 해당 필드에 할당</span>
-        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < column.Length; i++) {
+        <span class="c-cm">// 5. 각 컬럼 데이터를 해당 필드에 할당</span>
+        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < columns.Length; i++) {
             <span class="c-kw">if</span> (DataIndex_Dict.<span class="c-fn">TryGetValue</span>(i, <span class="c-kw">out</span> <span class="c-kw">string</span> attribute) &&
                 Data_Dict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">string</span> fieldName)) {
                 <span class="c-ty">FieldInfo</span> fieldInfo = myType.<span class="c-fn">GetField</span>(fieldName);
-                <span class="c-kw">string</span> columnData = column[i];
-
-                <span class="c-kw">if</span> (fieldInfo != <span class="c-kw">null</span>) {
-                    <span class="c-fn">SetFieldValue</span>(objectData, fieldInfo, columnData);
-                }
+                <span class="c-fn">SetFieldValue</span>(objectData, fieldInfo, columns[i]);  <span class="c-cm">// 타입 변환 및 할당</span>
             }
         }
-
         csvDataList.<span class="c-fn">Add</span>(objectData);
     }
     <span class="c-kw">return</span> csvDataList;
-}
+}</code></pre>
 
-<span class="c-cm">// 쉼표와 따옴표를 고려한 스마트 분할</span>
+                <h3>2.3 스마트 분할 (SmartSplit)</h3>
+                <p>일반적인 <code>Split(',')</code>는 쉼표가 포함된 문자열이나 따옴표로 감싼 필드를 제대로 처리하지 못합니다. 
+                정규식을 사용하여 CSV 표준에 맞게 파싱합니다.</p>
+
+<pre><code><span class="c-cm">// 쉼표와 따옴표를 고려한 스마트 분할</span>
 <span class="c-kw">string</span>[] <span class="c-fn">SmartSplit</span>(<span class="c-kw">string</span> line)
 {
+    <span class="c-cm">// 정규식: 따옴표로 감싼 값 또는 일반 값을 매칭</span>
     <span class="c-kw">return</span> <span class="c-ty">Regex</span>.<span class="c-fn">Matches</span>(line, <span class="c-st">@"(?:^|,)(?:""(?<val>[^""]*)""|(?<val>[^,""]*))"</span>)
                 .<span class="c-fn">Cast</span>&lt;<span class="c-ty">Match</span>&gt;()
                 .<span class="c-fn">Select</span>(m => m.Groups[<span class="c-st">"val"</span>].Value)
                 .<span class="c-fn">ToArray</span>();
 }
+<span class="c-cm">// 예시: "이름,설명",100,200 → ["이름,설명", "100", "200"]</span></code></pre>
 
-<span class="c-cm">// 필드 타입에 따라 자동 변환</span>
+                <h3>2.4 타입 자동 변환</h3>
+                <p>필드 타입에 따라 문자열 데이터를 자동으로 변환합니다.</p>
+
+<pre><code><span class="c-cm">// 필드 타입에 따라 자동 변환</span>
 <span class="c-kw">protected virtual void</span> <span class="c-fn">SetFieldValue</span>(<span class="c-ty">BaseData</span> instance, <span class="c-ty">FieldInfo</span> fieldInfo, <span class="c-kw">string</span> value)
 {
     <span class="c-kw">if</span> (fieldInfo.FieldType == <span class="c-kw">typeof</span>(<span class="c-kw">string</span>))
@@ -1736,7 +1744,7 @@
         fieldInfo.<span class="c-fn">SetValue</span>(instance, floatVal);
 }</code></pre>
 
-                <h3>기술적 특징</h3>
+                <h3>2.5 기술적 특징</h3>
                 <ul>
                     <li><span class="highlight">리플렉션 기반 동적 매핑:</span> CSV 헤더와 클래스 필드를 자동으로 매핑하여 수동 매핑 코드 불필요</li>
                     <li><span class="highlight">스마트 분할:</span> 정규식을 사용하여 쉼표와 따옴표를 포함한 CSV 데이터를 정확히 파싱</li>
@@ -1745,7 +1753,33 @@
                 </ul>
 
                 <h2>3. 서버 CSV 다운로드 및 버전 관리 시스템</h2>
-                <p>구글 스프레드시트에서 CSV 데이터를 다운로드하고, 버전을 관리하여 변경된 데이터만 업데이트하는 시스템을 구현했습니다.</p>
+                <p>구글 스프레드시트에서 CSV 데이터를 다운로드하고, 버전을 관리하여 변경된 데이터만 업데이트하는 시스템을 구현했습니다. 
+                <span class="highlight">버전 비교</span>를 통해 불필요한 다운로드를 방지하고, <span class="highlight">로컬 캐싱</span>으로 오프라인 사용을 지원합니다.</p>
+
+                <h3>3.1 다운로드 프로세스</h3>
+                <p>다운로드 프로세스는 다음과 같이 진행됩니다:</p>
+                <ol>
+                    <li><span class="highlight">메타 시트 다운로드:</span> 서버의 버전 정보가 담긴 메타 시트를 먼저 다운로드</li>
+                    <li><span class="highlight">버전 비교:</span> 각 CSV 파일의 서버 버전과 로컬 버전을 비교</li>
+                    <li><span class="highlight">조건부 다운로드:</span> 버전이 다르거나 로컬 파일이 없을 때만 서버에서 다운로드</li>
+                    <li><span class="highlight">로컬 캐싱:</span> 다운로드한 파일을 로컬에 저장하고 버전 정보 업데이트</li>
+                    <li><span class="highlight">진행률 보고:</span> 각 파일 다운로드 완료 시 진행률 콜백 호출</li>
+                </ol>
+
+                <h3>3.2 버전 관리 시스템</h3>
+                <p>각 CSV 파일은 고유한 버전 번호를 가지며, 서버의 메타 시트에서 버전 정보를 가져옵니다. 
+                로컬에 저장된 버전 정보와 비교하여 변경된 파일만 다운로드합니다.</p>
+                <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 15px 20px; margin: 20px 0; border-radius: 6px;">
+                    <div style="margin-bottom: 10px;"><strong>버전 비교 로직:</strong></div>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>로컬 버전 == 서버 버전 → 로컬 파일 사용 (다운로드 스킵)</li>
+                        <li>로컬 버전 != 서버 버전 → 서버에서 다운로드</li>
+                        <li>로컬 파일 없음 → 서버에서 다운로드</li>
+                    </ul>
+                </div>
+
+                <h3>3.3 핵심 다운로드 로직</h3>
+                <p>비동기 다운로드를 통해 UI 블로킹 없이 데이터를 가져옵니다.</p>
 
 <pre><code><span class="c-cm">// ServerCSV_ConvertData.cs: 서버 CSV 다운로드 및 버전 관리</span>
 <span class="c-kw">public static async</span> <span class="c-ty">Task</span>&lt;<span class="c-kw">bool</span>&gt; <span class="c-fn">DownloadAllCSVAsync</span>(<span class="c-ty">Action</span>&lt;<span class="c-kw">float</span>&gt; progressCallback = <span class="c-kw">null</span>)
@@ -1760,33 +1794,25 @@
             <span class="c-kw">string</span> attribute = attrKvp.Key;
             <span class="c-kw">string</span> url = attrKvp.Value;
 
-            <span class="c-cm">// 서버 버전과 로컬 버전 비교</span>
+            <span class="c-cm">// 1. 서버 버전과 로컬 버전 비교</span>
             <span class="c-kw">string</span> serverVersion = _serverVersions.<span class="c-fn">TryGetValue</span>(dataType, <span class="c-kw">out</span> <span class="c-kw">var</span> sAttrVerDict) 
                 && sAttrVerDict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">var</span> sVer) ? sVer : <span class="c-st">"0"</span>;
-
             <span class="c-kw">string</span> localVersion = _localVersions.<span class="c-fn">TryGetValue</span>(dataType, <span class="c-kw">out</span> <span class="c-kw">var</span> lAttrVerDict) 
                 && lAttrVerDict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">var</span> lVer) ? lVer : <span class="c-st">"0"</span>;
 
             <span class="c-kw">string</span> fileName = $<span class="c-st">"{dataType}_{attribute}.csv"</span>;
             <span class="c-kw">string</span> localFilePath = <span class="c-ty">Path</span>.<span class="c-fn">Combine</span>(LocalDataPath, fileName);
-
             <span class="c-kw">string</span> fileContent = <span class="c-kw">null</span>;
-            <span class="c-kw">bool</span> needsDownload = <span class="c-kw">true</span>;
 
-            <span class="c-cm">// 버전이 같으면 로컬 파일 사용, 다르면 서버에서 다운로드</span>
+            <span class="c-cm">// 2. 버전이 같으면 로컬 파일 사용, 다르면 서버에서 다운로드</span>
             <span class="c-kw">if</span> (<span class="c-ty">File</span>.<span class="c-fn">Exists</span>(localFilePath) && localVersion == serverVersion) {
-                fileContent = <span class="c-ty">File</span>.<span class="c-fn">ReadAllText</span>(localFilePath);
-                needsDownload = <span class="c-kw">false</span>;
-                <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>($<span class="c-st">"로컬에서 로드: {fileName} (버전: {localVersion})"</span>);
-            }
-
-            <span class="c-kw">if</span> (needsDownload) {
-                <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>($<span class="c-st">"서버에서 다운로드: {fileName} (로컬:{localVersion} vs 서버:{serverVersion})"</span>);
+                fileContent = <span class="c-ty">File</span>.<span class="c-fn">ReadAllText</span>(localFilePath);  <span class="c-cm">// 로컬 캐시 사용</span>
+            } <span class="c-kw">else</span> {
+                <span class="c-cm">// 3. 서버에서 비동기 다운로드</span>
                 fileContent = <span class="c-kw">await</span> <span class="c-fn">DownloadFileAsync</span>(url);
-                
                 <span class="c-kw">if</span> (fileContent != <span class="c-kw">null</span>) {
-                    <span class="c-ty">File</span>.<span class="c-fn">WriteAllText</span>(localFilePath, fileContent);
-                    <span class="c-cm">// 로컬 버전 정보 업데이트</span>
+                    <span class="c-ty">File</span>.<span class="c-fn">WriteAllText</span>(localFilePath, fileContent);  <span class="c-cm">// 로컬에 저장</span>
+                    <span class="c-cm">// 4. 로컬 버전 정보 업데이트</span>
                     <span class="c-kw">if</span> (!_localVersions.<span class="c-fn">ContainsKey</span>(dataType)) 
                         _localVersions[dataType] = <span class="c-kw">new</span> <span class="c-ty">Dictionary</span>&lt;<span class="c-kw">string</span>, <span class="c-kw">string</span>&gt;();
                     _localVersions[dataType][attribute] = serverVersion;
@@ -1794,7 +1820,7 @@
             }
 
             csvDataDict.<span class="c-fn">Add</span>(attribute, fileContent);
-            progressCallback?.<span class="c-fn">Invoke</span>((<span class="c-kw">float</span>)currentCount / totalCount);
+            progressCallback?.<span class="c-fn">Invoke</span>((<span class="c-kw">float</span>)currentCount / totalCount);  <span class="c-cm">// 진행률 콜백</span>
         }
     }
 
@@ -1802,12 +1828,31 @@
     <span class="c-kw">return true</span>;
 }</code></pre>
 
-                <h3>기술적 특징</h3>
+                <h3>3.4 비동기 다운로드 구현</h3>
+                <p>UnityWebRequest를 사용하여 비동기로 파일을 다운로드합니다.</p>
+
+<pre><code><span class="c-cm">// UnityWebRequest를 사용한 비동기 다운로드</span>
+<span class="c-kw">private static async</span> <span class="c-ty">Task</span>&lt;<span class="c-kw">string</span>&gt; <span class="c-fn">DownloadFileAsync</span>(<span class="c-kw">string</span> url)
+{
+    <span class="c-kw">using</span> (<span class="c-ty">UnityWebRequest</span> request = <span class="c-ty">UnityWebRequest</span>.<span class="c-fn">Get</span>(url)) {
+        <span class="c-kw">await</span> request.<span class="c-fn">SendWebRequest</span>();
+        
+        <span class="c-kw">if</span> (request.result == <span class="c-ty">UnityWebRequest</span>.<span class="c-ty">Result</span>.Success) {
+            <span class="c-kw">return</span> request.downloadHandler.text;
+        } <span class="c-kw">else</span> {
+            <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>($<span class="c-st">"다운로드 실패: {url}, 에러: {request.error}"</span>);
+    <span class="c-kw">return null</span>;
+        }
+    }
+}</code></pre>
+
+                <h3>3.5 기술적 특징</h3>
                 <ul>
                     <li><span class="highlight">버전 기반 업데이트:</span> 서버 버전과 로컬 버전을 비교하여 변경된 데이터만 다운로드</li>
                     <li><span class="highlight">비동기 다운로드:</span> UnityWebRequest를 사용한 비동기 CSV 다운로드로 UI 블로킹 방지</li>
                     <li><span class="highlight">로컬 캐싱:</span> 다운로드한 CSV 파일을 로컬에 저장하여 오프라인 사용 가능</li>
                     <li><span class="highlight">진행률 콜백:</span> 다운로드 진행률을 실시간으로 전달하여 UI 업데이트</li>
+                    <li><span class="highlight">에러 처리:</span> 다운로드 실패 시 null 반환하여 안전하게 처리</li>
                 </ul>
 
                 <h2>3. Factory Pattern을 활용한 데이터 기반 객체 생성</h2>
