@@ -1088,18 +1088,22 @@
                 <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">ML-Agents 자율 주행 경주차 학습 시스템</h1>
 
                 <div class="visual-frame" style="margin: 30px 0;">
-                    <img src="제목 없는 비디오 - Clipchamp로 제작.gif" alt="ML-Agents 학습 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <img src="Gifs/제목 없는 비디오 - Clipchamp로 제작.gif" alt="ML-Agents 학습 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
                 </div>
 
                 <h2>1. 프로젝트 개요</h2>
                 <p>Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는 자율 주행 경주차 에이전트를 학습시킨 프로젝트입니다. <span class="highlight">체크포인트 기반 네비게이션 시스템</span>과 <span class="highlight">목표 지향 보상 설계</span>를 통해 에이전트가 트랙을 순차적으로 주행하도록 설계했습니다.</p>
 
                 <div class="visual-frame" style="margin: 30px 0;">
-                    <img src="mlagent_4.png" alt="ML-Agents 트랙 환경" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <img src="images/mlagent_4.png" alt="ML-Agents 트랙 환경" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
                     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">구불구불한 도로와 바위 지형으로 구성된 학습 트랙 환경</p>
                 </div>
 
                 <h2>2. 체크포인트 기반 네비게이션 시스템</h2>
+                <div style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 4px solid #ff9800; padding: 15px 20px; margin: 20px 0; border-radius: 6px;">
+                    <p style="margin: 0; color: #e0e0e0;"><strong style="color: #ff9800;">시행착오 및 문제 해결:</strong></p>
+                    <p style="margin: 10px 0 0 0; color: #c9d1d9;">초기 설계에서는 차량 Agent들이 자율주행을 수행할 때 <span class="highlight">역주행 현상</span>이 빈번하게 발생했습니다. 목표 지점까지의 최단 경로를 찾는 과정에서 에이전트가 트랙을 거꾸로 주행하거나, 잘못된 방향으로 이동하는 문제가 있었습니다. 이를 해결하기 위해 <span class="highlight">목표 지점까지의 여러 체크포인트를 순차적으로 배치</span>하여 에이전트가 반드시 앞으로 주행하도록 강제하는 시스템을 설계했습니다.</p>
+                </div>
                 <p>에이전트가 트랙을 올바른 순서로 주행하도록 <span class="highlight">체크포인트 시스템</span>을 구현했습니다. 각 체크포인트를 순차적으로 통과해야 다음 목표로 진행할 수 있으며, 잘못된 순서로 통과 시 페널티를 받습니다.</p>
 
                 <div class="visual-frame">
@@ -1187,26 +1191,130 @@
                 </div>
 
                 <h3>목표 지향 보상 (Goal-Oriented Rewards)</h3>
+                <p>에이전트가 체크포인트를 순차적으로 통과하고 목표 지점에 도달하도록 설계된 보상 시스템입니다.</p>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 목표 지향 보상 설정</span>
+<span class="c-kw">[Header</span>(<span class="c-st">"Goal-Oriented Rewards (NEW)"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> distanceRewardFactor = <span class="c-st">0.1f</span>;        <span class="c-cm">// 다음 체크포인트에 가까워질 때 보상 계수</span>
+<span class="c-kw">public float</span> checkpointReward = <span class="c-st">1.0f</span>;            <span class="c-cm">// 체크포인트 통과 시 보상</span>
+<span class="c-kw">public float</span> wrongCheckpointPenalty = -<span class="c-st">0.5f</span>;    <span class="c-cm">// 잘못된 체크포인트 통과 시 페널티</span>
+<span class="c-kw">public float</span> finishReward = <span class="c-st">10.0f</span>;              <span class="c-cm">// Finish 라인 통과 시 최종 보상</span>
+
+<span class="c-cm">// 거리 기반 보상 계산</span>
+<span class="c-kw">float</span> distanceReward = (lastDistanceToTarget - distanceToTarget) * distanceRewardFactor;
+<span class="c-ty">AddReward</span>(distanceReward);  <span class="c-cm">// 목표에 가까워질수록 보상 증가</span></code></pre>
+
                 <ul>
-                    <li><span class="highlight">거리 기반 보상:</span> 다음 체크포인트에 가까워질수록 보상 (distanceRewardFactor: 0.1)</li>
-                    <li><span class="highlight">체크포인트 통과:</span> 올바른 순서로 통과 시 +1.0, 잘못된 순서 -0.5</li>
-                    <li><span class="highlight">Finish 라인:</span> 모든 체크포인트 통과 후 Finish 통과 시 +10.0</li>
+                    <li><span class="highlight">거리 기반 보상:</span> 다음 체크포인트에 가까워질수록 보상 (distanceRewardFactor: 0.1) - 매 프레임 계산</li>
+                    <li><span class="highlight">체크포인트 통과:</span> 올바른 순서로 통과 시 <code style="color: var(--sub-accent);">+1.0</code>, 잘못된 순서 <code style="color: #ff7b72;">-0.5</code></li>
+                    <li><span class="highlight">Finish 라인:</span> 모든 체크포인트 통과 후 Finish 통과 시 <code style="color: var(--sub-accent);">+10.0</code> (최대 보상)</li>
+                    <li><span class="highlight">Finish 우회 방지:</span> 체크포인트를 다 통과하지 않고 Finish 도달 시 <code style="color: #ff7b72;">-2.5</code> (wrongCheckpointPenalty × 5)</li>
                 </ul>
 
-                <h3>안전성 및 복구 보상</h3>
+                <h3>생존 및 기본 보상 (Survival Rewards)</h3>
+                <p>에이전트가 지속적으로 전진하고 시간 낭비를 방지하도록 설계된 보상 시스템입니다.</p>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 생존 보상 설정</span>
+<span class="c-kw">[Header</span>(<span class="c-st">"Reward Settings (Autonomous)"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> forwardSpeedReward = <span class="c-st">0.01f</span>;  <span class="c-cm">// 전진 속도 보상 계수</span>
+
+<span class="c-kw">[Header</span>(<span class="c-st">"Reward Settings (Survival)"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> timePenalty = -<span class="c-st">0.001f</span>;  <span class="c-cm">// 시간 페널티 (매 프레임)</span>
+
+<span class="c-cm">// 전진 속도 보상 계산</span>
+<span class="c-kw">float</span> forwardSpeed = <span class="c-ty">Vector3</span>.<span class="c-fn">Dot</span>(rb.linearVelocity, transform.forward);
+<span class="c-kw">if</span> (forwardSpeed > <span class="c-st">0.5f</span> && !isStuckInWall) {
+    <span class="c-ty">AddReward</span>(forwardSpeedReward * (forwardSpeed / vehicleController.MaxSpeed));
+}</code></pre>
+
                 <ul>
-                    <li><span class="highlight">근접 페널티:</span> 전방 벽 감지(15m), 후방 벽 감지(5m) - 거리 기반 페널티</li>
-                    <li><span class="highlight">역주행 감지:</span> 목표 방향과 반대 방향 주행 시 -0.2 (속도 1.5 이상, 각도 150도 이상)</li>
-                    <li><span class="highlight">미끄러짐 페널티:</span> 평균 슬립 계수 0.9 이상 시 페널티</li>
-                    <li><span class="highlight">정지 상태:</span> 2초 이상 정지 시 페널티, 5초 이상 시 에피소드 종료</li>
-                    <li><span class="highlight">뒤집힘 감지:</span> 160도 이상 기울어지면 감지, 5초 이상 지속 시 종료</li>
+                    <li><span class="highlight">시간 페널티:</span> 매 프레임마다 <code style="color: #ff7b72;">-0.001</code> (빠른 주행 유도)</li>
+                    <li><span class="highlight">전진 속도 보상:</span> 전진 속도가 0.5 이상일 때, 최대 속도 대비 비율로 보상 (최대 <code style="color: var(--sub-accent);">+0.01</code>)</li>
+                    <li><span class="highlight">정지 상태 감지:</span> 속도 0.5 미만일 때 정지 상태 체크 시작</li>
+                </ul>
+
+                <h3>안전성 및 복구 보상 (Safety & Recovery Rewards)</h3>
+                <p>에이전트가 안전하게 주행하고 위험 상황을 회피하도록 설계된 페널티 및 복구 보상 시스템입니다.</p>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 안전성 보상 설정</span>
+<span class="c-kw">[Header</span>(<span class="c-st">"Safety Reward Settings"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> slipPenalty = -<span class="c-st">0.005f</span>;           <span class="c-cm">// 미끄러짐 페널티 계수</span>
+<span class="c-kw">public float</span> slipThreshold = <span class="c-st">0.9f</span>;              <span class="c-cm">// 드리프트 허용 임계값</span>
+
+<span class="c-kw">[Header</span>(<span class="c-st">"Proximity Penalty Settings (NEW)"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> proximityPenalty = -<span class="c-st">0.015f</span>;      <span class="c-cm">// 전방 벽 근접 페널티 계수</span>
+<span class="c-kw">public float</span> rearProximityPenalty = -<span class="c-st">0.02f</span>;  <span class="c-cm">// 후방 벽 근접 페널티 계수</span>
+
+<span class="c-kw">[Header</span>(<span class="c-st">"Wrong Way Driving Penalty (NEW)"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> wrongWayPenalty = -<span class="c-st">0.2f</span>;          <span class="c-cm">// 역주행 페널티 계수</span>
+<span class="c-kw">public float</span> wrongWaySpeedThreshold = <span class="c-st">1.5f</span>;  <span class="c-cm">// 역주행 감지 최소 속도</span>
+<span class="c-kw">public float</span> wrongWayDotThreshold = -<span class="c-st">0.866f</span>;  <span class="c-cm">// 역주행 감지 각도 (약 150도)</span>
+
+<span class="c-kw">[Header</span>(<span class="c-st">"Recovery Reward Settings"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> wallCollisionPenalty = -<span class="c-st">1.0f</span>;      <span class="c-cm">// 벽 충돌 페널티</span>
+<span class="c-kw">public float</span> stuckPenaltyPerSecond = -<span class="c-st">0.5f</span>;  <span class="c-cm">// 벽에 막힌 상태 초당 페널티</span>
+<span class="c-kw">public float</span> reverseReward = <span class="c-st">0.01f</span>;            <span class="c-cm">// 벽에 막혔을 때 후진 보상</span></code></pre>
+
+                <h4>근접 페널티 (Proximity Penalty)</h4>
+                <ul>
+                    <li><span class="highlight">전방 벽 감지:</span> 15m 이내 벽 감지 시 거리 기반 페널티 (최대 <code style="color: #ff7b72;">-0.015</code> per frame)</li>
+                    <li><span class="highlight">후방 벽 감지:</span> 후진 중 5m 이내 벽 감지 시 거리 기반 페널티 (최대 <code style="color: #ff7b72;">-0.02</code> per frame)</li>
+                    <li><span class="highlight">거리 기반 계산:</span> <code>penalty = penaltyCoefficient × (1 - distance/maxDistance)</code> - 가까울수록 페널티 급증</li>
+                </ul>
+
+                <h4>역주행 감지 (Wrong Way Detection)</h4>
+                <ul>
+                    <li><span class="highlight">역주행 페널티:</span> 목표 방향과 반대 방향 주행 시 <code style="color: #ff7b72;">-0.2</code> per frame</li>
+                    <li><span class="highlight">감지 조건:</span> 
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>전진 속도 ≥ 1.5 (wrongWaySpeedThreshold)</li>
+                            <li>목표 방향과 차량 방향의 Dot Product < -0.866 (약 150도 이상 차이)</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">후진 처리:</span> 벽에 막혔을 때 후진은 <code style="color: var(--sub-accent);">+0.01</code> 보상, 그 외 후진은 거리 증가 시 페널티</li>
+                </ul>
+
+                <h4>미끄러짐 및 안정성 (Slip & Stability)</h4>
+                <ul>
+                    <li><span class="highlight">미끄러짐 페널티:</span> 평균 슬립 계수 0.9 이상 시 <code style="color: #ff7b72;">-0.005 × avgSlipCoeff</code> (드리프트 차량 특성 고려)</li>
+                    <li><span class="highlight">드리프트 허용:</span> 슬립 임계값을 0.9로 설정하여 드리프트 주행 허용</li>
+                </ul>
+
+                <h4>정지 및 뒤집힘 감지 (Stagnation & Flip Detection)</h4>
+                <ul>
+                    <li><span class="highlight">정지 상태:</span> 
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>2초 이상 정지: <code style="color: #ff7b72;">-0.02 × (duration/2)</code> (지속 시간에 비례)</li>
+                            <li>5초 이상 정지: <code style="color: #ff7b72;">-5.0</code> + 에피소드 종료</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">뒤집힘 감지:</span> 
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>160도 이상 기울어지면 감지 시작</li>
+                            <li>2초 이상 지속: <code style="color: #ff7b72;">-0.05</code> per frame</li>
+                            <li>5초 이상 지속: <code style="color: #ff7b72;">-3.0</code> + 에피소드 종료</li>
+                        </ul>
+                    </li>
+                </ul>
+
+                <h4>충돌 및 복구 (Collision & Recovery)</h4>
+                <ul>
+                    <li><span class="highlight">벽 충돌:</span> 벽과 충돌 시 즉시 <code style="color: #ff7b72;">-1.0</code> 페널티</li>
+                    <li><span class="highlight">벽에 막힘:</span> 
+                        <ul style="margin-left: 20px; margin-top: 5px;">
+                            <li>1초 이상 막힘: <code style="color: #ff7b72;">-0.5</code> per second</li>
+                            <li>10초 이상 막힘: <code style="color: #ff7b72;">-5.0</code> + 에피소드 종료</li>
+                        </ul>
+                    </li>
+                    <li><span class="highlight">맵 밖 낙하:</span> FallZone 감지 시 <code style="color: #ff7b72;">-5.0</code> + 에피소드 종료</li>
+                    <li><span class="highlight">속도 부족:</span> 속도 0.1 미만일 때 <code style="color: #ff7b72;">-0.001</code> per frame</li>
                 </ul>
 
                 <h2>4. 레이캐스트 기반 환경 감지</h2>
                 <p>에이전트가 주변 환경을 정확히 인식할 수 있도록 <span class="highlight">다방향 레이캐스트 시스템</span>을 구현했습니다.</p>
 
                 <div class="visual-frame" style="margin: 30px 0;">
-                    <img src="mlagent_1.png" alt="레이캐스트 센서 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <img src="images/mlagent_1.png" alt="레이캐스트 센서 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
                     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">차량의 레이캐스트 센서 시스템 시각화 (빨간색: 감지된 대상, 초록색: 일반 센서 범위, 체크포인트 및 경로 스플라인 표시)</p>
                 </div>
 
@@ -1330,50 +1438,70 @@
                     <li><span class="highlight">일반화 성능 향상:</span> 다양한 트랙 환경에서 학습하여 단일 트랙에 과적합되지 않도록 방지</li>
                 </ul>
 
-                <h2>7. 액션 스무딩 (Action Smoothing)</h2>
-                <p>ML-Agents가 출력하는 원시 액션 값을 직접 사용하면 급격한 조향 변화로 인해 차량이 불안정해질 수 있습니다. 이를 방지하기 위해 <span class="highlight">액션 스무딩 기법</span>을 구현하여 이전 프레임의 액션 값과 비교하여 변화량을 제한합니다.</p>
+                <h2>4.2 연속적 행동 결정 및 입력 보정</h2>
+                <p>수집된 관측 정보는 신경망을 통과하여 차량을 제어하기 위한 행동 값으로 변환됩니다.</p>
+
+                <h3>연속적 제어 (Continuous Control)</h3>
+                <p>본 프로젝트의 시스템은 불연속적인 이동이 아닌, 차량의 <span class="highlight">조향과 가속/감속을 정밀하게 제어하는 연속 행동 공간</span>을 사용합니다. ML-Agents의 <code>ContinuousActions</code>를 통해 -1.0부터 1.0까지의 연속적인 실수 값을 출력하여, 차량의 핸들 각도와 가속 페달을 부드럽게 제어할 수 있습니다.</p>
+
+                <h3>입력 스무딩 (Input Smoothing)</h3>
+                <p>강화학습 초기 단계에서 발생하는 무작위적이고 급격한 지터링을 방지하기 위해, 에이전트의 행동 결정 단계에서 <span class="highlight">입력 스무딩 알고리즘</span>을 적용하였습니다. 이를 통해 직전 프레임에서 차량에 적용된 최종 제어값과 현재 신경망이 출력한 목표값의 차이를 계산하고, 보정된 현재 프레임의 최종 제어값을 차량 컨트롤러에 전달함으로써, 실제 차량과 유사한 부드러운 주행 궤적과 물리적 관성을 구현하였습니다.</p>
 
                 <div class="visual-frame" style="margin: 30px 0;">
-                    <img src="mlagent_%.png" alt="액션 스무딩 플로우차트" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
-                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
+                    <img src="images/mlagent_%.png" alt="입력 스무딩 알고리즘 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">[그림 5] 입력 스무딩 알고리즘 시각화: AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
                 </div>
 
-<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 액션 스무딩 구현</span>
-<span class="c-kw">[Header</span>(<span class="c-st">"Action Smoothing"</span>)<span class="c-kw">]</span>
-<span class="c-kw">public float</span> maxSteeringChange = <span class="c-st">0.5f</span>;      <span class="c-cm">// 최대 조향 변화량</span>
-<span class="c-kw">public float</span> maxAccelerationChange = <span class="c-st">0.7f</span>;  <span class="c-cm">// 최대 가속 변화량</span>
+                <div style="background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent-color); padding: 15px 20px; margin: 20px 0; border-radius: 6px;">
+                    <p style="margin: 0 0 10px 0; color: var(--accent-color); font-weight: 700;">변수 설명:</p>
+                    <ul style="margin: 0; padding-left: 20px; color: #c9d1d9;">
+                        <li><code style="color: var(--accent-color);">rawSteering</code>: 신경망이 현재 상황을 보고 판단하여 설정한 차량의 조향 변수 (원시 조향값)</li>
+                        <li><code style="color: var(--accent-color);">lastSteeringInput</code>: 이전 프레임의 조향값 (마지막으로 차량에 적용된 최종 조향값)</li>
+                        <li><code style="color: var(--accent-color);">steeringInput</code>: 입력 스무딩 알고리즘을 통한 산출 최종 조향값 (차량의 핸들 값으로 사용)</li>
+                    </ul>
+                </div>
 
-<span class="c-kw">private float</span> lastSteeringInput = <span class="c-st">0f</span>;
-<span class="c-kw">private float</span> lastAccelerationInput = <span class="c-st">0f</span>;
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 연속적 행동 결정 및 입력 보정</span>
+<span class="c-kw">[Header</span>(<span class="c-st">"Action Smoothing"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> maxSteeringChange = <span class="c-st">0.5f</span>;      <span class="c-cm">// 최대 조향 변화량 (프레임당)</span>
+<span class="c-kw">public float</span> maxAccelerationChange = <span class="c-st">0.7f</span>;  <span class="c-cm">// 최대 가속 변화량 (프레임당)</span>
+
+<span class="c-kw">private float</span> lastSteeringInput = <span class="c-st">0f</span>;      <span class="c-cm">// 이전 프레임의 최종 조향값</span>
+<span class="c-kw">private float</span> lastAccelerationInput = <span class="c-st">0f</span>;  <span class="c-cm">// 이전 프레임의 최종 가속값</span>
 
 <span class="c-kw">public override void</span> <span class="c-fn">OnActionReceived</span>(<span class="c-ty">ActionBuffers</span> actions)
 {
-    <span class="c-cm">// 1. ML-Agents로부터 원시 액션 값 수신</span>
+    <span class="c-cm">// 1. 신경망으로부터 연속적 행동 값 수신 (Continuous Actions)</span>
     <span class="c-kw">float</span> rawSteering = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">0</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
     <span class="c-kw">float</span> rawAcceleration = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">1</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
+    <span class="c-cm">// rawSteering: 신경망이 판단한 원시 조향값 (-1.0 ~ 1.0)</span>
 
-    <span class="c-cm">// 2. 이전 프레임 값과 비교하여 변화량 제한 (스무딩)</span>
+    <span class="c-cm">// 2. 입력 스무딩: 이전 프레임 값과 비교하여 변화량 제한</span>
+    <span class="c-cm">//    직전 프레임의 최종 제어값(lastSteeringInput)과 현재 신경망 출력값(rawSteering)의 차이를 계산</span>
     <span class="c-kw">float</span> steeringInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawSteering,
         lastSteeringInput - maxSteeringChange,      <span class="c-cm">// 최소값: 이전값 - 최대변화량</span>
         lastSteeringInput + maxSteeringChange);     <span class="c-cm">// 최대값: 이전값 + 최대변화량</span>
+    <span class="c-cm">// steeringInput: 보정된 현재 프레임의 최종 조향값 (차량 핸들 값으로 사용)</span>
     
     <span class="c-kw">float</span> accelerationInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawAcceleration,
         lastAccelerationInput - maxAccelerationChange,
         lastAccelerationInput + maxAccelerationChange);
 
-    <span class="c-cm">// 3. 현재 값을 다음 프레임을 위해 저장</span>
-    lastSteeringInput = steeringInput;
+    <span class="c-cm">// 3. 현재 프레임의 최종 제어값을 다음 프레임을 위해 저장</span>
+    lastSteeringInput = steeringInput;        <span class="c-cm">// 다음 프레임의 기준값으로 사용</span>
     lastAccelerationInput = accelerationInput;
     
-    <span class="c-cm">// 4. 스무딩된 최종 명령을 차량에 전달</span>
+    <span class="c-cm">// 4. 보정된 최종 제어값을 차량 컨트롤러에 전달</span>
+    <span class="c-cm">//    부드러운 주행 궤적과 물리적 관성을 구현</span>
     vehicleController.<span class="c-fn">ProvideInputs</span>(accelerationInput, steeringInput, <span class="c-st">0f</span>);
 }</code></pre>
 
                 <p><strong>기술적 특징:</strong></p>
                 <ul>
-                    <li><span class="highlight">변화량 제한:</span> 조향은 최대 ±0.5, 가속은 최대 ±0.7로 프레임당 변화량 제한</li>
-                    <li><span class="highlight">부드러운 제어:</span> 급격한 액션 변화를 방지하여 차량의 안정성 향상</li>
-                    <li><span class="highlight">점진적 학습:</span> 에이전트가 부드러운 액션을 학습하도록 유도</li>
+                    <li><span class="highlight">연속 행동 공간:</span> 불연속적인 이동이 아닌 조향과 가속/감속을 정밀하게 제어하는 연속 실수 값 사용</li>
+                    <li><span class="highlight">변화량 제한:</span> 조향은 최대 ±0.5, 가속은 최대 ±0.7로 프레임당 변화량 제한하여 급격한 지터링 방지</li>
+                    <li><span class="highlight">부드러운 제어:</span> 이전 프레임 값과 현재 신경망 출력값의 차이를 계산하여 보정된 최종 제어값 생성</li>
+                    <li><span class="highlight">물리적 관성 구현:</span> 실제 차량과 유사한 부드러운 주행 궤적과 관성 효과 구현</li>
                 </ul>
 
                 <h2>8. 기술적 특징</h2>
