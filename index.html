@@ -1893,62 +1893,118 @@
 }</code></pre>
 
                 <h2>2. Seed/Token 시스템</h2>
-                <p>랜덤 시드 상태를 문자열 토큰으로 인코딩하여 저장하고 복원하는 시스템을 구현했습니다. 게임의 RNG 상태를 완전히 복원할 수 있습니다.</p>
+                <p>게임의 랜덤 시드(RNG) 상태를 문자열 토큰으로 인코딩하여 저장하고 복원하는 시스템을 구현했습니다. 
+                단순히 초기 시드만 저장하는 것이 아니라, <span class="highlight">각 Domain별로 사용된 랜덤 값의 개수</span>를 추적하여 
+                게임의 RNG 상태를 <span class="highlight">완전히 복원</span>할 수 있습니다.</p>
 
-<pre><code><span class="c-cm">// SaveLoadManager.cs: Seed Token 빌드 및 복원</span>
+                <h3>2.1 시스템 개요</h3>
+                <p>게임에서 랜덤 값이 사용되는 영역(Domain)은 여러 개입니다. 예를 들어, 몬스터 드롭 아이템, 장비 옵션, 던전 생성 등 
+                각각 독립적인 RNG 스트림을 사용합니다. 단순히 초기 시드만 저장하면, 세이브 파일을 불러왔을 때 
+                <span class="highlight">이미 사용된 랜덤 값들이 다시 생성</span>되어 게임 밸런스가 깨질 수 있습니다.</p>
+                
+                <p>Seed/Token 시스템은 다음과 같이 동작합니다:</p>
+                <ul>
+                    <li><span class="highlight">BaseSeed 저장:</span> 게임 시작 시 설정된 초기 시드 값</li>
+                    <li><span class="highlight">Domain별 사용량 추적:</span> 각 Domain에서 생성된 랜덤 값의 개수를 카운트</li>
+                    <li><span class="highlight">고정 폭 인코딩:</span> 토큰을 고정 길이 문자열로 인코딩하여 파싱 안정성 확보</li>
+                    <li><span class="highlight">완전한 상태 복원:</span> BaseSeed와 각 Domain의 사용량을 복원하여 정확한 RNG 상태 재현</li>
+                </ul>
+
+                <h3>2.2 토큰 구조</h3>
+                <p>토큰은 다음과 같은 구조로 구성됩니다:</p>
+                <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 15px 20px; margin: 20px 0; border-radius: 6px; font-family: 'Fira Code', monospace; font-size: 0.9rem;">
+                    <div style="margin-bottom: 10px;"><strong>토큰 구조:</strong></div>
+                    <div style="margin-left: 20px;">
+                        <div>[BaseSeed: 10자리] + [Domain 개수: 3자리] + [Domain1 ID: 3자리] + [Domain1 Usage: 12자리] + [Domain2 ID: 3자리] + [Domain2 Usage: 12자리] + ...</div>
+                    </div>
+                    <div style="margin-top: 15px; font-size: 0.85rem; color: #8b949e;">
+                        예시: <code>0000000123</code> (BaseSeed) + <code>003</code> (3개 Domain) + <code>001</code> (Domain 1) + <code>000000000042</code> (42번 사용) + ...
+                    </div>
+                </div>
+
+                <h3>2.3 토큰 생성 (BuildSeedToken)</h3>
+                <p>현재 게임의 RNG 상태를 문자열 토큰으로 변환합니다. BaseSeed와 각 Domain별 사용량을 고정 폭으로 인코딩하여 
+                일관된 토큰 형식을 보장합니다.</p>
+
+<pre><code><span class="c-cm">// SaveLoadManager.cs: Seed Token 생성</span>
 <span class="c-kw">public static string</span> <span class="c-fn">BuildSeedToken</span>()
 {
-    <span class="c-kw">int</span> baseSeed = <span class="c-ty">GameSeed</span>.BaseSeed;
-    <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>, <span class="c-kw">ulong</span>&gt; usage = <span class="c-ty">GameSeed</span>.<span class="c-fn">GetUsageSnapshot</span>();
+    <span class="c-kw">int</span> baseSeed = <span class="c-ty">GameSeed</span>.BaseSeed;  <span class="c-cm">// 초기 시드 값</span>
+    <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>, <span class="c-kw">ulong</span>&gt; usage = <span class="c-ty">GameSeed</span>.<span class="c-fn">GetUsageSnapshot</span>();  <span class="c-cm">// Domain별 사용량 스냅샷</span>
 
+    <span class="c-cm">// BaseSeed를 10자리 고정 폭으로 인코딩</span>
     <span class="c-kw">string</span> token = <span class="c-fn">Pad</span>(<span class="c-fn">EncodeIntToUInt</span>(baseSeed), BASE_SEED_WIDTH);
 
+    <span class="c-cm">// Domain 목록을 정렬하여 일관된 토큰 생성</span>
     <span class="c-ty">List</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>&gt; domains = <span class="c-kw">new</span> <span class="c-ty">List</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>&gt;((<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>[])<span class="c-ty">Enum</span>.<span class="c-fn">GetValues</span>(<span class="c-kw">typeof</span>(<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>)));
     domains.<span class="c-fn">Sort</span>((a, b) => (a).<span class="c-fn">CompareTo</span>(b));
 
+    <span class="c-cm">// Domain 개수 추가 (3자리)</span>
     token += <span class="c-fn">Pad</span>((<span class="c-kw">uint</span>)domains.Count, COUNT_WIDTH);
+    
+    <span class="c-cm">// 각 Domain의 ID와 사용량을 토큰에 추가</span>
     <span class="c-kw">foreach</span> (<span class="c-kw">var</span> d <span class="c-kw">in</span> domains) {
         <span class="c-kw">ulong</span> count = usage.<span class="c-fn">GetValueOrDefault</span>(d, <span class="c-st">0UL</span>);
-        token += <span class="c-fn">Pad</span>((<span class="c-kw">uint</span>)d, DOMAIN_ID_WIDTH);
-        token += <span class="c-fn">Pad</span>(count, USAGE_WIDTH);
+        token += <span class="c-fn">Pad</span>((<span class="c-kw">uint</span>)d, DOMAIN_ID_WIDTH);      <span class="c-cm">// Domain ID (3자리)</span>
+        token += <span class="c-fn">Pad</span>(count, USAGE_WIDTH);                    <span class="c-cm">// 사용량 (12자리)</span>
     }
 
     <span class="c-kw">return</span> token;
-}
+}</code></pre>
 
+                <h3>2.4 토큰 복원 (RestoreSeedToken)</h3>
+                <p>저장된 토큰을 파싱하여 게임의 RNG 상태를 완전히 복원합니다. 고정 폭 인코딩을 활용하여 
+                토큰의 각 부분을 정확히 추출하고, BaseSeed와 Domain별 사용량을 복원합니다.</p>
+
+<pre><code><span class="c-cm">// SaveLoadManager.cs: Seed Token 복원</span>
 <span class="c-kw">public static bool</span> <span class="c-fn">RestoreSeedToken</span>(<span class="c-kw">string</span> token)
 {
     <span class="c-kw">try</span> {
-        <span class="c-kw">int</span> idx = <span class="c-st">0</span>;
+        <span class="c-kw">int</span> idx = <span class="c-st">0</span>;  <span class="c-cm">// 토큰 읽기 위치 인덱스</span>
 
-        <span class="c-cm">// BaseSeed 디코딩</span>
+        <span class="c-cm">// BaseSeed 디코딩 (10자리)</span>
         <span class="c-kw">ulong</span> baseSeedEncoded = <span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, BASE_SEED_WIDTH);
         <span class="c-kw">int</span> baseSeed = <span class="c-fn">DecodeUlongToInt</span>(baseSeedEncoded);
 
-        <span class="c-cm">// Domain별 사용량 복원</span>
+        <span class="c-cm">// Domain 개수 읽기 (3자리)</span>
         <span class="c-kw">uint</span> count = (<span class="c-kw">uint</span>)<span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, COUNT_WIDTH);
+        
         <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>, <span class="c-kw">ulong</span>&gt; usage = <span class="c-kw">new</span> <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>, <span class="c-kw">ulong</span>&gt;();
+        
+        <span class="c-cm">// 각 Domain의 ID와 사용량 복원</span>
         <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < count; i++) {
-            <span class="c-kw">uint</span> domIdU = (<span class="c-kw">uint</span>)<span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, DOMAIN_ID_WIDTH);
-            <span class="c-kw">ulong</span> u = <span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, USAGE_WIDTH);
+            <span class="c-kw">uint</span> domIdU = (<span class="c-kw">uint</span>)<span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, DOMAIN_ID_WIDTH);  <span class="c-cm">// Domain ID (3자리)</span>
+            <span class="c-kw">ulong</span> u = <span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, USAGE_WIDTH);              <span class="c-cm">// 사용량 (12자리)</span>
+            
             <span class="c-kw">if</span> (<span class="c-ty">Enum</span>.<span class="c-fn">IsDefined</span>(<span class="c-kw">typeof</span>(<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>), domIdU)) {
                 usage[(<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>)domIdU] = u;
             }
         }
 
+        <span class="c-cm">// GameSeed 시스템에 상태 복원</span>
         <span class="c-ty">GameSeed</span>.<span class="c-fn">RestoreFromSnapshot</span>(baseSeed, usage);
         <span class="c-kw">return true</span>;
     }
     <span class="c-kw">catch</span> {
-        <span class="c-kw">return false</span>;
+        <span class="c-kw">return false</span>;  <span class="c-cm">// 토큰 파싱 실패 시 false 반환</span>
     }
 }</code></pre>
 
-                <h3>기술적 특징</h3>
+                <h3>2.5 고정 폭 인코딩의 장점</h3>
+                <p>고정 폭 인코딩을 사용하는 이유는 다음과 같습니다:</p>
+                <ul>
+                    <li><span class="highlight">파싱 안정성:</span> 각 필드의 위치가 고정되어 있어 파싱 오류 가능성 최소화</li>
+                    <li><span class="highlight">검증 용이성:</span> 토큰 길이를 계산하여 유효성 검증 가능</li>
+                    <li><span class="highlight">인덱스 기반 접근:</span> 구분자 없이 인덱스만으로 각 필드 추출 가능</li>
+                </ul>
+
+                <h3>2.6 기술적 특징</h3>
                 <ul>
                     <li><span class="highlight">고정 폭 인코딩:</span> BaseSeed(10자리), Domain ID(3자리), Usage(12자리)로 고정 폭 인코딩하여 파싱 안정성 확보</li>
                     <li><span class="highlight">완전한 RNG 복원:</span> BaseSeed와 각 Domain별 사용량을 저장하여 RNG 상태를 완전히 복원</li>
+                    <li><span class="highlight">Domain별 독립 추적:</span> 각 게임 영역의 RNG 사용량을 독립적으로 추적하여 정확한 상태 복원</li>
                     <li><span class="highlight">JSON 저장:</span> Seed Token을 JSON 파일에 저장하여 영구 보존</li>
+                    <li><span class="highlight">에러 처리:</span> 토큰 파싱 실패 시 안전하게 false 반환하여 게임 크래시 방지</li>
                 </ul>
 
                 <h2>3. 기술적 특징</h2>
