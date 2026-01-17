@@ -1643,13 +1643,16 @@
     </div>
 
     <!-- WorldFirstKill Modal -->
-    <div id="modal-overlay-wfk" class="modal-overlay" style="display: none;">
-        <div class="modal-container">
-            <div class="modal-header">
-                <h2>WorldFirstKill: 데이터 저장 및 파싱 시스템</h2>
-                <button class="close-btn" onclick="closeWFKModal()">×</button>
-            </div>
+    <div id="modal-overlay-wfk" class="modal-overlay" onclick="closeModal('wfk')">
+        <div class="modal-container" onclick="event.stopPropagation()">
             <div class="modal-body">
+                <div class="modal-header-nav">
+                    <div class="mono" style="color: var(--accent-color);">PROJECT REPORT // WORLDFIRSTKILL</div>
+                    <button onclick="closeModal('wfk')" style="background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 20px; border-radius: 6px; cursor: pointer; font-family: 'Fira Code'; font-size: 0.8rem;">[X] DISCONNECT</button>
+                </div>
+                
+                <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">WorldFirstKill: 데이터 저장 및 파싱 시스템</h1>
+
                 <h2>1. 프로젝트 개요</h2>
                 <p>WorldFirstKill 게임에서 <span class="highlight">데이터 저장, 파싱, 불러오기 로직</span>을 담당했습니다. 
                 <span class="highlight">리플렉션 기반 CSV 파싱 시스템</span>과 <span class="highlight">서버 CSV 다운로드 및 버전 관리</span>를 통해 
@@ -2354,7 +2357,15 @@
                 if (projectType === 'mlAgentsRacing') {
                     openMLAgentsModal(null);
                 } else if (projectType === 'wfk') {
-                    openWFKModal(null);
+                    const modal = document.getElementById('modal-overlay-wfk');
+                    if (modal) {
+                        const fileTowerModal = document.getElementById('modal-overlay');
+                        if (fileTowerModal) fileTowerModal.style.display = 'none';
+                        const mlAgentsModal = document.getElementById('modal-overlay-racing');
+                        if (mlAgentsModal) mlAgentsModal.style.display = 'none';
+                        modal.style.display = 'flex';
+                        document.body.style.overflow = 'hidden';
+                    }
                 } else {
                     const modal = document.getElementById('modal-overlay');
                     if (modal) {
@@ -2377,8 +2388,10 @@
         function closeModal(projectType) {
             if (projectType === 'racing' || projectType === 'mlAgentsRacing') {
                 document.getElementById('modal-overlay-racing').style.display = 'none';
+            } else if (projectType === 'wfk') {
+                document.getElementById('modal-overlay-wfk').style.display = 'none';
             } else {
-            document.getElementById('modal-overlay').style.display = 'none';
+                document.getElementById('modal-overlay').style.display = 'none';
             }
             document.body.style.overflow = 'auto';
         }
