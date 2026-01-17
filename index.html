@@ -172,7 +172,7 @@
                 </ul>
                 <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계로 통일하였으며, 이를 통해 성능 최적화와 확장성 있는 로직 설계가 가능해졌습니다.</p>
 
-                <h2>2. Grid기반 유닛 배치 시스템 (FileGridManager)</h2>
+                <h2>2. Grid기반 유닛 배치 시스템 (FileGridManager & FileGrid & Layout Engine)</h2>
 
                 <h3>[FileGrid: 데이터 중심의 개별 셀 매니저]</h3>
                 <p>유닛을 <code>GameObject</code> 기반으로 전환함에 따라, 윈도우 바탕화면의 아이콘 정렬 시스템을 모방하여 유닛 배치 시스템을 구축했습니다.</p>
@@ -221,6 +221,8 @@
     <span class="c-kw">public bool</span> GetFitToScreen => fitToScreen;
     <span class="c-kw">public Vector2</span> StartPos { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
 
+    <span class="c-cm">// ... </span>
+    
     <span class="c-cm">// 카메라 해상도에 맞춰 그리드 데이터 동적 계산</span>
     <span class="c-kw">public void</span> <span class="c-fn">FitToScreen</span>() {
         <span class="c-ty">Camera</span> cam = <span class="c-ty">Camera</span>.main;
