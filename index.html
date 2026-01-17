@@ -276,7 +276,7 @@
 
         <section id="projects">
             <h2 class="section-title">02. Major Achievement</h2>
-            <article class="project-card" onclick="openModal('fileTowerDefense')">
+            <article class="project-card" id="file-tower-defense-card" style="cursor: pointer;">
                 <div class="project-info">
                     <span class="project-tag mono">Systems Engineering</span>
                     <h3 class="project-name">File Tower Defense</h3>
@@ -289,7 +289,7 @@
                     <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> VIEW_TECHNICAL_REPORT</div>
                 </div>
             </article>
-            <article class="project-card" onclick="openModal('mlAgentsRacing')">
+            <article class="project-card" id="ml-agents-card" style="cursor: pointer;">
                 <div class="project-info">
                     <span class="project-tag mono">ML-Agents & Reinforcement Learning</span>
                     <h3 class="project-name">Autonomous Racing Agent</h3>
@@ -1326,26 +1326,47 @@
     </div>
 
     <script>
+        function openMLAgentsModal(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            console.log('openMLAgentsModal called');
+            const modal = document.getElementById('modal-overlay-racing');
+            console.log('Modal element:', modal);
+            if (modal) {
+                modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+                console.log('Modal opened successfully');
+            } else {
+                console.error('modal-overlay-racing not found!');
+                alert('모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+            }
+        }
+        
         function openModal(projectType) {
             console.log('openModal called with:', projectType);
-            if (projectType === 'mlAgentsRacing') {
-                const modal = document.getElementById('modal-overlay-racing');
-                if (modal) {
-                    modal.style.display = 'flex';
+            try {
+                if (projectType === 'mlAgentsRacing') {
+                    openMLAgentsModal(null);
                 } else {
-                    console.error('modal-overlay-racing not found');
+                    const modal = document.getElementById('modal-overlay');
+                    if (modal) {
+                        modal.style.display = 'flex';
+                        // 기본적으로 리팩토링 탭 활성화
+                        if (typeof switchTab === 'function') {
+                            switchTab('refactoring');
+                        }
+                        document.body.style.overflow = 'hidden';
+                    } else {
+                        console.error('modal-overlay element not found');
+                        return;
+                    }
                 }
-            } else {
-                const modal = document.getElementById('modal-overlay');
-                if (modal) {
-                    modal.style.display = 'flex';
-                    // 기본적으로 리팩토링 탭 활성화
-                    switchTab('refactoring');
-                } else {
-                    console.error('modal-overlay not found');
-                }
+            } catch (error) {
+                console.error('Error opening modal:', error);
+                alert('모달을 열 수 없습니다: ' + error.message);
             }
-            document.body.style.overflow = 'hidden';
         }
         function closeModal(projectType) {
             if (projectType === 'racing' || projectType === 'mlAgentsRacing') {
@@ -1373,6 +1394,35 @@
                 document.getElementById('existing-tab').classList.add('active');
             }
         }
+        
+        // 페이지 로드 시 이벤트 리스너 추가
+        document.addEventListener('DOMContentLoaded', function() {
+            // ML-Agents 카드 클릭 이벤트
+            const mlAgentsCard = document.getElementById('ml-agents-card');
+            if (mlAgentsCard) {
+                mlAgentsCard.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openMLAgentsModal(e);
+                });
+                console.log('ML-Agents card event listener added');
+            } else {
+                console.error('ml-agents-card not found');
+            }
+            
+            // File Tower Defense 카드 클릭 이벤트
+            const fileTowerDefenseCard = document.getElementById('file-tower-defense-card');
+            if (fileTowerDefenseCard) {
+                fileTowerDefenseCard.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openModal('fileTowerDefense');
+                });
+                console.log('File Tower Defense card event listener added');
+            } else {
+                console.error('file-tower-defense-card not found');
+            }
+        });
     </script>
 </body>
 </html>
