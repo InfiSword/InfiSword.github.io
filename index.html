@@ -376,6 +376,14 @@
 
                 <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계로 통일하였으며, 이를 통해 성능 최적화와 확장성 있는 로직 설계가 가능해졌습니다.</p>
 
+                <h3>1.1 기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">좌표계 통일:</span> 월드 좌표계로 통일하여 절대 위치 계산 단순화</li>
+                    <li><span class="highlight">성능 최적화:</span> 좌표 변환 오버헤드 제거로 프레임당 연산 비용 감소</li>
+                    <li><span class="highlight">물리 시스템 통합:</span> Physics2D와 직접 호환되어 충돌 판정 효율성 향상</li>
+                    <li><span class="highlight">확장성:</span> 계층 구조 단순화로 새로운 기능 추가 용이</li>
+                </ul>
+
                 <h2>2. FileGrid: 데이터 중심의 개별 셀 매니저</h2>
                 <p>유닛을 <code>GameObject</code> 기반으로 전환함에 따라, 윈도우 바탕화면의 아이콘 정렬 시스템을 모방하여 유닛 배치 시스템을 구축했습니다.</p>
                 <p><code>FileGrid</code>는 타워(파일)를 설치할 수 있는 최소 단위인 'Slot' 역할을 수행하며, 해당 셀의 점유 상태와 인접 유닛 간의 시너지, 버프를 관리합니다.</p>
@@ -431,7 +439,15 @@
       
   <p>각 그리드 셀은 단순한 위치 정보가 아닌, <span class="highlight">HashSet 기반의 버프 관리</span>를 통해 중복 버프를 방지하고 상태 변화를 실시간으로 동기화하는 지능형 컨테이너입니다.</p>
 
-                <h3>이벤트 기반 자동 버프 시스템 (Observer Pattern)</h3>
+                <h3>2.1 기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">상태 관리:</span> GridX, GridY, fileUnit, obstacleObject를 통한 셀 상태 추적</li>
+                    <li><span class="highlight">HashSet 기반 버프 관리:</span> O(1) 조회 성능과 중복 방지</li>
+                    <li><span class="highlight">시각적 피드백:</span> Color State, Hover Effect, Selection을 통한 사용자 경험 향상</li>
+                    <li><span class="highlight">자동 동기화:</span> 버프 소스 변경 시 자동으로 상태 업데이트</li>
+                </ul>
+
+                <h3>2.2 이벤트 기반 자동 버프 시스템 (Observer Pattern)</h3>
                 <p>유닛 배치 시 이미 그리드에 활성화된 버프 소스(Aura)를 즉각 적용받도록 설계되었습니다. <code>HashSet</code>을 사용하여 중복을 원천 차단합니다.</p>
 
                 <div class="visual-frame">
@@ -480,6 +496,14 @@
         <span class="c-fn">ApplyBuffFromSource</span>(fileUnit, source, <span class="c-kw">true</span>);
     }
 }</code></pre>
+
+                <h4>2.2.1 기술적 특징</h4>
+                <ul>
+                    <li><span class="highlight">Observer Pattern:</span> 버프 소스와 그리드 간의 느슨한 결합으로 확장성 확보</li>
+                    <li><span class="highlight">O(1) 조회:</span> HashSet을 통한 빠른 버프 소스 조회</li>
+                    <li><span class="highlight">즉시 적용:</span> 유닛 배치 시 활성화된 버프를 즉시 적용</li>
+                    <li><span class="highlight">중복 방지:</span> HashSet을 통한 자동 중복 제거</li>
+                </ul>
 
                 <h2>3. GameObjectGridLayout: 커스텀 레이아웃 엔진</h2>
                 <p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하고, 전체 시스템의 시작 월드 좌표를 제공하는 핵심 컴포넌트입니다.</p>
@@ -541,10 +565,18 @@
     }
 }</code></pre>
 
+                <h3>3.1 기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">동적 계산:</span> 화면 해상도에 맞춰 그리드 크기 자동 조정</li>
+                    <li><span class="highlight">유연한 설정:</span> columns, rows, spacing, padding을 통한 커스터마이징</li>
+                    <li><span class="highlight">시작 위치 제공:</span> StartPos를 통한 그리드 배치 기준점 제공</li>
+                    <li><span class="highlight">수학적 정확성:</span> 정확한 셀 크기 계산으로 일관된 레이아웃 보장</li>
+                </ul>
+
                 <h2>4. FileGridManager: 그리드 관련 매니저</h2>
                 <p>전체 그리드 시스템을 총괄하며, 좌표 변환, 조건부 탐색, 유닛 배치 트랜잭션을 총괄합니다.</p>
 
-                <h3>[공간 분할 최적화] 3x3 국소 영역 탐색 (Spatial Partitioning)</h3>
+                <h3>4.1 공간 분할 최적화: 3x3 국소 영역 탐색 (Spatial Partitioning)</h3>
                 <p>전체 그리드(91개)를 순회하는 대신, 중심 그리드 기준 3x3 영역만 검사하여 탐색 비용을 <strong>O(n)에서 O(1)</strong>로 단축했습니다. (약 10배 이상 성능 향상)</p>
                 <div class="visual-frame">
                     <div class="diagram-grid">
@@ -605,8 +637,16 @@
     targetGrid.<span class="c-fn">SetFileUnit</span>(unit); 
     <span class="c-kw">return true</span>;
 }</code></pre>
+
+                <h4>4.2.1 기술적 특징</h4>
+                <ul>
+                    <li><span class="highlight">원자적 연산:</span> 모든 상태 변경이 성공하거나 모두 롤백되는 트랜잭션 보장</li>
+                    <li><span class="highlight">사전 검증:</span> Pre-validation을 통한 실패 가능성 사전 차단</li>
+                    <li><span class="highlight">롤백 지원:</span> 실패 시 이전 상태로 안전하게 복원</li>
+                    <li><span class="highlight">데이터 일관성:</span> 물리/논리 계층 구조의 동기화 보장</li>
+                </ul>
                 
-                <h3>[동적 좌표 변환 시스템] 양방향 좌표 변환 (Dynamic Coordinate Transformation)</h3>
+                <h3>4.3 동적 좌표 변환 시스템: 양방향 좌표 변환 (Dynamic Coordinate Transformation)</h3>
                 <p>월드 좌표와 그리드 인덱스 간의 <span class="highlight">양방향 변환</span>을 지원하여, 마우스 위치나 유닛의 월드 좌표를 그리드 인덱스로 변환하거나, 그리드 인덱스를 월드 좌표로 변환할 수 있습니다.</p>
                 <p>Unity의 Transform 계층 구조를 활용하여 부모 객체의 변환을 자동으로 적용하며, 그리드 레이아웃의 셀 크기, 간격, 패딩을 동적으로 계산합니다.</p>
 
@@ -729,7 +769,7 @@
     <span class="c-kw">return</span> transform.<span class="c-fn">TransformPoint</span>(localPos);
 }</code></pre>
 
-                <p><strong>기술적 특징:</strong></p>
+                <h4>4.3.1 기술적 특징</h4>
                 <ul>
                     <li><span class="highlight">양방향 변환:</span> 월드 ↔ 그리드 인덱스 완전 호환</li>
                     <li><span class="highlight">동적 계산:</span> 런타임에 그리드 크기 변경 대응</li>
@@ -737,7 +777,7 @@
                     <li><span class="highlight">Transform 계층 지원:</span> 부모 Transform 변환 자동 적용</li>
                 </ul>
 
-                <h3>[플래그 기반 확장 가능한 검색 시스템] 확장 가능한 필터링 (Flag-Based Extensible Search)</h3>
+                <h3>4.4 플래그 기반 확장 가능한 검색 시스템: 확장 가능한 필터링 (Flag-Based Extensible Search)</h3>
                 <p>그리드 검색 시 점유 상태, 장애물 존재 여부 등 다양한 조건을 <span class="highlight">플래그 조합</span>으로 필터링할 수 있는 확장 가능한 검색 시스템입니다.</p>
                 <p>enum 기반의 플래그 시스템을 통해 새로운 검색 조건을 쉽게 추가할 수 있으며, 여러 플래그를 동시에 사용하여 복합 조건 검색이 가능합니다.</p>
 
@@ -815,12 +855,24 @@
     <span class="c-kw">return</span> bestGrid;
 }</code></pre>
 
-                <p><strong>기술적 특징:</strong></p>
+                <h4>4.4.1 기술적 특징</h4>
                 <ul>
                     <li><span class="highlight">확장성:</span> 새로운 플래그 추가 용이</li>
                     <li><span class="highlight">조합 가능:</span> 여러 플래그 동시 사용</li>
                     <li><span class="highlight">가변 인자:</span> params 키워드로 유연한 호출</li>
                     <li><span class="highlight">AND 조건:</span> 모든 플래그 조건 만족 필요</li>
+                </ul>
+
+                <h2>5. 전체 시스템 기술적 특징</h2>
+                <p>FileTowerDefense 프로젝트의 리팩토링을 통해 달성한 핵심 기술적 특징입니다.</p>
+                <ul>
+                    <li><span class="highlight">좌표계 통일:</span> UI에서 GameObject로 전환하여 월드 좌표계 기반 통합 시스템 구축</li>
+                    <li><span class="highlight">성능 최적화:</span> 공간 분할 알고리즘으로 O(n)에서 O(1) 탐색 비용 단축</li>
+                    <li><span class="highlight">데이터 일관성:</span> 트랜잭션 패턴을 통한 원자적 배치 로직 보장</li>
+                    <li><span class="highlight">확장성:</span> 플래그 기반 검색 시스템과 Observer Pattern을 통한 유연한 아키텍처</li>
+                    <li><span class="highlight">동적 레이아웃:</span> 화면 해상도에 맞춰 자동으로 조정되는 그리드 시스템</li>
+                    <li><span class="highlight">양방향 좌표 변환:</span> 월드 좌표와 그리드 인덱스 간 완전한 호환성</li>
+                    <li><span class="highlight">이벤트 기반 버프 시스템:</span> HashSet을 활용한 O(1) 버프 관리 및 자동 동기화</li>
                 </ul>
                 </div>
 
