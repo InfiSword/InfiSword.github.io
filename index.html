@@ -309,7 +309,7 @@
                     <p style="color: #8b949e; margin-bottom: 25px;">
                         <span class="highlight">리플렉션 기반 CSV 파싱 시스템</span>과 <span class="highlight">서버 CSV 다운로드 및 버전 관리 시스템</span>을 설계하여 
                         게임 데이터를 효율적으로 관리. <span class="highlight">JSON 기반 저장/불러오기 시스템</span>과 <span class="highlight">Seed/Token 시스템</span>을 구현하여 
-                        게임 상태를 안전하게 저장하고 복원. <span class="highlight">비동기 로딩 시스템</span>과 <span class="highlight">씬 관리 시스템</span>을 통해 
+                        게임 상태를 안전하게 저장하고 복원. <span class="highlight">비동기 로딩 시스템</span>을 통해 
                         UI 블로킹 없는 부드러운 게임 경험 제공. <span class="highlight">Factory Pattern</span>을 활용한 데이터 기반 객체 생성 시스템으로 
                         확장 가능한 데이터 아키텍처 구축.
                     </p>
@@ -1653,6 +1653,13 @@
                 
                 <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">WorldFirstKill: 데이터 저장 및 파싱 시스템</h1>
 
+                <div class="tab-container">
+                    <button class="tab-button active" onclick="switchTabWFK('csv')">CSV 서버 다운로드 및 파싱</button>
+                    <button class="tab-button" onclick="switchTabWFK('save')">Seed/Token 세이브 로드</button>
+                    <button class="tab-button" onclick="switchTabWFK('loading')">비동기 로딩 시스템</button>
+                </div>
+
+                <div id="wfk-csv-tab" class="tab-content active">
                 <h2>1. 프로젝트 개요</h2>
                 <p>WorldFirstKill 게임에서 <span class="highlight">데이터 저장, 파싱, 불러오기 로직</span>을 담당했습니다. 
                 <span class="highlight">리플렉션 기반 CSV 파싱 시스템</span>과 <span class="highlight">서버 CSV 다운로드 및 버전 관리</span>를 통해 
@@ -1803,7 +1810,56 @@
                     <li><span class="highlight">진행률 콜백:</span> 다운로드 진행률을 실시간으로 전달하여 UI 업데이트</li>
                 </ul>
 
-                <h2>4. JSON 기반 저장/불러오기 시스템</h2>
+                <h2>3. Factory Pattern을 활용한 데이터 기반 객체 생성</h2>
+                <p>파싱된 데이터를 기반으로 게임 객체를 생성하는 Factory Pattern을 구현했습니다. 데이터 타입에 따라 적절한 객체를 생성합니다.</p>
+
+<pre><code><span class="c-cm">// DataFactory.cs: 데이터 기반 객체 생성</span>
+<span class="c-kw">public static</span> <span class="c-ty">Unit_Monster</span> <span class="c-fn">MakeMonster</span>(<span class="c-ty">Define</span>.<span class="c-ty">MonsterType</span> monsterType, <span class="c-kw">int</span> grade, <span class="c-ty">GameObject</span> prefab)
+{
+    <span class="c-cm">// 몬스터 데이터 찾기</span>
+    <span class="c-ty">Data_Monster</span> data = Managers.Data.MonsterData.Values.<span class="c-fn">ToList</span>()
+        .<span class="c-fn">Find</span>(value => value.m_monsterIndex == (<span class="c-kw">int</span>)monsterType + grade - <span class="c-st">1</span>);
+
+    <span class="c-kw">if</span> (data == <span class="c-kw">null</span>) {
+        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>($<span class="c-st">"몬스터 데이터를 찾을 수 없습니다: Type={monsterType}, Grade={grade}"</span>);
+    <span class="c-kw">return null</span>;
+    }
+
+    <span class="c-cm">// 몬스터 인스턴스 생성</span>
+    <span class="c-ty">GameObject</span> monsterObj = <span class="c-ty">GameObject</span>.<span class="c-fn">Instantiate</span>(prefab);
+    <span class="c-ty">Unit_Monster</span> monster = monsterObj.<span class="c-fn">GetComponent</span>&lt;<span class="c-ty">Unit_Monster</span>&gt;();
+
+    <span class="c-cm">// 드롭 아이템 생성</span>
+    <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">Item</span>, <span class="c-kw">int</span>&gt; dropItems = <span class="c-fn">CreateDropItems</span>(grade, data);
+
+    <span class="c-cm">// 몬스터 스탯 계산</span>
+    <span class="c-ty">UnitStat</span> monsterStat = <span class="c-fn">CalculateMonsterStat</span>(data, grade, dropItems);
+
+    <span class="c-cm">// 몬스터 데이터 적용</span>
+    <span class="c-fn">ApplyMonsterData</span>(monster, data, monsterStat, dropItems, grade);
+
+    <span class="c-kw">return</span> monster;
+}</code></pre>
+
+                <h3>기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">데이터 기반 생성:</span> CSV에서 파싱된 데이터를 기반으로 게임 객체 생성</li>
+                    <li><span class="highlight">타입별 Factory:</span> 몬스터, 장비, 아이템 등 타입별로 전용 Factory 메서드 제공</li>
+                    <li><span class="highlight">확장성:</span> 새로운 데이터 타입 추가 시 Factory 메서드만 추가하면 됨</li>
+                </ul>
+
+                <h2>4. 기술적 특징</h2>
+                <ul>
+                    <li><span class="highlight">리플렉션 기반 동적 파싱:</span> 수동 매핑 코드 없이 CSV 헤더와 클래스 필드 자동 매핑</li>
+                    <li><span class="highlight">버전 관리 시스템:</span> 서버와 로컬 버전 비교를 통한 효율적인 데이터 업데이트</li>
+                    <li><span class="highlight">비동기 다운로드:</span> UnityWebRequest를 활용한 비동기 CSV 다운로드로 UI 반응성 유지</li>
+                    <li><span class="highlight">Factory Pattern:</span> 데이터 기반 객체 생성으로 확장 가능한 아키텍처 구축</li>
+                    <li><span class="highlight">타입 안전성:</span> 제네릭과 리플렉션을 활용한 컴파일 타임 타입 체크</li>
+                </ul>
+                </div>
+
+                <div id="wfk-save-tab" class="tab-content">
+                <h2>1. JSON 기반 저장/불러오기 시스템</h2>
                 <p>게임 상태를 JSON 형식으로 저장하고 불러오는 시스템을 구현했습니다. Unity의 JsonUtility를 활용하여 직렬화/역직렬화를 수행합니다.</p>
 
 <pre><code><span class="c-cm">// DataManager.cs: JSON 기반 저장/불러오기</span>
@@ -1836,7 +1892,7 @@
     Managers.Sound.SFXSoundVolume = Managers.nowPlayerData.SFXSound;
 }</code></pre>
 
-                <h2>5. Seed/Token 시스템</h2>
+                <h2>2. Seed/Token 시스템</h2>
                 <p>랜덤 시드 상태를 문자열 토큰으로 인코딩하여 저장하고 복원하는 시스템을 구현했습니다. 게임의 RNG 상태를 완전히 복원할 수 있습니다.</p>
 
 <pre><code><span class="c-cm">// SaveLoadManager.cs: Seed Token 빌드 및 복원</span>
@@ -1895,45 +1951,16 @@
                     <li><span class="highlight">JSON 저장:</span> Seed Token을 JSON 파일에 저장하여 영구 보존</li>
                 </ul>
 
-                <h2>6. Factory Pattern을 활용한 데이터 기반 객체 생성</h2>
-                <p>파싱된 데이터를 기반으로 게임 객체를 생성하는 Factory Pattern을 구현했습니다. 데이터 타입에 따라 적절한 객체를 생성합니다.</p>
-
-<pre><code><span class="c-cm">// DataFactory.cs: 데이터 기반 객체 생성</span>
-<span class="c-kw">public static</span> <span class="c-ty">Unit_Monster</span> <span class="c-fn">MakeMonster</span>(<span class="c-ty">Define</span>.<span class="c-ty">MonsterType</span> monsterType, <span class="c-kw">int</span> grade, <span class="c-ty">GameObject</span> prefab)
-{
-    <span class="c-cm">// 몬스터 데이터 찾기</span>
-    <span class="c-ty">Data_Monster</span> data = Managers.Data.MonsterData.Values.<span class="c-fn">ToList</span>()
-        .<span class="c-fn">Find</span>(value => value.m_monsterIndex == (<span class="c-kw">int</span>)monsterType + grade - <span class="c-st">1</span>);
-
-    <span class="c-kw">if</span> (data == <span class="c-kw">null</span>) {
-        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>($<span class="c-st">"몬스터 데이터를 찾을 수 없습니다: Type={monsterType}, Grade={grade}"</span>);
-    <span class="c-kw">return null</span>;
-    }
-
-    <span class="c-cm">// 몬스터 인스턴스 생성</span>
-    <span class="c-ty">GameObject</span> monsterObj = <span class="c-ty">GameObject</span>.<span class="c-fn">Instantiate</span>(prefab);
-    <span class="c-ty">Unit_Monster</span> monster = monsterObj.<span class="c-fn">GetComponent</span>&lt;<span class="c-ty">Unit_Monster</span>&gt;();
-
-    <span class="c-cm">// 드롭 아이템 생성</span>
-    <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">Item</span>, <span class="c-kw">int</span>&gt; dropItems = <span class="c-fn">CreateDropItems</span>(grade, data);
-
-    <span class="c-cm">// 몬스터 스탯 계산</span>
-    <span class="c-ty">UnitStat</span> monsterStat = <span class="c-fn">CalculateMonsterStat</span>(data, grade, dropItems);
-
-    <span class="c-cm">// 몬스터 데이터 적용</span>
-    <span class="c-fn">ApplyMonsterData</span>(monster, data, monsterStat, dropItems, grade);
-
-    <span class="c-kw">return</span> monster;
-}</code></pre>
-
-                <h3>기술적 특징</h3>
+                <h2>3. 기술적 특징</h2>
                 <ul>
-                    <li><span class="highlight">데이터 기반 생성:</span> CSV에서 파싱된 데이터를 기반으로 게임 객체 생성</li>
-                    <li><span class="highlight">타입별 Factory:</span> 몬스터, 장비, 아이템 등 타입별로 전용 Factory 메서드 제공</li>
-                    <li><span class="highlight">확장성:</span> 새로운 데이터 타입 추가 시 Factory 메서드만 추가하면 됨</li>
+                    <li><span class="highlight">완전한 RNG 복원:</span> Seed Token 시스템으로 게임의 랜덤 상태 완전 복원</li>
+                    <li><span class="highlight">JSON 기반 저장:</span> Unity JsonUtility를 활용한 직렬화/역직렬화</li>
+                    <li><span class="highlight">고정 폭 인코딩:</span> BaseSeed(10자리), Domain ID(3자리), Usage(12자리)로 고정 폭 인코딩하여 파싱 안정성 확보</li>
                 </ul>
+                </div>
 
-                <h2>7. 비동기 로딩 시스템</h2>
+                <div id="wfk-loading-tab" class="tab-content">
+                <h2>1. 비동기 로딩 시스템</h2>
                 <p>게임 데이터 로딩과 씬 전환 시 UI 블로킹을 방지하기 위해 <span class="highlight">비동기 로딩 시스템</span>을 구현했습니다. 
                 Unity의 <code>AsyncOperation</code>와 <code>Task</code>를 활용하여 로딩 진행률을 실시간으로 표시하고, 사용자 경험을 향상시켰습니다.</p>
 
@@ -2005,108 +2032,14 @@
                     <li><span class="highlight">UI 반응성:</span> UnityMainThreadDispatcher를 통한 안전한 UI 업데이트</li>
                 </ul>
 
-                <h2>8. 씬 관리 시스템</h2>
-                <p>게임의 다양한 씬을 효율적으로 관리하기 위해 <span class="highlight">씬 관리 시스템</span>을 구현했습니다. 
-                <span class="highlight">BaseScene</span>을 상속받은 각 씬 클래스가 자신의 생명주기를 관리하며, 씬 전환 시 적절한 초기화와 정리 작업을 수행합니다.</p>
-
-<pre><code><span class="c-cm">// BaseScene.cs: 씬 관리 기본 클래스</span>
-<span class="c-kw">public abstract class</span> <span class="c-ty">BaseScene</span> : <span class="c-ty">MonoBehaviour</span>
-{
-    <span class="c-kw">public</span> <span class="c-ty">Define</span>.<span class="c-ty">Scene</span> SceneType { <span class="c-kw">get</span>; <span class="c-kw">protected set</span>; }
-
-    <span class="c-cm">// 씬 진입 시 호출</span>
-    <span class="c-kw">public abstract void</span> <span class="c-fn">Clear</span>();
-
-    <span class="c-cm">// 씬 초기화</span>
-    <span class="c-kw">protected virtual void</span> <span class="c-fn">Init</span>()
-    {
-        <span class="c-ty">Managers</span>.<span class="c-fn">Init</span>();
-    }
-
-    <span class="c-kw">private void</span> <span class="c-fn">Awake</span>()
-    {
-        <span class="c-fn">Init</span>();
-    }
-}
-
-<span class="c-cm">// InGameScene.cs: 인게임 씬 구현</span>
-<span class="c-kw">public class</span> <span class="c-ty">InGameScene</span> : <span class="c-ty">BaseScene</span>
-{
-    <span class="c-kw">public override void</span> <span class="c-fn">Clear</span>()
-    {
-        <span class="c-cm">// 인게임 씬 전환 시 정리 작업</span>
-        <span class="c-ty">Managers</span>.Map.<span class="c-fn">Clear</span>();
-        <span class="c-ty">Managers</span>.Pool.<span class="c-fn">Clear</span>();
-        <span class="c-ty">Managers</span>.Sound.<span class="c-fn">Clear</span>();
-    }
-
-    <span class="c-kw">protected override void</span> <span class="c-fn">Init</span>()
-    {
-        <span class="c-kw">base</span>.<span class="c-fn">Init</span>();
-        SceneType = <span class="c-ty">Define</span>.<span class="c-ty">Scene</span>.InGame;
-        
-        <span class="c-cm">// 인게임 씬 전용 초기화</span>
-        <span class="c-ty">Managers</span>.Map.<span class="c-fn">Init</span>();
-        <span class="c-ty">Managers</span>.Pool.<span class="c-fn">Init</span>();
-    }
-}</code></pre>
-
-                <h3>비동기 씬 전환</h3>
-                <p>씬 전환 시에도 비동기 로딩을 활용하여 부드러운 전환을 구현했습니다.</p>
-
-<pre><code><span class="c-cm">// 씬 전환 관리자 예시</span>
-<span class="c-kw">public static class</span> <span class="c-ty">SceneManagerEx</span>
-{
-    <span class="c-kw">public static async</span> <span class="c-ty">Task</span> <span class="c-fn">LoadSceneAsync</span>(<span class="c-ty">Define</span>.<span class="c-ty">Scene</span> sceneType, <span class="c-ty">Action</span>&lt;<span class="c-kw">float</span>&gt; progressCallback = <span class="c-kw">null</span>)
-    {
-        <span class="c-cm">// 현재 씬 정리</span>
-        <span class="c-ty">BaseScene</span> currentScene = <span class="c-ty">GameObject</span>.<span class="c-fn">FindObjectOfType</span>&lt;<span class="c-ty">BaseScene</span>&gt;();
-        <span class="c-kw">if</span> (currentScene != <span class="c-kw">null</span>) {
-            currentScene.<span class="c-fn">Clear</span>();
-        }
-
-        <span class="c-cm">// 비동기 씬 로딩</span>
-        <span class="c-ty">AsyncOperation</span> asyncLoad = <span class="c-ty">UnityEngine</span>.<span class="c-ty">SceneManagement</span>.<span class="c-ty">SceneManager</span>
-            .<span class="c-fn">LoadSceneAsync</span>(<span class="c-ty">GetSceneName</span>(sceneType));
-
-        asyncLoad.allowSceneActivation = <span class="c-kw">false</span>;
-
-        <span class="c-cm">// 진행률 업데이트</span>
-        <span class="c-kw">while</span> (asyncLoad.progress < <span class="c-st">0.9f</span>) {
-            progressCallback?.<span class="c-fn">Invoke</span>(asyncLoad.progress);
-            <span class="c-kw">await</span> <span class="c-ty">Task</span>.<span class="c-fn">Yield</span>();
-        }
-
-        <span class="c-cm">// 씬 활성화</span>
-        asyncLoad.allowSceneActivation = <span class="c-kw">true</span>;
-        progressCallback?.<span class="c-fn">Invoke</span>(<span class="c-st">1.0f</span>);
-
-        <span class="c-kw">while</span> (!asyncLoad.isDone) {
-            <span class="c-kw">await</span> <span class="c-ty">Task</span>.<span class="c-fn">Yield</span>();
-        }
-    }
-}</code></pre>
-
-                <h3>기술적 특징</h3>
+                <h2>2. 기술적 특징</h2>
                 <ul>
-                    <li><span class="highlight">추상화된 씬 관리:</span> BaseScene을 통한 일관된 씬 생명주기 관리</li>
-                    <li><span class="highlight">씬별 초기화/정리:</span> 각 씬이 자신의 초기화와 정리 로직을 구현</li>
-                    <li><span class="highlight">비동기 씬 전환:</span> AsyncOperation을 활용한 부드러운 씬 전환</li>
-                    <li><span class="highlight">진행률 표시:</span> 씬 로딩 진행률을 실시간으로 표시</li>
-                    <li><span class="highlight">리소스 정리:</span> 씬 전환 시 이전 씬의 리소스를 자동으로 정리</li>
+                    <li><span class="highlight">비동기 처리:</span> async/await를 활용하여 메인 스레드 블로킹 방지</li>
+                    <li><span class="highlight">진행률 표시:</span> 실시간 진행률 콜백으로 사용자에게 명확한 피드백 제공</li>
+                    <li><span class="highlight">에러 처리:</span> 각 단계별 실패 시 적절한 에러 메시지 표시</li>
+                    <li><span class="highlight">UI 반응성:</span> UnityMainThreadDispatcher를 통한 안전한 UI 업데이트</li>
                 </ul>
-
-                <h2>9. 기술적 특징</h2>
-                <ul>
-                    <li><span class="highlight">리플렉션 기반 동적 파싱:</span> 수동 매핑 코드 없이 CSV 헤더와 클래스 필드 자동 매핑</li>
-                    <li><span class="highlight">버전 관리 시스템:</span> 서버와 로컬 버전 비교를 통한 효율적인 데이터 업데이트</li>
-                    <li><span class="highlight">비동기 다운로드:</span> UnityWebRequest를 활용한 비동기 CSV 다운로드로 UI 반응성 유지</li>
-                    <li><span class="highlight">완전한 RNG 복원:</span> Seed Token 시스템으로 게임의 랜덤 상태 완전 복원</li>
-                    <li><span class="highlight">Factory Pattern:</span> 데이터 기반 객체 생성으로 확장 가능한 아키텍처 구축</li>
-                    <li><span class="highlight">타입 안전성:</span> 제네릭과 리플렉션을 활용한 컴파일 타임 타입 체크</li>
-                    <li><span class="highlight">비동기 로딩 시스템:</span> async/await를 활용한 UI 블로킹 없는 데이터 로딩</li>
-                    <li><span class="highlight">씬 관리 시스템:</span> BaseScene 기반의 일관된 씬 생명주기 관리</li>
-                </ul>
+                </div>
 
                 <div style="height: 100px;"></div>
             </div>
@@ -2297,6 +2230,9 @@
                 
                 document.body.style.overflow = 'hidden';
                 
+                // 첫 번째 탭(csv) 활성화
+                switchTabWFK('csv');
+                
                 // 자식 요소 강제 표시
                 if (modalContainer) {
                     modalContainer.style.setProperty('display', 'block', 'important');
@@ -2391,7 +2327,7 @@
             } else if (projectType === 'wfk') {
                 document.getElementById('modal-overlay-wfk').style.display = 'none';
             } else {
-                document.getElementById('modal-overlay').style.display = 'none';
+            document.getElementById('modal-overlay').style.display = 'none';
             }
             document.body.style.overflow = 'auto';
         }
@@ -2411,6 +2347,30 @@
             } else if (tabName === 'existing') {
                 document.querySelector('.tab-button:last-child').classList.add('active');
                 document.getElementById('existing-tab').classList.add('active');
+            }
+        }
+
+        function switchTabWFK(tabName) {
+            // WFK 모달 내의 탭 버튼만 선택
+            const wfkModal = document.getElementById('modal-overlay-wfk');
+            if (!wfkModal) return;
+            
+            const buttons = wfkModal.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            const contents = wfkModal.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 활성화
+            if (tabName === 'csv') {
+                buttons[0].classList.add('active');
+                document.getElementById('wfk-csv-tab').classList.add('active');
+            } else if (tabName === 'save') {
+                buttons[1].classList.add('active');
+                document.getElementById('wfk-save-tab').classList.add('active');
+            } else if (tabName === 'loading') {
+                buttons[2].classList.add('active');
+                document.getElementById('wfk-loading-tab').classList.add('active');
             }
         }
         
