@@ -278,6 +278,48 @@
     }
 }</code></pre>
 
+                <!-- [ADDED] Category: GameObjectGridLayout -->
+               <h3>[GameObjectGridLayout: 커스텀 레이아웃 엔진]</h3>
+                <p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하고, 전체 시스템의 시작 월드 좌표를 제공하는 핵심 컴포넌트입니다.</p>
+
+<pre><code><span class="c-kw">public class</span> <span class="c-ty">GameObjectGridLayout</span> : <span class="c-ty">MonoBehaviour</span>
+{
+    [<span class="c-ty">Header</span>(<span class="c-st">"Grid Settings"</span>)]
+    <span class="c-kw">[SerializeField] private int</span> columns = <span class="string">13</span>; <span class="c-cm">// X축 그리드 수</span>
+    <span class="c-kw">[SerializeField] private int</span> rows = <span class="string">7</span>;     <span class="c-cm">// Y축 그리드 수</span>
+
+    <span class="c-kw">[SerializeField] private Vector2</span> cellSize = <span class="type">Vector2</span>.one;
+    <span class="c-kw">[SerializeField] private Vector2</span> spacing = <span class="type">Vector2</span>.zero;
+    <span class="c-kw">[SerializeField] private Vector2</span> padding = <span class="type">Vector2</span>.zero;
+
+    [<span class="c-ty">Header</span>(<span class="c-st">"Layout Settings"</span>)]
+    <span class="c-kw">[SerializeField] private bool</span> fitToScreen;
+
+    <span class="c-kw">public int</span> Columns => columns;
+    <span class="c-kw">public int</span> Rows => rows;
+    <span class="c-kw">public Vector2</span> CellSize => cellSize;
+    <span class="c-kw">public Vector2</span> Spacing => spacing;
+    <span class="c-kw">public bool</span> GetFitToScreen => fitToScreen;
+    <span class="c-kw">public Vector2</span> StartPos { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
+
+    <span class="c-cm">// ... </span>
+    
+    <span class="c-cm">// 카메라 해상도에 맞춰 그리드 데이터 동적 계산</span>
+    <span class="c-kw">public void</span> <span class="c-fn">FitToScreen</span>() {
+        <span class="c-ty">Camera</span> cam = <span class="c-ty">Camera</span>.main;
+        <span class="c-kw">float</span> height = cam.orthographicSize * <span class="string">2f</span>;
+        <span class="c-kw">float</span> width = height * cam.aspect;
+
+        <span class="c-cm">// 여백과 간격을 제외한 실제 가용 셀 크기 역산</span>
+        cellSize.x = (width - (padding.x * <span class="string">2</span>) - (spacing.x * (columns - <span class="string">1</span>))) / columns;
+        cellSize.y = (height - (padding.y * <span class="string">2</span>) - (spacing.y * (rows - <span class="string">1</span>))) / rows;
+
+        <span class="c-cm">// 좌상단 기준 월드 시작 좌표 설정</span>
+        StartPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(-(width / <span class="string">2</span>) + padding.x + (cellSize.x / <span class="string">2</span>), 
+                                (height / <span class="string">2</span>) - padding.y - (cellSize.y / <span class="string">2</span>));
+    }
+}</code></pre>
+
                 <!-- CATEGORY: FILE GRID MANAGER -->
                 <h2>[FileGridManager: 그리드 관련 매니저]</h2>
                 <p>전체 그리드 시스템을 총괄하며, 좌표 변환, 조건부 탐색, 유닛 배치 트랜잭션을 총괄합니다.</p>
@@ -429,38 +471,6 @@
     None,
 }
 
-<span class="c-kw">private bool</span> <span class="c-fn">CheckGridMatchesFlags</span>(<span class="c-ty">FileGrid</span> grid, <span class="c-ty">SearchGridFlag</span>[] flags)
-{
-    <span class="c-kw">if</span> (grid == <span class="c-kw">null</span> || flags == <span class="c-kw">null</span> || flags.Length == <span class="string">0</span>)
-        <span class="c-kw">return false</span>;
-
-    <span class="c-kw">bool</span> isOccupied = grid.<span class="c-fn">GetFileUnit</span>() != <span class="c-kw">null</span>;
-    <span class="c-kw">bool</span> hasObstacle = grid.obstacleObject != <span class="c-kw">null</span>;
-
-    <span class="c-kw">foreach</span> (<span class="c-ty">SearchGridFlag</span> flag <span class="c-kw">in</span> flags)
-    {
-        <span class="c-kw">switch</span> (flag)
-        {
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.Occupied:
-                <span class="c-kw">if</span> (!isOccupied) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.NotOccupied:
-                <span class="c-kw">if</span> (isOccupied) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.Obstacle:
-                <span class="c-kw">if</span> (!hasObstacle) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.NotObstacle:
-                <span class="c-kw">if</span> (hasObstacle) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.None:
-                <span class="c-kw">break</span>;
-        }
-    }
-
-    <span class="c-kw">return true</span>;
-}
-
 <span class="c-kw">public</span> <span class="c-ty">FileGrid</span> <span class="c-fn">FindFlagGridWorld</span>(<span class="c-ty">Vector2</span> worldPos, <span class="c-kw">params</span> <span class="c-ty">SearchGridFlag</span>[] flags)
 {
     <span class="c-kw">float</span> bestDistSqr = <span class="c-kw">float</span>.MaxValue;
@@ -486,305 +496,10 @@
                     <li><span class="highlight">조합 가능:</span> 여러 플래그 동시 사용</li>
                     <li><span class="highlight">가변 인자:</span> params 키워드로 유연한 호출</li>
                     <li><span class="highlight">AND 조건:</span> 모든 플래그 조건 만족 필요</li>
-                </ul>
-
-                <h3>[동적 장애물 레이어 관리] 런타임 장애물 생성/제거 (Dynamic Obstacle Layer Management)</h3>
-                <p>런타임에 장애물을 동적으로 생성하고 제거할 수 있으며, 장애물 생성 시 기존 유닛을 자동으로 처리하는 <span class="highlight">동적 레이어 관리 시스템</span>입니다.</p>
-                <p>장애물은 그리드의 자식 객체로 배치되며, 그리드의 상태와 연동되어 점유 상태를 자동으로 관리합니다.</p>
-
-<pre><code><span class="c-kw">public void</span> <span class="c-fn">CreateWormHoleAtPosition</span>(<span class="c-ty">Vector2</span> worldPos)
-{
-    <span class="c-ty">FileGrid</span> grid = <span class="c-fn">GetGrid</span>(worldPos);
-
-    <span class="c-cm">// 유효하지 않거나 이미 장애물이 있으면 생성하지 않음</span>
-    <span class="c-kw">if</span> (grid == <span class="c-kw">null</span> || grid.obstacleObject != <span class="c-kw">null</span>)
-        <span class="c-kw">return</span>;
-
-    <span class="c-cm">// 해당 그리드에 유닛이 있으면 제거</span>
-    <span class="c-ty">File_Base</span> unit = grid.<span class="c-fn">GetFileUnit</span>();
-    <span class="c-kw">if</span> (unit != <span class="c-kw">null</span>)
-    {
-        <span class="c-fn">TryRemoveUnit</span>(unit);
-    }
-
-    <span class="c-cm">// 땅굴 프리팹 로드 및 생성</span>
-    <span class="c-ty">GameObject</span> holePrefab = <span class="c-ty">Resources</span>.<span class="c-fn">Load</span>&lt;<span class="c-ty">GameObject</span>&gt;(<span class="c-st">"Prefabs/Effect/WormBlockLandObj"</span>);
-    <span class="c-kw">if</span> (holePrefab == <span class="c-kw">null</span>)
-    {
-        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>(<span class="c-st">"프리팹을 찾을 수 없습니다."</span>);
-        <span class="c-kw">return</span>;
-    }
-
-    <span class="c-ty">GameObject</span> holeInstance = <span class="c-fn">Instantiate</span>(holePrefab, grid.transform);
-    holeInstance.transform.localPosition = <span class="c-ty">Vector3</span>.zero;
-    grid.<span class="c-fn">SetObstacle</span>(holeInstance);
-
-    <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>(<span class="c-st">$"그리드 ({grid.GridX}, {grid.GridY})에 땅굴을 생성했습니다."</span>);
-}
-
-<span class="c-cm">/// &lt;summary&gt;</span>
-<span class="c-cm">/// 모든 그리드의 땅굴을 제거합니다.</span>
-<span class="c-cm">/// &lt;/summary&gt;</span>
-<span class="c-kw">public void</span> <span class="c-fn">RemoveAllWormHoles</span>()
-{
-    <span class="c-kw">foreach</span> (<span class="c-kw">var</span> grid <span class="c-kw">in</span> gridArray)
-    {
-        <span class="c-kw">if</span> (grid != <span class="c-kw">null</span> && grid.obstacleObject != <span class="c-kw">null</span>)
-        {
-            grid.<span class="c-fn">RemoveObstacle</span>();
-        }
-    }
-    <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>(<span class="c-st">"RemoveAllWormHoles: 모든 땅굴을 제거했습니다."</span>);
-}</code></pre>
-
-                <p><strong>기술적 특징:</strong></p>
-                <ul>
-                    <li><span class="highlight">동적 레이어:</span> 런타임에 장애물 추가/제거</li>
-                    <li><span class="highlight">자동 충돌 처리:</span> 장애물 생성 시 기존 유닛 자동 제거</li>
-                    <li><span class="highlight">계층 구조:</span> 장애물을 그리드의 자식으로 배치</li>
-                    <li><span class="highlight">일괄 관리:</span> RemoveAllWormHoles()로 일괄 제거</li>
-                </ul>
-
-                <!-- [ADDED] Category: GameObjectGridLayout -->
-               <h3>[GameObjectGridLayout: 커스텀 레이아웃 엔진]</h3>
-                <p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하고, 전체 시스템의 시작 월드 좌표를 제공하는 핵심 컴포넌트입니다.</p>
-
-<pre><code><span class="c-kw">public class</span> <span class="c-ty">GameObjectGridLayout</span> : <span class="c-ty">MonoBehaviour</span>
-{
-    [<span class="c-ty">Header</span>(<span class="c-st">"Grid Settings"</span>)]
-    <span class="c-kw">[SerializeField] private int</span> columns = <span class="string">13</span>; <span class="c-cm">// X축 그리드 수</span>
-    <span class="c-kw">[SerializeField] private int</span> rows = <span class="string">7</span>;     <span class="c-cm">// Y축 그리드 수</span>
-
-    <span class="c-kw">[SerializeField] private Vector2</span> cellSize = <span class="type">Vector2</span>.one;
-    <span class="c-kw">[SerializeField] private Vector2</span> spacing = <span class="type">Vector2</span>.zero;
-    <span class="c-kw">[SerializeField] private Vector2</span> padding = <span class="type">Vector2</span>.zero;
-
-    [<span class="c-ty">Header</span>(<span class="c-st">"Layout Settings"</span>)]
-    <span class="c-kw">[SerializeField] private bool</span> fitToScreen;
-
-    <span class="c-kw">public int</span> Columns => columns;
-    <span class="c-kw">public int</span> Rows => rows;
-    <span class="c-kw">public Vector2</span> CellSize => cellSize;
-    <span class="c-kw">public Vector2</span> Spacing => spacing;
-    <span class="c-kw">public bool</span> GetFitToScreen => fitToScreen;
-    <span class="c-kw">public Vector2</span> StartPos { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
-
-    <span class="c-cm">// ... </span>
-    
-    <span class="c-cm">// 카메라 해상도에 맞춰 그리드 데이터 동적 계산</span>
-    <span class="c-kw">public void</span> <span class="c-fn">FitToScreen</span>() {
-        <span class="c-ty">Camera</span> cam = <span class="c-ty">Camera</span>.main;
-        <span class="c-kw">float</span> height = cam.orthographicSize * <span class="string">2f</span>;
-        <span class="c-kw">float</span> width = height * cam.aspect;
-
-        <span class="c-cm">// 여백과 간격을 제외한 실제 가용 셀 크기 역산</span>
-        cellSize.x = (width - (padding.x * <span class="string">2</span>) - (spacing.x * (columns - <span class="string">1</span>))) / columns;
-        cellSize.y = (height - (padding.y * <span class="string">2</span>) - (spacing.y * (rows - <span class="string">1</span>))) / rows;
-
-        <span class="c-cm">// 좌상단 기준 월드 시작 좌표 설정</span>
-        StartPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(-(width / <span class="string">2</span>) + padding.x + (cellSize.x / <span class="string">2</span>), 
-                                (height / <span class="string">2</span>) - padding.y - (cellSize.y / <span class="string">2</span>));
-    }
-}</code></pre>
-
-                <h2>3. 동적 좌표 변환 시스템 (Dynamic Coordinate Transformation)</h2>
-                <p>월드 좌표와 그리드 인덱스 간의 <span class="highlight">양방향 변환</span>을 지원하여, 마우스 위치나 유닛의 월드 좌표를 그리드 인덱스로 변환하거나, 그리드 인덱스를 월드 좌표로 변환할 수 있습니다.</p>
-
-                <h3>[양방향 좌표 변환]</h3>
-                <p>Unity의 Transform 계층 구조를 활용하여 부모 객체의 변환을 자동으로 적용하며, 그리드 레이아웃의 셀 크기, 간격, 패딩을 동적으로 계산합니다.</p>
-
-<pre><code><span class="c-cm">// 월드 좌표 → 그리드 인덱스</span>
-<span class="c-kw">private bool</span> <span class="c-fn">WorldToGridIndex</span>(<span class="c-ty">Vector2</span> worldPos, <span class="c-kw">out int</span> x, <span class="c-kw">out int</span> y)
-{
-    x = <span class="string">0</span>;
-    y = <span class="string">0</span>;
-
-    <span class="c-kw">if</span> (gridLayout == <span class="c-kw">null</span>) <span class="c-kw">return false</span>;
-
-    <span class="c-cm">// 1. 월드 → 로컬 변환</span>
-    <span class="c-ty">Vector2</span> localPos = transform.<span class="c-fn">InverseTransformPoint</span>(worldPos);
-
-    <span class="c-cm">// 2. 그리드 시작 위치 계산 (중앙 기준)</span>
-    <span class="c-ty">Vector2</span> startPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(
-        -gridLayout.CellSize.x * (GridWidth - <span class="string">1</span>) * <span class="string">0.5f</span>,
-        -gridLayout.CellSize.y * (GridHeight - <span class="string">1</span>) * <span class="string">0.5f</span>
-    );
-    startPos += gridLayout.Padding;
-
-    <span class="c-cm">// 3. 인덱스 계산</span>
-    <span class="c-kw">float</span> xFloat = (localPos.x - startPos.x) / (gridLayout.CellSize.x + gridLayout.Spacing.x);
-    <span class="c-kw">float</span> yFloat = (localPos.y - startPos.y) / (gridLayout.CellSize.y + gridLayout.Spacing.y);
-
-    x = <span class="c-ty">Mathf</span>.<span class="c-fn">RoundToInt</span>(xFloat);
-    y = <span class="c-ty">Mathf</span>.<span class="c-fn">RoundToInt</span>(yFloat);
-
-    <span class="c-kw">return true</span>;
-}
-
-<span class="c-cm">// 그리드 인덱스 → 월드 좌표</span>
-<span class="c-kw">public</span> <span class="c-ty">Vector2</span> <span class="c-fn">GetGridWorldPosition</span>(<span class="c-kw">int</span> x, <span class="c-kw">int</span> y)
-{
-    <span class="c-kw">if</span> (gridLayout == <span class="c-kw">null</span>) <span class="c-kw">return</span> <span class="c-ty">Vector2</span>.zero;
-
-    <span class="c-cm">// 1. 로컬 위치 계산</span>
-    <span class="c-ty">Vector2</span> startPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(
-        -gridLayout.CellSize.x * (GridWidth - <span class="string">1</span>) * <span class="string">0.5f</span>,
-        -gridLayout.CellSize.y * (GridHeight - <span class="string">1</span>) * <span class="string">0.5f</span>
-    );
-    startPos += gridLayout.Padding;
-
-    <span class="c-ty">Vector2</span> localPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(
-        startPos.x + x * (gridLayout.CellSize.x + gridLayout.Spacing.x),
-        startPos.y + y * (gridLayout.CellSize.y + gridLayout.Spacing.y)
-    );
-
-    <span class="c-cm">// 2. 로컬 → 월드 변환</span>
-    <span class="c-kw">return</span> transform.<span class="c-fn">TransformPoint</span>(localPos);
-}</code></pre>
-
-                <p><strong>기술적 특징:</strong></p>
-                <ul>
-                    <li><span class="highlight">양방향 변환:</span> 월드 ↔ 그리드 인덱스 완전 호환</li>
-                    <li><span class="highlight">동적 계산:</span> 런타임에 그리드 크기 변경 대응</li>
-                    <li><span class="highlight">정밀도:</span> 반올림으로 정확한 인덱스 매핑</li>
-                    <li><span class="highlight">Transform 계층 지원:</span> 부모 Transform 변환 자동 적용</li>
-                </ul>
-
-                <h2>4. 플래그 기반 확장 가능한 검색 시스템 (Flag-Based Extensible Search)</h2>
-                <p>그리드 검색 시 점유 상태, 장애물 존재 여부 등 다양한 조건을 <span class="highlight">플래그 조합</span>으로 필터링할 수 있는 확장 가능한 검색 시스템입니다.</p>
-
-                <h3>[확장 가능한 필터링]</h3>
-                <p>enum 기반의 플래그 시스템을 통해 새로운 검색 조건을 쉽게 추가할 수 있으며, 여러 플래그를 동시에 사용하여 복합 조건 검색이 가능합니다.</p>
-
-<pre><code><span class="c-kw">public enum</span> <span class="c-ty">SearchGridFlag</span>
-{
-    Occupied,       <span class="c-cm">// 점유</span>
-    NotOccupied,    <span class="c-cm">// 비점유</span>
-    Obstacle,       <span class="c-cm">// 장애물이 존재하는 그리드만</span>
-    NotObstacle,    <span class="c-cm">// 장애물이 존재하지 않는 그리드만</span>
-    None,
-}
-
-<span class="c-kw">private bool</span> <span class="c-fn">CheckGridMatchesFlags</span>(<span class="c-ty">FileGrid</span> grid, <span class="c-ty">SearchGridFlag</span>[] flags)
-{
-    <span class="c-kw">if</span> (grid == <span class="c-kw">null</span> || flags == <span class="c-kw">null</span> || flags.Length == <span class="string">0</span>)
-        <span class="c-kw">return false</span>;
-
-    <span class="c-kw">bool</span> isOccupied = grid.<span class="c-fn">GetFileUnit</span>() != <span class="c-kw">null</span>;
-    <span class="c-kw">bool</span> hasObstacle = grid.obstacleObject != <span class="c-kw">null</span>;
-
-    <span class="c-kw">foreach</span> (<span class="c-ty">SearchGridFlag</span> flag <span class="c-kw">in</span> flags)
-    {
-        <span class="c-kw">switch</span> (flag)
-        {
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.Occupied:
-                <span class="c-kw">if</span> (!isOccupied) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.NotOccupied:
-                <span class="c-kw">if</span> (isOccupied) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.Obstacle:
-                <span class="c-kw">if</span> (!hasObstacle) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.NotObstacle:
-                <span class="c-kw">if</span> (hasObstacle) <span class="c-kw">return false</span>;
-                <span class="c-kw">break</span>;
-            <span class="c-kw">case</span> <span class="c-ty">SearchGridFlag</span>.None:
-                <span class="c-kw">break</span>;
-        }
-    }
-
-    <span class="c-kw">return true</span>;
-}
-
-<span class="c-kw">public</span> <span class="c-ty">FileGrid</span> <span class="c-fn">FindFlagGridWorld</span>(<span class="c-ty">Vector2</span> worldPos, <span class="c-kw">params</span> <span class="c-ty">SearchGridFlag</span>[] flags)
-{
-    <span class="c-kw">float</span> bestDistSqr = <span class="c-kw">float</span>.MaxValue;
-    <span class="c-ty">FileGrid</span> bestGrid = <span class="c-kw">null</span>;
-
-    <span class="c-kw">foreach</span> (<span class="c-ty">FileGrid</span> grid <span class="c-kw">in</span> gridArray)
-    {
-        <span class="c-kw">if</span> (grid == <span class="c-kw">null</span>) <span class="c-kw">continue</span>;
-
-        <span class="c-cm">// 플래그 조건 체크</span>
-        <span class="c-kw">if</span> (!<span class="c-fn">CheckGridMatchesFlags</span>(grid, flags))
-            <span class="c-kw">continue</span>;
-
-        <span class="c-fn">SearchClosestBetter</span>(grid, worldPos, <span class="c-kw">ref</span> bestDistSqr, <span class="c-kw">ref</span> bestGrid);
-    }
-
-    <span class="c-kw">return</span> bestGrid;
-}</code></pre>
-
-                <p><strong>기술적 특징:</strong></p>
-                <ul>
-                    <li><span class="highlight">확장성:</span> 새로운 플래그 추가 용이</li>
-                    <li><span class="highlight">조합 가능:</span> 여러 플래그 동시 사용</li>
-                    <li><span class="highlight">가변 인자:</span> params 키워드로 유연한 호출</li>
-                    <li><span class="highlight">AND 조건:</span> 모든 플래그 조건 만족 필요</li>
-                </ul>
-
-                <h2>5. 동적 장애물 레이어 관리 (Dynamic Obstacle Layer Management)</h2>
-                <p>런타임에 장애물을 동적으로 생성하고 제거할 수 있으며, 장애물 생성 시 기존 유닛을 자동으로 처리하는 <span class="highlight">동적 레이어 관리 시스템</span>입니다.</p>
-
-                <h3>[런타임 장애물 생성/제거]</h3>
-                <p>장애물은 그리드의 자식 객체로 배치되며, 그리드의 상태와 연동되어 점유 상태를 자동으로 관리합니다.</p>
-
-<pre><code><span class="c-kw">public void</span> <span class="c-fn">CreateWormHoleAtPosition</span>(<span class="c-ty">Vector2</span> worldPos)
-{
-    <span class="c-ty">FileGrid</span> grid = <span class="c-fn">GetGrid</span>(worldPos);
-
-    <span class="c-cm">// 유효하지 않거나 이미 장애물이 있으면 생성하지 않음</span>
-    <span class="c-kw">if</span> (grid == <span class="c-kw">null</span> || grid.obstacleObject != <span class="c-kw">null</span>)
-        <span class="c-kw">return</span>;
-
-    <span class="c-cm">// 해당 그리드에 유닛이 있으면 제거</span>
-    <span class="c-ty">File_Base</span> unit = grid.<span class="c-fn">GetFileUnit</span>();
-    <span class="c-kw">if</span> (unit != <span class="c-kw">null</span>)
-    {
-        <span class="c-fn">TryRemoveUnit</span>(unit);
-    }
-
-    <span class="c-cm">// 땅굴 프리팹 로드 및 생성</span>
-    <span class="c-ty">GameObject</span> holePrefab = <span class="c-ty">Resources</span>.<span class="c-fn">Load</span>&lt;<span class="c-ty">GameObject</span>&gt;(<span class="c-st">"Prefabs/Effect/WormBlockLandObj"</span>);
-    <span class="c-kw">if</span> (holePrefab == <span class="c-kw">null</span>)
-    {
-        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>(<span class="c-st">"프리팹을 찾을 수 없습니다."</span>);
-        <span class="c-kw">return</span>;
-    }
-
-    <span class="c-ty">GameObject</span> holeInstance = <span class="c-fn">Instantiate</span>(holePrefab, grid.transform);
-    holeInstance.transform.localPosition = <span class="c-ty">Vector3</span>.zero;
-    grid.<span class="c-fn">SetObstacle</span>(holeInstance);
-
-    <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>(<span class="c-st">$"그리드 ({grid.GridX}, {grid.GridY})에 땅굴을 생성했습니다."</span>);
-}
-
-<span class="c-cm">/// &lt;summary&gt;</span>
-<span class="c-cm">/// 모든 그리드의 땅굴을 제거합니다.</span>
-<span class="c-cm">/// &lt;/summary&gt;</span>
-<span class="c-kw">public void</span> <span class="c-fn">RemoveAllWormHoles</span>()
-{
-    <span class="c-kw">foreach</span> (<span class="c-kw">var</span> grid <span class="c-kw">in</span> gridArray)
-    {
-        <span class="c-kw">if</span> (grid != <span class="c-kw">null</span> && grid.obstacleObject != <span class="c-kw">null</span>)
-        {
-            grid.<span class="c-fn">RemoveObstacle</span>();
-        }
-    }
-    <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>(<span class="c-st">"RemoveAllWormHoles: 모든 땅굴을 제거했습니다."</span>);
-}</code></pre>
-
-                <p><strong>기술적 특징:</strong></p>
-                <ul>
-                    <li><span class="highlight">동적 레이어:</span> 런타임에 장애물 추가/제거</li>
-                    <li><span class="highlight">자동 충돌 처리:</span> 장애물 생성 시 기존 유닛 자동 제거</li>
-                    <li><span class="highlight">계층 구조:</span> 장애물을 그리드의 자식으로 배치</li>
-                    <li><span class="highlight">일괄 관리:</span> RemoveAllWormHoles()로 일괄 제거</li>
                 </ul>
 
                 <!-- [ADDED] Category: InputManager -->
-                <h2>6. Category: InputManager (Centralized Interaction)</h2>
+                <h2>3. Category: InputManager (Centralized Interaction)</h2>
                 <p>수많은 유닛이 개별 이벤트를 수신하지 않고, <code>InputManager</code>가 모든 마우스 입력을 통합 관리하여 <code>IInteractable</code> 인터페이스를 구현한 객체에 전달합니다.</p>
 
 <pre><code><span class="c-cm">// InputManager.cs: Raycast를 통한 중앙 집중식 상호작용 객체 탐지</span>
