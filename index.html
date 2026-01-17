@@ -1347,14 +1347,14 @@
                 console.log('Modal innerHTML preview:', modal.innerHTML.substring(0, 100));
                 
                 // 모달 위치 및 크기 확인
-                const rect = modal.getBoundingClientRect();
-                console.log('Modal bounding rect:', {
-                    top: rect.top,
-                    left: rect.left,
-                    width: rect.width,
-                    height: rect.height,
-                    bottom: rect.bottom,
-                    right: rect.right
+                const initialRect = modal.getBoundingClientRect();
+                console.log('Modal initial bounding rect:', {
+                    top: initialRect.top,
+                    left: initialRect.left,
+                    width: initialRect.width,
+                    height: initialRect.height,
+                    bottom: initialRect.bottom,
+                    right: initialRect.right
                 });
                 
                 // modal-container와 modal-body 확인
@@ -1375,59 +1375,100 @@
                     console.log('Body visibility:', bodyStyle.visibility);
                 }
                 
-                // 깔끔하게 display 설정 (중복 제거)
-                modal.style.display = 'flex';
+                // 모달의 기본 스타일 강제 적용 (인라인 스타일)
                 modal.style.setProperty('display', 'flex', 'important');
-                document.body.style.overflow = 'hidden';
+                modal.style.setProperty('position', 'fixed', 'important');
+                modal.style.setProperty('top', '0', 'important');
+                modal.style.setProperty('left', '0', 'important');
+                modal.style.setProperty('width', '100%', 'important');
+                modal.style.setProperty('height', '100%', 'important');
+                modal.style.setProperty('z-index', '10000', 'important');
+                modal.style.setProperty('background', 'rgba(0,0,0,0.92)', 'important');
+                modal.style.setProperty('justify-content', 'center', 'important');
+                modal.style.setProperty('align-items', 'center', 'important');
+            document.body.style.overflow = 'hidden';
                 
-                console.log('Modal display set to flex');
-                console.log('Modal style.display:', modal.style.display);
+                // 자식 요소 강제 표시
+                if (modalContainer) {
+                    modalContainer.style.setProperty('display', 'block', 'important');
+                    const containerComputed = window.getComputedStyle(modalContainer);
+                    if (containerComputed.display === 'none') {
+                        console.error('Container display is still none!');
+                        modalContainer.style.display = 'block';
+                    }
+                }
                 
-                // 모달이 실제로 보이는지 확인
+                if (modalBody) {
+                    modalBody.style.setProperty('display', 'block', 'important');
+                    const bodyComputed = window.getComputedStyle(modalBody);
+                    if (bodyComputed.display === 'none') {
+                        console.error('Body display is still none!');
+                        modalBody.style.display = 'block';
+                    }
+                }
+                
+                // 즉시 실행되는 디버깅 (setTimeout 없이)
+                const computedStyle = window.getComputedStyle(modal);
+                const immediateRect = modal.getBoundingClientRect();
+                const offsetWidth = modal.offsetWidth;
+                const offsetHeight = modal.offsetHeight;
+                
+                console.log('=== Immediate Modal State ===');
+                console.log('Computed display:', computedStyle.display);
+                console.log('Computed position:', computedStyle.position);
+                console.log('Computed top:', computedStyle.top);
+                console.log('Computed left:', computedStyle.left);
+                console.log('Computed width:', computedStyle.width);
+                console.log('Computed height:', computedStyle.height);
+                console.log('Computed z-index:', computedStyle.zIndex);
+                console.log('Bounding rect:', {
+                    top: immediateRect.top,
+                    left: immediateRect.left,
+                    width: immediateRect.width,
+                    height: immediateRect.height
+                });
+                console.log('Offset size:', {
+                    width: offsetWidth,
+                    height: offsetHeight
+                });
+                
+                // 문제 발견 시 즉시 수정
+                if (immediateRect.width === 0 || immediateRect.height === 0 || offsetWidth === 0 || offsetHeight === 0) {
+                    console.error('Modal has zero size! Forcing size...');
+                    modal.style.setProperty('width', '100vw', 'important');
+                    modal.style.setProperty('height', '100vh', 'important');
+                }
+                
+                if (immediateRect.top < -100 || immediateRect.left < -100 || immediateRect.top > window.innerHeight || immediateRect.left > window.innerWidth) {
+                    console.error('Modal is off-screen! Resetting position...');
+                    modal.style.setProperty('top', '0', 'important');
+                    modal.style.setProperty('left', '0', 'important');
+                }
+                
+                // 다른 요소가 모달을 가리고 있는지 확인
+                const elementsAtPoint = document.elementsFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+                const modalInStack = elementsAtPoint.some(el => el === modal || modal.contains(el));
+                console.log('Modal in element stack at center:', modalInStack);
+                if (!modalInStack && elementsAtPoint.length > 0) {
+                    console.warn('Other element on top of modal:', elementsAtPoint[0]);
+                    // z-index를 더 높게 설정
+                    modal.style.setProperty('z-index', '99999', 'important');
+                }
+                
+                // 추가 확인을 위한 setTimeout (선택적)
                 setTimeout(function() {
-                    const computedStyle = window.getComputedStyle(modal);
                     const finalRect = modal.getBoundingClientRect();
-                    
-                    console.log('=== Final Modal State ===');
-                    console.log('Computed display:', computedStyle.display);
-                    console.log('Computed visibility:', computedStyle.visibility);
-                    console.log('Computed opacity:', computedStyle.opacity);
-                    console.log('Computed z-index:', computedStyle.zIndex);
-                    console.log('Computed position:', computedStyle.position);
-                    console.log('Computed top:', computedStyle.top);
-                    console.log('Computed left:', computedStyle.left);
-                    console.log('Final bounding rect:', {
+                    const finalComputed = window.getComputedStyle(modal);
+                    console.log('=== After 100ms Check ===');
+                    console.log('Final display:', finalComputed.display);
+                    console.log('Final rect:', {
                         top: finalRect.top,
                         left: finalRect.left,
                         width: finalRect.width,
                         height: finalRect.height
                     });
-                    
-                    // 모달이 화면 밖에 있는지 확인
                     if (finalRect.width === 0 || finalRect.height === 0) {
-                        console.error('Modal has zero size!');
-                    }
-                    if (finalRect.top < -1000 || finalRect.left < -1000) {
-                        console.error('Modal is off-screen!');
-                    }
-                    
-                    // container와 body도 확인
-                    if (modalContainer) {
-                        const containerComputed = window.getComputedStyle(modalContainer);
-                        console.log('Container computed display:', containerComputed.display);
-                        if (containerComputed.display === 'none') {
-                            console.error('Container display is none!');
-                            modalContainer.style.display = 'block';
-                        }
-                    }
-                    
-                    if (modalBody) {
-                        const bodyComputed = window.getComputedStyle(modalBody);
-                        console.log('Body computed display:', bodyComputed.display);
-                        if (bodyComputed.display === 'none') {
-                            console.error('Body display is none!');
-                            modalBody.style.display = 'block';
-                        }
+                        console.error('Modal still has zero size after fixes!');
                     }
                 }, 100);
             } catch (error) {
