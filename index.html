@@ -289,8 +289,8 @@
                     <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> VIEW_TECHNICAL_REPORT</div>
                 </div>
             </article>
-            <article class="project-card" id="ml-agents-card" style="cursor: pointer;">
-                <div class="project-info">
+            <article class="project-card" id="ml-agents-card" style="cursor: pointer;" onclick="openMLAgentsModal(event)">
+                <div class="project-info" onclick="event.stopPropagation()">
                     <span class="project-tag mono">ML-Agents & Reinforcement Learning</span>
                     <h3 class="project-name">Autonomous Racing Agent</h3>
                     <p style="color: #8b949e; margin-bottom: 25px;">
@@ -1322,15 +1322,117 @@
                 event.stopPropagation();
             }
             console.log('openMLAgentsModal called');
-            const modal = document.getElementById('modal-overlay-racing');
-            console.log('Modal element:', modal);
-            if (modal) {
+            try {
+                // 다른 모달이 열려있으면 먼저 닫기
+                const fileTowerModal = document.getElementById('modal-overlay');
+                if (fileTowerModal && fileTowerModal.style.display === 'flex') {
+                    console.log('Closing File Tower Defense modal first');
+                    fileTowerModal.style.display = 'none';
+                }
+                
+                // 모달 찾기
+                const modal = document.getElementById('modal-overlay-racing');
+                
+                // 모달 요소 검증
+                if (!modal) {
+                    console.error('modal-overlay-racing not found!');
+                    console.log('All modals:', document.querySelectorAll('.modal-overlay'));
+                    alert('모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                    return;
+                }
+                
+                console.log('Modal element found:', modal);
+                console.log('Modal ID:', modal.id);
+                console.log('Modal classList:', modal.classList.toString());
+                console.log('Modal innerHTML preview:', modal.innerHTML.substring(0, 100));
+                
+                // 모달 위치 및 크기 확인
+                const rect = modal.getBoundingClientRect();
+                console.log('Modal bounding rect:', {
+                    top: rect.top,
+                    left: rect.left,
+                    width: rect.width,
+                    height: rect.height,
+                    bottom: rect.bottom,
+                    right: rect.right
+                });
+                
+                // modal-container와 modal-body 확인
+                const modalContainer = modal.querySelector('.modal-container');
+                const modalBody = modal.querySelector('.modal-body');
+                console.log('Modal container:', modalContainer);
+                console.log('Modal body:', modalBody);
+                
+                if (modalContainer) {
+                    const containerStyle = window.getComputedStyle(modalContainer);
+                    console.log('Container display:', containerStyle.display);
+                    console.log('Container visibility:', containerStyle.visibility);
+                }
+                
+                if (modalBody) {
+                    const bodyStyle = window.getComputedStyle(modalBody);
+                    console.log('Body display:', bodyStyle.display);
+                    console.log('Body visibility:', bodyStyle.visibility);
+                }
+                
+                // 깔끔하게 display 설정 (중복 제거)
                 modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-                console.log('Modal opened successfully');
-            } else {
-                console.error('modal-overlay-racing not found!');
-                alert('모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                modal.style.setProperty('display', 'flex', 'important');
+                document.body.style.overflow = 'hidden';
+                
+                console.log('Modal display set to flex');
+                console.log('Modal style.display:', modal.style.display);
+                
+                // 모달이 실제로 보이는지 확인
+                setTimeout(function() {
+                    const computedStyle = window.getComputedStyle(modal);
+                    const finalRect = modal.getBoundingClientRect();
+                    
+                    console.log('=== Final Modal State ===');
+                    console.log('Computed display:', computedStyle.display);
+                    console.log('Computed visibility:', computedStyle.visibility);
+                    console.log('Computed opacity:', computedStyle.opacity);
+                    console.log('Computed z-index:', computedStyle.zIndex);
+                    console.log('Computed position:', computedStyle.position);
+                    console.log('Computed top:', computedStyle.top);
+                    console.log('Computed left:', computedStyle.left);
+                    console.log('Final bounding rect:', {
+                        top: finalRect.top,
+                        left: finalRect.left,
+                        width: finalRect.width,
+                        height: finalRect.height
+                    });
+                    
+                    // 모달이 화면 밖에 있는지 확인
+                    if (finalRect.width === 0 || finalRect.height === 0) {
+                        console.error('Modal has zero size!');
+                    }
+                    if (finalRect.top < -1000 || finalRect.left < -1000) {
+                        console.error('Modal is off-screen!');
+                    }
+                    
+                    // container와 body도 확인
+                    if (modalContainer) {
+                        const containerComputed = window.getComputedStyle(modalContainer);
+                        console.log('Container computed display:', containerComputed.display);
+                        if (containerComputed.display === 'none') {
+                            console.error('Container display is none!');
+                            modalContainer.style.display = 'block';
+                        }
+                    }
+                    
+                    if (modalBody) {
+                        const bodyComputed = window.getComputedStyle(modalBody);
+                        console.log('Body computed display:', bodyComputed.display);
+                        if (bodyComputed.display === 'none') {
+                            console.error('Body display is none!');
+                            modalBody.style.display = 'block';
+                        }
+                    }
+                }, 100);
+            } catch (error) {
+                console.error('Error in openMLAgentsModal:', error);
+                alert('모달을 열 수 없습니다: ' + error.message);
             }
         }
         
@@ -1385,16 +1487,20 @@
             }
         }
         
-        // 페이지 로드 시 이벤트 리스너 추가
+        // 페이지 로드 시 이벤트 리스너 추가 (백업용)
         document.addEventListener('DOMContentLoaded', function() {
-            // ML-Agents 카드 클릭 이벤트
+            console.log('DOMContentLoaded - setting up event listeners');
+            
+            // ML-Agents 카드 클릭 이벤트 (백업)
             const mlAgentsCard = document.getElementById('ml-agents-card');
             if (mlAgentsCard) {
+                // onclick이 이미 있지만, 추가로 이벤트 리스너도 추가
                 mlAgentsCard.addEventListener('click', function(e) {
+                    console.log('ML-Agents card clicked via event listener');
                     e.preventDefault();
                     e.stopPropagation();
                     openMLAgentsModal(e);
-                });
+                }, true); // capture phase에서도 작동하도록
                 console.log('ML-Agents card event listener added');
             } else {
                 console.error('ml-agents-card not found');
