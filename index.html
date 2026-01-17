@@ -1591,46 +1591,6 @@
                 </div>
 
 <pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 연속적 행동 결정 및 입력 보정</span>
-<span class="c-kw">public override void</span> <span class="c-fn">OnEpisodeBegin</span>()
-{
-    <span class="c-cm">// 모든 트랙 중 랜덤 선택</span>
-    <span class="c-kw">if</span> (allTracks == <span class="c-kw">null</span> || allTracks.Count == <span class="c-st">0</span>) {
-        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>(<span class="c-st">"학습할 트랙(AllTracks 리스트)가 설정되지 않았습니다!"</span>);
-        <span class="c-kw">return</span>;
-    }
-    
-    <span class="c-cm">// 랜덤 트랙 선택</span>
-    currentTrackManager = allTracks[<span class="c-ty">Random</span>.<span class="c-fn">Range</span>(<span class="c-st">0</span>, allTracks.Count)];
-    <span class="c-ty">Transform</span> spawnPoint = currentTrackManager.<span class="c-fn">GetSpawnPoint</span>();
-    
-    <span class="c-cm">// 선택된 트랙의 스폰 포인트로 이동</span>
-    transform.position = spawnPoint.position;
-    transform.rotation = spawnPoint.rotation;
-    
-    <span class="c-cm">// 상태 초기화</span>
-    rb.linearVelocity = <span class="c-ty">Vector3</span>.zero;
-    rb.angularVelocity = <span class="c-ty">Vector3</span>.zero;
-    currentCheckpointIndex = <span class="c-st">0</span>;
-    <span class="c-cm">// ... 기타 상태 초기화</span>
-}</code></pre>
-
-                <p><strong>기술적 특징:</strong></p>
-                <ul>
-                    <li><span class="highlight">랜덤 트랙 선택:</span> 각 에피소드마다 `allTracks` 리스트에서 랜덤하게 트랙 선택</li>
-                    <li><span class="highlight">다양한 시작 위치:</span> 각 트랙의 `SpawnPointManager`에서 랜덤 스폰 포인트 선택</li>
-                    <li><span class="highlight">일반화 성능 향상:</span> 다양한 트랙 환경에서 학습하여 단일 트랙에 과적합되지 않도록 방지</li>
-                </ul>
-
-                <h2>전체 시스템 기술적 특징</h2>
-                <p>ML-Agents 학습 설정 및 최적화의 핵심 기술적 특징입니다.</p>
-                <ul>
-                    <li><span class="highlight">PPO 알고리즘:</span> Unity ML-Agents 라이브러리의 PPO 알고리즘을 활용한 안정적인 학습</li>
-                    <li><span class="highlight">하이퍼파라미터 튜닝:</span> Batch Size, Learning Rate, Hidden Units 등 최적화된 학습 파라미터</li>
-                    <li><span class="highlight">Curiosity Signal:</span> 탐험을 유도하는 호기심 신호로 다양한 행동 패턴 학습</li>
-                    <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
-                    <li><span class="highlight">대규모 학습:</span> 최대 10,000,000 스텝까지 학습하여 안정적인 정책 수렴</li>
-                </ul>
-                </div>
 <span class="c-kw">[Header</span>(<span class="c-st">"Action Smoothing"</span>)<span class="c-kw">]</span>
 <span class="c-kw">public float</span> maxSteeringChange = <span class="c-st">0.5f</span>;      <span class="c-cm">// 최대 조향 변화량 (프레임당)</span>
 <span class="c-kw">public float</span> maxAccelerationChange = <span class="c-st">0.7f</span>;  <span class="c-cm">// 최대 가속 변화량 (프레임당)</span>
@@ -1743,6 +1703,46 @@
                 <p>에이전트의 일반화 성능을 향상시키기 위해 <span class="highlight">다중 트랙 학습 시스템</span>을 구현했습니다. 각 에피소드 시작 시 랜덤하게 트랙을 선택하여 학습하므로, 다양한 트랙 환경에 적응할 수 있습니다.</p>
 
 <pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 다중 트랙 학습 지원</span>
+<span class="c-kw">public override void</span> <span class="c-fn">OnEpisodeBegin</span>()
+{
+    <span class="c-cm">// 모든 트랙 중 랜덤 선택</span>
+    <span class="c-kw">if</span> (allTracks == <span class="c-kw">null</span> || allTracks.Count == <span class="c-st">0</span>) {
+        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>(<span class="c-st">"학습할 트랙(AllTracks 리스트)가 설정되지 않았습니다!"</span>);
+        <span class="c-kw">return</span>;
+    }
+    
+    <span class="c-cm">// 랜덤 트랙 선택</span>
+    currentTrackManager = allTracks[<span class="c-ty">Random</span>.<span class="c-fn">Range</span>(<span class="c-st">0</span>, allTracks.Count)];
+    <span class="c-ty">Transform</span> spawnPoint = currentTrackManager.<span class="c-fn">GetSpawnPoint</span>();
+    
+    <span class="c-cm">// 선택된 트랙의 스폰 포인트로 이동</span>
+    transform.position = spawnPoint.position;
+    transform.rotation = spawnPoint.rotation;
+    
+    <span class="c-cm">// 상태 초기화</span>
+    rb.linearVelocity = <span class="c-ty">Vector3</span>.zero;
+    rb.angularVelocity = <span class="c-ty">Vector3</span>.zero;
+    currentCheckpointIndex = <span class="c-st">0</span>;
+    <span class="c-cm">// ... 기타 상태 초기화</span>
+}</code></pre>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">랜덤 트랙 선택:</span> 각 에피소드마다 `allTracks` 리스트에서 랜덤하게 트랙 선택</li>
+                    <li><span class="highlight">다양한 시작 위치:</span> 각 트랙의 `SpawnPointManager`에서 랜덤 스폰 포인트 선택</li>
+                    <li><span class="highlight">일반화 성능 향상:</span> 다양한 트랙 환경에서 학습하여 단일 트랙에 과적합되지 않도록 방지</li>
+                </ul>
+
+                <h2>전체 시스템 기술적 특징</h2>
+                <p>ML-Agents 학습 설정 및 최적화의 핵심 기술적 특징입니다.</p>
+                <ul>
+                    <li><span class="highlight">PPO 알고리즘:</span> Unity ML-Agents 라이브러리의 PPO 알고리즘을 활용한 안정적인 학습</li>
+                    <li><span class="highlight">하이퍼파라미터 튜닝:</span> Batch Size, Learning Rate, Hidden Units 등 최적화된 학습 파라미터</li>
+                    <li><span class="highlight">Curiosity Signal:</span> 탐험을 유도하는 호기심 신호로 다양한 행동 패턴 학습</li>
+                    <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
+                    <li><span class="highlight">대규모 학습:</span> 최대 10,000,000 스텝까지 학습하여 안정적인 정책 수렴</li>
+                </ul>
+                </div>
 
                 <div style="height: 100px;"></div>
             </div>
