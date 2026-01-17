@@ -1351,53 +1351,14 @@
                 </div>
 
                 <h3>레이캐스트 설정 및 초기화</h3>
-                <p>에이전트 초기화 시 전방과 후방 레이의 방향을 계산하여 저장합니다. 전방은 180도 범위에 9개의 레이를, 후방은 60도 범위에 3개의 레이를 균등하게 배치합니다.</p>
-
-<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 레이캐스트 설정</span>
-<span class="c-kw">[Header</span>(<span class="c-st">"Sensing (NEW)"</span>)<span class="c-kw">]</span>
-<span class="c-kw">public</span> <span class="c-ty">LayerMask</span> roadLayer;              <span class="c-cm">// 도로 레이어 마스크</span>
-<span class="c-kw">public float</span> roadRayDistance = <span class="c-st">50f</span>;      <span class="c-cm">// 도로 감지 최대 거리</span>
-<span class="c-kw">public</span> <span class="c-ty">LayerMask</span> wallLayer;              <span class="c-cm">// 벽/장애물 레이어 마스크</span>
-
-<span class="c-kw">[Header</span>(<span class="c-st">"Front Sensing Config"</span>)<span class="c-kw">]</span>
-<span class="c-kw">public float</span> wallProximityDistance = <span class="c-st">15f</span>;  <span class="c-cm">// 전방 벽 감지 거리 (브레이크 약함 고려)</span>
-<span class="c-kw">public int</span> frontRayCount = <span class="c-st">9</span>;                <span class="c-cm">// 전방 레이 개수 (홀수 추천)</span>
-
-<span class="c-kw">[Header</span>(<span class="c-st">"Rear Sensing Config (NEW)"</span>)<span class="c-kw">]</span>
-<span class="c-kw">public float</span> rearWallProximityDistance = <span class="c-st">5f</span>;  <span class="c-cm">// 후방 벽 감지 거리</span>
-<span class="c-kw">public int</span> rearRayCount = <span class="c-st">3</span>;                <span class="c-cm">// 후방 레이 개수</span>
-
-<span class="c-kw">private</span> <span class="c-ty">Vector3</span>[] roadRayDirections;        <span class="c-cm">// 도로 감지 레이 방향</span>
-<span class="c-kw">private</span> <span class="c-ty">Vector3</span>[] wallRayDirections;        <span class="c-cm">// 전방 벽 감지 레이 방향</span>
-<span class="c-kw">private</span> <span class="c-ty">Vector3</span>[] rearWallRayDirections;    <span class="c-cm">// 후방 벽 감지 레이 방향</span>
-
-<span class="c-kw">public override void</span> <span class="c-fn">Initialize</span>()
-{
-    <span class="c-cm">// 전방 레이 방향 계산 (180도 범위, 9개 레이)</span>
-    wallRayDirections = <span class="c-kw">new</span> <span class="c-ty">Vector3</span>[frontRayCount];
-    <span class="c-kw">if</span> (frontRayCount == <span class="c-st">1</span>) {
-        wallRayDirections[<span class="c-st">0</span>] = <span class="c-ty">Vector3</span>.forward;
-    } <span class="c-kw">else</span> {
-        <span class="c-kw">float</span> angleStep = <span class="c-st">180f</span> / (frontRayCount - <span class="c-st">1</span>);  <span class="c-cm">// 각도 간격</span>
-        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < frontRayCount; i++) {
-            <span class="c-kw">float</span> angle = -<span class="c-st">90f</span> + (angleStep * i);  <span class="c-cm">// -90도 ~ +90도</span>
-            wallRayDirections[i] = <span class="c-ty">Quaternion</span>.<span class="c-fn">Euler</span>(<span class="c-st">0</span>, angle, <span class="c-st">0</span>) * <span class="c-ty">Vector3</span>.forward;
-        }
-    }
-    roadRayDirections = wallRayDirections;  <span class="c-cm">// 도로 감지도 같은 방향 사용</span>
-
-    <span class="c-cm">// 후방 레이 방향 계산 (60도 범위, 3개 레이)</span>
-    rearWallRayDirections = <span class="c-kw">new</span> <span class="c-ty">Vector3</span>[rearRayCount];
-    <span class="c-kw">if</span> (rearRayCount == <span class="c-st">1</span>) {
-        rearWallRayDirections[<span class="c-st">0</span>] = <span class="c-ty">Vector3</span>.back;
-    } <span class="c-kw">else</span> {
-        <span class="c-kw">float</span> angleStep = <span class="c-st">60f</span> / (rearRayCount - <span class="c-st">1</span>);  <span class="c-cm">// 각도 간격</span>
-        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < rearRayCount; i++) {
-            <span class="c-kw">float</span> angle = -<span class="c-st">30f</span> + (angleStep * i);  <span class="c-cm">// -30도 ~ +30도</span>
-            rearWallRayDirections[i] = <span class="c-ty">Quaternion</span>.<span class="c-fn">Euler</span>(<span class="c-st">0</span>, angle, <span class="c-st">0</span>) * <span class="c-ty">Vector3</span>.back;
-        }
-    }
-}</code></pre>
+                <p>에이전트 초기화 시 전방과 후방 레이의 방향을 계산하여 저장합니다. <span class="highlight">전방 레이</span>는 180도 범위(-90도 ~ +90도)에 9개의 레이를 균등하게 배치하며, 각 레이는 <code>Quaternion.Euler</code>를 사용하여 회전된 방향 벡터로 계산됩니다. <span class="highlight">후방 레이</span>는 60도 범위(-30도 ~ +30도)에 3개의 레이를 배치하여 후진 시 벽 감지에 활용합니다. 도로 감지 레이는 전방 벽 감지 레이와 동일한 방향을 사용하여 효율성을 높였습니다.</p>
+                <p>레이캐스트 설정은 다음과 같이 구성됩니다:</p>
+                <ul>
+                    <li><span class="highlight">도로 레이어:</span> 도로 감지용 레이어 마스크, 최대 감지 거리 50m</li>
+                    <li><span class="highlight">벽 레이어:</span> 벽/장애물 감지용 레이어 마스크</li>
+                    <li><span class="highlight">전방 벽 감지:</span> 최대 거리 15m (브레이크 성능 고려), 레이 개수 9개</li>
+                    <li><span class="highlight">후방 벽 감지:</span> 최대 거리 5m, 레이 개수 3개</li>
+                </ul>
 
                 <h3>관측 데이터 수집 (CollectObservations)</h3>
                 <p>매 프레임마다 레이캐스트를 수행하여 환경 정보를 수집하고, 정규화된 거리 값을 신경망의 관측 벡터에 추가합니다.</p>
@@ -1597,7 +1558,7 @@
 
                 <div class="visual-frame" style="margin: 30px 0;">
                     <img src="images/mlagent_3.png" alt="입력 스무딩 알고리즘 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
-                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">[그림 5] 입력 스무딩 알고리즘 시각화: AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
+                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">입력 스무딩 알고리즘 시각화: AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
                 </div>
 
                 <div style="background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent-color); padding: 15px 20px; margin: 20px 0; border-radius: 6px;">
