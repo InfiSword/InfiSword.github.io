@@ -255,19 +255,6 @@
             <div class="status-line mono">Gameplay & Systems Programmer</div>
         </header>
 
-        <section style="margin: 60px 0;">
-            <div class="video-container" style="width: 100%; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <video controls style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
-                        <source src="MLAgent_1 Clipchamp로 제작.mp4" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
-                </div>
-                <div>
-                    <img src="제목 없는 비디오 - Clipchamp로 제작.gif" alt="ML-Agents 학습 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
-                </div>
-            </div>
-        </section>
 
         <section id="skills">
             <h2 class="section-title">01. Tech Stack</h2>
@@ -1100,6 +1087,20 @@
                 
                 <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">ML-Agents 자율 주행 경주차 학습 시스템</h1>
 
+                <div class="visual-frame" style="margin: 30px 0;">
+                    <div class="video-container" style="width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <video controls style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                                <source src="MLAgent_1 Clipchamp로 제작.mp4" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                        <div>
+                            <img src="제목 없는 비디오 - Clipchamp로 제작.gif" alt="ML-Agents 학습 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                        </div>
+                    </div>
+                </div>
+
                 <h2>1. 프로젝트 개요</h2>
                 <p>Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는 자율 주행 경주차 에이전트를 학습시킨 프로젝트입니다. <span class="highlight">체크포인트 기반 네비게이션 시스템</span>과 <span class="highlight">목표 지향 보상 설계</span>를 통해 에이전트가 트랙을 순차적으로 주행하도록 설계했습니다.</p>
 
@@ -1326,12 +1327,23 @@
 
     <script>
         function openModal(projectType) {
+            console.log('openModal called with:', projectType);
             if (projectType === 'mlAgentsRacing') {
-                document.getElementById('modal-overlay-racing').style.display = 'flex';
+                const modal = document.getElementById('modal-overlay-racing');
+                if (modal) {
+                    modal.style.display = 'flex';
+                } else {
+                    console.error('modal-overlay-racing not found');
+                }
             } else {
-            document.getElementById('modal-overlay').style.display = 'flex';
-                // 기본적으로 리팩토링 탭 활성화
-                switchTab('refactoring');
+                const modal = document.getElementById('modal-overlay');
+                if (modal) {
+                    modal.style.display = 'flex';
+                    // 기본적으로 리팩토링 탭 활성화
+                    switchTab('refactoring');
+                } else {
+                    console.error('modal-overlay not found');
+                }
             }
             document.body.style.overflow = 'hidden';
         }
