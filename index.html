@@ -95,6 +95,9 @@
             border: 1px solid var(--border-color); border-radius: 8px;
             margin: 25px 0; text-align: center;
         }
+        .visual-frame > * {
+            text-align: center;
+        }
         .diagram-grid {
             display: grid; grid-template-columns: repeat(3, 40px); gap: 5px; justify-content: center; margin: 10px 0;
         }
@@ -103,10 +106,100 @@
         .grid-cell.near { border-color: var(--sub-accent); background: rgba(35, 134, 54, 0.2); opacity: 1; }
 
         .transaction-flow {
-            display: flex; align-items: center; justify-content: space-around; font-size: 0.75rem; font-family: 'Fira Code';
+            display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-family: 'Fira Code';
+            gap: 10px; flex-wrap: wrap;
         }
-        .flow-step { padding: 8px 15px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--card-bg); color: var(--text-color); }
+        .flow-step { padding: 8px 15px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--card-bg); color: var(--text-color); text-align: center; }
         .flow-arrow { color: var(--accent-color); font-weight: bold; }
+
+        /* --- Tables --- */
+        .data-table {
+            width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem;
+            background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;
+        }
+        .data-table th {
+            background: rgba(88, 166, 255, 0.1); color: var(--accent-color);
+            padding: 12px 15px; text-align: center; font-weight: 700; border-bottom: 2px solid var(--border-color);
+            font-family: 'Fira Code', monospace;
+        }
+        .data-table td {
+            padding: 10px 15px; border-bottom: 1px solid var(--border-color); color: var(--text-color);
+            text-align: center;
+        }
+        .data-table tr:last-child td { border-bottom: none; }
+        .data-table tr:hover { background: rgba(88, 166, 255, 0.05); }
+
+        /* --- Architecture Diagrams --- */
+        .arch-diagram {
+            display: flex; flex-direction: column; gap: 15px; margin: 25px 0;
+        }
+        .arch-layer {
+            padding: 15px 20px; border: 1px solid var(--border-color); border-radius: 6px;
+            background: var(--card-bg); position: relative; text-align: center;
+        }
+        .arch-layer::before {
+            content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: var(--accent-color);
+        }
+        .arch-layer-title {
+            color: var(--accent-color); font-weight: 700; margin-bottom: 8px;
+            font-family: 'Fira Code', monospace; font-size: 0.9rem; text-align: center;
+        }
+        .arch-layer-items {
+            display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; justify-content: center;
+        }
+        .arch-item {
+            padding: 5px 12px; background: rgba(88, 166, 255, 0.1);
+            border: 1px solid var(--accent-color); border-radius: 4px;
+            font-size: 0.85rem; color: var(--text-color); text-align: center;
+        }
+
+        /* --- Coordinate Flow Diagram --- */
+        .coord-flow {
+            display: flex; gap: 15px; margin: 25px 0;
+            align-items: stretch; overflow-x: auto; padding-bottom: 10px;
+            scrollbar-width: thin; scrollbar-color: var(--accent-color) rgba(0, 0, 0, 0.2);
+        }
+        .coord-flow::-webkit-scrollbar {
+            height: 8px;
+        }
+        .coord-flow::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2); border-radius: 4px;
+        }
+        .coord-flow::-webkit-scrollbar-thumb {
+            background: var(--accent-color); border-radius: 4px;
+        }
+        .coord-flow::-webkit-scrollbar-thumb:hover {
+            background: var(--sub-accent);
+        }
+        .coord-box {
+            padding: 20px; border: 2px solid var(--accent-color); border-radius: 8px;
+            background: rgba(88, 166, 255, 0.05); text-align: center; display: flex; flex-direction: column;
+            justify-content: center; min-height: 120px; min-width: 200px; flex: 0 0 auto;
+            white-space: normal;
+        }
+        .coord-box-title {
+            color: var(--accent-color); font-weight: 700; margin-bottom: 12px;
+            font-family: 'Fira Code', monospace; font-size: 0.95rem; border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+        .coord-box-desc {
+            color: var(--text-color); font-size: 0.85rem; line-height: 1.6;
+        }
+        .coord-box-formula {
+            color: var(--sub-accent); font-size: 0.75rem; font-family: 'Fira Code', monospace;
+            margin-top: 8px; padding: 6px; background: rgba(35, 134, 54, 0.1); border-radius: 4px;
+        }
+        .coord-arrow {
+            color: var(--accent-color); font-size: 2rem; text-align: center; display: flex;
+            align-items: center; justify-content: center;
+        }
+        .coord-bidirectional {
+            text-align: center; color: var(--sub-accent); margin: 25px 0;
+            font-family: 'Fira Code', monospace; font-size: 1rem; font-weight: 700;
+            padding: 12px; background: rgba(35, 134, 54, 0.1); border-radius: 6px;
+            border: 1px solid var(--sub-accent);
+        }
 
         /* --- Advanced Code Block --- */
         pre {
@@ -123,6 +216,36 @@
 
         footer { margin-top: 100px; padding: 60px 0; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: flex-end; }
         .highlight { color: #f0f6fc; font-weight: 700; }
+
+        /* --- Tab System --- */
+        .tab-container {
+            display: flex; gap: 10px; margin-bottom: 40px; border-bottom: 2px solid var(--border-color);
+        }
+        .tab-button {
+            background: none; border: none; color: #8b949e; padding: 15px 30px;
+            font-family: 'Fira Code', monospace; font-size: 1rem; cursor: pointer;
+            border-bottom: 3px solid transparent; transition: all 0.3s;
+            position: relative; top: 2px;
+        }
+        .tab-button:hover {
+            color: var(--accent-color);
+        }
+        .tab-button.active {
+            color: var(--accent-color); border-bottom-color: var(--accent-color);
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Video Container Responsive */
+        @media (max-width: 768px) {
+            .video-container {
+                grid-template-columns: 1fr !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -132,15 +255,17 @@
             <div class="status-line mono">Gameplay & Systems Programmer</div>
         </header>
 
-        <!-- [ADDED] Introduction Section -->
-        <section id="about">
-            <h2 class="section-title">00. About Me</h2>
-            <div class="about-box">
-                <span class="about-highlight">"System Architecture & Optimization Expert"</span>
-                <p>
-                    Unity 엔진의 내부 동작 원리를 깊이 있게 분석하여, 성능과 확장성을 모두 고려한 시스템을 설계하는 프로그래머 이민혁입니다.<br>
-                    <strong>메모리 최적화(Memory Layout)</strong>와 <strong>연산 효율성(Algorithm Optimization)</strong>에 집중하며, 단순한 기능 구현을 넘어 견고한 아키텍처를 구축하는 것을 목표로 합니다.
-                </p>
+        <section style="margin: 60px 0;">
+            <div class="video-container" style="width: 100%; max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div>
+                    <video controls style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                        <source src="MLAgent_1 Clipchamp로 제작.mp4" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+                <div>
+                    <img src="제목 없는 비디오 - Clipchamp로 제작.gif" alt="ML-Agents 학습 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                </div>
             </div>
         </section>
 
@@ -164,13 +289,28 @@
 
         <section id="projects">
             <h2 class="section-title">02. Major Achievement</h2>
-            <article class="project-card" onclick="openModal()">
+            <article class="project-card" onclick="openModal('fileTowerDefense')">
                 <div class="project-info">
                     <span class="project-tag mono">Systems Engineering</span>
                     <h3 class="project-name">File Tower Defense</h3>
                     <p style="color: #8b949e; margin-bottom: 25px;">
-                        유니티의 좌표계 특성을 분석하여 <span class="highlight">UI에서 GameObject 기반</span>으로 아키텍처를 전면 재설계. 
-                        고도화된 탐색 최적화와 <span class="highlight">트랜잭션 기반 배치 시스템</span> 구축.
+                        유니티의 좌표계 특성을 분석하여 <span class="highlight">RectTransform(UI)에서 Transform(GameObject) 기반</span>으로 아키텍처를 전면 재설계. 
+                        <span class="highlight">공간 분할 최적화</span>와 <span class="highlight">트랜잭션 기반 배치 시스템</span>을 구축하여 성능 최적화와 확장성 있는 그리드 관리 시스템을 완성. 
+                        <span class="highlight">중앙 집중식 마우스 입력 관리(InputManager)</span>와 <span class="highlight">이벤트 기반 상호작용 시스템(InteractionHandler)</span>을 통해 
+                        수많은 유닛의 개별 이벤트 수신을 제거하고 통합 관리하여 성능을 최적화.
+                    </p>
+                    <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> VIEW_TECHNICAL_REPORT</div>
+                </div>
+            </article>
+            <article class="project-card" onclick="openModal('mlAgentsRacing')">
+                <div class="project-info">
+                    <span class="project-tag mono">ML-Agents & Reinforcement Learning</span>
+                    <h3 class="project-name">Autonomous Racing Agent</h3>
+                    <p style="color: #8b949e; margin-bottom: 25px;">
+                        Unity ML-Agents를 활용한 <span class="highlight">자율 주행 경주차 에이전트</span> 학습 시스템 구축. 
+                        <span class="highlight">체크포인트 기반 네비게이션 시스템</span>과 <span class="highlight">목표 지향 보상 설계</span>를 통해 정해진 트랙을 안정적으로 주행하도록 학습. 
+                        <span class="highlight">레이캐스트 기반 환경 감지</span>(전방/후방 벽 감지, 도로 감지)와 <span class="highlight">다중 트랙 학습 지원</span>으로 
+                        일반화 성능을 향상시키고, <span class="highlight">스플라인 기반 체크포인트 자동 생성 시스템</span>을 설계하여 다양한 트랙에 빠르게 적용 가능.
                     </p>
                     <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> VIEW_TECHNICAL_REPORT</div>
                 </div>
@@ -189,7 +329,7 @@
     </div>
 
     <!-- MODAL -->
-    <div id="modal-overlay" class="modal-overlay" onclick="closeModal()">
+    <div id="modal-overlay" class="modal-overlay" onclick="closeModal('fileTowerDefense')">
         <div class="modal-container" onclick="event.stopPropagation()">
             <div class="modal-body">
                 <div class="modal-header-nav">
@@ -197,9 +337,15 @@
                     <button onclick="closeModal()" style="background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 20px; border-radius: 6px; cursor: pointer; font-family: 'Fira Code'; font-size: 0.8rem;">[X] DISCONNECT</button>
                 </div>
                 
-                <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">System Architecture Deep-Dive</h1>
+                <div class="tab-container">
+                    <button class="tab-button active" onclick="switchTab('refactoring')">리팩토링 및 개선</button>
+                    <button class="tab-button" onclick="switchTab('existing')">입력 및 상호작용 시스템</button>
+                </div>
+                
+                <div id="refactoring-tab" class="tab-content active">
+                <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">시스템 리팩토링 및 개선</h1>
 
-               
+
                 <h2>1. UI(RectTransform)에서 GameObject(Transform)기반으로의 전환</h2>
                 <p>초기 단계에서는 윈도우 바탕화면의 느낌을 구현하고자 파일 유닛을 UI 시스템으로 구축했습니다. 하지만 프로젝트 규모가 커짐에 따라 다음과 같은 <span class="highlight">결정적인 설계적 한계</span>를 마주했습니다.</p>
                 
@@ -229,11 +375,38 @@
 
                 <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계로 통일하였으며, 이를 통해 성능 최적화와 확장성 있는 로직 설계가 가능해졌습니다.</p>
 
-                <h2>2. Grid기반 유닛 배치 시스템 (FileGridManager & FileGrid & Layout Engine)</h2>
-
-                <h3>[FileGrid: 데이터 중심의 개별 셀 매니저]</h3>
+                <h2>2. FileGrid: 데이터 중심의 개별 셀 매니저</h2>
                 <p>유닛을 <code>GameObject</code> 기반으로 전환함에 따라, 윈도우 바탕화면의 아이콘 정렬 시스템을 모방하여 유닛 배치 시스템을 구축했습니다.</p>
                 <p><code>FileGrid</code>는 타워(파일)를 설치할 수 있는 최소 단위인 'Slot' 역할을 수행하며, 해당 셀의 점유 상태와 인접 유닛 간의 시너지, 버프를 관리합니다.</p>
+
+                <div class="visual-frame">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; align-items: stretch;">
+                        <div style="padding: 18px; border: 2px solid var(--accent-color); border-radius: 8px; background: rgba(88, 166, 255, 0.05); text-align: center; display: flex; flex-direction: column; justify-content: flex-start;">
+                            <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">State</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8; flex-grow: 1;">
+                                <div>• GridX, GridY</div>
+                                <div>• fileUnit</div>
+                                <div>• obstacleObject</div>
+                            </div>
+                        </div>
+                        <div style="padding: 18px; border: 2px solid var(--sub-accent); border-radius: 8px; background: rgba(35, 134, 54, 0.05); text-align: center; display: flex; flex-direction: column; justify-content: flex-start;">
+                            <div style="color: var(--sub-accent); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Buff System</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8; flex-grow: 1;">
+                                <div>• HashSet&lt;File_Base&gt;</div>
+                                <div>• O(1) Lookup</div>
+                                <div>• Auto Sync</div>
+                            </div>
+                        </div>
+                        <div style="padding: 18px; border: 2px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.2); text-align: center; display: flex; flex-direction: column; justify-content: flex-start;">
+                            <div style="color: var(--text-color); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">Visuals</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8; flex-grow: 1;">
+                                <div>• Color State</div>
+                                <div>• Hover Effect</div>
+                                <div>• Selection</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 <pre><code><span class="c-kw">public class</span> <span class="c-ty">FileGrid</span> : <span class="c-ty">MonoBehaviour</span>
 {
@@ -253,12 +426,41 @@
     <span class="c-kw">public</span> <span class="c-ty">GameObject</span> obstacleObject { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
 
     <span class="c-cm">// ... 각종 초기화, 점유 파일 세팅/제거, 동적 버프 갱신 로직</span>
-}</code></pre>                
-
+}</code></pre>
+      
   <p>각 그리드 셀은 단순한 위치 정보가 아닌, <span class="highlight">HashSet 기반의 버프 관리</span>를 통해 중복 버프를 방지하고 상태 변화를 실시간으로 동기화하는 지능형 컨테이너입니다.</p>
 
-                <h3>[이벤트 기반 자동 버프 시스템] (Observer Pattern)</h3>
+                <h3>이벤트 기반 자동 버프 시스템 (Observer Pattern)</h3>
                 <p>유닛 배치 시 이미 그리드에 활성화된 버프 소스(Aura)를 즉각 적용받도록 설계되었습니다. <code>HashSet</code>을 사용하여 중복을 원천 차단합니다.</p>
+
+                <div class="visual-frame">
+                    <div class="arch-diagram">
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">Buff Source (File_Base)</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">AddBuffSource()</span>
+                                <span class="arch-item">RemoveBuffSource()</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓ Notify</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">FileGrid (Observer)</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">HashSet&lt;File_Base&gt;</span>
+                                <span class="arch-item">O(1) Lookup</span>
+                                <span class="arch-item">Auto Apply Buff</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓ Apply</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">FileUnit (Target)</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">ApplyBuffFromSource()</span>
+                                <span class="arch-item">Real-time Sync</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 <pre><code><span class="c-cm">// FileGrid.cs: 버프 소스 추가 시 즉시 반응 로직</span>
 <span class="c-kw">private readonly</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt; _activeBuffSources = <span class="c-kw">new</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt;(); 
@@ -278,9 +480,27 @@
     }
 }</code></pre>
 
-                <!-- [ADDED] Category: GameObjectGridLayout -->
-               <h3>[GameObjectGridLayout: 커스텀 레이아웃 엔진]</h3>
+                <h2>3. GameObjectGridLayout: 커스텀 레이아웃 엔진</h2>
                 <p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하고, 전체 시스템의 시작 월드 좌표를 제공하는 핵심 컴포넌트입니다.</p>
+
+                <div class="visual-frame">
+                    <div class="transaction-flow mono" style="margin-bottom: 20px;">
+                        <div class="flow-step">Camera Resolution</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Calculate Available Space</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Compute Cell Size</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Set Start Position</div>
+                    </div>
+                    <div style="padding: 18px; background: rgba(88, 166, 255, 0.05); border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">계산 공식:</div>
+                        <div style="color: var(--text-color); font-size: 0.9rem; font-family: 'Fira Code'; line-height: 1.8;">
+                            <div style="margin-bottom: 8px;">cellSize = (screenSize - padding×2 - spacing×(n-1)) / n</div>
+                            <div style="color: #8b949e; font-size: 0.85rem;">n: 그리드 개수 (columns/rows)</div>
+                        </div>
+                    </div>
+                </div>
 
 <pre><code><span class="c-kw">public class</span> <span class="c-ty">GameObjectGridLayout</span> : <span class="c-ty">MonoBehaviour</span>
 {
@@ -303,7 +523,7 @@
     <span class="c-kw">public Vector2</span> StartPos { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
 
     <span class="c-cm">// ... </span>
-    
+
     <span class="c-cm">// 카메라 해상도에 맞춰 그리드 데이터 동적 계산</span>
     <span class="c-kw">public void</span> <span class="c-fn">FitToScreen</span>() {
         <span class="c-ty">Camera</span> cam = <span class="c-ty">Camera</span>.main;
@@ -320,8 +540,7 @@
     }
 }</code></pre>
 
-                <!-- CATEGORY: FILE GRID MANAGER -->
-                <h2>[FileGridManager: 그리드 관련 매니저]</h2>
+                <h2>4. FileGridManager: 그리드 관련 매니저</h2>
                 <p>전체 그리드 시스템을 총괄하며, 좌표 변환, 조건부 탐색, 유닛 배치 트랜잭션을 총괄합니다.</p>
 
                 <h3>[공간 분할 최적화] 3x3 국소 영역 탐색 (Spatial Partitioning)</h3>
@@ -364,17 +583,6 @@
 
                 <h3>[트랜잭션 보장 패턴] 원자적 배치 로직 (Transactional Pattern)</h3>
                 <p>유닛 배치 시 데이터 불일치를 방지하고 실패 시 이전 상태를 유지하기 위해 <strong>원자적(Atomic) 배치 로직</strong>을 설계했습니다.</p>
-                <div class="visual-frame">
-                    <div class="transaction-flow mono">
-                        <div class="flow-step">Validate</div>
-                        <div class="flow-arrow">→</div>
-                        <div class="flow-step">Rollback Prep</div>
-                        <div class="flow-arrow">→</div>
-                        <div class="flow-step">Commit State</div>
-                        <div class="flow-arrow">→</div>
-                        <div class="flow-step">Notify/Buff</div>
-                    </div>
-                </div>
 
 <pre><code><span class="c-kw">public bool</span> <span class="c-fn">TrySetUnitAtGrid</span>(<span class="c-ty">File_Base</span> unit, <span class="c-ty">FileGrid</span> targetGrid)
 {
@@ -396,10 +604,80 @@
     targetGrid.<span class="c-fn">SetFileUnit</span>(unit); 
     <span class="c-kw">return true</span>;
 }</code></pre>
-
+                
                 <h3>[동적 좌표 변환 시스템] 양방향 좌표 변환 (Dynamic Coordinate Transformation)</h3>
                 <p>월드 좌표와 그리드 인덱스 간의 <span class="highlight">양방향 변환</span>을 지원하여, 마우스 위치나 유닛의 월드 좌표를 그리드 인덱스로 변환하거나, 그리드 인덱스를 월드 좌표로 변환할 수 있습니다.</p>
                 <p>Unity의 Transform 계층 구조를 활용하여 부모 객체의 변환을 자동으로 적용하며, 그리드 레이아웃의 셀 크기, 간격, 패딩을 동적으로 계산합니다.</p>
+
+                <div class="visual-frame">
+                    <div style="margin-bottom: 30px;">
+                        <div style="text-align: center; color: var(--accent-color); font-weight: 700; margin-bottom: 15px; font-family: 'Fira Code'; font-size: 1rem;">
+                            월드 좌표 → 그리드 인덱스 변환
+                        </div>
+                        <div class="coord-flow">
+                            <div class="coord-box">
+                                <div class="coord-box-title">World Position</div>
+                                <div class="coord-box-desc">
+                                    <strong>입력:</strong> Vector2 worldPos<br/>
+                                    <span style="color: #8b949e;">마우스 위치 또는<br/>유닛의 월드 좌표</span>
+                                </div>
+                            </div>
+                            <div class="coord-arrow">→</div>
+                            <div class="coord-box">
+                                <div class="coord-box-title">Local Position</div>
+                                <div class="coord-box-desc">
+                                    <strong>변환:</strong> InverseTransformPoint()<br/>
+                                    <span style="color: #8b949e;">부모 Transform의<br/>로컬 좌표계로 변환</span>
+                                </div>
+                                <div class="coord-box-formula">localPos = transform.InverseTransformPoint(worldPos)</div>
+                            </div>
+                            <div class="coord-arrow">→</div>
+                            <div class="coord-box">
+                                <div class="coord-box-title">Grid Index</div>
+                                <div class="coord-box-desc">
+                                    <strong>출력:</strong> (x, y)<br/>
+                                    <span style="color: #8b949e;">그리드 배열 인덱스<br/>(반올림 적용)</span>
+                                </div>
+                                <div class="coord-box-formula">x = Round((localPos.x - startPos.x) / cellWidth)</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="coord-bidirectional">↕ 양방향 변환 (Bidirectional)</div>
+                    
+                    <div>
+                        <div style="text-align: center; color: var(--accent-color); font-weight: 700; margin-bottom: 15px; font-family: 'Fira Code'; font-size: 1rem;">
+                            그리드 인덱스 → 월드 좌표 변환
+                        </div>
+                        <div class="coord-flow">
+                            <div class="coord-box">
+                                <div class="coord-box-title">Grid Index</div>
+                                <div class="coord-box-desc">
+                                    <strong>입력:</strong> (x, y)<br/>
+                                    <span style="color: #8b949e;">그리드 배열의<br/>인덱스 좌표</span>
+                                </div>
+                            </div>
+                            <div class="coord-arrow">→</div>
+                            <div class="coord-box">
+                                <div class="coord-box-title">Local Position</div>
+                                <div class="coord-box-desc">
+                                    <strong>계산:</strong> startPos + offset<br/>
+                                    <span style="color: #8b949e;">시작 위치 + (셀 크기 × 인덱스)<br/>+ 간격(spacing) 적용</span>
+                                </div>
+                                <div class="coord-box-formula">localPos = startPos + x × (cellSize + spacing)</div>
+                            </div>
+                            <div class="coord-arrow">→</div>
+                            <div class="coord-box">
+                                <div class="coord-box-title">World Position</div>
+                                <div class="coord-box-desc">
+                                    <strong>출력:</strong> Vector2<br/>
+                                    <span style="color: #8b949e;">월드 좌표계의<br/>절대 위치</span>
+                                </div>
+                                <div class="coord-box-formula">worldPos = transform.TransformPoint(localPos)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
 <pre><code><span class="c-cm">// 월드 좌표 → 그리드 인덱스</span>
 <span class="c-kw">private bool</span> <span class="c-fn">WorldToGridIndex</span>(<span class="c-ty">Vector2</span> worldPos, <span class="c-kw">out int</span> x, <span class="c-kw">out int</span> y)
@@ -462,6 +740,52 @@
                 <p>그리드 검색 시 점유 상태, 장애물 존재 여부 등 다양한 조건을 <span class="highlight">플래그 조합</span>으로 필터링할 수 있는 확장 가능한 검색 시스템입니다.</p>
                 <p>enum 기반의 플래그 시스템을 통해 새로운 검색 조건을 쉽게 추가할 수 있으며, 여러 플래그를 동시에 사용하여 복합 조건 검색이 가능합니다.</p>
 
+                <div class="visual-frame">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>플래그</th>
+                                <th>설명</th>
+                                <th>사용 예시</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>Occupied</code></td>
+                                <td>점유된 그리드만 검색</td>
+                                <td>유닛이 설치된 위치 찾기</td>
+                            </tr>
+                            <tr>
+                                <td><code>NotOccupied</code></td>
+                                <td>비어있는 그리드만 검색</td>
+                                <td>새 유닛 배치 가능 위치</td>
+                            </tr>
+                            <tr>
+                                <td><code>Obstacle</code></td>
+                                <td>장애물이 있는 그리드만</td>
+                                <td>장애물 위치 확인</td>
+                            </tr>
+                            <tr>
+                                <td><code>NotObstacle</code></td>
+                                <td>장애물이 없는 그리드만</td>
+                                <td>배치 가능한 안전한 위치</td>
+                            </tr>
+                            <tr>
+                                <td><code>None</code></td>
+                                <td>필터 없음</td>
+                                <td>모든 그리드 검색</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div style="margin-top: 20px; padding: 15px; background: rgba(88, 166, 255, 0.05); border-radius: 6px; border: 1px solid var(--border-color); text-align: center;">
+                        <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 8px; font-family: 'Fira Code'; font-size: 0.95rem;">조합 예시:</div>
+                        <div style="color: var(--text-color); font-size: 0.9rem; font-family: 'Fira Code'; line-height: 1.6;">
+                            <code style="color: var(--code-func);">FindFlagGridWorld</code>(pos, <code style="color: var(--code-type);">NotOccupied</code>, <code style="color: var(--code-type);">NotObstacle</code>)<br/>
+                            <span style="color: #8b949e; font-size: 0.85rem;">→ 비어있고 장애물이 없는 가장 가까운 그리드 검색</span>
+                        </div>
+                    </div>
+                </div>
+
 <pre><code><span class="c-kw">public enum</span> <span class="c-ty">SearchGridFlag</span>
 {
     Occupied,       <span class="c-cm">// 점유</span>
@@ -497,20 +821,503 @@
                     <li><span class="highlight">가변 인자:</span> params 키워드로 유연한 호출</li>
                     <li><span class="highlight">AND 조건:</span> 모든 플래그 조건 만족 필요</li>
                 </ul>
+                </div>
 
-                <!-- [ADDED] Category: InputManager -->
-                <h2>3. Category: InputManager (Centralized Interaction)</h2>
+                <div id="existing-tab" class="tab-content">
+                <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">입력 및 상호작용 시스템</h1>
+
+                <h2>1. Mouse Event: 중앙 집중식 마우스 입력 관리</h2>
                 <p>수많은 유닛이 개별 이벤트를 수신하지 않고, <code>InputManager</code>가 모든 마우스 입력을 통합 관리하여 <code>IInteractable</code> 인터페이스를 구현한 객체에 전달합니다.</p>
 
-<pre><code><span class="c-cm">// InputManager.cs: Raycast를 통한 중앙 집중식 상호작용 객체 탐지</span>
-<span class="c-kw">private</span> <span class="c-ty">IInteractable</span> <span class="c-fn">GetInteractableUnderMouse</span>() {
-    <span class="c-cm">// Physics2D Raycast를 사용하여 월드 좌표상의 유닛과 바이러스를 정교하게 검출</span>
-    <span class="c-ty">RaycastHit2D</span> hit = <span class="c-ty">Physics2D</span>.<span class="c-fn">Raycast</span>(m_mouseWorldPosition, <span class="c-ty">Vector2</span>.zero, <span class="string">0f</span>, unitLayerMask);
-    <span class="c-kw">if</span> (hit.collider != <span class="c-kw">null</span>) {
-        <span class="c-kw">return</span> hit.collider.<span class="c-fn">GetComponent</span>&lt;<span class="c-ty">IInteractable</span>&gt;();
-    }
-    <span class="c-kw">return null</span>;
+                <div class="visual-frame">
+                    <div class="arch-diagram">
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">Input Layer</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">Mouse Input</span>
+                                <span class="arch-item">Screen Position</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">InputManager (Central Hub)</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">ScreenToWorldPoint()</span>
+                                <span class="arch-item">Physics2D.Raycast()</span>
+                                <span class="arch-item">GetInteractableUnderMouse()</span>
+                                <span class="arch-item">IsOverUI() 우선순위 판정</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓ Dispatch</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">InteractionHandler</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">HandlePointerEnter/Exit</span>
+                                <span class="arch-item">HandlePointerDown/Up</span>
+                                <span class="arch-item">HandleDrag</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">IInteractable Objects</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">File_Base (Units)</span>
+                                <span class="arch-item">Virus (Enemies)</span>
+                                <span class="arch-item">UI Elements</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 20px; padding: 12px; background: rgba(88, 166, 255, 0.05); border-radius: 6px; border: 1px solid var(--border-color); color: #8b949e; font-size: 0.9rem; line-height: 1.6; text-align: center;">
+                        <strong style="color: var(--accent-color);">장점:</strong> 개별 객체가 이벤트를 수신하지 않아 성능 최적화 및 중앙 집중식 관리 가능
+                    </p>
+                </div>
+
+                <h3>핵심 처리 플로우</h3>
+                <p>InputManager는 매 프레임 사용자 입력을 감지해서, 다음 순서로 입력을 처리합니다:</p>
+
+                <div class="visual-frame">
+                    <div class="transaction-flow mono" style="margin-bottom: 20px;">
+                        <div class="flow-step">HandleHover()<br/>객체 탐지</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">HandleMouseInput()<br/>클릭/드래그</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">InteractionHandler<br/>이벤트 전달</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">IInteractable<br/>객체 처리</div>
+                    </div>
+                </div>
+
+                <h4>1. 객체 탐지 (GetInteractableUnderMouse)</h4>
+                <p>Physics2D.Raycast를 사용하여 마우스 위치의 상호작용 가능한 객체를 탐지합니다. <span class="highlight">레이어 우선순위</span>를 적용하여 Unit 레이어를 먼저 검사하고, 없을 경우 바이러스 등 다른 상호작용 객체를 검사합니다.</p>
+
+                <h4>2. 레이어 우선순위 처리 (IsOverUI)</h4>
+                <p>UI와 게임 오브젝트가 겹칠 때, <span class="highlight">SortingLayer와 SortingOrder</span>를 비교하여 정확한 우선순위를 판정합니다. UI Raycast와 GameObject Raycast 결과를 비교하여 UI가 위에 있으면 게임 오브젝트 이벤트를 무시합니다.</p>
+
+                <h4>3. 상태 머신 기반 드래그 처리</h4>
+                <p>InputState (None → Pressing → DraggingObject/DraggingBox → None) 기반으로 드래그를 관리합니다. <span class="highlight">dragThreshold</span>를 기반으로 드래그 시작을 판정하며, 객체 드래그와 박스 선택 드래그를 자동으로 구분합니다.</p>
+
+                <div class="visual-frame">
+                    <div class="transaction-flow mono" style="margin-bottom: 20px;">
+                        <div class="flow-step">None</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Pressing<br/>(거리 &lt; threshold)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">DraggingObject<br/>DraggingBox<br/>(거리 &gt; threshold)</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">None</div>
+                    </div>
+                </div>
+
+                <h4>4. 더블클릭 감지</h4>
+                <p>0.3초 threshold를 사용하여 같은 객체에 대한 연속 클릭을 더블클릭으로 감지합니다.</p>
+
+                <h4>5. 박스 선택 및 바이러스 특수 처리</h4>
+                <p>빈 공간에서 드래그 시 <span class="highlight">Physics2D.OverlapAreaAll</span>을 사용하여 영역 내 모든 객체를 선택합니다. 바이러스 드래그는 <code>HasActiveViruses</code> 플래그로 일반 드래그와 구분하여 처리합니다.</p>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">중앙 집중식 관리:</span> 모든 마우스 입력을 InputManager에서 통합 처리</li>
+                    <li><span class="highlight">레이어 우선순위:</span> SortingLayer/SortingOrder 기반 정교한 우선순위 판정</li>
+                    <li><span class="highlight">상태 머신:</span> InputState 기반 명확한 드래그 상태 관리</li>
+                    <li><span class="highlight">성능 최적화:</span> 개별 객체가 이벤트를 수신하지 않아 오버헤드 감소</li>
+                </ul>
+
+                <h2>2. InteractionHandler: 이벤트 기반 상호작용 관리 시스템</h2>
+                <p><code>InteractionHandler</code>는 <span class="highlight">이벤트 기반 아키텍처</span>를 통해 InputManager와 IInteractable 객체 간의 상호작용을 중재합니다. 각 객체가 개별적으로 이벤트를 수신하지 않고, InteractionHandler가 모든 상호작용을 통합 관리하여 성능을 최적화하고 일관된 동작을 보장합니다.</p>
+
+                <div class="visual-frame">
+                    <div class="arch-diagram">
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">InputManager</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">GetInteractableUnderMouse()</span>
+                                <span class="arch-item">HandleLeftMouseDown()</span>
+                                <span class="arch-item">HandleDrag()</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">InteractionHandler (Mediator)</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">HandlePointerDown/Up</span>
+                                <span class="arch-item">HandleBeginDrag/EndDrag</span>
+                                <span class="arch-item">HandleDoubleClick</span>
+                                <span class="arch-item">SelectionData 관리</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">IInteractable Objects</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">OnClick()</span>
+                                <span class="arch-item">OnDrag()</span>
+                                <span class="arch-item">OnHoverEnter/Exit</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>IInteractable 인터페이스: 확장 가능한 상호작용 계약</h3>
+                <p>모든 상호작용 가능한 객체는 <code>IInteractable</code> 인터페이스를 구현하여 일관된 상호작용 패턴을 제공합니다.</p>
+
+<pre><code><span class="c-cm">// IInteractable.cs: 상호작용 가능한 객체를 위한 인터페이스</span>
+<span class="c-kw">public interface</span> <span class="c-ty">IInteractable</span>
+{
+    <span class="c-ty">GameObject</span> targetObj { <span class="c-kw">get</span>; }
+    <span class="c-ty">Transform</span> transform { <span class="c-kw">get</span>; }
+    <span class="c-ty">Sprite</span> TooltipImg { <span class="c-kw">get</span>; }
+    <span class="c-ty">string</span> ToolTipDes { <span class="c-kw">get</span>; }
+    
+    <span class="c-cm">// 선택 상태 관리</span>
+    <span class="c-kw">bool</span> IsSelectable { <span class="c-kw">get</span>; }
+    <span class="c-kw">bool</span> IsDraggable { <span class="c-kw">get</span>; }
+    <span class="c-kw">bool</span> IsTooltipEnabled { <span class="c-kw">get</span>; }
+    
+    <span class="c-cm">// 이벤트 메서드</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnHoverEnter</span>();     <span class="c-cm">// 마우스가 객체 위로 올라올 때</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnHoverExit</span>();      <span class="c-cm">// 마우스가 객체에서 벗어날 때</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnClickEnter</span>();     <span class="c-cm">// 마우스 버튼을 누를 때</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnClickExit</span>();      <span class="c-cm">// 마우스 버튼을 뗄 때</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnBeginDrag</span>();       <span class="c-cm">// 드래그 시작</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnDrag</span>(<span class="c-ty">Vector2</span> mouseDelta); <span class="c-cm">// 드래그 중</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnEndDrag</span>();         <span class="c-cm">// 드래그 종료</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnClick</span>();            <span class="c-cm">// 클릭 처리</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnDoubleClick</span>();    <span class="c-cm">// 더블클릭 처리</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnRightClick</span>();     <span class="c-cm">// 우클릭 처리</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnSelectSingle</span>();   <span class="c-cm">// 단일 선택</span>
+    <span class="c-kw">void</span> <span class="c-fn">OnSelected</span>(<span class="c-kw">bool</span> isSelected); <span class="c-cm">// 선택 상태 표시</span>
 }</code></pre>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">인터페이스 기반 설계:</span> 다양한 객체 타입(File_Base, Virus, UI)이 동일한 인터페이스로 처리</li>
+                    <li><span class="highlight">확장성:</span> 새로운 상호작용 가능한 객체 추가 시 인터페이스만 구현하면 자동 통합</li>
+                    <li><span class="highlight">관심사 분리:</span> 각 객체는 자신의 상호작용 로직만 구현, InteractionHandler가 흐름 제어</li>
+                </ul>
+
+                <h3>InteractionHandler의 핵심 기능</h3>
+                <p>InteractionHandler는 선택 상태 관리, 드래그 처리, ToolTip 관리, 바이러스 특수 처리 등을 담당합니다. 단일 클래스에서 모든 상호작용을 관리합니다.</p>
+
+                <div class="visual-frame">
+                    <div class="arch-diagram">
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">포인터 다운 처리</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">OnClickEnter() 호출</span>
+                                <span class="arch-item">선택 상태 관리</span>
+                                <span class="arch-item">단일/멀티 선택 처리</span>
+                                <span class="arch-item">OnClick() 호출</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">드래그 시작 처리</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">선택된 객체만 드래그 대상</span>
+                                <span class="arch-item">원본 위치 저장</span>
+                                <span class="arch-item">OnBeginDrag() 호출</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">드래그 중 처리</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">각 객체의 OnDrag() 호출</span>
+                                <span class="arch-item">위치 이동 처리</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">드래그 종료 처리</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">OnEndDrag() 호출</span>
+                                <span class="arch-item">드래그 상태 초기화</span>
+                                <span class="arch-item">선택 해제</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>선택 상태 관리 시스템</h3>
+                <p>InteractionHandler는 <span class="highlight">Dictionary를 사용한 원본 위치 저장</span>과 <span class="highlight">List 기반 선택 관리</span>를 통해 효율적인 상태 관리를 제공합니다.</p>
+
+                <div class="visual-frame">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; align-items: stretch;">
+                        <div style="padding: 18px; border: 2px solid var(--accent-color); border-radius: 8px; background: rgba(88, 166, 255, 0.05); text-align: center; display: flex; flex-direction: column; justify-content: flex-start;">
+                            <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">선택 관리</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8; flex-grow: 1;">
+                                <div>• SelectedObjects</div>
+                                <div>• 멀티 선택 지원</div>
+                                <div>• 단일/다중 선택</div>
+                                <div>• Ctrl 키 토글</div>
+                            </div>
+                        </div>
+                        <div style="padding: 18px; border: 2px solid var(--sub-accent); border-radius: 8px; background: rgba(35, 134, 54, 0.05); text-align: center; display: flex; flex-direction: column; justify-content: flex-start;">
+                            <div style="color: var(--sub-accent); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">드래그 관리</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8; flex-grow: 1;">
+                                <div>• DragObjects</div>
+                                <div>• 원래 위치 저장</div>
+                                <div>• 복원 기능</div>
+                                <div>• 드래그 상태 추적</div>
+                            </div>
+                        </div>
+                        <div style="padding: 18px; border: 2px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.2); text-align: center; display: flex; flex-direction: column; justify-content: flex-start;">
+                            <div style="color: var(--text-color); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">상태 관리</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8; flex-grow: 1;">
+                                <div>• OriginalPositions</div>
+                                <div>• 선택 해제</div>
+                                <div>• 상태 초기화</div>
+                                <div>• 바이러스 처리</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">Mediator 패턴:</span> InputManager와 IInteractable 객체 간의 직접적인 의존성 제거</li>
+                    <li><span class="highlight">선택 상태 캡슐화:</span> SelectedObjects, DragObjects, OriginalPositions를 통해 선택 상태를 중앙에서 관리</li>
+                    <li><span class="highlight">원본 위치 복원:</span> Dictionary를 사용하여 드래그 실패 시 원래 위치로 복원 가능</li>
+                    <li><span class="highlight">멀티 선택 지원:</span> Ctrl 키를 통한 토글 방식 멀티 선택</li>
+                    <li><span class="highlight">ToolTip 관리:</span> StageMain_UI와 연동하여 ToolTip 표시/숨김 처리</li>
+                    <li><span class="highlight">바이러스 특수 처리:</span> HasActiveViruses 플래그로 일반 드래그와 구분, 별도 핸들러 메서드 제공</li>
+                    <li><span class="highlight">확장 가능한 인터페이스:</span> OnClickEnterHandler, OnBeginDragHandler, OnDragHandler 등 명확한 메서드 네이밍</li>
+                </ul>
+
+                <div style="height: 100px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ML-Agents Racing Modal -->
+    <div id="modal-overlay-racing" class="modal-overlay" onclick="closeModal('racing')">
+        <div class="modal-container" onclick="event.stopPropagation()">
+            <div class="modal-body">
+                <div class="modal-header-nav">
+                    <div class="mono" style="color: var(--accent-color);">PROJECT REPORT // AUTONOMOUS_RACING_AGENT</div>
+                    <button onclick="closeModal('racing')" style="background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 20px; border-radius: 6px; cursor: pointer; font-family: 'Fira Code'; font-size: 0.8rem;">[X] DISCONNECT</button>
+                </div>
+                
+                <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">ML-Agents 자율 주행 경주차 학습 시스템</h1>
+
+                <h2>1. 프로젝트 개요</h2>
+                <p>Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는 자율 주행 경주차 에이전트를 학습시킨 프로젝트입니다. <span class="highlight">체크포인트 기반 네비게이션 시스템</span>과 <span class="highlight">목표 지향 보상 설계</span>를 통해 에이전트가 트랙을 순차적으로 주행하도록 설계했습니다.</p>
+
+                <div class="visual-frame" style="margin: 30px 0;">
+                    <img src="mlagent_4.png" alt="ML-Agents 트랙 환경" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">구불구불한 도로와 바위 지형으로 구성된 학습 트랙 환경</p>
+                </div>
+
+                <h2>2. 체크포인트 기반 네비게이션 시스템</h2>
+                <p>에이전트가 트랙을 올바른 순서로 주행하도록 <span class="highlight">체크포인트 시스템</span>을 구현했습니다. 각 체크포인트를 순차적으로 통과해야 다음 목표로 진행할 수 있으며, 잘못된 순서로 통과 시 페널티를 받습니다.</p>
+
+                <div class="visual-frame">
+                    <div class="arch-diagram">
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">SplineToCheckpointGenerator</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">스플라인에서 체크포인트 자동 생성</span>
+                                <span class="arch-item">BoxCollider(Trigger) 설정</span>
+                                <span class="arch-item">태그 자동 할당</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">SpawnPointManager</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">체크포인트 배열 관리</span>
+                                <span class="arch-item">스폰 포인트 관리</span>
+                                <span class="arch-item">Finish 포인트 관리</span>
+                            </div>
+                        </div>
+                        <div style="text-align: center; color: var(--accent-color); font-size: 1.5rem; padding: 10px 0; font-weight: 700;">↓</div>
+                        <div class="arch-layer">
+                            <div class="arch-layer-title">SimcadeCarAgent_Auto</div>
+                            <div class="arch-layer-items">
+                                <span class="arch-item">체크포인트 통과 감지</span>
+                                <span class="arch-item">목표 위치 계산</span>
+                                <span class="arch-item">거리 기반 보상</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>CheckPoint: 순차적 체크포인트 검증</h3>
+                <p><code>CheckPoint</code>는 트리거를 통해 플레이어가 올바른 순서의 체크포인트를 통과했는지 검증합니다. 마지막 체크포인트 통과 시 랩을 증가시키고 체크포인트를 리셋합니다.</p>
+
+<pre><code><span class="c-cm">// CheckPoint.cs: 체크포인트 트리거 처리</span>
+<span class="c-kw">private void</span> <span class="c-fn">OnTriggerEnter</span>(<span class="c-ty">Collider</span> other)
+{
+    <span class="c-kw">if</span> (other.CompareTag(<span class="c-st">"Player"</span>)) {
+        <span class="c-ty">CarProgress</span> progress = other.GetComponentInParent&lt;<span class="c-ty">CarProgress</span>&gt;();
+        
+        <span class="c-cm">// 올바른 순서의 체크포인트인지 확인</span>
+        <span class="c-kw">if</span> (progress.currentCheckPoint + <span class="c-st">1</span> == checkPointIndex) {
+            progress.currentCheckPoint = checkPointIndex;
+        }
+        <span class="c-cm">// 마지막 체크포인트 통과 시 랩 증가</span>
+        <span class="c-kw">else if</span> (isLast) {
+            progress.currentCheckPoint = <span class="c-st">0</span>;
+            progress.currentLap++;
+        }
+    }
+}</code></pre>
+
+                <h3>SplineToCheckpointGenerator: 스플라인 기반 자동 생성</h3>
+                <p>Unity Spline 시스템을 활용하여 트랙의 스플라인 곡선을 따라 체크포인트를 자동으로 생성합니다. 이를 통해 다양한 트랙에 빠르게 체크포인트 시스템을 적용할 수 있습니다.</p>
+
+                <h3>SpawnPointManager: 다중 스폰 포인트 관리</h3>
+                <p>학습 시 다양한 시작 위치에서 에피소드를 시작할 수 있도록 <span class="highlight">다중 스폰 포인트 시스템</span>을 구현했습니다. 스플라인 시작 지점을 기준으로 횡방향으로 여러 스폰 포인트를 자동 생성합니다.</p>
+
+                <h2>3. 보상 설계 (Reward Engineering)</h2>
+                <p>에이전트가 올바르게 트랙을 주행하도록 <span class="highlight">다층적 보상 시스템</span>을 설계했습니다.</p>
+
+                <div class="visual-frame">
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; align-items: stretch;">
+                        <div style="padding: 18px; border: 2px solid var(--sub-accent); border-radius: 8px; background: rgba(35, 134, 54, 0.05); text-align: center;">
+                            <div style="color: var(--sub-accent); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">목표 지향 보상</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8;">
+                                <div>• 체크포인트 통과: +1.0</div>
+                                <div>• Finish 통과: +10.0</div>
+                                <div>• 거리 감소 보상</div>
+                                <div>• 잘못된 체크포인트: -0.5</div>
+                            </div>
+                        </div>
+                        <div style="padding: 18px; border: 2px solid #ff7b72; border-radius: 8px; background: rgba(255, 123, 114, 0.05); text-align: center;">
+                            <div style="color: #ff7b72; font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">안전성 페널티</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8;">
+                                <div>• 벽 충돌: -1.0</div>
+                                <div>• 근접 페널티 (전방/후방)</div>
+                                <div>• 미끄러짐 페널티</div>
+                                <div>• 역주행 페널티: -0.2</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>목표 지향 보상 (Goal-Oriented Rewards)</h3>
+                <ul>
+                    <li><span class="highlight">거리 기반 보상:</span> 다음 체크포인트에 가까워질수록 보상 (distanceRewardFactor: 0.1)</li>
+                    <li><span class="highlight">체크포인트 통과:</span> 올바른 순서로 통과 시 +1.0, 잘못된 순서 -0.5</li>
+                    <li><span class="highlight">Finish 라인:</span> 모든 체크포인트 통과 후 Finish 통과 시 +10.0</li>
+                </ul>
+
+                <h3>안전성 및 복구 보상</h3>
+                <ul>
+                    <li><span class="highlight">근접 페널티:</span> 전방 벽 감지(15m), 후방 벽 감지(5m) - 거리 기반 페널티</li>
+                    <li><span class="highlight">역주행 감지:</span> 목표 방향과 반대 방향 주행 시 -0.2 (속도 1.5 이상, 각도 150도 이상)</li>
+                    <li><span class="highlight">미끄러짐 페널티:</span> 평균 슬립 계수 0.9 이상 시 페널티</li>
+                    <li><span class="highlight">정지 상태:</span> 2초 이상 정지 시 페널티, 5초 이상 시 에피소드 종료</li>
+                    <li><span class="highlight">뒤집힘 감지:</span> 160도 이상 기울어지면 감지, 5초 이상 지속 시 종료</li>
+                </ul>
+
+                <h2>4. 레이캐스트 기반 환경 감지</h2>
+                <p>에이전트가 주변 환경을 정확히 인식할 수 있도록 <span class="highlight">다방향 레이캐스트 시스템</span>을 구현했습니다.</p>
+
+                <div class="visual-frame" style="margin: 30px 0;">
+                    <img src="mlagent_1.png" alt="레이캐스트 센서 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">차량의 레이캐스트 센서 시스템 시각화 (빨간색: 감지된 대상, 초록색: 일반 센서 범위, 체크포인트 및 경로 스플라인 표시)</p>
+                </div>
+
+                <div class="visual-frame">
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0; align-items: stretch;">
+                        <div style="padding: 18px; border: 2px solid var(--accent-color); border-radius: 8px; background: rgba(88, 166, 255, 0.05); text-align: center;">
+                            <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">전방 감지</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8;">
+                                <div>• 레이 개수: 9개</div>
+                                <div>• 각도 범위: 180도</div>
+                                <div>• 감지 거리: 15m</div>
+                                <div>• 도로/벽 감지</div>
+                            </div>
+                        </div>
+                        <div style="padding: 18px; border: 2px solid var(--sub-accent); border-radius: 8px; background: rgba(35, 134, 54, 0.05); text-align: center;">
+                            <div style="color: var(--sub-accent); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">후방 감지</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8;">
+                                <div>• 레이 개수: 3개</div>
+                                <div>• 각도 범위: 60도</div>
+                                <div>• 감지 거리: 5m</div>
+                                <div>• 후진 시 활성화</div>
+                            </div>
+                        </div>
+                        <div style="padding: 18px; border: 2px solid var(--border-color); border-radius: 8px; background: rgba(0,0,0,0.2); text-align: center;">
+                            <div style="color: var(--text-color); font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">관측 데이터</div>
+                            <div style="color: var(--text-color); font-size: 0.85rem; line-height: 1.8;">
+                                <div>• 속도/각속도 (7)</div>
+                                <div>• 레이캐스트 (21)</div>
+                                <div>• 목표 방향/거리 (4)</div>
+                                <div>• 총 36차원</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h2>5. ML-Agents 학습 설정</h2>
+                <p>PPO(Proximal Policy Optimization) 알고리즘을 사용하여 에이전트를 학습시켰습니다.</p>
+
+                <div class="visual-frame">
+                    <div class="data-table">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="border-bottom: 2px solid var(--border-color);">
+                                    <th style="padding: 12px; text-align: left; color: var(--accent-color);">하이퍼파라미터</th>
+                                    <th style="padding: 12px; text-align: center; color: var(--accent-color);">값</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Trainer Type</td>
+                                    <td style="padding: 12px; text-align: center;">PPO</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Batch Size</td>
+                                    <td style="padding: 12px; text-align: center;">1024</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Buffer Size</td>
+                                    <td style="padding: 12px; text-align: center;">10240</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Learning Rate</td>
+                                    <td style="padding: 12px; text-align: center;">0.0003</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Hidden Units</td>
+                                    <td style="padding: 12px; text-align: center;">256</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Num Layers</td>
+                                    <td style="padding: 12px; text-align: center;">2</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Time Horizon</td>
+                                    <td style="padding: 12px; text-align: center;">1000</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid var(--border-color);">
+                                    <td style="padding: 12px;">Max Steps</td>
+                                    <td style="padding: 12px; text-align: center;">10,000,000</td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 12px;">Curiosity Signal</td>
+                                    <td style="padding: 12px; text-align: center;">0.02 (활성화)</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <h2>6. 다중 트랙 학습 지원</h2>
+                <p>에이전트의 일반화 성능을 향상시키기 위해 <span class="highlight">다중 트랙 학습 시스템</span>을 구현했습니다. 각 에피소드 시작 시 랜덤하게 트랙을 선택하여 학습하므로, 다양한 트랙 환경에 적응할 수 있습니다.</p>
+
+                <h2>7. 기술적 특징</h2>
+                <ul>
+                    <li><span class="highlight">체크포인트 기반 네비게이션:</span> 순차적 체크포인트 통과를 통한 정확한 트랙 주행</li>
+                    <li><span class="highlight">목표 지향 보상 설계:</span> 거리 기반 보상과 체크포인트 보상을 통한 효과적인 학습</li>
+                    <li><span class="highlight">다방향 레이캐스트:</span> 전방 9개, 후방 3개 레이로 환경 정확히 인식</li>
+                    <li><span class="highlight">안전성 보상:</span> 근접 페널티, 역주행 감지, 미끄러짐 감지로 안전한 주행 유도</li>
+                    <li><span class="highlight">스플라인 기반 자동 생성:</span> 다양한 트랙에 빠르게 체크포인트 시스템 적용</li>
+                    <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
+                    <li><span class="highlight">액션 스무딩:</span> 최대 조향 변화 0.5, 최대 가속 변화 0.7로 부드러운 제어</li>
+                </ul>
 
                 <div style="height: 100px;"></div>
             </div>
@@ -518,13 +1325,41 @@
     </div>
 
     <script>
-        function openModal() {
+        function openModal(projectType) {
+            if (projectType === 'mlAgentsRacing') {
+                document.getElementById('modal-overlay-racing').style.display = 'flex';
+            } else {
             document.getElementById('modal-overlay').style.display = 'flex';
+                // 기본적으로 리팩토링 탭 활성화
+                switchTab('refactoring');
+            }
             document.body.style.overflow = 'hidden';
         }
-        function closeModal() {
+        function closeModal(projectType) {
+            if (projectType === 'racing' || projectType === 'mlAgentsRacing') {
+                document.getElementById('modal-overlay-racing').style.display = 'none';
+            } else {
             document.getElementById('modal-overlay').style.display = 'none';
+            }
             document.body.style.overflow = 'auto';
+        }
+        function switchTab(tabName) {
+            // 모든 탭 버튼 비활성화
+            const buttons = document.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            // 모든 탭 콘텐츠 숨기기
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 활성화
+            if (tabName === 'refactoring') {
+                document.querySelector('.tab-button:first-child').classList.add('active');
+                document.getElementById('refactoring-tab').classList.add('active');
+            } else if (tabName === 'existing') {
+                document.querySelector('.tab-button:last-child').classList.add('active');
+                document.getElementById('existing-tab').classList.add('active');
+            }
         }
     </script>
 </body>
