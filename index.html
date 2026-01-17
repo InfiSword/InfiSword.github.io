@@ -1407,7 +1407,18 @@
                     <li><span class="highlight">속도 부족:</span> 속도 0.1 미만일 때 <code style="color: #ff7b72;">-0.001</code> per frame</li>
                 </ul>
 
-                <h2>4. 레이캐스트 기반 환경 감지</h2>
+                <h2>전체 시스템 기술적 특징</h2>
+                <p>체크포인트 및 보상 시스템의 핵심 기술적 특징입니다.</p>
+                <ul>
+                    <li><span class="highlight">체크포인트 기반 네비게이션:</span> 순차적 체크포인트 통과를 통한 정확한 트랙 주행</li>
+                    <li><span class="highlight">목표 지향 보상 설계:</span> 거리 기반 보상과 체크포인트 보상을 통한 효과적인 학습</li>
+                    <li><span class="highlight">안전성 보상:</span> 근접 페널티, 역주행 감지, 미끄러짐 감지로 안전한 주행 유도</li>
+                    <li><span class="highlight">스플라인 기반 자동 생성:</span> 다양한 트랙에 빠르게 체크포인트 시스템 적용</li>
+                </ul>
+                </div>
+
+                <div id="ml-sensing-tab" class="tab-content">
+                <h2>3. 레이캐스트 기반 환경 감지</h2>
                 <p>에이전트가 주변 환경을 정확히 인식할 수 있도록 <span class="highlight">다방향 레이캐스트 시스템</span>을 구현했습니다. 전방 9개, 후방 3개의 레이를 사용하여 도로와 벽을 감지하고, 이를 신경망의 관측 데이터로 변환합니다.</p>
 
                 <div class="visual-frame" style="margin: 30px 0;">
@@ -1559,6 +1570,124 @@
                 <h2>4. 연속적 행동 결정 및 입력 보정</h2>
                 <p>수집된 관측 정보는 신경망을 통과하여 차량을 제어하기 위한 행동 값으로 변환됩니다.</p>
 
+                <h3>연속적 제어 (Continuous Control)</h3>
+                <p>본 프로젝트의 시스템은 불연속적인 이동이 아닌, 차량의 <span class="highlight">조향과 가속/감속을 정밀하게 제어하는 연속 행동 공간</span>을 사용합니다. ML-Agents의 <code>ContinuousActions</code>를 통해 -1.0부터 1.0까지의 연속적인 실수 값을 출력하여, 차량의 핸들 각도와 가속 페달을 부드럽게 제어할 수 있습니다.</p>
+
+                <h3>입력 스무딩 (Input Smoothing)</h3>
+                <p>강화학습 초기 단계에서 발생하는 무작위적이고 급격한 지터링을 방지하기 위해, 에이전트의 행동 결정 단계에서 <span class="highlight">입력 스무딩 알고리즘</span>을 적용하였습니다. 이를 통해 직전 프레임에서 차량에 적용된 최종 제어값과 현재 신경망이 출력한 목표값의 차이를 계산하고, 보정된 현재 프레임의 최종 제어값을 차량 컨트롤러에 전달함으로써, 실제 차량과 유사한 부드러운 주행 궤적과 물리적 관성을 구현하였습니다.</p>
+
+                <div class="visual-frame" style="margin: 30px 0;">
+                    <img src="images/mlagent_3.png" alt="입력 스무딩 알고리즘 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">입력 스무딩 알고리즘 시각화: AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
+                </div>
+
+                <div style="background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent-color); padding: 15px 20px; margin: 20px 0; border-radius: 6px;">
+                    <p style="margin: 0 0 10px 0; color: var(--accent-color); font-weight: 700;">변수 설명:</p>
+                    <ul style="margin: 0; padding-left: 20px; color: #c9d1d9;">
+                        <li><code style="color: var(--accent-color);">rawSteering</code>: 신경망이 현재 상황을 보고 판단하여 설정한 차량의 조향 변수 (원시 조향값)</li>
+                        <li><code style="color: var(--accent-color);">lastSteeringInput</code>: 이전 프레임의 조향값 (마지막으로 차량에 적용된 최종 조향값)</li>
+                        <li><code style="color: var(--accent-color);">steeringInput</code>: 입력 스무딩 알고리즘을 통한 산출 최종 조향값 (차량의 핸들 값으로 사용)</li>
+                    </ul>
+                </div>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 연속적 행동 결정 및 입력 보정</span>
+<span class="c-kw">public override void</span> <span class="c-fn">OnEpisodeBegin</span>()
+{
+    <span class="c-cm">// 모든 트랙 중 랜덤 선택</span>
+    <span class="c-kw">if</span> (allTracks == <span class="c-kw">null</span> || allTracks.Count == <span class="c-st">0</span>) {
+        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>(<span class="c-st">"학습할 트랙(AllTracks 리스트)가 설정되지 않았습니다!"</span>);
+        <span class="c-kw">return</span>;
+    }
+    
+    <span class="c-cm">// 랜덤 트랙 선택</span>
+    currentTrackManager = allTracks[<span class="c-ty">Random</span>.<span class="c-fn">Range</span>(<span class="c-st">0</span>, allTracks.Count)];
+    <span class="c-ty">Transform</span> spawnPoint = currentTrackManager.<span class="c-fn">GetSpawnPoint</span>();
+    
+    <span class="c-cm">// 선택된 트랙의 스폰 포인트로 이동</span>
+    transform.position = spawnPoint.position;
+    transform.rotation = spawnPoint.rotation;
+    
+    <span class="c-cm">// 상태 초기화</span>
+    rb.linearVelocity = <span class="c-ty">Vector3</span>.zero;
+    rb.angularVelocity = <span class="c-ty">Vector3</span>.zero;
+    currentCheckpointIndex = <span class="c-st">0</span>;
+    <span class="c-cm">// ... 기타 상태 초기화</span>
+}</code></pre>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">랜덤 트랙 선택:</span> 각 에피소드마다 `allTracks` 리스트에서 랜덤하게 트랙 선택</li>
+                    <li><span class="highlight">다양한 시작 위치:</span> 각 트랙의 `SpawnPointManager`에서 랜덤 스폰 포인트 선택</li>
+                    <li><span class="highlight">일반화 성능 향상:</span> 다양한 트랙 환경에서 학습하여 단일 트랙에 과적합되지 않도록 방지</li>
+                </ul>
+
+                <h2>전체 시스템 기술적 특징</h2>
+                <p>ML-Agents 학습 설정 및 최적화의 핵심 기술적 특징입니다.</p>
+                <ul>
+                    <li><span class="highlight">PPO 알고리즘:</span> Unity ML-Agents 라이브러리의 PPO 알고리즘을 활용한 안정적인 학습</li>
+                    <li><span class="highlight">하이퍼파라미터 튜닝:</span> Batch Size, Learning Rate, Hidden Units 등 최적화된 학습 파라미터</li>
+                    <li><span class="highlight">Curiosity Signal:</span> 탐험을 유도하는 호기심 신호로 다양한 행동 패턴 학습</li>
+                    <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
+                    <li><span class="highlight">대규모 학습:</span> 최대 10,000,000 스텝까지 학습하여 안정적인 정책 수렴</li>
+                </ul>
+                </div>
+<span class="c-kw">[Header</span>(<span class="c-st">"Action Smoothing"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> maxSteeringChange = <span class="c-st">0.5f</span>;      <span class="c-cm">// 최대 조향 변화량 (프레임당)</span>
+<span class="c-kw">public float</span> maxAccelerationChange = <span class="c-st">0.7f</span>;  <span class="c-cm">// 최대 가속 변화량 (프레임당)</span>
+
+<span class="c-kw">private float</span> lastSteeringInput = <span class="c-st">0f</span>;      <span class="c-cm">// 이전 프레임의 최종 조향값</span>
+<span class="c-kw">private float</span> lastAccelerationInput = <span class="c-st">0f</span>;  <span class="c-cm">// 이전 프레임의 최종 가속값</span>
+
+<span class="c-kw">public override void</span> <span class="c-fn">OnActionReceived</span>(<span class="c-ty">ActionBuffers</span> actions)
+{
+    <span class="c-cm">// 1. 신경망으로부터 연속적 행동 값 수신 (Continuous Actions)</span>
+    <span class="c-kw">float</span> rawSteering = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">0</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
+    <span class="c-kw">float</span> rawAcceleration = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">1</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
+    <span class="c-cm">// rawSteering: 신경망이 판단한 원시 조향값 (-1.0 ~ 1.0)</span>
+
+    <span class="c-cm">// 2. 입력 스무딩: 이전 프레임 값과 비교하여 변화량 제한</span>
+    <span class="c-cm">//    직전 프레임의 최종 제어값(lastSteeringInput)과 현재 신경망 출력값(rawSteering)의 차이를 계산</span>
+    <span class="c-kw">float</span> steeringInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawSteering,
+        lastSteeringInput - maxSteeringChange,      <span class="c-cm">// 최소값: 이전값 - 최대변화량</span>
+        lastSteeringInput + maxSteeringChange);     <span class="c-cm">// 최대값: 이전값 + 최대변화량</span>
+    <span class="c-cm">// steeringInput: 보정된 현재 프레임의 최종 조향값 (차량 핸들 값으로 사용)</span>
+    
+    <span class="c-kw">float</span> accelerationInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawAcceleration,
+        lastAccelerationInput - maxAccelerationChange,
+        lastAccelerationInput + maxAccelerationChange);
+
+    <span class="c-cm">// 3. 현재 프레임의 최종 제어값을 다음 프레임을 위해 저장</span>
+    lastSteeringInput = steeringInput;        <span class="c-cm">// 다음 프레임의 기준값으로 사용</span>
+    lastAccelerationInput = accelerationInput;
+    
+    <span class="c-cm">// 4. 보정된 최종 제어값을 차량 컨트롤러에 전달</span>
+    <span class="c-cm">//    부드러운 주행 궤적과 물리적 관성을 구현</span>
+    vehicleController.<span class="c-fn">ProvideInputs</span>(accelerationInput, steeringInput, <span class="c-st">0f</span>);
+}</code></pre>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">연속 행동 공간:</span> 불연속적인 이동이 아닌 조향과 가속/감속을 정밀하게 제어하는 연속 실수 값 사용</li>
+                    <li><span class="highlight">변화량 제한:</span> 조향은 최대 ±0.5, 가속은 최대 ±0.7로 프레임당 변화량 제한하여 급격한 지터링 방지</li>
+                    <li><span class="highlight">부드러운 제어:</span> 이전 프레임 값과 현재 신경망 출력값의 차이를 계산하여 보정된 최종 제어값 생성</li>
+                    <li><span class="highlight">물리적 관성 구현:</span> 실제 차량과 유사한 부드러운 주행 궤적과 관성 효과 구현</li>
+                </ul>
+
+                <h2>전체 시스템 기술적 특징</h2>
+                <p>환경 감지 및 행동 결정 시스템의 핵심 기술적 특징입니다.</p>
+                <ul>
+                    <li><span class="highlight">다방향 레이캐스트:</span> 전방 9개, 후방 3개 레이로 환경 정확히 인식</li>
+                    <li><span class="highlight">정규화된 관측:</span> 모든 거리 값을 0.0~1.0 범위로 정규화하여 신경망 학습 안정성 향상</li>
+                    <li><span class="highlight">비선형 페널티:</span> 거리 기반 비선형 페널티 함수로 가까울수록 급격한 페널티 증가</li>
+                    <li><span class="highlight">연속 행동 공간:</span> 조향과 가속/감속을 정밀하게 제어하는 연속 실수 값 사용</li>
+                    <li><span class="highlight">입력 스무딩:</span> 변화량 제한을 통한 부드러운 제어 및 급격한 지터링 방지</li>
+                </ul>
+                </div>
+
+                <div id="ml-training-tab" class="tab-content">
+                <h2>5. ML-Agents 학습 설정</h2>
+                <p>Unity ML-Agents 라이브러리의 PPO(Proximal Policy Optimization) 알고리즘을 사용하여 에이전트를 학습시켰습니다. 하이퍼파라미터 튜닝과 보상 설계를 통해 안정적인 학습을 달성했습니다.</p>
+
                 <div class="visual-frame">
                     <div class="data-table">
                         <table style="width: 100%; border-collapse: collapse;">
@@ -1614,121 +1743,6 @@
                 <p>에이전트의 일반화 성능을 향상시키기 위해 <span class="highlight">다중 트랙 학습 시스템</span>을 구현했습니다. 각 에피소드 시작 시 랜덤하게 트랙을 선택하여 학습하므로, 다양한 트랙 환경에 적응할 수 있습니다.</p>
 
 <pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 다중 트랙 학습 지원</span>
-<span class="c-kw">public override void</span> <span class="c-fn">OnEpisodeBegin</span>()
-{
-    <span class="c-cm">// 모든 트랙 중 랜덤 선택</span>
-    <span class="c-kw">if</span> (allTracks == <span class="c-kw">null</span> || allTracks.Count == <span class="c-st">0</span>) {
-        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>(<span class="c-st">"학습할 트랙(AllTracks 리스트)가 설정되지 않았습니다!"</span>);
-        <span class="c-kw">return</span>;
-    }
-    
-    <span class="c-cm">// 랜덤 트랙 선택</span>
-    currentTrackManager = allTracks[<span class="c-ty">Random</span>.<span class="c-fn">Range</span>(<span class="c-st">0</span>, allTracks.Count)];
-    <span class="c-ty">Transform</span> spawnPoint = currentTrackManager.<span class="c-fn">GetSpawnPoint</span>();
-    
-    <span class="c-cm">// 선택된 트랙의 스폰 포인트로 이동</span>
-    transform.position = spawnPoint.position;
-    transform.rotation = spawnPoint.rotation;
-    
-    <span class="c-cm">// 상태 초기화</span>
-    rb.linearVelocity = <span class="c-ty">Vector3</span>.zero;
-    rb.angularVelocity = <span class="c-ty">Vector3</span>.zero;
-    currentCheckpointIndex = <span class="c-st">0</span>;
-    <span class="c-cm">// ... 기타 상태 초기화</span>
-}</code></pre>
-
-                <p><strong>기술적 특징:</strong></p>
-                <ul>
-                    <li><span class="highlight">랜덤 트랙 선택:</span> 각 에피소드마다 `allTracks` 리스트에서 랜덤하게 트랙 선택</li>
-                    <li><span class="highlight">다양한 시작 위치:</span> 각 트랙의 `SpawnPointManager`에서 랜덤 스폰 포인트 선택</li>
-                    <li><span class="highlight">일반화 성능 향상:</span> 다양한 트랙 환경에서 학습하여 단일 트랙에 과적합되지 않도록 방지</li>
-                </ul>
-
-                <h2>전체 시스템 기술적 특징</h2>
-                <p>ML-Agents 학습 설정 및 최적화의 핵심 기술적 특징입니다.</p>
-                <ul>
-                    <li><span class="highlight">PPO 알고리즘:</span> Unity ML-Agents 라이브러리의 PPO 알고리즘을 활용한 안정적인 학습</li>
-                    <li><span class="highlight">하이퍼파라미터 튜닝:</span> Batch Size, Learning Rate, Hidden Units 등 최적화된 학습 파라미터</li>
-                    <li><span class="highlight">Curiosity Signal:</span> 탐험을 유도하는 호기심 신호로 다양한 행동 패턴 학습</li>
-                    <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
-                    <li><span class="highlight">대규모 학습:</span> 최대 10,000,000 스텝까지 학습하여 안정적인 정책 수렴</li>
-                </ul>
-                </div>
-                <p>수집된 관측 정보는 신경망을 통과하여 차량을 제어하기 위한 행동 값으로 변환됩니다.</p>
-
-                <h3>연속적 제어 (Continuous Control)</h3>
-                <p>본 프로젝트의 시스템은 불연속적인 이동이 아닌, 차량의 <span class="highlight">조향과 가속/감속을 정밀하게 제어하는 연속 행동 공간</span>을 사용합니다. ML-Agents의 <code>ContinuousActions</code>를 통해 -1.0부터 1.0까지의 연속적인 실수 값을 출력하여, 차량의 핸들 각도와 가속 페달을 부드럽게 제어할 수 있습니다.</p>
-
-                <h3>입력 스무딩 (Input Smoothing)</h3>
-                <p>강화학습 초기 단계에서 발생하는 무작위적이고 급격한 지터링을 방지하기 위해, 에이전트의 행동 결정 단계에서 <span class="highlight">입력 스무딩 알고리즘</span>을 적용하였습니다. 이를 통해 직전 프레임에서 차량에 적용된 최종 제어값과 현재 신경망이 출력한 목표값의 차이를 계산하고, 보정된 현재 프레임의 최종 제어값을 차량 컨트롤러에 전달함으로써, 실제 차량과 유사한 부드러운 주행 궤적과 물리적 관성을 구현하였습니다.</p>
-
-                <div class="visual-frame" style="margin: 30px 0;">
-                    <img src="images/mlagent_3.png" alt="입력 스무딩 알고리즘 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
-                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">입력 스무딩 알고리즘 시각화: AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
-                </div>
-
-                <div style="background: rgba(88, 166, 255, 0.1); border-left: 4px solid var(--accent-color); padding: 15px 20px; margin: 20px 0; border-radius: 6px;">
-                    <p style="margin: 0 0 10px 0; color: var(--accent-color); font-weight: 700;">변수 설명:</p>
-                    <ul style="margin: 0; padding-left: 20px; color: #c9d1d9;">
-                        <li><code style="color: var(--accent-color);">rawSteering</code>: 신경망이 현재 상황을 보고 판단하여 설정한 차량의 조향 변수 (원시 조향값)</li>
-                        <li><code style="color: var(--accent-color);">lastSteeringInput</code>: 이전 프레임의 조향값 (마지막으로 차량에 적용된 최종 조향값)</li>
-                        <li><code style="color: var(--accent-color);">steeringInput</code>: 입력 스무딩 알고리즘을 통한 산출 최종 조향값 (차량의 핸들 값으로 사용)</li>
-                    </ul>
-                </div>
-
-<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 연속적 행동 결정 및 입력 보정</span>
-<span class="c-kw">[Header</span>(<span class="c-st">"Action Smoothing"</span>)<span class="c-kw">]</span>
-<span class="c-kw">public float</span> maxSteeringChange = <span class="c-st">0.5f</span>;      <span class="c-cm">// 최대 조향 변화량 (프레임당)</span>
-<span class="c-kw">public float</span> maxAccelerationChange = <span class="c-st">0.7f</span>;  <span class="c-cm">// 최대 가속 변화량 (프레임당)</span>
-
-<span class="c-kw">private float</span> lastSteeringInput = <span class="c-st">0f</span>;      <span class="c-cm">// 이전 프레임의 최종 조향값</span>
-<span class="c-kw">private float</span> lastAccelerationInput = <span class="c-st">0f</span>;  <span class="c-cm">// 이전 프레임의 최종 가속값</span>
-
-<span class="c-kw">public override void</span> <span class="c-fn">OnActionReceived</span>(<span class="c-ty">ActionBuffers</span> actions)
-{
-    <span class="c-cm">// 1. 신경망으로부터 연속적 행동 값 수신 (Continuous Actions)</span>
-    <span class="c-kw">float</span> rawSteering = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">0</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
-    <span class="c-kw">float</span> rawAcceleration = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">1</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
-    <span class="c-cm">// rawSteering: 신경망이 판단한 원시 조향값 (-1.0 ~ 1.0)</span>
-
-    <span class="c-cm">// 2. 입력 스무딩: 이전 프레임 값과 비교하여 변화량 제한</span>
-    <span class="c-cm">//    직전 프레임의 최종 제어값(lastSteeringInput)과 현재 신경망 출력값(rawSteering)의 차이를 계산</span>
-    <span class="c-kw">float</span> steeringInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawSteering,
-        lastSteeringInput - maxSteeringChange,      <span class="c-cm">// 최소값: 이전값 - 최대변화량</span>
-        lastSteeringInput + maxSteeringChange);     <span class="c-cm">// 최대값: 이전값 + 최대변화량</span>
-    <span class="c-cm">// steeringInput: 보정된 현재 프레임의 최종 조향값 (차량 핸들 값으로 사용)</span>
-    
-    <span class="c-kw">float</span> accelerationInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawAcceleration,
-        lastAccelerationInput - maxAccelerationChange,
-        lastAccelerationInput + maxAccelerationChange);
-
-    <span class="c-cm">// 3. 현재 프레임의 최종 제어값을 다음 프레임을 위해 저장</span>
-    lastSteeringInput = steeringInput;        <span class="c-cm">// 다음 프레임의 기준값으로 사용</span>
-    lastAccelerationInput = accelerationInput;
-    
-    <span class="c-cm">// 4. 보정된 최종 제어값을 차량 컨트롤러에 전달</span>
-    <span class="c-cm">//    부드러운 주행 궤적과 물리적 관성을 구현</span>
-    vehicleController.<span class="c-fn">ProvideInputs</span>(accelerationInput, steeringInput, <span class="c-st">0f</span>);
-}</code></pre>
-
-                <p><strong>기술적 특징:</strong></p>
-                <ul>
-                    <li><span class="highlight">연속 행동 공간:</span> 불연속적인 이동이 아닌 조향과 가속/감속을 정밀하게 제어하는 연속 실수 값 사용</li>
-                    <li><span class="highlight">변화량 제한:</span> 조향은 최대 ±0.5, 가속은 최대 ±0.7로 프레임당 변화량 제한하여 급격한 지터링 방지</li>
-                    <li><span class="highlight">부드러운 제어:</span> 이전 프레임 값과 현재 신경망 출력값의 차이를 계산하여 보정된 최종 제어값 생성</li>
-                    <li><span class="highlight">물리적 관성 구현:</span> 실제 차량과 유사한 부드러운 주행 궤적과 관성 효과 구현</li>
-                </ul>
-
-                <h2>전체 시스템 기술적 특징</h2>
-                <p>ML-Agents 자율 주행 경주차 학습 시스템의 핵심 기술적 특징입니다.</p>
-                <ul>
-                    <li><span class="highlight">체크포인트 기반 네비게이션:</span> 순차적 체크포인트 통과를 통한 정확한 트랙 주행</li>
-                    <li><span class="highlight">목표 지향 보상 설계:</span> 거리 기반 보상과 체크포인트 보상을 통한 효과적인 학습</li>
-                    <li><span class="highlight">다방향 레이캐스트:</span> 전방 9개, 후방 3개 레이로 환경 정확히 인식</li>
-                    <li><span class="highlight">안전성 보상:</span> 근접 페널티, 역주행 감지, 미끄러짐 감지로 안전한 주행 유도</li>
-                    <li><span class="highlight">스플라인 기반 자동 생성:</span> 다양한 트랙에 빠르게 체크포인트 시스템 적용</li>
-                    <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
-                </ul>
 
                 <div style="height: 100px;"></div>
             </div>
