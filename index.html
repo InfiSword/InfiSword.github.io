@@ -2260,20 +2260,76 @@
                 const modal = document.getElementById('modal-overlay-wfk');
                 if (!modal) {
                     console.error('modal-overlay-wfk not found!');
+                    console.log('All modals:', document.querySelectorAll('.modal-overlay'));
                     alert('모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
                     return;
                 }
                 
-                modal.style.display = 'flex';
-                modal.style.visibility = 'visible';
-                modal.style.opacity = '1';
-                modal.style.zIndex = '99999';
+                console.log('WFK Modal element found:', modal);
                 
-                requestAnimationFrame(() => {
-                    const rect = modal.getBoundingClientRect();
-                    if (rect.width === 0 || rect.height === 0) {
-                        modal.style.width = '100vw';
-                        modal.style.height = '100vh';
+                // 모달이 body의 직접 자식이 아니면 body에 추가
+                if (modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                    console.log('Modal moved to body');
+                }
+                
+                const modalContainer = modal.querySelector('.modal-container');
+                const modalBody = modal.querySelector('.modal-body');
+                
+                // 강제 스타일 적용
+                modal.style.setProperty('display', 'flex', 'important');
+                modal.style.setProperty('position', 'fixed', 'important');
+                modal.style.setProperty('top', '0', 'important');
+                modal.style.setProperty('left', '0', 'important');
+                modal.style.setProperty('width', '100vw', 'important');
+                modal.style.setProperty('height', '100vh', 'important');
+                modal.style.setProperty('z-index', '99999', 'important');
+                modal.style.setProperty('background', 'rgba(0,0,0,0.92)', 'important');
+                modal.style.setProperty('justify-content', 'center', 'important');
+                modal.style.setProperty('align-items', 'center', 'important');
+                modal.style.setProperty('visibility', 'visible', 'important');
+                modal.style.setProperty('opacity', '1', 'important');
+                modal.style.setProperty('margin', '0', 'important');
+                modal.style.setProperty('padding', '0', 'important');
+                
+                document.body.style.overflow = 'hidden';
+                
+                // 자식 요소 강제 표시
+                if (modalContainer) {
+                    modalContainer.style.setProperty('display', 'block', 'important');
+                    modalContainer.style.setProperty('visibility', 'visible', 'important');
+                    modalContainer.style.setProperty('opacity', '1', 'important');
+                    modalContainer.style.setProperty('width', '95%', 'important');
+                    modalContainer.style.setProperty('max-width', '1000px', 'important');
+                }
+                
+                if (modalBody) {
+                    modalBody.style.setProperty('display', 'block', 'important');
+                    modalBody.style.setProperty('visibility', 'visible', 'important');
+                    modalBody.style.setProperty('opacity', '1', 'important');
+                }
+                
+                // 강제 리플로우 트리거
+                void modal.offsetHeight;
+                
+                // 리플로우 후 크기 확인
+                requestAnimationFrame(function() {
+                    const checkRect = modal.getBoundingClientRect();
+                    const checkComputed = window.getComputedStyle(modal);
+                    console.log('WFK Modal after reflow:', {
+                        computedDisplay: checkComputed.display,
+                        computedWidth: checkComputed.width,
+                        computedHeight: checkComputed.height,
+                        rectWidth: checkRect.width,
+                        rectHeight: checkRect.height,
+                        offsetWidth: modal.offsetWidth,
+                        offsetHeight: modal.offsetHeight
+                    });
+                    
+                    if (checkRect.width === 0 || checkRect.height === 0) {
+                        console.warn('WFK Modal has zero size, forcing dimensions');
+                        modal.style.setProperty('width', '100vw', 'important');
+                        modal.style.setProperty('height', '100vh', 'important');
                     }
                 });
             } catch (error) {
@@ -2286,6 +2342,9 @@
             const modal = document.getElementById('modal-overlay-wfk');
             if (modal) {
                 modal.style.display = 'none';
+                modal.style.visibility = 'hidden';
+                modal.style.opacity = '0';
+                document.body.style.overflow = '';
             }
         }
         
