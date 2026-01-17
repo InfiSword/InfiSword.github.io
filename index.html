@@ -1189,6 +1189,13 @@
                     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">구불구불한 도로와 바위 지형으로 구성된 학습 트랙 환경</p>
                 </div>
 
+                <div class="tab-container">
+                    <button class="tab-button active" onclick="switchTabML('navigation')">체크포인트 및 보상 시스템</button>
+                    <button class="tab-button" onclick="switchTabML('sensing')">환경 감지 및 행동 결정</button>
+                    <button class="tab-button" onclick="switchTabML('training')">ML-Agents 학습 설정</button>
+                </div>
+
+                <div id="ml-navigation-tab" class="tab-content active">
                 <h2>2. 체크포인트 기반 네비게이션 시스템</h2>
                 <div style="background: linear-gradient(135deg, rgba(255, 193, 7, 0.1) 0%, rgba(255, 152, 0, 0.1) 100%); border-left: 4px solid #ff9800; padding: 15px 20px; margin: 20px 0; border-radius: 6px;">
                     <p style="margin: 0; color: #e0e0e0;"><strong style="color: #ff9800;">시행착오 및 문제 해결:</strong></p>
@@ -1549,8 +1556,8 @@
                     <li><span class="highlight">전방 감지 거리 최적화:</span> 브레이크 성능을 고려하여 15m 거리에서 미리 감지하도록 설정</li>
                 </ul>
 
-                <h2>5. ML-Agents 학습 설정</h2>
-                <p>Unity ML-Agents 라이브러리의 PPO(Proximal Policy Optimization) 알고리즘을 사용하여 에이전트를 학습시켰습니다. 하이퍼파라미터 튜닝과 보상 설계를 통해 안정적인 학습을 달성했습니다.</p>
+                <h2>4. 연속적 행동 결정 및 입력 보정</h2>
+                <p>수집된 관측 정보는 신경망을 통과하여 차량을 제어하기 위한 행동 값으로 변환됩니다.</p>
 
                 <div class="visual-frame">
                     <div class="data-table">
@@ -1637,7 +1644,16 @@
                     <li><span class="highlight">일반화 성능 향상:</span> 다양한 트랙 환경에서 학습하여 단일 트랙에 과적합되지 않도록 방지</li>
                 </ul>
 
-                <h2>4.2 연속적 행동 결정 및 입력 보정</h2>
+                <h2>전체 시스템 기술적 특징</h2>
+                <p>ML-Agents 학습 설정 및 최적화의 핵심 기술적 특징입니다.</p>
+                <ul>
+                    <li><span class="highlight">PPO 알고리즘:</span> Unity ML-Agents 라이브러리의 PPO 알고리즘을 활용한 안정적인 학습</li>
+                    <li><span class="highlight">하이퍼파라미터 튜닝:</span> Batch Size, Learning Rate, Hidden Units 등 최적화된 학습 파라미터</li>
+                    <li><span class="highlight">Curiosity Signal:</span> 탐험을 유도하는 호기심 신호로 다양한 행동 패턴 학습</li>
+                    <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
+                    <li><span class="highlight">대규모 학습:</span> 최대 10,000,000 스텝까지 학습하여 안정적인 정책 수렴</li>
+                </ul>
+                </div>
                 <p>수집된 관측 정보는 신경망을 통과하여 차량을 제어하기 위한 행동 값으로 변환됩니다.</p>
 
                 <h3>연속적 제어 (Continuous Control)</h3>
@@ -1737,12 +1753,7 @@
                 </div>
 
                 <div id="wfk-csv-tab" class="tab-content active">
-                <h2>1. 프로젝트 개요</h2>
-                <p>WorldFirstKill 게임에서 <span class="highlight">데이터 저장, 파싱, 불러오기 로직</span>을 담당했습니다. 
-                <span class="highlight">리플렉션 기반 CSV 파싱 시스템</span>과 <span class="highlight">서버 CSV 다운로드 및 버전 관리</span>를 통해 
-                게임 데이터를 효율적으로 관리하고, <span class="highlight">JSON 기반 저장/불러오기 시스템</span>으로 게임 상태를 안전하게 저장합니다.</p>
-
-                <h2>2. 리플렉션 기반 CSV 파싱 시스템</h2>
+                <h2>1. 리플렉션 기반 CSV 파싱 시스템</h2>
                 <p>CSV 파일의 헤더와 데이터 클래스의 필드를 자동으로 매핑하여 동적으로 파싱하는 시스템을 구현했습니다. 
                 <span class="highlight">리플렉션(Reflection)</span>을 활용하여 타입 안전성을 보장하면서도 확장 가능한 파싱 로직을 설계했습니다.</p>
 
@@ -2409,6 +2420,9 @@
                         // 최후의 수단: 모달을 완전히 재생성
                         modal.style.cssText = 'display: flex !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important; background: rgba(0,0,0,0.92) !important; justify-content: center !important; align-items: center !important; visibility: visible !important; opacity: 1 !important; margin: 0 !important; padding: 0 !important;';
                     }
+                    
+                    // 기본 탭 설정 (navigation 탭 활성화)
+                    switchTabML('navigation');
                 });
                 
             } catch (error) {
@@ -2588,6 +2602,36 @@
             } else if (tabName === 'existing') {
                 document.querySelector('.tab-button:last-child').classList.add('active');
                 document.getElementById('existing-tab').classList.add('active');
+            }
+        }
+
+        function switchTabML(tabName) {
+            // ML-Agents 모달 내의 탭 버튼만 선택
+            const mlModal = document.getElementById('modal-overlay-racing');
+            if (!mlModal) return;
+            
+            const buttons = mlModal.querySelectorAll('.tab-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            const contents = mlModal.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 활성화
+            if (tabName === 'navigation') {
+                const btn = mlModal.querySelector('.tab-button:first-child');
+                if (btn) btn.classList.add('active');
+                const content = document.getElementById('ml-navigation-tab');
+                if (content) content.classList.add('active');
+            } else if (tabName === 'sensing') {
+                const btn = mlModal.querySelector('.tab-button:nth-child(2)');
+                if (btn) btn.classList.add('active');
+                const content = document.getElementById('ml-sensing-tab');
+                if (content) content.classList.add('active');
+            } else if (tabName === 'training') {
+                const btn = mlModal.querySelector('.tab-button:last-child');
+                if (btn) btn.classList.add('active');
+                const content = document.getElementById('ml-training-tab');
+                if (content) content.classList.add('active');
             }
         }
 
