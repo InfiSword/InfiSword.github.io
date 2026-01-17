@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Minhyuk Lee | Systems & Rendering</title>
-    <!-- 폰트: Fira Code (기술), Inter (가독성) -->
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -33,7 +32,7 @@
         .mono { font-family: 'Fira Code', monospace; }
         .container { max-width: 1000px; margin: 0 auto; padding: 80px 20px; }
 
-        header { margin-bottom: 80px; }
+        header { margin-bottom: 60px; }
         .name-tag { font-size: 3.5rem; color: #f0f6fc; font-weight: 700; margin-bottom: 10px; }
         .status-line { color: var(--accent-color); font-size: 1.1rem; border-left: 3px solid var(--accent-color); padding-left: 15px; }
 
@@ -43,6 +42,13 @@
             margin: 80px 0 30px; display: flex; align-items: center;
         }
         .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border-color); margin-left: 20px; }
+
+        /* --- About Me --- */
+        .about-box {
+            background: var(--card-bg); padding: 30px; border: 1px solid var(--border-color); border-radius: 12px;
+            color: #8b949e; margin-bottom: 50px;
+        }
+        .about-highlight { color: #f0f6fc; font-weight: 700; font-size: 1.1rem; display: block; margin-bottom: 15px; }
 
         /* --- Skills --- */
         .skill-container { display: flex; flex-wrap: wrap; gap: 15px; }
@@ -69,7 +75,7 @@
             background: rgba(0,0,0,0.92); z-index: 10000; justify-content: center; align-items: center; backdrop-filter: blur(10px);
         }
         .modal-container {
-            background: var(--bg-color); width: 95%; max-width: 950px; max-height: 90vh;
+            background: var(--bg-color); width: 95%; max-width: 1000px; max-height: 90vh;
             border: 1px solid var(--border-color); border-radius: 16px; overflow-y: auto;
             animation: modalIn 0.3s ease-out;
         }
@@ -77,11 +83,30 @@
 
         .modal-body { padding: 60px; }
         .modal-header-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
-        .modal-body h2 { color: var(--accent-color); margin: 50px 0 20px; font-size: 1.6rem; border-left: 5px solid var(--accent-color); padding-left: 20px;}
-        .modal-body h3 { color: #f0f6fc; margin: 30px 0 15px; font-size: 1.25rem; font-weight: 600; }
+        .modal-body h2 { color: var(--accent-color); margin: 60px 0 25px; font-size: 1.8rem; border-left: 6px solid var(--accent-color); padding-left: 20px;}
+        .modal-body h3 { color: #f0f6fc; margin: 35px 0 15px; font-size: 1.3rem; font-weight: 600; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
         .modal-body p { margin-bottom: 18px; color: #8b949e; font-size: 1.05rem; }
         .modal-body ul { margin: 15px 0 30px 25px; color: #8b949e; }
         .modal-body li { margin-bottom: 10px; }
+
+        /* --- Visual Frames --- */
+        .visual-frame {
+            width: 100%; padding: 30px; background: rgba(0,0,0,0.4);
+            border: 1px solid var(--border-color); border-radius: 8px;
+            margin: 25px 0; text-align: center;
+        }
+        .diagram-grid {
+            display: grid; grid-template-columns: repeat(3, 40px); gap: 5px; justify-content: center; margin: 10px 0;
+        }
+        .grid-cell { width: 40px; height: 40px; border: 1px solid var(--accent-color); opacity: 0.2; }
+        .grid-cell.active { background: var(--accent-color); opacity: 1; box-shadow: 0 0 15px var(--accent-color); }
+        .grid-cell.near { border-color: var(--sub-accent); background: rgba(35, 134, 54, 0.2); opacity: 1; }
+
+        .transaction-flow {
+            display: flex; align-items: center; justify-content: space-around; font-size: 0.75rem; font-family: 'Fira Code';
+        }
+        .flow-step { padding: 8px 15px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--card-bg); color: var(--text-color); }
+        .flow-arrow { color: var(--accent-color); font-weight: bold; }
 
         /* --- Advanced Code Block --- */
         pre {
@@ -107,6 +132,18 @@
             <div class="status-line mono">Gameplay & Systems Programmer</div>
         </header>
 
+        <!-- [ADDED] Introduction Section -->
+        <section id="about">
+            <h2 class="section-title">00. About Me</h2>
+            <div class="about-box">
+                <span class="about-highlight">"System Architecture & Optimization Expert"</span>
+                <p>
+                    Unity 엔진의 내부 동작 원리를 깊이 있게 분석하여, 성능과 확장성을 모두 고려한 시스템을 설계하는 프로그래머 이민혁입니다.<br>
+                    <strong>메모리 최적화(Memory Layout)</strong>와 <strong>연산 효율성(Algorithm Optimization)</strong>에 집중하며, 단순한 기능 구현을 넘어 견고한 아키텍처를 구축하는 것을 목표로 합니다.
+                </p>
+            </div>
+        </section>
+
         <section id="skills">
             <h2 class="section-title">01. Tech Stack</h2>
             <div class="skill-container">
@@ -126,14 +163,14 @@
         </section>
 
         <section id="projects">
-            <h2 class="section-title">02.Game Projects</h2>
+            <h2 class="section-title">02. Major Achievement</h2>
             <article class="project-card" onclick="openModal()">
                 <div class="project-info">
                     <span class="project-tag mono">Systems Engineering</span>
                     <h3 class="project-name">File Tower Defense</h3>
                     <p style="color: #8b949e; margin-bottom: 25px;">
                         유니티의 좌표계 특성을 분석하여 <span class="highlight">UI에서 GameObject 기반</span>으로 아키텍처를 전면 재설계. 
-                        커스텀 레이아웃 엔진을 통한 <span class="highlight">동적 그리드 스냅 및 배치 로직</span> 구축.
+                        고도화된 탐색 최적화와 <span class="highlight">트랜잭션 기반 배치 시스템</span> 구축.
                     </p>
                     <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> VIEW_TECHNICAL_REPORT</div>
                 </div>
@@ -160,8 +197,9 @@
                     <button onclick="closeModal()" style="background: none; border: 1px solid var(--accent-color); color: var(--accent-color); padding: 8px 20px; border-radius: 6px; cursor: pointer; font-family: 'Fira Code'; font-size: 0.8rem;">[X] DISCONNECT</button>
                 </div>
                 
-                <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">Architecture Redesign</h1>
+                <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">System Architecture Deep-Dive</h1>
 
+               
                 <h2>1. UI(RectTransform)에서 GameObject(Transform)기반으로의 전환</h2>
                 <p>초기 단계에서는 윈도우 바탕화면의 느낌을 구현하고자 파일 유닛을 UI 시스템으로 구축했습니다. 하지만 프로젝트 규모가 커짐에 따라 다음과 같은 <span class="highlight">결정적인 설계적 한계</span>를 마주했습니다.</p>
                 
@@ -170,6 +208,25 @@
                     <li><span class="highlight">연산 비용의 증가:</span> 월드 좌표 기반의 바이러스(적)가 UI 기반의 파일 유닛 간의 거리 계산 및 물리적 충돌 판정을 수행할 때, <code>Camera.WorldToScreenPoint</code>, <code>Camera.ScreenToWorldPoint</code> 등의 변환 함수를 매 프레임 호출해야 하는 오버헤드가 발생했습니다.</li>
                     <li><span class="highlight">계층 구조의 복잡성:</span> 서로 다른 부모 객체(UI Hierarchy) 간의 위치 변환 로직은 코드의 가독성을 해치고 구조적인 복잡도를 증대시켰습니다.</li>
                 </ul>
+
+<div class="visual-frame">
+                    <div style="display: flex; justify-content: space-around; align-items: center;">
+                        <div class="mono" style="font-size: 0.7rem; border: 1px solid #ff7b72; padding: 10px;">
+                            RectTransform (UI)<br>
+                            - Anchor Dependent<br>
+                            - Pivot Relative<br>
+                            - WorldToScreen Required
+                        </div>
+                        <div class="flow-arrow">>>></div>
+                        <div class="mono" style="font-size: 0.7rem; border: 1px solid var(--sub-accent); padding: 10px;">
+                            Transform (World)<br>
+                            - Absolute Position<br>
+                            - Physics 2D Optimized<br>
+                            - Unified Coordinate Space
+                        </div>
+                    </div>
+                </div>
+
                 <p>이를 해결하기 위해 모든 유닛을 <span class="highlight">GameObject(Transform) 기반</span>으로 전면 교체하여 월드 좌표계로 통일하였으며, 이를 통해 성능 최적화와 확장성 있는 로직 설계가 가능해졌습니다.</p>
 
                 <h2>2. Grid기반 유닛 배치 시스템 (FileGridManager & FileGrid & Layout Engine)</h2>
@@ -196,9 +253,110 @@
     <span class="c-kw">public</span> <span class="c-ty">GameObject</span> obstacleObject { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
 
     <span class="c-cm">// ... 각종 초기화, 점유 파일 세팅/제거, 동적 버프 갱신 로직</span>
+}</code></pre>                
+
+  <p>각 그리드 셀은 단순한 위치 정보가 아닌, <span class="highlight">HashSet 기반의 버프 관리</span>를 통해 중복 버프를 방지하고 상태 변화를 실시간으로 동기화하는 지능형 컨테이너입니다.</p>
+
+                <h3>[이벤트 기반 자동 버프 시스템] (Observer Pattern)</h3>
+                <p>유닛 배치 시 이미 그리드에 활성화된 버프 소스(Aura)를 즉각 적용받도록 설계되었습니다. <code>HashSet</code>을 사용하여 중복을 원천 차단합니다.</p>
+
+<pre><code><span class="c-cm">// FileGrid.cs: 버프 소스 추가 시 즉시 반응 로직</span>
+<span class="c-kw">private readonly</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt; _activeBuffSources = <span class="c-kw">new</span> <span class="c-ty">HashSet</span>&lt;<span class="c-ty">File_Base</span>&gt;(); 
+
+<span class="c-kw">public void</span> <span class="c-fn">AddBuffSource</span>(<span class="c-ty">File_Base</span> source)
+{
+    <span class="c-kw">if</span> (source == <span class="c-kw">null</span>) <span class="c-kw">return</span>;
+
+    <span class="c-cm">// HashSet을 통한 O(1) 중복 체크 및 빠른 조회</span>
+    <span class="c-kw">if</span> (!_activeBuffSources.<span class="c-fn">Contains</span>(source)) {
+        _activeBuffSources.<span class="c-fn">Add</span>(source);
+    }
+
+    <span class="c-cm">// 파일 배치 시 활성화된 버프 소스들을 즉시 적용</span>
+    <span class="c-kw">if</span> (fileUnit != <span class="c-kw">null</span>) {
+        <span class="c-fn">ApplyBuffFromSource</span>(fileUnit, source, <span class="c-kw">true</span>);
+    }
 }</code></pre>
-      
-                <h3>[GameObjectGridLayout: 커스텀 레이아웃 엔진]</h3>
+
+                <!-- CATEGORY: FILE GRID MANAGER -->
+                <h2>[FileGridManager: 그리드 관련 매니저]</h2>
+                <p>전체 그리드 시스템을 총괄하며, 좌표 변환, 조건부 탐색, 유닛 배치 트랜잭션을 총괄합니다.</p>
+
+                <h3>[공간 분할 최적화] 3x3 국소 영역 탐색 (Spatial Partitioning)</h3>
+                <p>전체 그리드(91개)를 순회하는 대신, 중심 그리드 기준 3x3 영역만 검사하여 탐색 비용을 <strong>O(n)에서 O(1)</strong>로 단축했습니다. (약 10배 이상 성능 향상)</p>
+                <div class="visual-frame">
+                    <div class="diagram-grid">
+                        <div class="grid-cell near"></div><div class="grid-cell near"></div><div class="grid-cell near"></div>
+                        <div class="grid-cell near"></div><div class="grid-cell active"></div><div class="grid-cell near"></div>
+                        <div class="grid-cell near"></div><div class="grid-cell near"></div><div class="grid-cell near"></div>
+                    </div>
+                </div>
+
+<pre><code><span class="c-cm">// FileGridManager.cs: 공간 분할 기반 국소 탐색 최적화</span>
+<span class="c-kw">private</span> <span class="c-ty">FileGrid</span> <span class="c-fn">FindClosestGridInRange</span>(<span class="c-ty">Vector2</span> worldPos, <span class="c-kw">int</span> centerX, <span class="c-kw">int</span> centerY)
+{
+    <span class="c-kw">float</span> minDistSqr = <span class="c-kw">float</span>.MaxValue;
+    <span class="c-ty">FileGrid</span> closestGrid = <span class="c-kw">null</span>;
+
+    <span class="c-kw">for</span> (<span class="c-kw">int</span> dx = -<span class="string">1</span>; dx <= <span class="string">1</span>; dx++) {
+        <span class="c-kw">for</span> (<span class="c-kw">int</span> dy = -<span class="string">1</span>; dy <= <span class="string">1</span>; dy++) {
+            <span class="c-kw">int</span> x = centerX + dx; <span class="c-kw">int</span> y = centerY + dy;
+            <span class="c-kw">if</span> (<span class="c-fn">IsValidGridIndex</span>(x, y)) {
+                <span class="c-fn">SearchClosestBetter</span>(gridArray[x, y], worldPos, <span class="c-kw">ref</span> minDistSqr, <span class="c-kw">ref</span> closestGrid);
+            }
+        }
+    }
+    <span class="c-kw">return</span> closestGrid;
+}
+
+<span class="c-cm">// 제곱 거리(sqrMagnitude) 사용으로 sqrt 연산 제거 최적화</span>
+<span class="c-kw">private void</span> <span class="c-fn">SearchClosestBetter</span>(<span class="c-ty">FileGrid</span> candidate, <span class="c-ty">Vector2</span> worldPos, <span class="c-kw">ref float</span> bestDistSqr, <span class="c-kw">ref FileGrid</span> bestGrid)
+{
+    <span class="c-kw">if</span> (candidate == <span class="c-kw">null</span>) <span class="c-kw">return</span>;
+    <span class="c-kw">float</span> distSqr = ((<span class="c-ty">Vector2</span>)candidate.transform.position - worldPos).sqrMagnitude;
+    <span class="c-kw">if</span> (distSqr < bestDistSqr) {
+        bestDistSqr = distSqr;
+        bestGrid = candidate;
+    }
+}</code></pre>
+
+                <h3>[트랜잭션 보장 패턴] 원자적 배치 로직 (Transactional Pattern)</h3>
+                <p>유닛 배치 시 데이터 불일치를 방지하고 실패 시 이전 상태를 유지하기 위해 <strong>원자적(Atomic) 배치 로직</strong>을 설계했습니다.</p>
+                <div class="visual-frame">
+                    <div class="transaction-flow mono">
+                        <div class="flow-step">Validate</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Rollback Prep</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Commit State</div>
+                        <div class="flow-arrow">→</div>
+                        <div class="flow-step">Notify/Buff</div>
+                    </div>
+                </div>
+
+<pre><code><span class="c-kw">public bool</span> <span class="c-fn">TrySetUnitAtGrid</span>(<span class="c-ty">File_Base</span> unit, <span class="c-ty">FileGrid</span> targetGrid)
+{
+    <span class="c-cm">// 1. 유효성 검사 (Pre-validation)</span>
+    <span class="c-kw">if</span> (unit == <span class="c-kw">null</span> || targetGrid == <span class="c-kw">null</span> || targetGrid.obstacleObject != <span class="c-kw">null</span>) <span class="c-kw">return false</span>;
+
+    <span class="c-cm">// 2. 기존 그리드에서 안전하게 제거 (Rollback 준비)</span>
+    <span class="c-ty">FileGrid</span> currentGrid = unit.CurrentGrid;
+    <span class="c-kw">if</span> (currentGrid != <span class="c-kw">null</span> && currentGrid != targetGrid) {
+        currentGrid.<span class="c-fn">RemoveFileUnit</span>(); 
+    }
+
+    <span class="c-cm">// 3. Commit: 상태 변경 및 물리/논리 계층 구조 설정</span>
+    unit.FileState = <span class="c-ty">FileStatus</span>.normal;
+    unit.transform.position = targetGrid.transform.position;
+    unit.transform.<span class="c-fn">SetParent</span>(targetGrid.transform);
+    
+    <span class="c-cm">// 4. Notify: 새 그리드 등록 및 버프 자동 적용</span>
+    targetGrid.<span class="c-fn">SetFileUnit</span>(unit); 
+    <span class="c-kw">return true</span>;
+}</code></pre>
+
+                <!-- [ADDED] Category: GameObjectGridLayout -->
+               <h3>[GameObjectGridLayout: 커스텀 레이아웃 엔진]</h3>
                 <p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하고, 전체 시스템의 시작 월드 좌표를 제공하는 핵심 컴포넌트입니다.</p>
 
 <pre><code><span class="c-kw">public class</span> <span class="c-ty">GameObjectGridLayout</span> : <span class="c-ty">MonoBehaviour</span>
@@ -239,46 +397,15 @@
     }
 }</code></pre>
 
-<h3>[FileGridManager: 시스템 오케스트레이터]</h3>
-                <p>전체 그리드 시스템을 관리하는 핵심 매니저입니다. <code>FileGrid</code> 인스턴스들의 생명주기 관리, 좌표 변환, 조건부 탐색, 유닛 배치 트랜잭션을 총괄합니다.</p>
-                
-                <div class="skill-item mono" style="margin-bottom: 20px; background: rgba(88, 166, 255, 0.05);">
-                    <span class="skill-label">System Relationship</span>
-                    FileGridManager (매니저)<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;├─ gridArray[Width, Height] (2D 배열 데이터)<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;├─ 좌표 변환 (월드 ↔ 그리드 인덱스)<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;├─ 그리드 탐색 및 플래그 기반 검색<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;└─ 파일 배치/제거 트랜잭션 관리<br>
-                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─→ FileGrid (개별 셀: 유닛 보관/버프/장애물)
-                </div>
 
-                <h3>주요 기능 로그</h3>
-                <ul>
-                    <li><span class="highlight">그리드 시스템 초기화:</span> <code>CreateGrids()</code>를 통해 프리팹 기반의 2D 레이아웃을 생성하고 <code>GameObjectGridLayout</code>과 연동하여 동적 배치를 완료합니다.</li>
-                    <li><span class="highlight">고도화된 탐색 시스템:</span> <code>FindFlagGridWorld</code> 함수를 통해 <code>Occupied</code>, <code>Obstacle</code> 등 여러 조건을 조합한 최적의 그리드를 탐색합니다.</li>
-                    <li><span class="highlight">안전한 드롭 처리:</span> <code>HandleDropAt</code> 로직을 통해 UI 폴더 창, 월드 그리드, 특수 장애물(WormHole) 간의 상호작용 우선순위를 결정합니다.</li>
-                </ul>
-
-<pre><code><span class="c-cm">// FileGridManager.cs: 그리드 점유 상태 및 계층 구조 동기화</span>
-<span class="c-kw">public bool</span> <span class="c-fn">TrySetUnitAtGrid</span>(<span class="c-ty">File_Base</span> unit, <span class="c-ty">FileGrid</span> targetGrid) {
-    <span class="c-cm">// 유효성 검사 (장애물 및 점유 여부 확인)</span>
-    <span class="c-kw">if</span> (targetGrid.obstacleObject != <span class="c-kw">null</span> || targetGrid.<span class="c-fn">GetFileUnit</span>() != <span class="c-kw">null</span>) 
-        <span class="c-kw">return false</span>;
-    
-    <span class="c-cm">// 물리적 위치 및 부모 계층 구조 동기화</span>
-    unit.transform.position = targetGrid.transform.position;
-    unit.transform.<span class="c-fn">SetParent</span>(targetGrid.transform);
-    
-    <span class="c-cm">// 논리 데이터 갱신 및 버프 시스템 트리거</span>
-    targetGrid.<span class="c-fn">SetFileUnit</span>(unit); 
-    <span class="c-kw">return true</span>;
-}</code></pre>
-                
-                <h2>3. 중앙 집중식 입력 시스템 (InputManager)</h2>
+                <!-- [ADDED] Category: InputManager -->
+                <h2>5. Category: InputManager (Centralized Interaction)</h2>
                 <p>수많은 유닛이 개별 이벤트를 수신하지 않고, <code>InputManager</code>가 모든 마우스 입력을 통합 관리하여 <code>IInteractable</code> 인터페이스를 구현한 객체에 전달합니다.</p>
+
 <pre><code><span class="c-cm">// InputManager.cs: Raycast를 통한 중앙 집중식 상호작용 객체 탐지</span>
 <span class="c-kw">private</span> <span class="c-ty">IInteractable</span> <span class="c-fn">GetInteractableUnderMouse</span>() {
-    <span class="c-ty">RaycastHit2D</span> hit = <span class="type">Physics2D</span>.<span class="c-fn">Raycast</span>(m_mouseWorldPosition, <span class="c-ty">Vector2</span>.zero, <span class="string">0f</span>, unitLayerMask);
+    <span class="c-cm">// Physics2D Raycast를 사용하여 월드 좌표상의 유닛과 바이러스를 정교하게 검출</span>
+    <span class="c-ty">RaycastHit2D</span> hit = <span class="c-ty">Physics2D</span>.<span class="c-fn">Raycast</span>(m_mouseWorldPosition, <span class="c-ty">Vector2</span>.zero, <span class="string">0f</span>, unitLayerMask);
     <span class="c-kw">if</span> (hit.collider != <span class="c-kw">null</span>) {
         <span class="c-kw">return</span> hit.collider.<span class="c-fn">GetComponent</span>&lt;<span class="c-ty">IInteractable</span>&gt;();
     }
