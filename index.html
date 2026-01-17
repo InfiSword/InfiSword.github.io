@@ -302,6 +302,19 @@
                     <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> VIEW_TECHNICAL_REPORT</div>
                 </div>
             </article>
+            <article class="project-card" id="wfk-card" style="cursor: pointer;" onclick="openWFKModal(event)">
+                <div class="project-info" onclick="event.stopPropagation()">
+                    <span class="project-tag mono">Data Management & Parsing</span>
+                    <h3 class="project-name">WorldFirstKill</h3>
+                    <p style="color: #8b949e; margin-bottom: 25px;">
+                        <span class="highlight">리플렉션 기반 CSV 파싱 시스템</span>과 <span class="highlight">서버 CSV 다운로드 및 버전 관리 시스템</span>을 설계하여 
+                        게임 데이터를 효율적으로 관리. <span class="highlight">JSON 기반 저장/불러오기 시스템</span>과 <span class="highlight">Seed/Token 시스템</span>을 구현하여 
+                        게임 상태를 안전하게 저장하고 복원. <span class="highlight">Factory Pattern</span>을 활용한 데이터 기반 객체 생성 시스템으로 
+                        확장 가능한 데이터 아키텍처 구축.
+                    </p>
+                    <div class="mono" style="font-size: 0.9rem; color: var(--accent-color);">>> VIEW_TECHNICAL_REPORT</div>
+                </div>
+            </article>
         </section>
 
         <footer>
@@ -1628,6 +1641,309 @@
         </div>
     </div>
 
+    <!-- WorldFirstKill Modal -->
+    <div id="modal-overlay-wfk" class="modal-overlay" style="display: none;">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2>WorldFirstKill: 데이터 저장 및 파싱 시스템</h2>
+                <button class="close-btn" onclick="closeWFKModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <h2>1. 프로젝트 개요</h2>
+                <p>WorldFirstKill 게임에서 <span class="highlight">데이터 저장, 파싱, 불러오기 로직</span>을 담당했습니다. 
+                <span class="highlight">리플렉션 기반 CSV 파싱 시스템</span>과 <span class="highlight">서버 CSV 다운로드 및 버전 관리</span>를 통해 
+                게임 데이터를 효율적으로 관리하고, <span class="highlight">JSON 기반 저장/불러오기 시스템</span>으로 게임 상태를 안전하게 저장합니다.</p>
+
+                <h2>2. 리플렉션 기반 CSV 파싱 시스템</h2>
+                <p>CSV 파일의 헤더와 데이터 클래스의 필드를 자동으로 매핑하여 동적으로 파싱하는 시스템을 구현했습니다. 
+                <span class="highlight">리플렉션(Reflection)</span>을 활용하여 타입 안전성을 보장하면서도 확장 가능한 파싱 로직을 설계했습니다.</p>
+
+<pre><code><span class="c-cm">// CSVParser.cs: 리플렉션 기반 CSV 파싱</span>
+<span class="c-kw">public</span> <span class="c-ty">List</span>&lt;<span class="c-ty">T</span>&gt; <span class="c-fn">parseCSV</span>&lt;<span class="c-ty">T</span>&gt;(<span class="c-kw">string</span> csvData, <span class="c-kw">bool</span> isCutColumn, <span class="c-kw">int</span> start, <span class="c-kw">int</span> end) <span class="c-kw">where T</span> : <span class="c-ty">BaseData</span>, <span class="c-kw">new</span>()
+{
+    <span class="c-ty">List</span>&lt;<span class="c-ty">T</span>&gt; csvDataList = <span class="c-kw">new</span> <span class="c-ty">List</span>&lt;<span class="c-ty">T</span>&gt;();
+
+    <span class="c-cm">// 리플렉션을 사용하여 타입의 모든 필드 정보 가져오기</span>
+    <span class="c-ty">FieldInfo</span>[] myFieldInfo;
+    <span class="c-ty">Type</span> myType = <span class="c-kw">typeof</span>(<span class="c-ty">T</span>);
+    myFieldInfo = myType.<span class="c-fn">GetFields</span>(<span class="c-ty">BindingFlags</span>.NonPublic | <span class="c-ty">BindingFlags</span>.Instance
+        | <span class="c-ty">BindingFlags</span>.Public | <span class="c-ty">BindingFlags</span>.Static);
+
+    <span class="c-cm">// CSV 데이터를 줄 단위로 분리</span>
+    <span class="c-kw">string</span>[] csvIndexData = csvData.<span class="c-fn">Split</span>(<span class="c-st">'\n'</span>)
+        .<span class="c-fn">Where</span>(x => !<span class="c-ty">string</span>.<span class="c-fn">IsNullOrWhiteSpace</span>(x)).<span class="c-fn">ToArray</span>();
+
+    <span class="c-cm">// 첫 번째 줄은 헤더(Attribute)로 사용</span>
+    <span class="c-kw">string</span>[] attributeColumnArray = csvIndexData[<span class="c-st">0</span>].<span class="c-fn">Trim</span>().<span class="c-fn">Split</span>(<span class="c-st">','</span>);
+
+    <span class="c-cm">// CSV 헤더와 클래스 필드를 매핑</span>
+    <span class="c-fn">SetupFieldDict</span>(attributeColumnArray, myFieldInfo);
+
+    <span class="c-cm">// 각 데이터 행 파싱</span>
+    <span class="c-kw">for</span> (<span class="c-kw">int</span> rowIndex = <span class="c-st">1</span>; rowIndex < csvIndexData.Length; rowIndex++) {
+        <span class="c-kw">string</span>[] column = <span class="c-fn">SmartSplit</span>(csvIndexData[rowIndex].<span class="c-fn">Trim</span>());
+        <span class="c-kw">if</span> (column.Length == <span class="c-st">0</span> || <span class="c-ty">string</span>.<span class="c-fn">IsNullOrWhiteSpace</span>(column[<span class="c-st">0</span>]))
+            <span class="c-kw">continue</span>;
+
+        <span class="c-ty">T</span> objectData = <span class="c-ty">Activator</span>.<span class="c-fn">CreateInstance</span>&lt;<span class="c-ty">T</span>&gt;();
+
+        <span class="c-cm">// 각 컬럼 데이터를 해당 필드에 할당</span>
+        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < column.Length; i++) {
+            <span class="c-kw">if</span> (DataIndex_Dict.<span class="c-fn">TryGetValue</span>(i, <span class="c-kw">out</span> <span class="c-kw">string</span> attribute) &&
+                Data_Dict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">string</span> fieldName)) {
+                <span class="c-ty">FieldInfo</span> fieldInfo = myType.<span class="c-fn">GetField</span>(fieldName);
+                <span class="c-kw">string</span> columnData = column[i];
+
+                <span class="c-kw">if</span> (fieldInfo != <span class="c-kw">null</span>) {
+                    <span class="c-fn">SetFieldValue</span>(objectData, fieldInfo, columnData);
+                }
+            }
+        }
+
+        csvDataList.<span class="c-fn">Add</span>(objectData);
+    }
+    <span class="c-kw">return</span> csvDataList;
+}
+
+<span class="c-cm">// 쉼표와 따옴표를 고려한 스마트 분할</span>
+<span class="c-kw">string</span>[] <span class="c-fn">SmartSplit</span>(<span class="c-kw">string</span> line)
+{
+    <span class="c-kw">return</span> <span class="c-ty">Regex</span>.<span class="c-fn">Matches</span>(line, <span class="c-st">@"(?:^|,)(?:""(?<val>[^""]*)""|(?<val>[^,""]*))"</span>)
+                .<span class="c-fn">Cast</span>&lt;<span class="c-ty">Match</span>&gt;()
+                .<span class="c-fn">Select</span>(m => m.Groups[<span class="c-st">"val"</span>].Value)
+                .<span class="c-fn">ToArray</span>();
+}
+
+<span class="c-cm">// 필드 타입에 따라 자동 변환</span>
+<span class="c-kw">protected virtual void</span> <span class="c-fn">SetFieldValue</span>(<span class="c-ty">BaseData</span> instance, <span class="c-ty">FieldInfo</span> fieldInfo, <span class="c-kw">string</span> value)
+{
+    <span class="c-kw">if</span> (fieldInfo.FieldType == <span class="c-kw">typeof</span>(<span class="c-kw">string</span>))
+        fieldInfo.<span class="c-fn">SetValue</span>(instance, value);
+    <span class="c-kw">else if</span> (fieldInfo.FieldType == <span class="c-kw">typeof</span>(<span class="c-kw">int</span>) && <span class="c-kw">int</span>.<span class="c-fn">TryParse</span>(value, <span class="c-kw">out</span> <span class="c-kw">int</span> intVal))
+        fieldInfo.<span class="c-fn">SetValue</span>(instance, intVal);
+    <span class="c-kw">else if</span> (fieldInfo.FieldType == <span class="c-kw">typeof</span>(<span class="c-kw">float</span>) && <span class="c-kw">float</span>.<span class="c-fn">TryParse</span>(value, <span class="c-kw">out</span> <span class="c-kw">float</span> floatVal))
+        fieldInfo.<span class="c-fn">SetValue</span>(instance, floatVal);
+}</code></pre>
+
+                <h3>기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">리플렉션 기반 동적 매핑:</span> CSV 헤더와 클래스 필드를 자동으로 매핑하여 수동 매핑 코드 불필요</li>
+                    <li><span class="highlight">스마트 분할:</span> 정규식을 사용하여 쉼표와 따옴표를 포함한 CSV 데이터를 정확히 파싱</li>
+                    <li><span class="highlight">타입 안전성:</span> 제네릭과 리플렉션을 활용하여 컴파일 타임 타입 체크 보장</li>
+                    <li><span class="highlight">확장성:</span> 새로운 데이터 타입 추가 시 BaseData만 상속하면 자동으로 파싱 지원</li>
+                </ul>
+
+                <h2>3. 서버 CSV 다운로드 및 버전 관리 시스템</h2>
+                <p>구글 스프레드시트에서 CSV 데이터를 다운로드하고, 버전을 관리하여 변경된 데이터만 업데이트하는 시스템을 구현했습니다.</p>
+
+<pre><code><span class="c-cm">// ServerCSV_ConvertData.cs: 서버 CSV 다운로드 및 버전 관리</span>
+<span class="c-kw">public static async</span> <span class="c-ty">Task</span>&lt;<span class="c-kw">bool</span>&gt; <span class="c-fn">DownloadAllCSVAsync</span>(<span class="c-ty">Action</span>&lt;<span class="c-kw">float</span>&gt; progressCallback = <span class="c-kw">null</span>)
+{
+    <span class="c-fn">LoadLocalVersions</span>();  <span class="c-cm">// 로컬 버전 정보 로드</span>
+
+    <span class="c-kw">foreach</span> (<span class="c-kw">var</span> kvp <span class="c-kw">in</span> csvURLDict) {
+        <span class="c-ty">CSVDataType</span> dataType = kvp.Key;
+        <span class="c-kw">var</span> attrUrlDict = kvp.Value;
+
+        <span class="c-kw">foreach</span> (<span class="c-kw">var</span> attrKvp <span class="c-kw">in</span> attrUrlDict) {
+            <span class="c-kw">string</span> attribute = attrKvp.Key;
+            <span class="c-kw">string</span> url = attrKvp.Value;
+
+            <span class="c-cm">// 서버 버전과 로컬 버전 비교</span>
+            <span class="c-kw">string</span> serverVersion = _serverVersions.<span class="c-fn">TryGetValue</span>(dataType, <span class="c-kw">out</span> <span class="c-kw">var</span> sAttrVerDict) 
+                && sAttrVerDict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">var</span> sVer) ? sVer : <span class="c-st">"0"</span>;
+
+            <span class="c-kw">string</span> localVersion = _localVersions.<span class="c-fn">TryGetValue</span>(dataType, <span class="c-kw">out</span> <span class="c-kw">var</span> lAttrVerDict) 
+                && lAttrVerDict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">var</span> lVer) ? lVer : <span class="c-st">"0"</span>;
+
+            <span class="c-kw">string</span> fileName = $<span class="c-st">"{dataType}_{attribute}.csv"</span>;
+            <span class="c-kw">string</span> localFilePath = <span class="c-ty">Path</span>.<span class="c-fn">Combine</span>(LocalDataPath, fileName);
+
+            <span class="c-kw">string</span> fileContent = <span class="c-kw">null</span>;
+            <span class="c-kw">bool</span> needsDownload = <span class="c-kw">true</span>;
+
+            <span class="c-cm">// 버전이 같으면 로컬 파일 사용, 다르면 서버에서 다운로드</span>
+            <span class="c-kw">if</span> (<span class="c-ty">File</span>.<span class="c-fn">Exists</span>(localFilePath) && localVersion == serverVersion) {
+                fileContent = <span class="c-ty">File</span>.<span class="c-fn">ReadAllText</span>(localFilePath);
+                needsDownload = <span class="c-kw">false</span>;
+                <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>($<span class="c-st">"로컬에서 로드: {fileName} (버전: {localVersion})"</span>);
+            }
+
+            <span class="c-kw">if</span> (needsDownload) {
+                <span class="c-ty">Debug</span>.<span class="c-fn">Log</span>($<span class="c-st">"서버에서 다운로드: {fileName} (로컬:{localVersion} vs 서버:{serverVersion})"</span>);
+                fileContent = <span class="c-kw">await</span> <span class="c-fn">DownloadFileAsync</span>(url);
+                
+                <span class="c-kw">if</span> (fileContent != <span class="c-kw">null</span>) {
+                    <span class="c-ty">File</span>.<span class="c-fn">WriteAllText</span>(localFilePath, fileContent);
+                    <span class="c-cm">// 로컬 버전 정보 업데이트</span>
+                    <span class="c-kw">if</span> (!_localVersions.<span class="c-fn">ContainsKey</span>(dataType)) 
+                        _localVersions[dataType] = <span class="c-kw">new</span> <span class="c-ty">Dictionary</span>&lt;<span class="c-kw">string</span>, <span class="c-kw">string</span>&gt;();
+                    _localVersions[dataType][attribute] = serverVersion;
+                }
+            }
+
+            csvDataDict.<span class="c-fn">Add</span>(attribute, fileContent);
+            progressCallback?.<span class="c-fn">Invoke</span>((<span class="c-kw">float</span>)currentCount / totalCount);
+        }
+    }
+
+    <span class="c-fn">SaveLocalVersions</span>();  <span class="c-cm">// 업데이트된 버전 정보 저장</span>
+    <span class="c-kw">return true</span>;
+}</code></pre>
+
+                <h3>기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">버전 기반 업데이트:</span> 서버 버전과 로컬 버전을 비교하여 변경된 데이터만 다운로드</li>
+                    <li><span class="highlight">비동기 다운로드:</span> UnityWebRequest를 사용한 비동기 CSV 다운로드로 UI 블로킹 방지</li>
+                    <li><span class="highlight">로컬 캐싱:</span> 다운로드한 CSV 파일을 로컬에 저장하여 오프라인 사용 가능</li>
+                    <li><span class="highlight">진행률 콜백:</span> 다운로드 진행률을 실시간으로 전달하여 UI 업데이트</li>
+                </ul>
+
+                <h2>4. JSON 기반 저장/불러오기 시스템</h2>
+                <p>게임 상태를 JSON 형식으로 저장하고 불러오는 시스템을 구현했습니다. Unity의 JsonUtility를 활용하여 직렬화/역직렬화를 수행합니다.</p>
+
+<pre><code><span class="c-cm">// DataManager.cs: JSON 기반 저장/불러오기</span>
+<span class="c-kw">public void</span> <span class="c-fn">SaveData</span>()
+{
+    <span class="c-ty">PlayerData</span> saveData = <span class="c-kw">new</span> <span class="c-ty">PlayerData</span>();
+
+    <span class="c-kw">if</span> (Managers.nowPlayerData == <span class="c-kw">null</span>) <span class="c-kw">return</span>;
+
+    saveData = Managers.nowPlayerData;
+
+    <span class="c-cm">// JSON 직렬화</span>
+    <span class="c-kw">string</span> data = <span class="c-ty">JsonUtility</span>.<span class="c-fn">ToJson</span>(saveData);
+    <span class="c-ty">File</span>.<span class="c-fn">WriteAllText</span>(FilePath + DataNum, data);
+}
+
+<span class="c-kw">public void</span> <span class="c-fn">LoadData</span>()
+{
+    <span class="c-kw">if</span> (!<span class="c-ty">File</span>.<span class="c-fn">Exists</span>(FilePath + DataNum)) <span class="c-kw">return</span>;
+
+    <span class="c-kw">string</span> data = <span class="c-ty">File</span>.<span class="c-fn">ReadAllText</span>(FilePath);
+
+    <span class="c-cm">// JSON 역직렬화</span>
+    <span class="c-ty">PlayerData</span> LoadData = <span class="c-ty">JsonUtility</span>.<span class="c-fn">FromJson</span>&lt;<span class="c-ty">PlayerData</span>&gt;(data);
+
+    Managers.nowPlayerData = LoadData;
+
+    <span class="c-cm">// 설정 데이터 복원</span>
+    Managers.Sound.BGMSoundVolume = Managers.nowPlayerData.BGMSound;
+    Managers.Sound.SFXSoundVolume = Managers.nowPlayerData.SFXSound;
+}</code></pre>
+
+                <h2>5. Seed/Token 시스템</h2>
+                <p>랜덤 시드 상태를 문자열 토큰으로 인코딩하여 저장하고 복원하는 시스템을 구현했습니다. 게임의 RNG 상태를 완전히 복원할 수 있습니다.</p>
+
+<pre><code><span class="c-cm">// SaveLoadManager.cs: Seed Token 빌드 및 복원</span>
+<span class="c-kw">public static string</span> <span class="c-fn">BuildSeedToken</span>()
+{
+    <span class="c-kw">int</span> baseSeed = <span class="c-ty">GameSeed</span>.BaseSeed;
+    <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>, <span class="c-kw">ulong</span>&gt; usage = <span class="c-ty">GameSeed</span>.<span class="c-fn">GetUsageSnapshot</span>();
+
+    <span class="c-kw">string</span> token = <span class="c-fn">Pad</span>(<span class="c-fn">EncodeIntToUInt</span>(baseSeed), BASE_SEED_WIDTH);
+
+    <span class="c-ty">List</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>&gt; domains = <span class="c-kw">new</span> <span class="c-ty">List</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>&gt;((<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>[])<span class="c-ty">Enum</span>.<span class="c-fn">GetValues</span>(<span class="c-kw">typeof</span>(<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>)));
+    domains.<span class="c-fn">Sort</span>((a, b) => (a).<span class="c-fn">CompareTo</span>(b));
+
+    token += <span class="c-fn">Pad</span>((<span class="c-kw">uint</span>)domains.Count, COUNT_WIDTH);
+    <span class="c-kw">foreach</span> (<span class="c-kw">var</span> d <span class="c-kw">in</span> domains) {
+        <span class="c-kw">ulong</span> count = usage.<span class="c-fn">GetValueOrDefault</span>(d, <span class="c-st">0UL</span>);
+        token += <span class="c-fn">Pad</span>((<span class="c-kw">uint</span>)d, DOMAIN_ID_WIDTH);
+        token += <span class="c-fn">Pad</span>(count, USAGE_WIDTH);
+    }
+
+    <span class="c-kw">return</span> token;
+}
+
+<span class="c-kw">public static bool</span> <span class="c-fn">RestoreSeedToken</span>(<span class="c-kw">string</span> token)
+{
+    <span class="c-kw">try</span> {
+        <span class="c-kw">int</span> idx = <span class="c-st">0</span>;
+
+        <span class="c-cm">// BaseSeed 디코딩</span>
+        <span class="c-kw">ulong</span> baseSeedEncoded = <span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, BASE_SEED_WIDTH);
+        <span class="c-kw">int</span> baseSeed = <span class="c-fn">DecodeUlongToInt</span>(baseSeedEncoded);
+
+        <span class="c-cm">// Domain별 사용량 복원</span>
+        <span class="c-kw">uint</span> count = (<span class="c-kw">uint</span>)<span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, COUNT_WIDTH);
+        <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>, <span class="c-kw">ulong</span>&gt; usage = <span class="c-kw">new</span> <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>, <span class="c-kw">ulong</span>&gt;();
+        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < count; i++) {
+            <span class="c-kw">uint</span> domIdU = (<span class="c-kw">uint</span>)<span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, DOMAIN_ID_WIDTH);
+            <span class="c-kw">ulong</span> u = <span class="c-fn">ReadUInt</span>(token, <span class="c-kw">ref</span> idx, USAGE_WIDTH);
+            <span class="c-kw">if</span> (<span class="c-ty">Enum</span>.<span class="c-fn">IsDefined</span>(<span class="c-kw">typeof</span>(<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>), domIdU)) {
+                usage[(<span class="c-ty">GameSeed</span>.<span class="c-ty">Domain</span>)domIdU] = u;
+            }
+        }
+
+        <span class="c-ty">GameSeed</span>.<span class="c-fn">RestoreFromSnapshot</span>(baseSeed, usage);
+        <span class="c-kw">return true</span>;
+    }
+    <span class="c-kw">catch</span> {
+        <span class="c-kw">return false</span>;
+    }
+}</code></pre>
+
+                <h3>기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">고정 폭 인코딩:</span> BaseSeed(10자리), Domain ID(3자리), Usage(12자리)로 고정 폭 인코딩하여 파싱 안정성 확보</li>
+                    <li><span class="c-kw">완전한 RNG 복원:</span> BaseSeed와 각 Domain별 사용량을 저장하여 RNG 상태를 완전히 복원</li>
+                    <li><span class="highlight">JSON 저장:</span> Seed Token을 JSON 파일에 저장하여 영구 보존</li>
+                </ul>
+
+                <h2>6. Factory Pattern을 활용한 데이터 기반 객체 생성</h2>
+                <p>파싱된 데이터를 기반으로 게임 객체를 생성하는 Factory Pattern을 구현했습니다. 데이터 타입에 따라 적절한 객체를 생성합니다.</p>
+
+<pre><code><span class="c-cm">// DataFactory.cs: 데이터 기반 객체 생성</span>
+<span class="c-kw">public static</span> <span class="c-ty">Unit_Monster</span> <span class="c-fn">MakeMonster</span>(<span class="c-ty">Define</span>.<span class="c-ty">MonsterType</span> monsterType, <span class="c-kw">int</span> grade, <span class="c-ty">GameObject</span> prefab)
+{
+    <span class="c-cm">// 몬스터 데이터 찾기</span>
+    <span class="c-ty">Data_Monster</span> data = Managers.Data.MonsterData.Values.<span class="c-fn">ToList</span>()
+        .<span class="c-fn">Find</span>(value => value.m_monsterIndex == (<span class="c-kw">int</span>)monsterType + grade - <span class="c-st">1</span>);
+
+    <span class="c-kw">if</span> (data == <span class="c-kw">null</span>) {
+        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>($<span class="c-st">"몬스터 데이터를 찾을 수 없습니다: Type={monsterType}, Grade={grade}"</span>);
+    <span class="c-kw">return null</span>;
+    }
+
+    <span class="c-cm">// 몬스터 인스턴스 생성</span>
+    <span class="c-ty">GameObject</span> monsterObj = <span class="c-ty">GameObject</span>.<span class="c-fn">Instantiate</span>(prefab);
+    <span class="c-ty">Unit_Monster</span> monster = monsterObj.<span class="c-fn">GetComponent</span>&lt;<span class="c-ty">Unit_Monster</span>&gt;();
+
+    <span class="c-cm">// 드롭 아이템 생성</span>
+    <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">Item</span>, <span class="c-kw">int</span>&gt; dropItems = <span class="c-fn">CreateDropItems</span>(grade, data);
+
+    <span class="c-cm">// 몬스터 스탯 계산</span>
+    <span class="c-ty">UnitStat</span> monsterStat = <span class="c-fn">CalculateMonsterStat</span>(data, grade, dropItems);
+
+    <span class="c-cm">// 몬스터 데이터 적용</span>
+    <span class="c-fn">ApplyMonsterData</span>(monster, data, monsterStat, dropItems, grade);
+
+    <span class="c-kw">return</span> monster;
+}</code></pre>
+
+                <h3>기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">데이터 기반 생성:</span> CSV에서 파싱된 데이터를 기반으로 게임 객체 생성</li>
+                    <li><span class="highlight">타입별 Factory:</span> 몬스터, 장비, 아이템 등 타입별로 전용 Factory 메서드 제공</li>
+                    <li><span class="highlight">확장성:</span> 새로운 데이터 타입 추가 시 Factory 메서드만 추가하면 됨</li>
+                </ul>
+
+                <h2>7. 기술적 특징</h2>
+                <ul>
+                    <li><span class="highlight">리플렉션 기반 동적 파싱:</span> 수동 매핑 코드 없이 CSV 헤더와 클래스 필드 자동 매핑</li>
+                    <li><span class="highlight">버전 관리 시스템:</span> 서버와 로컬 버전 비교를 통한 효율적인 데이터 업데이트</li>
+                    <li><span class="highlight">비동기 다운로드:</span> UnityWebRequest를 활용한 비동기 CSV 다운로드로 UI 반응성 유지</li>
+                    <li><span class="highlight">완전한 RNG 복원:</span> Seed Token 시스템으로 게임의 랜덤 상태 완전 복원</li>
+                    <li><span class="highlight">Factory Pattern:</span> 데이터 기반 객체 생성으로 확장 가능한 아키텍처 구축</li>
+                    <li><span class="highlight">타입 안전성:</span> 제네릭과 리플렉션을 활용한 컴파일 타임 타입 체크</li>
+                </ul>
+
+                <div style="height: 100px;"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         function openMLAgentsModal(event) {
             if (event) {
@@ -1758,11 +2074,62 @@
             }
         }
         
+        function openWFKModal(event) {
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            console.log('openWFKModal called');
+            try {
+                // 다른 모달이 열려있으면 먼저 닫기
+                const fileTowerModal = document.getElementById('modal-overlay');
+                if (fileTowerModal && fileTowerModal.style.display === 'flex') {
+                    fileTowerModal.style.display = 'none';
+                }
+                const mlAgentsModal = document.getElementById('modal-overlay-racing');
+                if (mlAgentsModal && mlAgentsModal.style.display === 'flex') {
+                    mlAgentsModal.style.display = 'none';
+                }
+                
+                const modal = document.getElementById('modal-overlay-wfk');
+                if (!modal) {
+                    console.error('modal-overlay-wfk not found!');
+                    alert('모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
+                    return;
+                }
+                
+                modal.style.display = 'flex';
+                modal.style.visibility = 'visible';
+                modal.style.opacity = '1';
+                modal.style.zIndex = '99999';
+                
+                requestAnimationFrame(() => {
+                    const rect = modal.getBoundingClientRect();
+                    if (rect.width === 0 || rect.height === 0) {
+                        modal.style.width = '100vw';
+                        modal.style.height = '100vh';
+                    }
+                });
+            } catch (error) {
+                console.error('Error in openWFKModal:', error);
+                alert('모달을 열 수 없습니다: ' + error.message);
+            }
+        }
+        
+        function closeWFKModal() {
+            const modal = document.getElementById('modal-overlay-wfk');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
         function openModal(projectType) {
             console.log('openModal called with:', projectType);
             try {
                 if (projectType === 'mlAgentsRacing') {
                     openMLAgentsModal(null);
+                } else if (projectType === 'wfk') {
+                    openWFKModal(null);
                 } else {
                     const modal = document.getElementById('modal-overlay');
                     if (modal) {
@@ -1839,6 +2206,19 @@
                 console.log('File Tower Defense card event listener added');
             } else {
                 console.error('file-tower-defense-card not found');
+            }
+            
+            // WFK 카드 이벤트 리스너
+            const wfkCard = document.getElementById('wfk-card');
+            if (wfkCard) {
+                wfkCard.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openWFKModal(e);
+                }, true);
+                console.log('WFK card event listener added');
+            } else {
+                console.error('wfk-card not found');
             }
         });
     </script>
