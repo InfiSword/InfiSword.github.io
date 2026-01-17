@@ -1375,102 +1375,70 @@
                     console.log('Body visibility:', bodyStyle.visibility);
                 }
                 
+                // 모달이 body의 직접 자식인지 확인하고, 아니면 이동
+                if (modal.parentElement !== document.body) {
+                    console.log('Moving modal to body');
+                    document.body.appendChild(modal);
+                }
+                
                 // 모달의 기본 스타일 강제 적용 (인라인 스타일)
                 modal.style.setProperty('display', 'flex', 'important');
                 modal.style.setProperty('position', 'fixed', 'important');
                 modal.style.setProperty('top', '0', 'important');
                 modal.style.setProperty('left', '0', 'important');
-                modal.style.setProperty('width', '100%', 'important');
-                modal.style.setProperty('height', '100%', 'important');
-                modal.style.setProperty('z-index', '10000', 'important');
+                modal.style.setProperty('width', '100vw', 'important');
+                modal.style.setProperty('height', '100vh', 'important');
+                modal.style.setProperty('z-index', '99999', 'important');
                 modal.style.setProperty('background', 'rgba(0,0,0,0.92)', 'important');
                 modal.style.setProperty('justify-content', 'center', 'important');
                 modal.style.setProperty('align-items', 'center', 'important');
+                modal.style.setProperty('visibility', 'visible', 'important');
+                modal.style.setProperty('opacity', '1', 'important');
+                modal.style.setProperty('margin', '0', 'important');
+                modal.style.setProperty('padding', '0', 'important');
+                
             document.body.style.overflow = 'hidden';
                 
-                // 자식 요소 강제 표시
+                // 자식 요소 강제 표시 및 크기 확인
                 if (modalContainer) {
                     modalContainer.style.setProperty('display', 'block', 'important');
-                    const containerComputed = window.getComputedStyle(modalContainer);
-                    if (containerComputed.display === 'none') {
-                        console.error('Container display is still none!');
-                        modalContainer.style.display = 'block';
-                    }
+                    modalContainer.style.setProperty('visibility', 'visible', 'important');
+                    modalContainer.style.setProperty('opacity', '1', 'important');
+                    modalContainer.style.setProperty('width', '95%', 'important');
+                    modalContainer.style.setProperty('max-width', '1000px', 'important');
                 }
                 
                 if (modalBody) {
                     modalBody.style.setProperty('display', 'block', 'important');
-                    const bodyComputed = window.getComputedStyle(modalBody);
-                    if (bodyComputed.display === 'none') {
-                        console.error('Body display is still none!');
-                        modalBody.style.display = 'block';
-                    }
+                    modalBody.style.setProperty('visibility', 'visible', 'important');
+                    modalBody.style.setProperty('opacity', '1', 'important');
                 }
                 
-                // 즉시 실행되는 디버깅 (setTimeout 없이)
-                const computedStyle = window.getComputedStyle(modal);
-                const immediateRect = modal.getBoundingClientRect();
-                const offsetWidth = modal.offsetWidth;
-                const offsetHeight = modal.offsetHeight;
+                // 강제 리플로우 트리거
+                void modal.offsetHeight;
                 
-                console.log('=== Immediate Modal State ===');
-                console.log('Computed display:', computedStyle.display);
-                console.log('Computed position:', computedStyle.position);
-                console.log('Computed top:', computedStyle.top);
-                console.log('Computed left:', computedStyle.left);
-                console.log('Computed width:', computedStyle.width);
-                console.log('Computed height:', computedStyle.height);
-                console.log('Computed z-index:', computedStyle.zIndex);
-                console.log('Bounding rect:', {
-                    top: immediateRect.top,
-                    left: immediateRect.left,
-                    width: immediateRect.width,
-                    height: immediateRect.height
-                });
-                console.log('Offset size:', {
-                    width: offsetWidth,
-                    height: offsetHeight
-                });
-                
-                // 문제 발견 시 즉시 수정
-                if (immediateRect.width === 0 || immediateRect.height === 0 || offsetWidth === 0 || offsetHeight === 0) {
-                    console.error('Modal has zero size! Forcing size...');
-                    modal.style.setProperty('width', '100vw', 'important');
-                    modal.style.setProperty('height', '100vh', 'important');
-                }
-                
-                if (immediateRect.top < -100 || immediateRect.left < -100 || immediateRect.top > window.innerHeight || immediateRect.left > window.innerWidth) {
-                    console.error('Modal is off-screen! Resetting position...');
-                    modal.style.setProperty('top', '0', 'important');
-                    modal.style.setProperty('left', '0', 'important');
-                }
-                
-                // 다른 요소가 모달을 가리고 있는지 확인
-                const elementsAtPoint = document.elementsFromPoint(window.innerWidth / 2, window.innerHeight / 2);
-                const modalInStack = elementsAtPoint.some(el => el === modal || modal.contains(el));
-                console.log('Modal in element stack at center:', modalInStack);
-                if (!modalInStack && elementsAtPoint.length > 0) {
-                    console.warn('Other element on top of modal:', elementsAtPoint[0]);
-                    // z-index를 더 높게 설정
-                    modal.style.setProperty('z-index', '99999', 'important');
-                }
-                
-                // 추가 확인을 위한 setTimeout (선택적)
-                setTimeout(function() {
-                    const finalRect = modal.getBoundingClientRect();
-                    const finalComputed = window.getComputedStyle(modal);
-                    console.log('=== After 100ms Check ===');
-                    console.log('Final display:', finalComputed.display);
-                    console.log('Final rect:', {
-                        top: finalRect.top,
-                        left: finalRect.left,
-                        width: finalRect.width,
-                        height: finalRect.height
+                // 리플로우 후 크기 확인
+                requestAnimationFrame(function() {
+                    const checkRect = modal.getBoundingClientRect();
+                    const checkComputed = window.getComputedStyle(modal);
+                    console.log('After reflow - Modal state:', {
+                        computedDisplay: checkComputed.display,
+                        computedWidth: checkComputed.width,
+                        computedHeight: checkComputed.height,
+                        rectWidth: checkRect.width,
+                        rectHeight: checkRect.height,
+                        offsetWidth: modal.offsetWidth,
+                        offsetHeight: modal.offsetHeight,
+                        parentElement: modal.parentElement.tagName
                     });
-                    if (finalRect.width === 0 || finalRect.height === 0) {
-                        console.error('Modal still has zero size after fixes!');
+                    
+                    if (checkRect.width === 0 || checkRect.height === 0) {
+                        console.error('Modal still zero size! Trying alternative approach...');
+                        // 최후의 수단: 모달을 완전히 재생성
+                        modal.style.cssText = 'display: flex !important; position: fixed !important; top: 0 !important; left: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 99999 !important; background: rgba(0,0,0,0.92) !important; justify-content: center !important; align-items: center !important; visibility: visible !important; opacity: 1 !important; margin: 0 !important; padding: 0 !important;';
                     }
-                }, 100);
+                });
+                
             } catch (error) {
                 console.error('Error in openMLAgentsModal:', error);
                 alert('모달을 열 수 없습니다: ' + error.message);
