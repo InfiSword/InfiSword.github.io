@@ -1311,7 +1311,7 @@
                 </ul>
 
                 <h2>4. 레이캐스트 기반 환경 감지</h2>
-                <p>에이전트가 주변 환경을 정확히 인식할 수 있도록 <span class="highlight">다방향 레이캐스트 시스템</span>을 구현했습니다.</p>
+                <p>에이전트가 주변 환경을 정확히 인식할 수 있도록 <span class="highlight">다방향 레이캐스트 시스템</span>을 구현했습니다. 전방 9개, 후방 3개의 레이를 사용하여 도로와 벽을 감지하고, 이를 신경망의 관측 데이터로 변환합니다.</p>
 
                 <div class="visual-frame" style="margin: 30px 0;">
                     <img src="images/mlagent_1.png" alt="레이캐스트 센서 시각화" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
@@ -1349,6 +1349,154 @@
                         </div>
                     </div>
                 </div>
+
+                <h3>레이캐스트 설정 및 초기화</h3>
+                <p>에이전트 초기화 시 전방과 후방 레이의 방향을 계산하여 저장합니다. 전방은 180도 범위에 9개의 레이를, 후방은 60도 범위에 3개의 레이를 균등하게 배치합니다.</p>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 레이캐스트 설정</span>
+<span class="c-kw">[Header</span>(<span class="c-st">"Sensing (NEW)"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public</span> <span class="c-ty">LayerMask</span> roadLayer;              <span class="c-cm">// 도로 레이어 마스크</span>
+<span class="c-kw">public float</span> roadRayDistance = <span class="c-st">50f</span>;      <span class="c-cm">// 도로 감지 최대 거리</span>
+<span class="c-kw">public</span> <span class="c-ty">LayerMask</span> wallLayer;              <span class="c-cm">// 벽/장애물 레이어 마스크</span>
+
+<span class="c-kw">[Header</span>(<span class="c-st">"Front Sensing Config"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> wallProximityDistance = <span class="c-st">15f</span>;  <span class="c-cm">// 전방 벽 감지 거리 (브레이크 약함 고려)</span>
+<span class="c-kw">public int</span> frontRayCount = <span class="c-st">9</span>;                <span class="c-cm">// 전방 레이 개수 (홀수 추천)</span>
+
+<span class="c-kw">[Header</span>(<span class="c-st">"Rear Sensing Config (NEW)"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> rearWallProximityDistance = <span class="c-st">5f</span>;  <span class="c-cm">// 후방 벽 감지 거리</span>
+<span class="c-kw">public int</span> rearRayCount = <span class="c-st">3</span>;                <span class="c-cm">// 후방 레이 개수</span>
+
+<span class="c-kw">private</span> <span class="c-ty">Vector3</span>[] roadRayDirections;        <span class="c-cm">// 도로 감지 레이 방향</span>
+<span class="c-kw">private</span> <span class="c-ty">Vector3</span>[] wallRayDirections;        <span class="c-cm">// 전방 벽 감지 레이 방향</span>
+<span class="c-kw">private</span> <span class="c-ty">Vector3</span>[] rearWallRayDirections;    <span class="c-cm">// 후방 벽 감지 레이 방향</span>
+
+<span class="c-kw">public override void</span> <span class="c-fn">Initialize</span>()
+{
+    <span class="c-cm">// 전방 레이 방향 계산 (180도 범위, 9개 레이)</span>
+    wallRayDirections = <span class="c-kw">new</span> <span class="c-ty">Vector3</span>[frontRayCount];
+    <span class="c-kw">if</span> (frontRayCount == <span class="c-st">1</span>) {
+        wallRayDirections[<span class="c-st">0</span>] = <span class="c-ty">Vector3</span>.forward;
+    } <span class="c-kw">else</span> {
+        <span class="c-kw">float</span> angleStep = <span class="c-st">180f</span> / (frontRayCount - <span class="c-st">1</span>);  <span class="c-cm">// 각도 간격</span>
+        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < frontRayCount; i++) {
+            <span class="c-kw">float</span> angle = -<span class="c-st">90f</span> + (angleStep * i);  <span class="c-cm">// -90도 ~ +90도</span>
+            wallRayDirections[i] = <span class="c-ty">Quaternion</span>.<span class="c-fn">Euler</span>(<span class="c-st">0</span>, angle, <span class="c-st">0</span>) * <span class="c-ty">Vector3</span>.forward;
+        }
+    }
+    roadRayDirections = wallRayDirections;  <span class="c-cm">// 도로 감지도 같은 방향 사용</span>
+
+    <span class="c-cm">// 후방 레이 방향 계산 (60도 범위, 3개 레이)</span>
+    rearWallRayDirections = <span class="c-kw">new</span> <span class="c-ty">Vector3</span>[rearRayCount];
+    <span class="c-kw">if</span> (rearRayCount == <span class="c-st">1</span>) {
+        rearWallRayDirections[<span class="c-st">0</span>] = <span class="c-ty">Vector3</span>.back;
+    } <span class="c-kw">else</span> {
+        <span class="c-kw">float</span> angleStep = <span class="c-st">60f</span> / (rearRayCount - <span class="c-st">1</span>);  <span class="c-cm">// 각도 간격</span>
+        <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < rearRayCount; i++) {
+            <span class="c-kw">float</span> angle = -<span class="c-st">30f</span> + (angleStep * i);  <span class="c-cm">// -30도 ~ +30도</span>
+            rearWallRayDirections[i] = <span class="c-ty">Quaternion</span>.<span class="c-fn">Euler</span>(<span class="c-st">0</span>, angle, <span class="c-st">0</span>) * <span class="c-ty">Vector3</span>.back;
+        }
+    }
+}</code></pre>
+
+                <h3>관측 데이터 수집 (CollectObservations)</h3>
+                <p>매 프레임마다 레이캐스트를 수행하여 환경 정보를 수집하고, 정규화된 거리 값을 신경망의 관측 벡터에 추가합니다.</p>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 관측 데이터 수집</span>
+<span class="c-kw">public override void</span> <span class="c-fn">CollectObservations</span>(<span class="c-ty">VectorSensor</span> sensor)
+{
+    <span class="c-cm">// 기본 관측 데이터 (10차원)</span>
+    sensor.<span class="c-fn">AddObservation</span>(transform.<span class="c-fn">InverseTransformDirection</span>(rb.linearVelocity));      <span class="c-cm">// 3: 선속도 (로컬 좌표)</span>
+    sensor.<span class="c-fn">AddObservation</span>(transform.<span class="c-fn">InverseTransformDirection</span>(rb.angularVelocity));  <span class="c-cm">// 3: 각속도 (로컬 좌표)</span>
+    <span class="c-kw">float</span> normalizedSpeed = rb.linearVelocity.magnitude / vehicleController.MaxSpeed;
+    sensor.<span class="c-fn">AddObservation</span>(normalizedSpeed);  <span class="c-cm">// 1: 정규화된 속도</span>
+    sensor.<span class="c-fn">AddObservation</span>(vehicleController.vehicleIsGrounded ? <span class="c-st">1f</span> : <span class="c-st">0f</span>);  <span class="c-cm">// 1: 지면 접촉 여부</span>
+    sensor.<span class="c-fn">AddObservation</span>(lastSteeringInput);      <span class="c-cm">// 1: 이전 조향 입력</span>
+    sensor.<span class="c-fn">AddObservation</span>(lastAccelerationInput);  <span class="c-cm">// 1: 이전 가속 입력</span>
+
+    <span class="c-cm">// 상태 관측 (1차원)</span>
+    sensor.<span class="c-fn">AddObservation</span>(isStuckInWall ? <span class="c-st">1f</span> : <span class="c-st">0f</span>);  <span class="c-cm">// 1: 벽에 막혔는지 여부</span>
+
+    <span class="c-cm">// 레이캐스트 관측 (9 + 9 + 3 = 21차원)</span>
+    <span class="c-fn">AddRaycastObservations</span>(sensor, roadRayDirections, roadLayer, roadRayDistance);        <span class="c-cm">// 9: 도로 감지</span>
+    <span class="c-fn">AddRaycastObservations</span>(sensor, wallRayDirections, wallLayer, wallProximityDistance);      <span class="c-cm">// 9: 전방 벽 감지</span>
+    <span class="c-fn">AddRaycastObservations</span>(sensor, rearWallRayDirections, wallLayer, rearWallProximityDistance);  <span class="c-cm">// 3: 후방 벽 감지</span>
+
+    <span class="c-cm">// 목표 지향 관측 (4차원)</span>
+    <span class="c-ty">Vector3</span> targetPosition = <span class="c-fn">GetTargetPosition</span>();  <span class="c-cm">// 다음 체크포인트 또는 Finish 위치</span>
+    <span class="c-ty">Vector3</span> targetDirLocal = transform.<span class="c-fn">InverseTransformPoint</span>(targetPosition);
+    sensor.<span class="c-fn">AddObservation</span>(targetDirLocal.normalized);  <span class="c-cm">// 3: 목표 방향 (로컬 좌표)</span>
+    sensor.<span class="c-fn">AddObservation</span>(targetDirLocal.magnitude / roadRayDistance);  <span class="c-cm">// 1: 정규화된 목표 거리</span>
+
+    <span class="c-cm">// 총 관측 차원: 10 + 1 + 21 + 4 = 36차원</span>
+}</code></pre>
+
+                <h3>레이캐스트 관측 헬퍼 함수</h3>
+                <p>각 레이 방향에 대해 Physics.Raycast를 수행하고, 감지된 거리를 정규화하여 관측 벡터에 추가합니다.</p>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 레이캐스트 관측 헬퍼 함수</span>
+<span class="c-kw">private void</span> <span class="c-fn">AddRaycastObservations</span>(<span class="c-ty">VectorSensor</span> sensor, <span class="c-ty">Vector3</span>[] directions, <span class="c-ty">LayerMask</span> layer, <span class="c-kw">float</span> distance)
+{
+    <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < directions.Length; i++) {
+        <span class="c-cm">// 로컬 방향을 월드 방향으로 변환</span>
+        <span class="c-ty">Vector3</span> worldRayDir = transform.<span class="c-fn">TransformDirection</span>(directions[i]);
+        
+        <span class="c-cm">// 레이캐스트 수행</span>
+        <span class="c-kw">if</span> (<span class="c-ty">Physics</span>.<span class="c-fn">Raycast</span>(transform.position, worldRayDir, <span class="c-kw">out</span> <span class="c-ty">RaycastHit</span> hit, distance, layer)) {
+            <span class="c-cm">// 감지된 경우: 거리를 정규화 (0.0 ~ 1.0, 가까울수록 작은 값)</span>
+            sensor.<span class="c-fn">AddObservation</span>(hit.distance / distance);
+        } <span class="c-kw">else</span> {
+            <span class="c-cm">// 감지되지 않은 경우: 1.0 (최대 거리)</span>
+            sensor.<span class="c-fn">AddObservation</span>(<span class="c-st">1f</span>);
+        }
+    }
+}</code></pre>
+
+                <h3>근접 페널티 계산 (Proximity Penalty)</h3>
+                <p>벽에 가까워질수록 페널티를 부여하여 에이전트가 안전 거리를 유지하도록 유도합니다. 거리가 가까울수록 페널티가 급증하는 비선형 함수를 사용합니다.</p>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 근접 페널티 계산</span>
+<span class="c-kw">private void</span> <span class="c-fn">ApplyProximityPenalty</span>(<span class="c-ty">Vector3</span>[] directions, <span class="c-ty">LayerMask</span> layer, <span class="c-kw">float</span> distance, <span class="c-kw">float</span> penaltyCoefficient)
+{
+    <span class="c-kw">for</span> (<span class="c-kw">int</span> i = <span class="c-st">0</span>; i < directions.Length; i++) {
+        <span class="c-ty">Vector3</span> worldRayDir = transform.<span class="c-fn">TransformDirection</span>(directions[i]);
+        
+        <span class="c-kw">if</span> (<span class="c-ty">Physics</span>.<span class="c-fn">Raycast</span>(transform.position, worldRayDir, <span class="c-kw">out</span> <span class="c-ty">RaycastHit</span> hit, distance, layer)) {
+            <span class="c-cm">// 거리 기반 페널티 계산: 가까울수록 페널티 급증</span>
+            <span class="c-cm">// penalty = penaltyCoefficient × (1 - distance/maxDistance)</span>
+            <span class="c-cm">// 예: distance=0이면 penalty=penaltyCoefficient, distance=maxDistance이면 penalty=0</span>
+            <span class="c-kw">float</span> penalty = penaltyCoefficient * (<span class="c-st">1f</span> - (hit.distance / distance));
+            
+            <span class="c-cm">// FixedUpdate 주기에 맞춰 스케일링</span>
+            <span class="c-ty">AddReward</span>(penalty * <span class="c-ty">Time</span>.fixedDeltaTime);
+        }
+    }
+}
+
+<span class="c-cm">// CalculateRewards()에서 호출</span>
+<span class="c-kw">private void</span> <span class="c-fn">CalculateRewards</span>()
+{
+    <span class="c-cm">// 전방 벽 근접 페널티 (항상 적용)</span>
+    <span class="c-fn">ApplyProximityPenalty</span>(wallRayDirections, wallLayer, wallProximityDistance, proximityPenalty);
+    <span class="c-cm">// proximityPenalty = -0.015f, wallProximityDistance = 15f</span>
+
+    <span class="c-kw">float</span> forwardSpeed = <span class="c-ty">Vector3</span>.<span class="c-fn">Dot</span>(rb.linearVelocity, transform.forward);
+    <span class="c-kw">if</span> (forwardSpeed < -<span class="c-st">0.1f</span>) {
+        <span class="c-cm">// 후진 중일 때만 후방 벽 근접 페널티 적용</span>
+        <span class="c-fn">ApplyProximityPenalty</span>(rearWallRayDirections, wallLayer, rearWallProximityDistance, rearProximityPenalty);
+        <span class="c-cm">// rearProximityPenalty = -0.02f, rearWallProximityDistance = 5f</span>
+    }
+}</code></pre>
+
+                <h3>기술적 특징</h3>
+                <ul>
+                    <li><span class="highlight">다방향 감지:</span> 전방 180도(9개 레이), 후방 60도(3개 레이)로 넓은 범위의 환경 인식</li>
+                    <li><span class="highlight">레이어 분리:</span> 도로 레이어와 벽 레이어를 분리하여 각각 다른 용도로 활용 (도로: 50m, 벽: 15m/5m)</li>
+                    <li><span class="highlight">정규화된 관측:</span> 모든 거리 값을 0.0~1.0 범위로 정규화하여 신경망 학습 안정성 향상</li>
+                    <li><span class="highlight">비선형 페널티:</span> 거리 기반 비선형 페널티 함수로 가까울수록 급격한 페널티 증가</li>
+                    <li><span class="highlight">조건부 후방 감지:</span> 후진 중일 때만 후방 레이캐스트 페널티 적용하여 효율성 향상</li>
+                    <li><span class="highlight">전방 감지 거리 최적화:</span> 브레이크 성능을 고려하여 15m 거리에서 미리 감지하도록 설정</li>
+                </ul>
 
                 <h2>5. ML-Agents 학습 설정</h2>
                 <p>Unity ML-Agents 라이브러리의 PPO(Proximal Policy Optimization) 알고리즘을 사용하여 에이전트를 학습시켰습니다. 하이퍼파라미터 튜닝과 보상 설계를 통해 안정적인 학습을 달성했습니다.</p>
