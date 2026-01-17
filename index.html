@@ -1243,7 +1243,7 @@
                 </div>
 
                 <h2>5. ML-Agents 학습 설정</h2>
-                <p>PPO(Proximal Policy Optimization) 알고리즘을 사용하여 에이전트를 학습시켰습니다.</p>
+                <p>Unity ML-Agents 라이브러리의 PPO(Proximal Policy Optimization) 알고리즘을 사용하여 에이전트를 학습시켰습니다. 하이퍼파라미터 튜닝과 보상 설계를 통해 안정적인 학습을 달성했습니다.</p>
 
                 <div class="visual-frame">
                     <div class="data-table">
@@ -1299,7 +1299,84 @@
                 <h2>6. 다중 트랙 학습 지원</h2>
                 <p>에이전트의 일반화 성능을 향상시키기 위해 <span class="highlight">다중 트랙 학습 시스템</span>을 구현했습니다. 각 에피소드 시작 시 랜덤하게 트랙을 선택하여 학습하므로, 다양한 트랙 환경에 적응할 수 있습니다.</p>
 
-                <h2>7. 기술적 특징</h2>
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 다중 트랙 학습 지원</span>
+<span class="c-kw">public override void</span> <span class="c-fn">OnEpisodeBegin</span>()
+{
+    <span class="c-cm">// 모든 트랙 중 랜덤 선택</span>
+    <span class="c-kw">if</span> (allTracks == <span class="c-kw">null</span> || allTracks.Count == <span class="c-st">0</span>) {
+        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>(<span class="c-st">"학습할 트랙(AllTracks 리스트)가 설정되지 않았습니다!"</span>);
+        <span class="c-kw">return</span>;
+    }
+    
+    <span class="c-cm">// 랜덤 트랙 선택</span>
+    currentTrackManager = allTracks[<span class="c-ty">Random</span>.<span class="c-fn">Range</span>(<span class="c-st">0</span>, allTracks.Count)];
+    <span class="c-ty">Transform</span> spawnPoint = currentTrackManager.<span class="c-fn">GetSpawnPoint</span>();
+    
+    <span class="c-cm">// 선택된 트랙의 스폰 포인트로 이동</span>
+    transform.position = spawnPoint.position;
+    transform.rotation = spawnPoint.rotation;
+    
+    <span class="c-cm">// 상태 초기화</span>
+    rb.linearVelocity = <span class="c-ty">Vector3</span>.zero;
+    rb.angularVelocity = <span class="c-ty">Vector3</span>.zero;
+    currentCheckpointIndex = <span class="c-st">0</span>;
+    <span class="c-cm">// ... 기타 상태 초기화</span>
+}</code></pre>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">랜덤 트랙 선택:</span> 각 에피소드마다 `allTracks` 리스트에서 랜덤하게 트랙 선택</li>
+                    <li><span class="highlight">다양한 시작 위치:</span> 각 트랙의 `SpawnPointManager`에서 랜덤 스폰 포인트 선택</li>
+                    <li><span class="highlight">일반화 성능 향상:</span> 다양한 트랙 환경에서 학습하여 단일 트랙에 과적합되지 않도록 방지</li>
+                </ul>
+
+                <h2>7. 액션 스무딩 (Action Smoothing)</h2>
+                <p>ML-Agents가 출력하는 원시 액션 값을 직접 사용하면 급격한 조향 변화로 인해 차량이 불안정해질 수 있습니다. 이를 방지하기 위해 <span class="highlight">액션 스무딩 기법</span>을 구현하여 이전 프레임의 액션 값과 비교하여 변화량을 제한합니다.</p>
+
+                <div class="visual-frame" style="margin: 30px 0;">
+                    <img src="mlagent_%.png" alt="액션 스무딩 플로우차트" style="width: 100%; border-radius: 8px; border: 2px solid var(--border-color);">
+                    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
+                </div>
+
+<pre><code><span class="c-cm">// SimcadeCarAgent_Auto.cs: 액션 스무딩 구현</span>
+<span class="c-kw">[Header</span>(<span class="c-st">"Action Smoothing"</span>)<span class="c-kw">]</span>
+<span class="c-kw">public float</span> maxSteeringChange = <span class="c-st">0.5f</span>;      <span class="c-cm">// 최대 조향 변화량</span>
+<span class="c-kw">public float</span> maxAccelerationChange = <span class="c-st">0.7f</span>;  <span class="c-cm">// 최대 가속 변화량</span>
+
+<span class="c-kw">private float</span> lastSteeringInput = <span class="c-st">0f</span>;
+<span class="c-kw">private float</span> lastAccelerationInput = <span class="c-st">0f</span>;
+
+<span class="c-kw">public override void</span> <span class="c-fn">OnActionReceived</span>(<span class="c-ty">ActionBuffers</span> actions)
+{
+    <span class="c-cm">// 1. ML-Agents로부터 원시 액션 값 수신</span>
+    <span class="c-kw">float</span> rawSteering = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">0</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
+    <span class="c-kw">float</span> rawAcceleration = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(actions.ContinuousActions[<span class="c-st">1</span>], -<span class="c-st">1f</span>, <span class="c-st">1f</span>);
+
+    <span class="c-cm">// 2. 이전 프레임 값과 비교하여 변화량 제한 (스무딩)</span>
+    <span class="c-kw">float</span> steeringInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawSteering,
+        lastSteeringInput - maxSteeringChange,      <span class="c-cm">// 최소값: 이전값 - 최대변화량</span>
+        lastSteeringInput + maxSteeringChange);     <span class="c-cm">// 최대값: 이전값 + 최대변화량</span>
+    
+    <span class="c-kw">float</span> accelerationInput = <span class="c-ty">Mathf</span>.<span class="c-fn">Clamp</span>(rawAcceleration,
+        lastAccelerationInput - maxAccelerationChange,
+        lastAccelerationInput + maxAccelerationChange);
+
+    <span class="c-cm">// 3. 현재 값을 다음 프레임을 위해 저장</span>
+    lastSteeringInput = steeringInput;
+    lastAccelerationInput = accelerationInput;
+    
+    <span class="c-cm">// 4. 스무딩된 최종 명령을 차량에 전달</span>
+    vehicleController.<span class="c-fn">ProvideInputs</span>(accelerationInput, steeringInput, <span class="c-st">0f</span>);
+}</code></pre>
+
+                <p><strong>기술적 특징:</strong></p>
+                <ul>
+                    <li><span class="highlight">변화량 제한:</span> 조향은 최대 ±0.5, 가속은 최대 ±0.7로 프레임당 변화량 제한</li>
+                    <li><span class="highlight">부드러운 제어:</span> 급격한 액션 변화를 방지하여 차량의 안정성 향상</li>
+                    <li><span class="highlight">점진적 학습:</span> 에이전트가 부드러운 액션을 학습하도록 유도</li>
+                </ul>
+
+                <h2>8. 기술적 특징</h2>
                 <ul>
                     <li><span class="highlight">체크포인트 기반 네비게이션:</span> 순차적 체크포인트 통과를 통한 정확한 트랙 주행</li>
                     <li><span class="highlight">목표 지향 보상 설계:</span> 거리 기반 보상과 체크포인트 보상을 통한 효과적인 학습</li>
@@ -1307,7 +1384,6 @@
                     <li><span class="highlight">안전성 보상:</span> 근접 페널티, 역주행 감지, 미끄러짐 감지로 안전한 주행 유도</li>
                     <li><span class="highlight">스플라인 기반 자동 생성:</span> 다양한 트랙에 빠르게 체크포인트 시스템 적용</li>
                     <li><span class="highlight">다중 트랙 학습:</span> 랜덤 트랙 선택으로 일반화 성능 향상</li>
-                    <li><span class="highlight">액션 스무딩:</span> 최대 조향 변화 0.5, 최대 가속 변화 0.7로 부드러운 제어</li>
                 </ul>
 
                 <div style="height: 100px;"></div>
