@@ -1972,6 +1972,7 @@
                 <p>비동기 다운로드를 통해 UI 블로킹 없이 데이터를 가져옵니다.</p>
 
 <pre><code><span class="c-cm">// ServerCSV_ConvertData.cs: 서버 CSV 다운로드 및 버전 관리</span>
+<span class="c-cm">// 서버에서 CSV 파일을 다운로드하여 게임 데이터(몬스터, 아이템, 장비 등)를 가져옵니다.</span>
 <span class="c-kw">public static async</span> <span class="c-ty">Task</span>&lt;<span class="c-kw">bool</span>&gt; <span class="c-fn">DownloadAllCSVAsync</span>(<span class="c-ty">Action</span>&lt;<span class="c-kw">float</span>&gt; progressCallback = <span class="c-kw">null</span>)
 {
     <span class="c-fn">LoadLocalVersions</span>();  <span class="c-cm">// 로컬 버전 정보 로드</span>
@@ -1985,27 +1986,21 @@
             <span class="c-kw">string</span> url = attrKvp.Value;
 
             <span class="c-cm">// 1. 서버 버전과 로컬 버전 비교</span>
-            <span class="c-kw">string</span> serverVersion = _serverVersions.<span class="c-fn">TryGetValue</span>(dataType, <span class="c-kw">out</span> <span class="c-kw">var</span> sAttrVerDict) 
-                && sAttrVerDict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">var</span> sVer) ? sVer : <span class="c-st">"0"</span>;
-            <span class="c-kw">string</span> localVersion = _localVersions.<span class="c-fn">TryGetValue</span>(dataType, <span class="c-kw">out</span> <span class="c-kw">var</span> lAttrVerDict) 
-                && lAttrVerDict.<span class="c-fn">TryGetValue</span>(attribute, <span class="c-kw">out</span> <span class="c-kw">var</span> lVer) ? lVer : <span class="c-st">"0"</span>;
-
-            <span class="c-kw">string</span> fileName = $<span class="c-st">"{dataType}_{attribute}.csv"</span>;
-            <span class="c-kw">string</span> localFilePath = <span class="c-ty">Path</span>.<span class="c-fn">Combine</span>(LocalDataPath, fileName);
-            <span class="c-kw">string</span> fileContent = <span class="c-kw">null</span>;
+            <span class="c-cm">// ...</span>
+            <span class="c-kw">string</span> serverVersion = <span class="c-cm">/* 서버 버전 조회 로직 */</span>;
+            <span class="c-kw">string</span> localVersion = <span class="c-cm">/* 로컬 버전 조회 로직 */</span>;
+            <span class="c-kw">string</span> localFilePath = <span class="c-cm">/* 로컬 파일 경로 생성 */</span>;
 
             <span class="c-cm">// 2. 버전이 같으면 로컬 파일 사용, 다르면 서버에서 다운로드</span>
             <span class="c-kw">if</span> (<span class="c-ty">File</span>.<span class="c-fn">Exists</span>(localFilePath) && localVersion == serverVersion) {
                 fileContent = <span class="c-ty">File</span>.<span class="c-fn">ReadAllText</span>(localFilePath);  <span class="c-cm">// 로컬 캐시 사용</span>
             } <span class="c-kw">else</span> {
-                <span class="c-cm">// 3. 서버에서 비동기 다운로드</span>
+                <span class="c-cm">// 3. 서버에서 비동기 다운로드 (CSV 파일 텍스트 데이터)</span>
                 fileContent = <span class="c-kw">await</span> <span class="c-fn">DownloadFileAsync</span>(url);
                 <span class="c-kw">if</span> (fileContent != <span class="c-kw">null</span>) {
                     <span class="c-ty">File</span>.<span class="c-fn">WriteAllText</span>(localFilePath, fileContent);  <span class="c-cm">// 로컬에 저장</span>
                     <span class="c-cm">// 4. 로컬 버전 정보 업데이트</span>
-                    <span class="c-kw">if</span> (!_localVersions.<span class="c-fn">ContainsKey</span>(dataType)) 
-                        _localVersions[dataType] = <span class="c-kw">new</span> <span class="c-ty">Dictionary</span>&lt;<span class="c-kw">string</span>, <span class="c-kw">string</span>&gt;();
-                    _localVersions[dataType][attribute] = serverVersion;
+                    <span class="c-cm">// ...</span>
                 }
             }
 
@@ -2022,16 +2017,17 @@
                 <p>UnityWebRequest를 사용하여 비동기로 파일을 다운로드합니다.</p>
 
 <pre><code><span class="c-cm">// UnityWebRequest를 사용한 비동기 다운로드</span>
+<span class="c-cm">// 서버 URL에서 CSV 파일의 텍스트 데이터를 다운로드하여 반환합니다.</span>
 <span class="c-kw">private static async</span> <span class="c-ty">Task</span>&lt;<span class="c-kw">string</span>&gt; <span class="c-fn">DownloadFileAsync</span>(<span class="c-kw">string</span> url)
 {
     <span class="c-kw">using</span> (<span class="c-ty">UnityWebRequest</span> request = <span class="c-ty">UnityWebRequest</span>.<span class="c-fn">Get</span>(url)) {
         <span class="c-kw">await</span> request.<span class="c-fn">SendWebRequest</span>();
         
         <span class="c-kw">if</span> (request.result == <span class="c-ty">UnityWebRequest</span>.<span class="c-ty">Result</span>.Success) {
-            <span class="c-kw">return</span> request.downloadHandler.text;
+            <span class="c-kw">return</span> request.downloadHandler.text;  <span class="c-cm">// CSV 텍스트 데이터 반환</span>
         } <span class="c-kw">else</span> {
-            <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>($<span class="c-st">"다운로드 실패: {url}, 에러: {request.error}"</span>);
-    <span class="c-kw">return null</span>;
+            <span class="c-cm">// ...</span>
+            <span class="c-kw">return null</span>;
         }
     }
 }</code></pre>
