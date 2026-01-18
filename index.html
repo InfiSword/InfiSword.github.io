@@ -1974,7 +1974,112 @@
     <span class="c-kw">return</span> csvDataList;
 }</code></pre>
 
-                <h3>2.3 스마트 분할 (SmartSplit)</h3>
+                <h3>2.3 실제 파싱 예시</h3>
+                <p>WorldFirstKill에서 사용하는 실제 CSV 파싱 예시를 통해 동작 방식을 설명합니다.</p>
+                
+                <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; margin: 30px 0;">
+                    <div style="color: var(--accent-color); font-family: 'Fira Code', monospace; font-size: 1.1rem; font-weight: 700; margin-bottom: 20px; text-align: center; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">CSV 파싱 예시: 몬스터 데이터</div>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 25px;">
+                        <div>
+                            <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 10px; font-family: 'Fira Code', monospace;">1. CSV 파일 형식 (서버에서 다운로드한 원시 텍스트)</div>
+                            <div style="background: var(--code-bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.85rem; overflow-x: auto;">
+<pre style="margin: 0; color: var(--text-color);">m_monsterIndex,m_monsterName,m_hp,m_attack,m_defense,m_dropItemID
+1,슬라임,100,10,5,101
+2,고블린,150,15,8,102
+3,오크,200,25,12,103</pre>
+                            </div>
+                            <div style="color: #8b949e; font-size: 0.85rem; margin-top: 8px; padding-left: 10px;">
+                                • 첫 줄은 헤더(컬럼명), 나머지는 데이터 행<br>
+                                • 각 필드는 쉼표(,)로 구분됨
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 10px; font-family: 'Fira Code', monospace;">2. C# 데이터 클래스 정의</div>
+                            <div style="background: var(--code-bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.85rem; overflow-x: auto;">
+<pre style="margin: 0; color: var(--text-color);"><span style="color: var(--code-keyword);">public class</span> <span style="color: var(--code-type);">Data_Monster</span> : <span style="color: var(--code-type);">BaseData</span>
+{
+    <span style="color: var(--code-keyword);">public int</span> m_monsterIndex;
+    <span style="color: var(--code-keyword);">public string</span> m_monsterName;
+    <span style="color: var(--code-keyword);">public int</span> m_hp;
+    <span style="color: var(--code-keyword);">public int</span> m_attack;
+    <span style="color: var(--code-keyword);">public int</span> m_defense;
+    <span style="color: var(--code-keyword);">public int</span> m_dropItemID;
+}</pre>
+                            </div>
+                            <div style="color: #8b949e; font-size: 0.85rem; margin-top: 8px; padding-left: 10px;">
+                                • BaseData를 상속하여 자동 파싱 지원<br>
+                                • 필드명이 CSV 헤더와 정확히 일치해야 함
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 10px; font-family: 'Fira Code', monospace;">3. 파싱 과정</div>
+                            <div style="background: rgba(88, 166, 255, 0.1); padding: 15px; border-radius: 6px; border-left: 4px solid var(--accent-color);">
+                                <div style="margin-bottom: 12px;">
+                                    <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 5px;">Step 1: 헤더 매핑</div>
+                                    <div style="color: var(--text-color); font-size: 0.9rem; margin-left: 10px;">
+                                        CSV 헤더: <code style="color: var(--code-string);">["m_monsterIndex", "m_monsterName", "m_hp", "m_attack", "m_defense", "m_dropItemID"]</code><br>
+                                        클래스 필드와 자동 매핑 → <code style="color: var(--code-comment);">DataIndex_Dict</code>, <code style="color: var(--code-comment);">Data_Dict</code> 생성
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 12px;">
+                                    <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 5px;">Step 2: 첫 번째 행 파싱</div>
+                                    <div style="color: var(--text-color); font-size: 0.9rem; margin-left: 10px;">
+                                        CSV 행: <code style="color: var(--code-string);">"1,슬라임,100,10,5,101"</code><br>
+                                        SmartSplit → <code style="color: var(--code-string);">["1", "슬라임", "100", "10", "5", "101"]</code><br>
+                                        타입 변환 및 할당:
+                                        <ul style="margin-top: 5px; margin-left: 20px; color: var(--text-color);">
+                                            <li>m_monsterIndex = <code style="color: var(--code-type);">int</code>.Parse("1") → <code style="color: var(--code-string);">1</code></li>
+                                            <li>m_monsterName = <code style="color: var(--code-type);">string</code>("슬라임") → <code style="color: var(--code-string);">"슬라임"</code></li>
+                                            <li>m_hp = <code style="color: var(--code-type);">int</code>.Parse("100") → <code style="color: var(--code-string);">100</code></li>
+                                            <li>m_attack = <code style="color: var(--code-type);">int</code>.Parse("10") → <code style="color: var(--code-string);">10</code></li>
+                                            <li>m_defense = <code style="color: var(--code-type);">int</code>.Parse("5") → <code style="color: var(--code-string);">5</code></li>
+                                            <li>m_dropItemID = <code style="color: var(--code-type);">int</code>.Parse("101") → <code style="color: var(--code-string);">101</code></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 5px;">Step 3: 결과 객체</div>
+                                    <div style="color: var(--text-color); font-size: 0.9rem; margin-left: 10px;">
+                                        <code style="color: var(--code-type);">Data_Monster</code> 객체 생성 완료:
+                                        <div style="background: rgba(0, 0, 0, 0.3); padding: 10px; border-radius: 4px; margin-top: 5px; font-family: 'Fira Code', monospace; font-size: 0.85rem;">
+                                            { m_monsterIndex: 1, m_monsterName: "슬라임", m_hp: 100, m_attack: 10, m_defense: 5, m_dropItemID: 101 }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 10px; font-family: 'Fira Code', monospace;">4. 최종 파싱 결과</div>
+                            <div style="background: var(--code-bg); padding: 15px; border-radius: 6px; border: 1px solid var(--border-color); font-family: 'Fira Code', monospace; font-size: 0.85rem; overflow-x: auto;">
+<pre style="margin: 0; color: var(--text-color);"><span style="color: var(--code-type);">List</span>&lt;<span style="color: var(--code-type);">Data_Monster</span>&gt; monsterList = [
+    { m_monsterIndex: 1, m_monsterName: "슬라임", m_hp: 100, m_attack: 10, m_defense: 5, m_dropItemID: 101 },
+    { m_monsterIndex: 2, m_monsterName: "고블린", m_hp: 150, m_attack: 15, m_defense: 8, m_dropItemID: 102 },
+    { m_monsterIndex: 3, m_monsterName: "오크", m_hp: 200, m_attack: 25, m_defense: 12, m_dropItemID: 103 }
+];</pre>
+                            </div>
+                            <div style="color: #8b949e; font-size: 0.85rem; margin-top: 8px; padding-left: 10px;">
+                                • 모든 행이 파싱되어 <code style="color: var(--code-type);">List&lt;Data_Monster&gt;</code>로 반환됨<br>
+                                • 게임에서 <code style="color: var(--code-comment);">Managers.Data.MonsterData</code>로 접근 가능
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 20px; margin: 25px 0; border-radius: 6px;">
+                    <div style="margin-bottom: 15px;"><strong style="color: var(--accent-color);">예시에서 확인할 수 있는 핵심 사항:</strong></div>
+                    <ul style="margin-left: 20px; color: var(--text-color); line-height: 1.8;">
+                        <li><strong>자동 매핑:</strong> CSV 헤더의 컬럼명("m_monsterIndex")과 클래스 필드명이 일치하면 자동으로 연결됩니다. 수동 매핑 코드가 필요 없습니다.</li>
+                        <li><strong>타입 자동 변환:</strong> CSV의 문자열 데이터("100")가 필드 타입(int)에 맞게 자동으로 변환됩니다.</li>
+                        <li><strong>확장성:</strong> 새로운 몬스터를 추가하려면 CSV 파일에 행만 추가하면 됩니다. 코드 수정이 필요 없습니다.</li>
+                        <li><strong>일관성:</strong> 몬스터, 아이템, 장비 등 모든 데이터 타입에 대해 동일한 파싱 로직을 사용합니다.</li>
+                    </ul>
+                </div>
+
+                <h3>2.4 스마트 분할 (SmartSplit)</h3>
                 <p>일반적인 <code>Split(',')</code>는 쉼표가 포함된 문자열이나 따옴표로 감싼 필드를 제대로 처리하지 못합니다. 
                 정규식을 사용하여 CSV 표준에 맞게 파싱합니다.</p>
 
@@ -1989,8 +2094,29 @@
 }
 <span class="c-cm">// 예시: "이름,설명",100,200 → ["이름,설명", "100", "200"]</span></code></pre>
 
-                <h3>2.4 타입 자동 변환</h3>
+                <h3>2.5 타입 자동 변환</h3>
                 <p>필드 타입에 따라 문자열 데이터를 자동으로 변환합니다.</p>
+                
+                <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 20px; margin: 25px 0; border-radius: 6px;">
+                    <div style="margin-bottom: 15px;"><strong style="color: var(--accent-color);">타입 변환 예시:</strong></div>
+                    <div style="color: var(--text-color); line-height: 1.8; margin-left: 10px;">
+                        <div style="margin-bottom: 10px;">
+                            <strong>CSV 데이터:</strong> <code style="color: var(--code-string);">"100"</code> (문자열)<br>
+                            <strong>필드 타입:</strong> <code style="color: var(--code-type);">int</code><br>
+                            <strong>변환 결과:</strong> <code style="color: var(--code-type);">int</code> 값 <code style="color: var(--code-string);">100</code>
+                        </div>
+                        <div style="margin-bottom: 10px;">
+                            <strong>CSV 데이터:</strong> <code style="color: var(--code-string);">"3.14"</code> (문자열)<br>
+                            <strong>필드 타입:</strong> <code style="color: var(--code-type);">float</code><br>
+                            <strong>변환 결과:</strong> <code style="color: var(--code-type);">float</code> 값 <code style="color: var(--code-string);">3.14f</code>
+                        </div>
+                        <div>
+                            <strong>CSV 데이터:</strong> <code style="color: var(--code-string);">"슬라임"</code> (문자열)<br>
+                            <strong>필드 타입:</strong> <code style="color: var(--code-type);">string</code><br>
+                            <strong>변환 결과:</strong> <code style="color: var(--code-type);">string</code> 값 <code style="color: var(--code-string);">"슬라임"</code> (변환 없음)
+                        </div>
+                    </div>
+                </div>
 
 <pre><code><span class="c-cm">// 필드 타입에 따라 자동 변환</span>
 <span class="c-kw">protected virtual void</span> <span class="c-fn">SetFieldValue</span>(<span class="c-ty">BaseData</span> instance, <span class="c-ty">FieldInfo</span> fieldInfo, <span class="c-kw">string</span> value)
@@ -2003,7 +2129,7 @@
         fieldInfo.<span class="c-fn">SetValue</span>(instance, floatVal);
 }</code></pre>
 
-                <h3>2.5 기술적 특징</h3>
+                <h3>2.6 기술적 특징</h3>
                 <ul>
                     <li><span class="highlight">리플렉션 기반 동적 매핑:</span> CSV 헤더와 클래스 필드를 자동으로 매핑하여 수동 매핑 코드 불필요</li>
                     <li><span class="highlight">스마트 분할:</span> 정규식을 사용하여 쉼표와 따옴표를 포함한 CSV 데이터를 정확히 파싱</li>
