@@ -610,39 +610,27 @@
                     </div>
                 </div>
 
-<pre><code><span class="c-kw">public class</span> <span class="c-ty">GameObjectGridLayout</span> : <span class="c-ty">MonoBehaviour</span>
+<pre><code><span class="c-cm">// GameObjectGridLayout.cs: 화면 해상도에 맞춰 그리드 크기와 시작 위치를 동적으로 계산</span>
+<span class="c-kw">public class</span> <span class="c-ty">GameObjectGridLayout</span> : <span class="c-ty">MonoBehaviour</span>
 {
-    [<span class="c-ty">Header</span>(<span class="c-st">"Grid Settings"</span>)]
-    <span class="c-kw">[SerializeField] private int</span> columns = <span class="string">13</span>; <span class="c-cm">// X축 그리드 수</span>
-    <span class="c-kw">[SerializeField] private int</span> rows = <span class="string">7</span>;     <span class="c-cm">// Y축 그리드 수</span>
-
-    <span class="c-kw">[SerializeField] private Vector2</span> cellSize = <span class="type">Vector2</span>.one;
-    <span class="c-kw">[SerializeField] private Vector2</span> spacing = <span class="type">Vector2</span>.zero;
-    <span class="c-kw">[SerializeField] private Vector2</span> padding = <span class="type">Vector2</span>.zero;
-
-    [<span class="c-ty">Header</span>(<span class="c-st">"Layout Settings"</span>)]
-    <span class="c-kw">[SerializeField] private bool</span> fitToScreen;
-
-    <span class="c-kw">public int</span> Columns => columns;
-    <span class="c-kw">public int</span> Rows => rows;
-    <span class="c-kw">public Vector2</span> CellSize => cellSize;
-    <span class="c-kw">public Vector2</span> Spacing => spacing;
-    <span class="c-kw">public bool</span> GetFitToScreen => fitToScreen;
+    <span class="c-kw">[SerializeField] private int</span> columns, rows;  <span class="c-cm">// 그리드 개수</span>
+    <span class="c-kw">[SerializeField] private Vector2</span> cellSize, spacing, padding;
     <span class="c-kw">public Vector2</span> StartPos { <span class="c-kw">get</span>; <span class="c-kw">private set</span>; }
-
-    <span class="c-cm">// ... </span>
+    <span class="c-cm">// ...</span>
 
     <span class="c-cm">// 카메라 해상도에 맞춰 그리드 데이터 동적 계산</span>
+    <span class="c-cm">// 화면 크기에서 여백과 간격을 제외한 실제 가용 공간을 계산하여 셀 크기를 결정합니다.</span>
     <span class="c-kw">public void</span> <span class="c-fn">FitToScreen</span>() {
         <span class="c-ty">Camera</span> cam = <span class="c-ty">Camera</span>.main;
         <span class="c-kw">float</span> height = cam.orthographicSize * <span class="string">2f</span>;
         <span class="c-kw">float</span> width = height * cam.aspect;
 
-        <span class="c-cm">// 여백과 간격을 제외한 실제 가용 셀 크기 역산</span>
+        <span class="c-cm">// 셀 크기 계산: (화면 크기 - 패딩×2 - 간격×(n-1)) / 그리드 개수</span>
         cellSize.x = (width - (padding.x * <span class="string">2</span>) - (spacing.x * (columns - <span class="string">1</span>))) / columns;
         cellSize.y = (height - (padding.y * <span class="string">2</span>) - (spacing.y * (rows - <span class="string">1</span>))) / rows;
 
         <span class="c-cm">// 좌상단 기준 월드 시작 좌표 설정</span>
+        <span class="c-cm">// ...</span>
         StartPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(-(width / <span class="string">2</span>) + padding.x + (cellSize.x / <span class="string">2</span>), 
                                 (height / <span class="string">2</span>) - padding.y - (cellSize.y / <span class="string">2</span>));
     }
@@ -803,52 +791,36 @@
                     </div>
                 </div>
 
-<pre><code><span class="c-cm">// 월드 좌표 → 그리드 인덱스</span>
+<pre><code><span class="c-cm">// 월드 좌표 → 그리드 인덱스 변환</span>
+<span class="c-cm">// 마우스 위치나 유닛의 월드 좌표를 그리드 배열 인덱스로 변환합니다.</span>
 <span class="c-kw">private bool</span> <span class="c-fn">WorldToGridIndex</span>(<span class="c-ty">Vector2</span> worldPos, <span class="c-kw">out int</span> x, <span class="c-kw">out int</span> y)
 {
-    x = <span class="string">0</span>;
-    y = <span class="string">0</span>;
-
-    <span class="c-kw">if</span> (gridLayout == <span class="c-kw">null</span>) <span class="c-kw">return false</span>;
-
-    <span class="c-cm">// 1. 월드 → 로컬 변환</span>
+    <span class="c-cm">// 1. 월드 → 로컬 변환 (부모 Transform의 변환 적용)</span>
     <span class="c-ty">Vector2</span> localPos = transform.<span class="c-fn">InverseTransformPoint</span>(worldPos);
 
-    <span class="c-cm">// 2. 그리드 시작 위치 계산 (중앙 기준)</span>
-    <span class="c-ty">Vector2</span> startPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(
-        -gridLayout.CellSize.x * (GridWidth - <span class="string">1</span>) * <span class="string">0.5f</span>,
-        -gridLayout.CellSize.y * (GridHeight - <span class="string">1</span>) * <span class="string">0.5f</span>
-    );
-    startPos += gridLayout.Padding;
+    <span class="c-cm">// 2. 그리드 시작 위치 계산</span>
+    <span class="c-cm">// ...</span>
+    <span class="c-ty">Vector2</span> startPos = <span class="c-cm">/* 중앙 기준 시작 위치 계산 */</span>;
 
-    <span class="c-cm">// 3. 인덱스 계산</span>
-    <span class="c-kw">float</span> xFloat = (localPos.x - startPos.x) / (gridLayout.CellSize.x + gridLayout.Spacing.x);
-    <span class="c-kw">float</span> yFloat = (localPos.y - startPos.y) / (gridLayout.CellSize.y + gridLayout.Spacing.y);
-
-    x = <span class="c-ty">Mathf</span>.<span class="c-fn">RoundToInt</span>(xFloat);
-    y = <span class="c-ty">Mathf</span>.<span class="c-fn">RoundToInt</span>(yFloat);
-
+    <span class="c-cm">// 3. 인덱스 계산 (셀 크기와 간격 고려)</span>
+    x = <span class="c-ty">Mathf</span>.<span class="c-fn">RoundToInt</span>((localPos.x - startPos.x) / (cellSize + spacing));
+    y = <span class="c-ty">Mathf</span>.<span class="c-fn">RoundToInt</span>((localPos.y - startPos.y) / (cellSize + spacing));
+    
     <span class="c-kw">return true</span>;
 }
 
-<span class="c-cm">// 그리드 인덱스 → 월드 좌표</span>
+<span class="c-cm">// 그리드 인덱스 → 월드 좌표 변환</span>
+<span class="c-cm">// 그리드 배열의 인덱스를 월드 좌표계의 절대 위치로 변환합니다.</span>
 <span class="c-kw">public</span> <span class="c-ty">Vector2</span> <span class="c-fn">GetGridWorldPosition</span>(<span class="c-kw">int</span> x, <span class="c-kw">int</span> y)
 {
-    <span class="c-kw">if</span> (gridLayout == <span class="c-kw">null</span>) <span class="c-kw">return</span> <span class="c-ty">Vector2</span>.zero;
-
-    <span class="c-cm">// 1. 로컬 위치 계산</span>
-    <span class="c-ty">Vector2</span> startPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(
-        -gridLayout.CellSize.x * (GridWidth - <span class="string">1</span>) * <span class="string">0.5f</span>,
-        -gridLayout.CellSize.y * (GridHeight - <span class="string">1</span>) * <span class="string">0.5f</span>
-    );
-    startPos += gridLayout.Padding;
-
-    <span class="c-ty">Vector2</span> localPos = <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(
-        startPos.x + x * (gridLayout.CellSize.x + gridLayout.Spacing.x),
-        startPos.y + y * (gridLayout.CellSize.y + gridLayout.Spacing.y)
+    <span class="c-cm">// 1. 로컬 위치 계산 (시작 위치 + 인덱스 × 셀 크기)</span>
+    <span class="c-cm">// ...</span>
+    <span class="c-ty">Vector2</span> localPos = startPos + <span class="c-kw">new</span> <span class="c-ty">Vector2</span>(
+        x * (cellSize + spacing),
+        y * (cellSize + spacing)
     );
 
-    <span class="c-cm">// 2. 로컬 → 월드 변환</span>
+    <span class="c-cm">// 2. 로컬 → 월드 변환 (부모 Transform의 변환 적용)</span>
     <span class="c-kw">return</span> transform.<span class="c-fn">TransformPoint</span>(localPos);
 }</code></pre>
 
