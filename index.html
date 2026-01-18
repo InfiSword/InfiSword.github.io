@@ -3902,41 +3902,71 @@
                 event.preventDefault();
                 event.stopPropagation();
             }
-            console.log('openSlimeModal called');
             try {
                 // 다른 모달이 열려있으면 먼저 닫기
                 const fileTowerModal = document.getElementById('modal-overlay');
                 if (fileTowerModal && fileTowerModal.style.display === 'flex') {
-                    console.log('Closing File Tower Defense modal first');
                     fileTowerModal.style.display = 'none';
                 }
-                
-                const racingModal = document.getElementById('modal-overlay-racing');
-                if (racingModal && racingModal.style.display === 'flex') {
-                    console.log('Closing Racing modal first');
-                    racingModal.style.display = 'none';
+                const mlAgentsModal = document.getElementById('modal-overlay-racing');
+                if (mlAgentsModal && mlAgentsModal.style.display === 'flex') {
+                    mlAgentsModal.style.display = 'none';
                 }
-                
                 const wfkModal = document.getElementById('modal-overlay-wfk');
                 if (wfkModal && wfkModal.style.display === 'flex') {
-                    console.log('Closing WFK modal first');
                     wfkModal.style.display = 'none';
                 }
                 
-                // 모달 찾기
                 const modal = document.getElementById('modal-overlay-slime');
-                
-                // 모달 요소 검증
                 if (!modal) {
-                    console.error('modal-overlay-slime not found');
+                    alert('모달을 찾을 수 없습니다. 페이지를 새로고침해주세요.');
                     return;
                 }
                 
-                console.log('Opening Slime modal');
-                modal.style.display = 'flex';
+                // modal-container와 modal-body 확인
+                const modalContainer = modal.querySelector('.modal-container');
+                const modalBody = modal.querySelector('.modal-body');
+                
+                // 모달이 body의 직접 자식인지 확인하고, 아니면 이동
+                if (modal.parentElement !== document.body) {
+                    document.body.appendChild(modal);
+                }
+                
+                // 모달의 기본 스타일 강제 적용 (인라인 스타일)
+                modal.style.setProperty('display', 'flex', 'important');
+                modal.style.setProperty('position', 'fixed', 'important');
+                modal.style.setProperty('top', '0', 'important');
+                modal.style.setProperty('left', '0', 'important');
+                modal.style.setProperty('width', '100vw', 'important');
+                modal.style.setProperty('height', '100vh', 'important');
+                modal.style.setProperty('z-index', '99999', 'important');
+                modal.style.setProperty('background', 'rgba(0,0,0,0.92)', 'important');
+                modal.style.setProperty('justify-content', 'center', 'important');
+                modal.style.setProperty('align-items', 'center', 'important');
+                modal.style.setProperty('visibility', 'visible', 'important');
+                modal.style.setProperty('opacity', '1', 'important');
+                modal.style.setProperty('margin', '0', 'important');
+                modal.style.setProperty('padding', '0', 'important');
+                
                 document.body.style.overflow = 'hidden';
+                
+                // 첫 번째 탭(state-machine) 활성화
+                switchTabSlime('state-machine');
+                
+                // 자식 요소 강제 표시
+                if (modalContainer) {
+                    modalContainer.style.setProperty('display', 'block', 'important');
+                    modalContainer.style.setProperty('visibility', 'visible', 'important');
+                    modalContainer.style.setProperty('opacity', '1', 'important');
+                }
+                
+                if (modalBody) {
+                    modalBody.style.setProperty('display', 'block', 'important');
+                    modalBody.style.setProperty('visibility', 'visible', 'important');
+                    modalBody.style.setProperty('opacity', '1', 'important');
+                }
             } catch (error) {
-                console.error('Error opening Slime modal:', error);
+                alert('모달을 열 수 없습니다: ' + error.message);
             }
         }
 
@@ -3966,21 +3996,14 @@
         
         // 페이지 로드 시 이벤트 리스너 추가 (백업용)
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('DOMContentLoaded - setting up event listeners');
-            
             // ML-Agents 카드 클릭 이벤트 (백업)
             const mlAgentsCard = document.getElementById('ml-agents-card');
             if (mlAgentsCard) {
-                // onclick이 이미 있지만, 추가로 이벤트 리스너도 추가
                 mlAgentsCard.addEventListener('click', function(e) {
-                    console.log('ML-Agents card clicked via event listener');
                     e.preventDefault();
                     e.stopPropagation();
                     openMLAgentsModal(e);
-                }, true); // capture phase에서도 작동하도록
-                console.log('ML-Agents card event listener added');
-            } else {
-                console.error('ml-agents-card not found');
+                }, true);
             }
             
             // File Tower Defense 카드 클릭 이벤트
@@ -3991,9 +4014,6 @@
                     e.stopPropagation();
                     openModal('fileTowerDefense');
                 });
-                console.log('File Tower Defense card event listener added');
-            } else {
-                console.error('file-tower-defense-card not found');
             }
             
             // WFK 카드 이벤트 리스너
@@ -4004,9 +4024,16 @@
                     e.stopPropagation();
                     openWFKModal(e);
                 }, true);
-                console.log('WFK card event listener added');
-            } else {
-                console.error('wfk-card not found');
+            }
+            
+            // Slime 카드 이벤트 리스너
+            const slimeCard = document.getElementById('slime-card');
+            if (slimeCard) {
+                slimeCard.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openSlimeModal(e);
+                }, true);
             }
         });
     </script>
