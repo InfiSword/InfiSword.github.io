@@ -1828,7 +1828,7 @@
                 </div>
                 
                 <h1 style="font-size: 2.5rem; margin-bottom: 30px; color: #f0f6fc;">WorldFirstKill: 데이터 저장 및 파싱 시스템</h1>
-                
+
                 <div style="background: rgba(88, 166, 255, 0.1); border: 2px solid var(--accent-color); border-radius: 12px; padding: 30px; margin-bottom: 40px;">
                     <h3 style="color: var(--accent-color); margin-bottom: 20px; font-family: 'Fira Code', monospace; font-size: 1.2rem;">시스템 개요</h3>
                     <p style="color: var(--text-color); line-height: 1.8; margin-bottom: 25px;">
@@ -1867,7 +1867,7 @@
                 <p>CSV 파일의 헤더와 데이터 클래스의 필드를 자동으로 매핑하여 동적으로 파싱하는 시스템을 구현했습니다. 
                 <span class="highlight">리플렉션(Reflection)</span>을 활용하여 타입 안전성을 보장하면서도 확장 가능한 파싱 로직을 설계했습니다.</p>
 
-                <h3>2.1 파싱 과정 개요</h3>
+                <h3>1.1 파싱 과정 개요</h3>
                 <p>CSV 파싱은 다음과 같은 단계로 진행됩니다:</p>
                 
                 <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; margin: 30px 0;">
@@ -1937,7 +1937,7 @@
                     <li><span class="highlight">타입 변환 및 할당:</span> 문자열 데이터를 필드 타입에 맞게 변환하여 객체에 할당</li>
                 </ul>
 
-                <h3>2.2 핵심 파싱 로직</h3>
+                <h3>1.2 핵심 파싱 로직</h3>
                 <p>제네릭 메서드를 사용하여 타입에 독립적인 파싱을 수행합니다. 리플렉션으로 타입 정보를 추출하고, CSV 헤더와 클래스 필드를 자동 매핑하여 객체를 생성합니다.</p>
 
                 <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 20px; margin: 25px 0; border-radius: 6px;">
@@ -1974,7 +1974,7 @@
     <span class="c-kw">return</span> csvDataList;
 }</code></pre>
 
-                <h3>2.3 실제 파싱 예시</h3>
+                <h3>1.3 실제 파싱 예시</h3>
                 <p>WorldFirstKill에서 사용하는 실제 CSV 파싱 예시를 통해 동작 방식을 설명합니다.</p>
                 
                 <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; margin: 30px 0;">
@@ -2079,7 +2079,7 @@
                     </ul>
                 </div>
 
-                <h3>2.4 스마트 분할 (SmartSplit)</h3>
+                <h3>1.4 스마트 분할 (SmartSplit)</h3>
                 <p>일반적인 <code>Split(',')</code>는 쉼표가 포함된 문자열이나 따옴표로 감싼 필드를 제대로 처리하지 못합니다. 
                 정규식을 사용하여 CSV 표준에 맞게 파싱합니다.</p>
 
@@ -2094,7 +2094,7 @@
 }
 <span class="c-cm">// 예시: "이름,설명",100,200 → ["이름,설명", "100", "200"]</span></code></pre>
 
-                <h3>2.5 타입 자동 변환</h3>
+                <h3>1.5 타입 자동 변환</h3>
                 <p>필드 타입에 따라 문자열 데이터를 자동으로 변환합니다.</p>
                 
                 <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 20px; margin: 25px 0; border-radius: 6px;">
@@ -2129,7 +2129,7 @@
         fieldInfo.<span class="c-fn">SetValue</span>(instance, floatVal);
 }</code></pre>
 
-                <h3>2.6 기술적 특징</h3>
+                <h3>1.6 기술적 특징</h3>
                 <ul>
                     <li><span class="highlight">리플렉션 기반 동적 매핑:</span> CSV 헤더와 클래스 필드를 자동으로 매핑하여 수동 매핑 코드 불필요</li>
                     <li><span class="highlight">스마트 분할:</span> 정규식을 사용하여 쉼표와 따옴표를 포함한 CSV 데이터를 정확히 파싱</li>
@@ -2137,11 +2137,11 @@
                     <li><span class="highlight">확장성:</span> 새로운 데이터 타입 추가 시 BaseData만 상속하면 자동으로 파싱 지원</li>
                 </ul>
 
-                <h2>3. 서버 CSV 다운로드 및 버전 관리 시스템</h2>
+                <h2>2. 서버 CSV 다운로드 및 버전 관리 시스템</h2>
                 <p>구글 스프레드시트에서 CSV 데이터를 다운로드하고, 버전을 관리하여 변경된 데이터만 업데이트하는 시스템을 구현했습니다. 
                 <span class="highlight">버전 비교</span>를 통해 불필요한 다운로드를 방지하고, <span class="highlight">로컬 캐싱</span>으로 오프라인 사용을 지원합니다.</p>
 
-                <h3>3.1 다운로드 프로세스</h3>
+                <h3>2.1 다운로드 프로세스</h3>
                 <p>다운로드 프로세스는 다음과 같이 진행됩니다:</p>
                 
                 <div style="background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-color); border-radius: 12px; padding: 30px; margin: 30px 0;">
@@ -2222,7 +2222,7 @@
                     <li><span class="highlight">진행률 보고:</span> 각 파일 다운로드 완료 시 진행률 콜백 호출</li>
                 </ul>
 
-                <h3>3.2 버전 관리 시스템</h3>
+                <h3>2.2 버전 관리 시스템</h3>
                 <p>각 CSV 파일은 고유한 버전 번호를 가지며, 서버의 메타 시트에서 버전 정보를 가져옵니다. 
                 로컬에 저장된 버전 정보와 비교하여 변경된 파일만 다운로드합니다. <span class="highlight">버전이 다를 경우, 서버 버전을 기준으로 해당 버전의 CSV 파일을 다운로드하고 로컬 버전 정보를 서버 버전으로 업데이트합니다.</span></p>
                 
@@ -2257,7 +2257,7 @@
     _localVersions[dataType][attribute] = serverVersion;  <span class="c-cm">// 로컬 버전 업데이트</span>
 }</code></pre>
 
-                <h3>3.3 핵심 다운로드 로직</h3>
+                <h3>2.3 핵심 다운로드 로직</h3>
                 <p>비동기 다운로드를 통해 UI 블로킹 없이 데이터를 가져옵니다. 서버에서 CSV 파일을 다운로드하여 게임 데이터(몬스터, 아이템, 장비 등)를 가져옵니다.</p>
                 
                 <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 20px; margin: 25px 0; border-radius: 6px;">
@@ -2312,7 +2312,7 @@
     <span class="c-kw">return true</span>;
 }</code></pre>
 
-                <h3>3.4 비동기 다운로드 구현</h3>
+                <h3>2.4 비동기 다운로드 구현</h3>
                 <p>UnityWebRequest를 사용하여 비동기로 파일을 다운로드합니다. 서버 URL에서 CSV 파일의 텍스트 데이터를 다운로드하여 반환합니다.</p>
                 
                 <div style="background: rgba(56, 139, 253, 0.1); border-left: 4px solid #388bfd; padding: 20px; margin: 25px 0; border-radius: 6px;">
@@ -2336,12 +2336,12 @@
             <span class="c-kw">return</span> request.downloadHandler.text;  <span class="c-cm">// CSV 텍스트 데이터 반환</span>
         } <span class="c-kw">else</span> {
             <span class="c-cm">// ...</span>
-            <span class="c-kw">return null</span>;
+    <span class="c-kw">return null</span>;
         }
     }
 }</code></pre>
 
-                <h3>3.5 기술적 특징</h3>
+                <h3>2.5 기술적 특징</h3>
                 <ul>
                     <li><span class="highlight">버전 기반 업데이트:</span> 서버 버전과 로컬 버전을 비교하여 변경된 데이터만 다운로드</li>
                     <li><span class="highlight">비동기 다운로드:</span> UnityWebRequest를 사용한 비동기 CSV 다운로드로 UI 블로킹 방지</li>
@@ -2350,51 +2350,12 @@
                     <li><span class="highlight">에러 처리:</span> 다운로드 실패 시 null 반환하여 안전하게 처리</li>
                 </ul>
 
-                <h2>3. Factory Pattern을 활용한 데이터 기반 객체 생성</h2>
-                <p>파싱된 데이터를 기반으로 게임 객체를 생성하는 Factory Pattern을 구현했습니다. 데이터 타입에 따라 적절한 객체를 생성합니다.</p>
-
-<pre><code><span class="c-cm">// DataFactory.cs: 데이터 기반 객체 생성</span>
-<span class="c-kw">public static</span> <span class="c-ty">Unit_Monster</span> <span class="c-fn">MakeMonster</span>(<span class="c-ty">Define</span>.<span class="c-ty">MonsterType</span> monsterType, <span class="c-kw">int</span> grade, <span class="c-ty">GameObject</span> prefab)
-{
-    <span class="c-cm">// 몬스터 데이터 찾기</span>
-    <span class="c-ty">Data_Monster</span> data = Managers.Data.MonsterData.Values.<span class="c-fn">ToList</span>()
-        .<span class="c-fn">Find</span>(value => value.m_monsterIndex == (<span class="c-kw">int</span>)monsterType + grade - <span class="c-st">1</span>);
-
-    <span class="c-kw">if</span> (data == <span class="c-kw">null</span>) {
-        <span class="c-ty">Debug</span>.<span class="c-fn">LogError</span>($<span class="c-st">"몬스터 데이터를 찾을 수 없습니다: Type={monsterType}, Grade={grade}"</span>);
-    <span class="c-kw">return null</span>;
-    }
-
-    <span class="c-cm">// 몬스터 인스턴스 생성</span>
-    <span class="c-ty">GameObject</span> monsterObj = <span class="c-ty">GameObject</span>.<span class="c-fn">Instantiate</span>(prefab);
-    <span class="c-ty">Unit_Monster</span> monster = monsterObj.<span class="c-fn">GetComponent</span>&lt;<span class="c-ty">Unit_Monster</span>&gt;();
-
-    <span class="c-cm">// 드롭 아이템 생성</span>
-    <span class="c-ty">Dictionary</span>&lt;<span class="c-ty">Item</span>, <span class="c-kw">int</span>&gt; dropItems = <span class="c-fn">CreateDropItems</span>(grade, data);
-
-    <span class="c-cm">// 몬스터 스탯 계산</span>
-    <span class="c-ty">UnitStat</span> monsterStat = <span class="c-fn">CalculateMonsterStat</span>(data, grade, dropItems);
-
-    <span class="c-cm">// 몬스터 데이터 적용</span>
-    <span class="c-fn">ApplyMonsterData</span>(monster, data, monsterStat, dropItems, grade);
-
-    <span class="c-kw">return</span> monster;
-}</code></pre>
-
-                <h3>기술적 특징</h3>
-                <ul>
-                    <li><span class="highlight">데이터 기반 생성:</span> CSV에서 파싱된 데이터를 기반으로 게임 객체 생성</li>
-                    <li><span class="highlight">타입별 Factory:</span> 몬스터, 장비, 아이템 등 타입별로 전용 Factory 메서드 제공</li>
-                    <li><span class="highlight">확장성:</span> 새로운 데이터 타입 추가 시 Factory 메서드만 추가하면 됨</li>
-                </ul>
-
                 <h2>전체 시스템 기술적 특징</h2>
                 <p>CSV 서버 다운로드 및 파싱 시스템의 핵심 기술적 특징입니다.</p>
                 <ul>
                     <li><span class="highlight">리플렉션 기반 동적 파싱:</span> 수동 매핑 코드 없이 CSV 헤더와 클래스 필드 자동 매핑</li>
                     <li><span class="highlight">버전 관리 시스템:</span> 서버와 로컬 버전 비교를 통한 효율적인 데이터 업데이트</li>
                     <li><span class="highlight">비동기 다운로드:</span> UnityWebRequest를 활용한 비동기 CSV 다운로드로 UI 반응성 유지</li>
-                    <li><span class="highlight">Factory Pattern:</span> 데이터 기반 객체 생성으로 확장 가능한 아키텍처 구축</li>
                     <li><span class="highlight">타입 안전성:</span> 제네릭과 리플렉션을 활용한 컴파일 타임 타입 체크</li>
                 </ul>
                 </div>
@@ -2464,14 +2425,14 @@
                                 <div style="font-size: 0.9rem; color: var(--text-color); margin-bottom: 5px;">10자리 고정</div>
                                 <div style="color: var(--code-comment); font-size: 0.85rem; margin-top: 5px;">예: <code style="color: var(--accent-color);">0000000123</code></div>
                                 <div style="color: #8b949e; font-size: 0.8rem; margin-top: 8px;">게임 시작 시 설정된 초기 시드 값</div>
-                            </div>
+                    </div>
                             <div style="color: var(--accent-color); font-size: 1.5rem;">+</div>
                             <div style="background: rgba(88, 166, 255, 0.2); padding: 15px 20px; border-radius: 8px; border: 2px solid var(--accent-color); flex: 1; min-width: 200px;">
                                 <div style="color: var(--accent-color); font-weight: 700; margin-bottom: 8px; font-family: 'Fira Code', monospace;">Domain 개수</div>
                                 <div style="font-size: 0.9rem; color: var(--text-color); margin-bottom: 5px;">3자리 고정</div>
                                 <div style="color: var(--code-comment); font-size: 0.85rem; margin-top: 5px;">예: <code style="color: var(--accent-color);">003</code></div>
                                 <div style="color: #8b949e; font-size: 0.8rem; margin-top: 8px;">랜덤 값이 사용되는 영역의 개수</div>
-                            </div>
+                    </div>
                         </div>
                         
                         <div style="margin: 20px 0; padding: 20px; background: rgba(0, 0, 0, 0.3); border-radius: 8px; border-left: 4px solid var(--sub-accent);">
