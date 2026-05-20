@@ -1,0 +1,30 @@
+# ==========================================================
+#  Minhyuk Lee | Systems & Rendering Blog Configuration
+# ==========================================================
+
+title: Minhyuk Lee | Systems & Rendering
+email: seif4688@gmail.com
+description: Client programming Engineer Portfolio.
+baseurl: "" # 중요: 만약 '아이디.github.io/레포명' 이라면 "/레포명"을 적으시고, 루트라면 빈칸 ""으로 둡니다.
+url: "https://infisword.github.io" # 본인의 깃허브 주소로 변경하세요.
+
+# Markdown 파서 및 하이라이터 지정
+markdown: kramdown
+highlighter: rouge
+permalink: /blog/:title/
+
+# 빌드에서 제외할 항목 설정
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules/
+  - vendor/
+  - README.md
+
+# 마크다운 기본 레이아웃 적용 매핑
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"

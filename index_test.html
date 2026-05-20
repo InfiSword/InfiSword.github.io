@@ -1,0 +1,28 @@
+---
+layout: null
+---
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ site.title }}</title>
+</head>
+<body>
+    <h1>{{ site.title }}에 오신 것을 환영합니다!</h1>
+    <p>{{ site.description }}</p>
+
+    <hr>
+    <h2>최신 등록 로그목록</h2>
+    <ul>
+        <!-- _posts 폴더 안의 글들을 최신순으로 돌면서 루프를 수행합니다 -->
+        {% for post in site.posts %}
+        <li>
+            <!-- post.url 은 jekyll이 자동으로 생성해주는 해당 글의 링크입니다 -->
+            <a href="{{ post.url }}">{{ post.title }}</a> 
+            <small>({{ post.date | date: "%Y-%m-%d" }})</small>
+        </li>
+        {% else %}
+        <li>등록된 글이 아직 없습니다.</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
