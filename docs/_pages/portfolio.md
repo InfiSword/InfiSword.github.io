@@ -1,12 +1,10 @@
+---
 layout: single
-
 title: "Minhyuk Lee | Systems \& Rendering"
-
 permalink: /portfolio/
-
 author\_profile: true
-
 classes: wide
+---
 
 
 
