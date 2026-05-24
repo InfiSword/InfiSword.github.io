@@ -92,14 +92,6 @@ classes: wide
         display: flex;
         align-items: center;
     }
-    .details-desc {
-        padding: 15px 20px;
-        background: #fff;
-        color: #666;
-        font-size: 0.95rem;
-        border-top: 1px solid #e1e4e8;
-        line-height: 1.6;
-    }
 
     /* --- Training Table --- */
     .pf-data-table {
@@ -156,12 +148,12 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 
 <div class="highlight-box">
     <strong style="color: #007bff;">시행착오 및 문제 해결:</strong><br>
-    초기 설계 시 에이전트가 목표 지점까지의 최단 경로를 찾는 과정에서 역주행하는 현상이 발생했습니다. 이를 방지하기 위해 목표 지점 사이에 다수의 체크포인트를 순차적으로 배치하고, 현재 가야 할 체크포인트를 통과해야만 다음 포인트에서 보상을 받을 수 있도록 논리를 강화했습니다.
+    초기 설계 시 에이전트가 목표 지점까지의 최단 경로를 찾는 과정에서 역주행하는 현상이 발생했습니다. 이를 방지하기 위해 목표 지점 사이에 다수의 체크포인트를 순차적으로 배치하고, 현재 가야 할 체크포인트를 통과해야만 다음 포인트에서 보상을 받을 수 있도록 논리를 강화했습니다. 추가로, 트랙 생성의 효율성을 위해 스플라인(Spline)을 따라 체크포인트를 자동 생성하는 툴을 개발하여 개발 생산성을 크게 높였습니다.
 </div>
 
 ### 2.1 시스템 아키텍처
 
-트랙의 스플라인 곡선을 분석하여 체크포인트를 자동 생성하고, 에이전트의 진행 상태를 관리하는 계층적 구조를 설계했습니다.
+트랙의 스플라인 곡선을 분석하여 체크포인트를 자동 생성하고, 에이전트의 진행 상태를 관리하는 계층적 구조를 설계했습니다. `SplineToCheckpointGenerator`를 통해 수작업 없이 일정한 간격으로 체크포인트와 스타팅 그리드를 구성할 수 있습니다.
 
 <div class="pf-visual-frame">
 <div class="pf-arch-diagram">
@@ -173,7 +165,7 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 <span class="pf-arch-item">태그 자동 할당</span>
 </div>
 </div>
-<div class="flow-arrow">↓</div>
+<div class="flow-arrow" style="text-align: center;">↓</div>
 <div class="pf-arch-layer">
 <div class="pf-arch-layer-title">SpawnPointManager / TrackData</div>
 <div class="pf-arch-layer-items">
@@ -182,7 +174,7 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 <span class="pf-arch-item">Finish 라인 및 랩(Lap) 정보 관리</span>
 </div>
 </div>
-<div class="flow-arrow">↓</div>
+<div class="flow-arrow" style="text-align: center;">↓</div>
 <div class="pf-arch-layer">
 <div class="pf-arch-layer-title">SimcadeCarAgent_Auto</div>
 <div class="pf-arch-layer-items">
@@ -194,11 +186,52 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 </div>
 </div>
 
-<details class="pf-details">
-<summary>코드 보기: 순차적 체크포인트 검증 로직</summary>
-<div class="details-desc">
+**스플라인 기반 체크포인트 자동 생성 로직**
+Unity Spline을 기반으로 정해진 개수만큼의 체크포인트를 트랙의 곡률(탄젠트)에 맞게 회전시켜 자동 생성하고, TrackData에 연동하는 핵심 로직입니다.
+
+<details class="pf-details" markdown="1">
+<summary>코드 보기: 체크포인트 자동 생성 로직</summary>
+
+```csharp
+// SplineToCheckpointGenerator.cs: 체크포인트 자동 생성 로직
+public void GenerateCheckpoints()
+{
+    // ... 초기화 및 검증 생략 ...
+    for (int i = 0; i < totalCheckpoints; i++)
+    {
+        // 스플라인을 따라 위치 계산
+        float progress = (float)(i + 1) / totalCheckpoints;
+        spline.Spline.Evaluate(progress, out float3 pos, out float3 tan, out float3 up);
+        if (math.lengthsq(tan) == 0) tan = math.forward(); 
+
+        // 체크포인트 GameObject 생성 및 배치
+        GameObject checkpointObj = new GameObject($"Checkpoint_{i:00}");
+        checkpointObj.transform.SetParent(checkpointRoot.transform);
+        checkpointObj.transform.localPosition = (Vector3)pos;
+        checkpointObj.transform.localRotation = Quaternion.LookRotation((Vector3)tan, (Vector3)up);
+
+        // BoxCollider(Trigger)와 Tag 자동 추가
+        BoxCollider collider = checkpointObj.AddComponent<BoxCollider>();
+        collider.isTrigger = true;
+        collider.size = checkpointColliderSize;
+        checkpointObj.tag = checkpointTag;
+
+        CheckPoint cpScript = checkpointObj.AddComponent<CheckPoint>();
+        cpScript.Init(i); 
+        checkPointsTemp[i] = checkpointObj.transform;
+    }
+    
+    // TrackData에 최종 등록
+    trackData.SetCheckPoints(checkPointsTemp);
+}
+```
+</details>
+
+**순차적 체크포인트 검증 로직**
 차량이 통과한 체크포인트의 인덱스가 현재 기대되는 순서(NextCheckpointIndex)와 일치하는지 확인하여 논리적 주행 경로를 보장합니다.
-</div>
+
+<details class="pf-details" markdown="1">
+<summary>코드 보기: 순차적 체크포인트 검증 로직</summary>
 
 ```csharp
 // CarProgress.cs: 체크포인트 충돌 처리 (내부 상태 갱신)
@@ -286,22 +319,50 @@ private void CheckpointPassed(int checkpointIndex)
     </div>
 </div>
 
-<details class="pf-details">
+**통합 보상 계산 및 페널티 부여 로직**
+목표 지점을 향한 거리 보상, 방향 정렬(Dot Product), 그리고 전방/후방 레이캐스트 센서를 활용한 벽 근접 페널티를 종합적으로 계산하는 핵심 함수입니다.
+
+<details class="pf-details" markdown="1">
 <summary>코드 보기: 벽 근접 페널티 및 역주행 감지 로직</summary>
 
 ```csharp
-// SimcadeCarAgent_Auto.cs
+// SimcadeCarAgent_Auto.cs: 보상 계산 로직
 private void CalculateRewards() {
-    // 1. 전방 벽 근접 페널티 (레이캐스트 기반)
-    ApplyProximityPenalty(wallRayDirections, wallLayer, wallProximityDistance, proximityPenalty);
+    // 1. 기본 시간 페널티 (빠른 완주 유도)
+    AddReward(timePenalty);
 
-    // 2. 역주행 감지 (Dot Product 활용)
-    Vector3 targetDirection = (targetPosition - transform.position).normalized;
-    float directionDot = Vector3.Dot(transform.forward, targetDirection);
-    
-    // 목표 방향과 150도 이상 차이 날 경우 역주행으로 간주
-    if (directionDot < -0.866f && rb.linearVelocity.magnitude > 1.5f) {
-        AddReward(wrongWayPenalty);
+    Vector3 targetPosition = GetTargetPosition();
+    float distanceToTarget = Vector3.Distance(transform.position, targetPosition); 
+
+    if (targetPosition != transform.position) {
+        // 2. 방향 정렬 보상 (목표 방향과 현재 차량의 전방 방향 일치도)
+        Vector3 targetDirection = (targetPosition - transform.position).normalized;
+        float directionDot = Vector3.Dot(transform.forward, targetDirection);
+        AddReward(directionDot * directionAlignmentRewardFactor);
+
+        // 3. 거리 기반 보상 (가까워질수록 보상)
+        float distanceChange = lastDistanceToTarget - distanceToTarget;
+        float weight = (Vector3.Dot(rb.linearVelocity, transform.forward) > 0.1f) ? 1.0f : 0.5f;
+        AddReward(distanceChange * distanceRewardFactor * weight);
+        
+        lastDistanceToTarget = distanceToTarget;
+    }
+
+    // 4. 벽 근접 페널티 (레이캐스트 활용)
+    if (!isStuckInWall) {
+        ApplyProximityPenalty(wallRayDirections, wallLayer, wallProximityDistance, proximityPenalty);
+    }
+}
+
+// 레이캐스트 기반 근접 페널티 계산
+private void ApplyProximityPenalty(Vector3[] directions, LayerMask layer, float distance, float penaltyCoefficient) {
+    for (int i = 0; i < directions.Length; i++) {
+        Vector3 worldRayDir = transform.TransformDirection(directions[i]);
+        if (Physics.Raycast(transform.position, worldRayDir, out RaycastHit hit, distance, layer)) {
+            // 거리가 가까울수록 더 큰 페널티를 부여하여 충돌 회피 유도
+            float penalty = penaltyCoefficient * (1f - (hit.distance / distance));
+            AddReward(penalty * Time.fixedDeltaTime);
+        }
     }
 }
 ```
@@ -346,43 +407,42 @@ private void CalculateRewards() {
 </div>
 </div>
 
-### 4.2 입력 스무딩 및 연속 제어 (Action Smoothing)
+### 4.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)
 
-강화학습 초기 단계의 급격한 조향 지터링(Jittering)을 방지하고 실제 차량과 유사한 관성을 부여하기 위해 **입력 보정 알고리즘**을 적용했습니다.
+초기 학습 단계에서는 급격한 조향 지터링(Jittering)을 방지하기 위해 프레임 간 조향값의 변화량을 제한하는 **입력 보정(Action Smoothing)** 알고리즘을 테스트했습니다. 그러나 차량의 반응성을 떨어뜨려 코너링에서 에이전트의 의도가 지연되는 현상이 확인되었습니다.
 
 <div class="pf-visual-frame">
-    <img src="{{ '/assets/images/mlagent_3.png' | relative_url }}" alt="Input Smoothing Visualization" style="width: 100%; border-radius: 8px;">
-    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">입력 스무딩 알고리즘 시각화: AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
+    <img src="{{ '/assets/images/mlagent_3.png' | relative_url }}" alt="Direct Control Visualization" style="width: 100%; border-radius: 8px;">
+    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">신경망 출력을 물리 차량 컨트롤러에 직접 매핑하여 반응성을 극대화</p>
 </div>
 
 <div class="highlight-box">
-    <strong style="color: #007bff;">입력 보정 원리:</strong><br>
-    신경망이 현재 상황을 보고 판단한 '원시 조향값(rawSteering)'과 직전 프레임의 '최종 조향값(lastSteeringInput)'을 비교합니다. 프레임당 변화량(maxSteeringChange)을 제한하여 핸들이 급격하게 꺾이지 않도록 부드러운 궤적을 생성합니다.
+    <strong style="color: #007bff;">입력 보정 제거 및 반응성 향상:</strong><br>
+    최종 모델에서는 신경망이 현재 상황을 보고 판단한 원시 출력값(Continuous Actions)을 즉각적으로 물리 엔진(Vehicle Controller)에 전달하도록 수정했습니다. 지터링 문제는 강화학습의 하이퍼파라미터 조정 및 보상 체계(Slip Penalty 등) 강화를 통해 궤적 자체를 부드럽게 그리도록 유도하는 방식으로 근본적인 해결을 이끌어냈습니다.
 </div>
 
-<details class="pf-details">
-<summary>코드 보기: Action Smoothing 알고리즘</summary>
+**즉각적 행동 매핑 로직**
+입력 스무딩을 제거하여 AI의 조향 및 가속 의도가 지연 없이 차량에 반영되도록 최적화한 컨트롤 메서드입니다.
+
+<details class="pf-details" markdown="1">
+<summary>코드 보기: 즉각적 행동 매핑 로직</summary>
 
 ```csharp
 public override void OnActionReceived(ActionBuffers actions)
 {
-    // 1. 신경망의 원시 행동 값 수신 (-1.0 ~ 1.0)
-    float rawSteering = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
-    float rawAcceleration = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
+    // 액션 스무딩 제거: AI의 의도가 즉각적으로 반영되도록 수정
+    float steeringInput = Mathf.Clamp(actions.ContinuousActions[0], -1f, 1f);
+    float accelerationInput = Mathf.Clamp(actions.ContinuousActions[1], -1f, 1f);
 
-    // 2. 입력 스무딩: 프레임당 최대 변화량 제한 (조향: 0.5, 가속: 0.7)
-    float steeringInput = Mathf.Clamp(rawSteering,
-        lastSteeringInput - maxSteeringChange,
-        lastSteeringInput + maxSteeringChange);
-    
-    float accelerationInput = Mathf.Clamp(rawAcceleration,
-        lastAccelerationInput - maxAccelerationChange,
-        lastAccelerationInput + maxAccelerationChange);
-
-    // 3. 상태 저장 및 차량 컨트롤러에 전달
     lastSteeringInput = steeringInput;
     lastAccelerationInput = accelerationInput;
+
+    // 보정 없이 차량 컨트롤러에 원시 입력값 직접 전달
     vehicleController.ProvideInputs(accelerationInput, steeringInput, 0f);
+    
+    CalculateRewards();
+    CheckEpisodeEndConditions();
+    GetComponent<CarProgress>().UpdateProgress();
 }
 ```
 </details>
@@ -410,11 +470,11 @@ public override void OnActionReceived(ActionBuffers actions)
 
 에이전트의 일반화 성능을 극대화하기 위해 매 에피소드 시작 시 랜덤하게 트랙과 스폰 포인트를 교체하는 시스템을 도입했습니다.
 
-<details class="pf-details">
-<summary>코드 보기: 다중 트랙 랜덤 스폰 로직</summary>
-<div class="details-desc">
+**다중 트랙 랜덤 스폰 로직**
 매 에피소드 초기화 시 다양한 트랙과 위치에서 시작하도록 설정하여 에이전트의 일반화 능력을 향상시킵니다.
-</div>
+
+<details class="pf-details" markdown="1">
+<summary>코드 보기: 다중 트랙 랜덤 스폰 로직</summary>
 
 ```csharp
 public override void OnEpisodeBegin()
@@ -439,7 +499,7 @@ public override void OnEpisodeBegin()
 ## 6. 기술적 성과 및 결론
 {: .chapter-title }
 
-*   **주행 안정성:** Action Smoothing을 통해 지터링 없는 부드러운 코너링과 직선 주행 구현.
+*   **주행 안정성:** 보상 체계 정밀화를 통해 조향 지터링을 스스로 극복하는 부드러운 코너링 구현.
 *   **환경 적응력:** 다중 트랙 학습을 통해 학습되지 않은 새로운 트랙에서도 90% 이상의 완주율 달성.
 *   **복구 지능:** 충돌 시 스스로 후진하여 경로로 복귀하거나, 복구 불가능 시 빠르게 재시도하는 효율적 학습 루프 구축.
 
