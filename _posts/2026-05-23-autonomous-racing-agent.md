@@ -7,7 +7,6 @@ permalink: /project/autonomous-racing-agent/
 tags: [Machine Learning, ML-Agents, AI, Unity, Reinforcement Learning]
 toc: true
 toc_sticky: true
-classes: wide
 ---
 
 <style>

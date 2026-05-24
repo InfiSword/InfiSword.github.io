@@ -7,7 +7,6 @@ permalink: /project/file-tower-defense/
 tags: [Unity, Optimization, Architecture, Algorithms]
 toc: true
 toc_sticky: true
-classes: wide
 ---
 
 <style>
