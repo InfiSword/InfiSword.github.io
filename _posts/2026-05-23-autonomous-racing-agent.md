@@ -138,10 +138,13 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 본 프로젝트는 강화학습(Reinforcement Learning)을 통해 복잡한 트랙 환경에서 자율 주행이 가능한 경주차 에이전트를 개발하는 것을 목표로 합니다. **체크포인트 기반 네비게이션 시스템**과 **다층적 보상 설계**를 통해 에이전트가 트랙을 순차적으로 완주하도록 유도하며, **레이캐스트 기반 환경 감지**와 **입력 스무딩**을 통해 물리적으로 안정적인 주행 성능을 확보했습니다.
 
 <div class="pf-visual-frame">
-    <div style="background: #eee; height: 300px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 2px dashed #ccc;">
-        <span style="color: #666;">[ML-Agents 학습 시각화 영상/GIF 자리]</span>
-    </div>
+    <img src="{{ '/assets/Gifs/autonomous-racing.gif' | relative_url }}" alt="Unity ML-Agents Training Visualization" style="width: 100%; border-radius: 8px;">
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">Unity ML-Agents를 통한 자율 주행 학습 과정</p>
+</div>
+
+<div class="pf-visual-frame">
+    <img src="{{ '/assets/images/mlagent_4.png' | relative_url }}" alt="ML-Agents Track Environment" style="width: 100%; border-radius: 8px;">
+    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">구불구불한 도로와 바위 지형으로 구성된 학습 트랙 환경</p>
 </div>
 
 ---
@@ -316,6 +319,11 @@ private void CalculateRewards() {
 에이전트가 도로의 폭, 곡률, 장애물과의 거리를 정확히 파악하도록 다방향 레이캐스트 시스템을 구축했습니다.
 
 <div class="pf-visual-frame">
+    <img src="{{ '/assets/images/mlagent_1.png' | relative_url }}" alt="Raycast Sensor Visualization" style="width: 100%; border-radius: 8px;">
+    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">차량의 레이캐스트 센서 시스템 시각화 (빨간색: 감지된 대상, 초록색: 일반 센서 범위, 체크포인트 및 경로 스플라인 표시)</p>
+</div>
+
+<div class="pf-visual-frame">
 <div class="pf-grid">
 <div class="pf-arch-layer">
 <div class="pf-arch-layer-title">전방 센서 (9개)</div>
@@ -341,6 +349,11 @@ private void CalculateRewards() {
 ### 4.2 입력 스무딩 및 연속 제어 (Action Smoothing)
 
 강화학습 초기 단계의 급격한 조향 지터링(Jittering)을 방지하고 실제 차량과 유사한 관성을 부여하기 위해 **입력 보정 알고리즘**을 적용했습니다.
+
+<div class="pf-visual-frame">
+    <img src="{{ '/assets/images/mlagent_3.png' | relative_url }}" alt="Input Smoothing Visualization" style="width: 100%; border-radius: 8px;">
+    <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">입력 스무딩 알고리즘 시각화: AI의 원시 판단과 이전 상태를 비교하여 부드러운 최종 명령 생성</p>
+</div>
 
 <div class="highlight-box">
     <strong style="color: #007bff;">입력 보정 원리:</strong><br>
@@ -386,15 +399,22 @@ public override void OnActionReceived(ActionBuffers actions)
 | 파라미터 | 값 | 설명 |
 | :--- | :--- | :--- |
 | **Trainer Type** | PPO | Proximal Policy Optimization |
-| **Batch Size** | 1024 | 대규모 에이전트 동시 업데이트 최적화 |
-| **Learning Rate** | 0.0003 | 표준 안정 학습률 |
-| **Hidden Units** | 256 | 신경망 복잡도 설정 (2개 층) |
-| **Max Steps** | 10,000,000 | 충분한 수렴을 위한 대규모 학습 스텝 |
-| **Curiosity Signal** | 0.02 | 새로운 경로 탐험(Exploration) 가중치 활성화 |
+| **Batch Size** | 2048 | 대규모 에이전트 동시 업데이트 및 안정성 최적화 |
+| **Buffer Size** | 10240 | 정책 업데이트 전 수집할 경험 데이터 크기 |
+| **Learning Rate** | 0.0002 | 안정적인 수렴을 위한 선형 감소 학습률 |
+| **Beta (Entropy)** | 0.002 | 에이전트의 탐험(Exploration)을 유도하는 가중치 |
+| **Hidden Units** | 256 | 신경망의 복잡도 설정 (2개 Hidden Layer) |
+| **Max Steps** | 5,000,000 | 모델의 완전한 학습을 위한 총 스텝 수 |
 
 ### 5.2 다중 트랙 랜덤 학습 시스템
 
 에이전트의 일반화 성능을 극대화하기 위해 매 에피소드 시작 시 랜덤하게 트랙과 스폰 포인트를 교체하는 시스템을 도입했습니다.
+
+<details class="pf-details">
+<summary>코드 보기: 다중 트랙 랜덤 스폰 로직</summary>
+<div class="details-desc">
+매 에피소드 초기화 시 다양한 트랙과 위치에서 시작하도록 설정하여 에이전트의 일반화 능력을 향상시킵니다.
+</div>
 
 ```csharp
 public override void OnEpisodeBegin()
@@ -412,6 +432,7 @@ public override void OnEpisodeBegin()
     carProgress.Initialize();
 }
 ```
+</details>
 
 ---
 
