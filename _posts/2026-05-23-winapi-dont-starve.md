@@ -402,6 +402,69 @@ void ObjectManager::UpdateObjectGrid(GameObject* pObj)
 ```
 </details>
 
+#### 3.1.3 오브젝트 그리드 추가/제거 및 선언 구조 (Spatial Lifecycle Management)
+오브젝트가 새로 생성되거나 소멸할 때, 해당 오브젝트를 그리드 시스템에 안전하게 등록하고 지워주는 과정이 필수적입니다. 또한, 월드의 크기와 타일 크기에 맞추어 그리드의 너비와 높이를 런타임 최적화를 위해 상수로 정의했습니다.
+
+<details class="pf-details" markdown="1">
+<summary>코드 보기: ObjectManager.h - 공간 분할 시스템 헤더 정의</summary>
+
+```cpp
+// ObjectManager.h - 공간 분할 시스템의 선언부
+class ObjectManager {
+public:
+    void UpdateObjectGrid(GameObject* pObj);
+    void AddToGrid(GameObject* pObj);
+    void RemoveFromGrid(GameObject* pObj);
+
+private:
+    // 256px 정사각형 셀 기준의 정적 그리드 크기 정의
+    static constexpr int GRID_CELL_SIZE = 256;
+    static constexpr int GRID_WIDTH = (MAP_WIDTH * TILE_SIZE / GRID_CELL_SIZE) + 2;
+    static constexpr int GRID_HEIGHT = (MAP_HEIGHT * TILE_SIZE / GRID_CELL_SIZE) + 2;
+
+    // 2D 공간 분할 그리드 (각 셀마다 속한 오브젝트 포인터 벡터 관리)
+    std::vector<GameObject*> m_spatialGrid[GRID_WIDTH][GRID_HEIGHT];
+    uint32_t m_spatialQueryStamp = 1;
+};
+```
+</details>
+
+<details class="pf-details" markdown="1">
+<summary>코드 보기: ObjectManager.cpp - 그리드 추가 및 삭제 구현</summary>
+
+```cpp
+// ObjectManager.cpp - 객체 생성 시 그리드 등록
+void ObjectManager::AddToGrid(GameObject* pObj)
+{
+    if (!pObj || pObj->GetType() == GO_TYPE_UI) return;
+
+    Gdiplus::RectF bounds = pObj->GetBounds();
+    int x = (int)floor((bounds.X + bounds.Width * 0.5f) / GRID_CELL_SIZE);
+    int y = (int)floor((bounds.Y + bounds.Height * 0.5f) / GRID_CELL_SIZE);
+
+    x = (std::max<int>)(0, (std::min<int>)(GRID_WIDTH - 1, x));
+    y = (std::max<int>)(0, (std::min<int>)(GRID_HEIGHT - 1, y));
+
+    m_spatialGrid[x][y].push_back(pObj);
+    pObj->SetGridCell(x, y);
+}
+
+// ObjectManager.cpp - 객체 소멸 시 그리드 제거
+void ObjectManager::RemoveFromGrid(GameObject* pObj)
+{
+    if (!pObj) return;
+    int x = pObj->GetGridCellX();
+    int y = pObj->GetGridCellY();
+
+    if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+        std::vector<GameObject*>& cell = m_spatialGrid[x][y];
+        cell.erase(std::remove(cell.begin(), cell.end(), pObj), cell.end());
+        pObj->SetGridCell(-1, -1);
+    }
+}
+```
+</details>
+
 ---
 
 ## 4. 애니메이션 시스템 및 이벤트 콜백

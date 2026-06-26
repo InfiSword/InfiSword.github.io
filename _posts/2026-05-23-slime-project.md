@@ -159,51 +159,51 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
 
 FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 상태의 Exit와 새 상태의 Enter를 자동으로 호출하여 물리 및 애니메이션 상태의 정합성을 보장합니다.
 
-<div class="pf-visual-frame">
-    <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
-        <div style="background: rgba(40, 167, 69, 0.05); border: 2px solid #28a745; border-radius: 8px; padding: 15px 25px; text-align: center; width: 100%; max-width: 500px;">
-            <div style="color: #28a745; font-weight: 700; margin-bottom: 5px; font-family: 'Fira Code';">1. Init(StartingState)</div>
-            <div style="color: #666; font-size: 0.8rem;">초기 상태 설정 및 Enter() 호출</div>
+<div class="pf-visual-frame" style="overflow-x: auto;">
+    <div style="display: flex; align-items: center; justify-content: flex-start; min-width: 800px; padding: 20px 0;">
+        <!-- Init -->
+        <div style="background: rgba(40, 167, 69, 0.05); border: 2px solid #28a745; border-radius: 8px; padding: 12px 20px; text-align: center; flex: 0 0 160px;">
+            <div style="color: #28a745; font-weight: 700; font-size: 0.85rem; font-family: 'Fira Code';">State::Enter</div>
+            <div style="color: #888; font-size: 0.7rem; margin-top: 4px;">상태 초기화</div>
         </div>
         
-        <div class="flow-arrow" style="font-size: 1rem; margin: 5px 0;">↓</div>
+        <div style="color: #007bff; font-weight: bold; margin: 0 15px; font-size: 1.2rem;">→</div>
         
-        <div style="background: rgba(0, 123, 255, 0.05); border: 2px solid #007bff; border-radius: 8px; padding: 15px 25px; text-align: center; width: 100%; max-width: 500px; position: relative;">
-            <div style="color: #007bff; font-weight: 700; margin-bottom: 5px; font-family: 'Fira Code';">2. Update Loop</div>
-            <div style="display: flex; justify-content: space-around; margin-top: 10px; gap: 10px;">
-                <div style="background: #fff; border: 1px solid #e1e4e8; padding: 8px; border-radius: 4px; font-size: 0.75rem; flex: 1;">
-                    <strong>LogicUpdate</strong><br>프레임 연산
+        <!-- Update Loop -->
+        <div style="background: rgba(0, 123, 255, 0.05); border: 2px solid #007bff; border-radius: 8px; padding: 12px; text-align: center; flex: 0 0 240px; position: relative;">
+            <div style="color: #007bff; font-weight: 700; font-size: 0.85rem; font-family: 'Fira Code'; margin-bottom: 8px;">Execution Loop</div>
+            <div style="display: flex; gap: 8px;">
+                <div style="background: #fff; border: 1px solid #e1e4e8; padding: 6px; border-radius: 4px; font-size: 0.7rem; flex: 1;">
+                    <strong>LogicUpdate</strong>
                 </div>
-                <div style="background: #fff; border: 1px solid #e1e4e8; padding: 8px; border-radius: 4px; font-size: 0.75rem; flex: 1;">
-                    <strong>PhysicsUpdate</strong><br>물리 연산
-                </div>
-            </div>
-        </div>
-        
-        <div class="flow-arrow" style="font-size: 1rem; margin: 5px 0;">↓</div>
-        
-        <div style="background: rgba(255, 123, 114, 0.05); border: 2px solid #ff7b72; border-radius: 40px; padding: 12px 30px; text-align: center; font-weight: 700; color: #ff7b72; font-size: 0.9rem; font-family: 'Fira Code';">
-            Condition Met?
-        </div>
-        
-        <div style="display: flex; gap: 40px; margin-top: 10px;">
-            <div style="display: flex; flex-direction: column; align-items: center;">
-                <div style="color: #28a745; font-weight: 700; font-size: 0.8rem; margin-bottom: 5px;">[NO]</div>
-                <div style="width: 2px; height: 30px; background: #28a745; position: relative;">
-                    <div style="position: absolute; bottom: 0; left: -100px; width: 100px; height: 2px; background: #28a745;"></div>
-                    <div style="position: absolute; bottom: 0; left: -100px; width: 2px; height: 160px; background: #28a745;"></div>
-                    <div style="position: absolute; top: -130px; left: -100px; width: 100px; height: 2px; background: #28a745;"></div>
+                <div style="background: #fff; border: 1px solid #e1e4e8; padding: 6px; border-radius: 4px; font-size: 0.7rem; flex: 1;">
+                    <strong>PhysicsUpdate</strong>
                 </div>
             </div>
-            <div style="display: flex; flex-direction: column; align-items: center;">
-                <div style="color: #007bff; font-weight: 700; font-size: 0.8rem; margin-bottom: 5px;">[YES]</div>
-                <div class="flow-arrow" style="font-size: 1rem;">↓</div>
-            </div>
+            <!-- Loop Arrow -->
+            <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 10px; border: 2px solid #007bff; border-bottom: none; border-radius: 10px 10px 0 0;"></div>
         </div>
         
-        <div style="background: rgba(0, 123, 255, 0.05); border: 2px solid #007bff; border-radius: 8px; padding: 15px 25px; text-align: center; width: 100%; max-width: 500px;">
-            <div style="color: #007bff; font-weight: 700; margin-bottom: 5px; font-family: 'Fira Code';">3. ChangeState(NewState)</div>
-            <div style="color: #666; font-size: 0.8rem;">CurrentState.Exit() → NewState.Enter()</div>
+        <div style="color: #007bff; font-weight: bold; margin: 0 15px; font-size: 1.2rem;">→</div>
+        
+        <!-- Decision -->
+        <div style="background: rgba(255, 123, 114, 0.05); border: 2px solid #ff7b72; border-radius: 50%; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; flex: 0 0 120px; font-size: 0.75rem; font-weight: 700; color: #ff7b72; font-family: 'Fira Code';">
+            Trigger<br>Transition?
+        </div>
+        
+        <div style="color: #007bff; font-weight: bold; margin: 0 15px; font-size: 1.2rem; position: relative;">
+            <span style="position: absolute; top: -20px; left: 0; font-size: 0.7rem; color: #007bff;">[YES]</span>
+            →
+        </div>
+        
+        <!-- Exit & Transition -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="background: rgba(0, 123, 255, 0.05); border: 1px solid #007bff; border-radius: 6px; padding: 8px 15px; text-align: center; font-size: 0.75rem; color: #333; font-family: 'Fira Code';">
+                State::Exit
+            </div>
+            <div style="background: #007bff; color: #fff; border-radius: 6px; padding: 8px 15px; text-align: center; font-size: 0.75rem; font-weight: 700; font-family: 'Fira Code';">
+                NewState::Enter
+            </div>
         </div>
     </div>
 </div>
