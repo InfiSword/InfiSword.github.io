@@ -7,6 +7,7 @@ permalink: /project/winapi-dont-starve/
 tags: [C++, WinAPI, Optimization, Game Logic]
 toc: true
 toc_sticky: true
+toc_levels: 1..4
 ---
 
 <style>
