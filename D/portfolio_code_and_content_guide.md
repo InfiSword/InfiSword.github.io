@@ -11,53 +11,64 @@
 * **슬라이드 기재 내용:**
   - **상황:** 맵에 배치되는 오브젝트가 1,000~10,000개로 늘어남에 따라 뷰포트 내 검사 후보를 찾기 위한 루프 비용 과다 발생.
   - **구현 해결책:** 맵 전체를 `GRID_CELL_SIZE = 256` 픽셀 크기의 정적 2D 배열(`m_spatialGrid`)로 분할 관리. 오브젝트 이동 시 셀 경계를 교차할 때만 그리드 정보를 갱신하도록 `UpdateObjectGrid()` 구현.
-* **삽입할 핵심 코드 스니펫 (`ObjectManager.cpp`):**
+* **삽입할 핵심 코드 스니펫 (PPT 슬라이드용 최적화 버전):**
   ```cpp
-  // ObjectManager.cpp - 객체 이동 시 그리드 셀 갱신
+  // ObjectManager.cpp - O(1) 공간 분할 격자 이동 갱신
   void ObjectManager::UpdateObjectGrid(GameObject* pObj)
   {
       if (!pObj || pObj->GetType() == GO_TYPE_UI) return;
-      int oldX = pObj->GetGridCellX(); int oldY = pObj->GetGridCellY();
 
-      Gdiplus::RectF bounds = pObj->GetBounds();
-      int newX = (std::max)(0, (std::min)(GRID_WIDTH - 1, (int)floor((bounds.X + bounds.Width * 0.5f) / GRID_CELL_SIZE)));
-      int newY = (std::max)(0, (std::min)(GRID_HEIGHT - 1, (int)floor((bounds.Y + bounds.Height * 0.5f) / GRID_CELL_SIZE)));
+      // 1. 객체의 이전 그리드 좌표 획득
+      int oldX = pObj->GetGridCellX(), oldY = pObj->GetGridCellY();
 
-      if (oldX == newX && oldY == newY) return; // 속한 셀이 동일하면 얼리 리턴(최적화)
+      // 2. 월드 좌표 ➔ 그리드 셀 인덱스 변환 (O(1) Clamp 연산)
+      int newX = ConvertWorldToGridX(pObj->GetBounds().X);
+      int newY = ConvertWorldToGridY(pObj->GetBounds().Y);
 
-      if (oldX >= 0 && oldX < GRID_WIDTH && oldY >= 0 && oldY < GRID_HEIGHT) {
-          std::vector<GameObject*>& cell = m_spatialGrid[oldX][oldY];
-          cell.erase(std::remove(cell.begin(), cell.end(), pObj), cell.end());
-      }
+      // ★ [핵심 최적화] 동일 셀 내부 이동 시 연산 생략 (Early Return)
+      if (oldX == newX && oldY == newY) return;
+
+      // 3. 이전 격자(Cell)에서 삭제 후 새로운 격자에 이관 등록
+      RemoveFromCell(oldX, oldY, pObj); // vector 삭제 로직 캡슐화
       m_spatialGrid[newX][newY].push_back(pObj);
       pObj->SetGridCell(newX, newY);
   }
   ```
+  - **💡 면접관을 위한 키 포인트:**
+    - `m_spatialGrid`: `std::vector<GameObject*>[GRID_WIDTH][GRID_HEIGHT]` 구조의 2D 공간 분할 격자판으로, 각 구역 안에 속한 객체들의 주소(포인터)만 얇게 관리하는 이정표 역할을 합니다.
+    - **핵심 최적화 논리:** 이동할 때마다 매번 삭제/추가를 반복하는 대신, **격자 경계를 교차하는 경우에만** 이동 등록 연산을 수행하도록 조기 종료(Early Return)하여 CPU 부하를 극도로 줄였습니다.
+
 
 ### 📂 [Slide 4] 3x3 국소 쿼리 및 카메라 가시 범위 컬링
 * **슬라이드 기재 내용:**
-  - **상황:** 카메라 뷰포트에 닿는 특정 영역의 오브젝트만 연산해 렌더링 부하 제거 필요.
-  - **구현 해결책:** 뷰포트 Rect 영역 좌표를 인덱스로 변환하여 인접 3x3 범위의 그리드만 검사 ($O(1)$). 여러 셀에 걸친 큰 오브젝트 중복 연산은 고유 스탬프(`m_spatialQueryStamp`) 비교를 통해 $O(1)$로 차단.
-* **삽입할 핵심 코드 스니펫 (`ObjectManager.cpp`):**
+  - **상황:** 전체 맵의 수많은 객체들을 대상으로 화면 안에 그릴 대상을 매 프레임 검사하는 것은 심각한 CPU 오버헤드 유발.
+  - **구현 해결책:** 윈도우 화면 크기(카메라 뷰포트 영역 Rect)와 겹치는 인접 3x3 격자(Cell) 범위만 찾아 O(1)로 쿼리 대상을 선별. 여러 격자에 걸쳐 배치된 큰 오브젝트의 중복 연산은 고유 스탬프 번호 대조를 통해 단 1번만 계산하도록 차단.
+* **삽입할 핵심 코드 스니펫 (PPT 슬라이드용 최적화 버전):**
   ```cpp
-  // ObjectManager.cpp - 뷰포트 기반 공간 분할 쿼리
-  void ObjectManager::QueryObjectsInRectArea(const Gdiplus::RectF& rectArea, std::vector<GameObject*>& targetOutObjects)
+  // ObjectManager.cpp - 카메라 뷰포트 영역(Rect) 내 객체 쿼리
+  void ObjectManager::QueryObjectsInRectArea(const Gdiplus::RectF& viewport, std::vector<GameObject*>& targetOutObjects)
   {
-      int startX = (std::max)(0, (int)floor(rectArea.X / GRID_CELL_SIZE));
-      int endX = (std::min)(GRID_WIDTH - 1, (int)ceil((rectArea.X + rectArea.Width) / GRID_CELL_SIZE) - 1);
-      int startY = (std::max)(0, (int)floor(rectArea.Y / GRID_CELL_SIZE));
-      int endY = (std::min)(GRID_HEIGHT - 1, (int)ceil((rectArea.Y + rectArea.Height) / GRID_CELL_SIZE) - 1);
+      // 1. 카메라 해상도(Window) 좌표 ➔ 탐색할 그리드 시작/끝 셀 인덱스 변환 (O(1))
+      int startX = ConvertWorldToGridX(viewport.X);
+      int endX   = ConvertWorldToGridX(viewport.X + viewport.Width);
+      int startY = ConvertWorldToGridY(viewport.Y);
+      int endY   = ConvertWorldToGridY(viewport.Y + viewport.Height);
 
-      if (++m_spatialQueryStamp == 0) m_spatialQueryStamp = 1; // 오버플로우 방지 스탬프 갱신
+      // ★ [중복 검사 방지] 1프레임 고유 쿼리 스탬프 번호 갱신
+      if (++m_spatialQueryStamp == 0) m_spatialQueryStamp = 1;
 
+      // 2. 화면 영역과 부딪히는 격자(3x3 내외)만 제한적으로 탐색
       for (int y = startY; y <= endY; ++y) {
           for (int x = startX; x <= endX; ++x) {
               for (auto* obj : m_spatialGrid[x][y]) {
-                  if (obj->GetLastSpatialQueryStamp() == m_spatialQueryStamp) continue; // 중복 쿼리 스킵
+                  // 중복 스캔 방지: 여러 셀에 걸친 큰 오브젝트는 스탬프 비교로 즉시 패스
+                  if (obj->GetLastSpatialQueryStamp() == m_spatialQueryStamp) continue;
                   obj->SetLastSpatialQueryStamp(m_spatialQueryStamp);
 
                   if (!obj->IsEnabled() || obj->IsDead()) continue;
-                  if (rectArea.IntersectsWith(obj->GetBounds())) { // 최종 AABB 정밀 검사
+
+                  // 3. 화면 범위와 오브젝트 바운딩 박스(AABB) 최종 충돌 검사
+                  if (viewport.IntersectsWith(obj->GetBounds())) {
                       targetOutObjects.push_back(obj);
                   }
               }
@@ -65,6 +76,74 @@
       }
   }
   ```
+  - **💡 면접관을 위한 키 포인트:**
+    - **윈도우 크기 기반 필터링:** 전체 월드가 아무리 넓고 객체가 많아도, 렌더러는 오직 **현재 윈도우 해상도 영역(Camera Viewport)**이 커버하는 약 9칸의 그리드 셀 내부만 훑습니다.
+    - **중복 검사 방지 (`m_spatialQueryStamp`):** 거대 보스나 건물처럼 여러 격자 셀에 걸쳐 있는 객체가 여러 번 중복 검사되는 것을, 고유 ID 비교 연산(`Stamp == m_spatialQueryStamp`)을 통해 O(1) 수준으로 빠르게 필터링해 냈습니다.
+
+
+### 📂 [Slide 4.5] 동적 타일 캐싱 및 뷰포트 통합 컬링 파이프라인
+* **슬라이드 기재 내용:**
+  - **상황:** 광활한 맵의 수만 개 타일 비트맵을 매 프레임 로드하고 그릴 경우 엄청난 메모리 소요 및 GDI+ 속도 저하 발생.
+  - **구현 해결책:** 카메라 화면 범위와 연계하여 화면 밖 타일 비트맵 캐시를 해제하는 `RenderVisibleTiles` 시스템 구현. 오브젝트 쿼리(`QueryObjectsInRectArea`)와 결합하여 **화면에 보이는 타일 + 화면 범위 내 오브젝트만 선별해서 그리는 통합 뷰포트 컬링 파이프라인** 완성.
+* **삽입할 핵심 코드 스니펫 (CameraManager.cpp):**
+  ```cpp
+  // 1. 카메라 화면 범위(Window)에 닿는 타일만 컬링 및 캐싱
+  void CameraManager::RenderVisibleTiles(const MapData* mapData)
+  {
+      if (!mapData) return;
+      Gdiplus::RectF vp = GetViewportWorldRect();
+
+      // 시작/끝 그리드 인덱스 계산 (O(1))
+      int gsx = ConvertWorldToGridX(vp.X - Padding);
+      int gex = ConvertWorldToGridX(vp.X + vp.Width + Padding);
+      int gsy = ConvertWorldToGridY(vp.Y - Padding);
+      int gey = ConvertWorldToGridY(vp.Y + vp.Height + Padding);
+
+      // 가시 화면 격자 경계가 바뀐 경우에만 안 쓰는 타일 캐시 일괄 해제 (메모리 최적화)
+      if (HasViewportChanged(gsx, gex, gsy, gey)) {
+          CleanupUnusedTileCache(mapData, gsx, gex, gsy, gey);
+      }
+
+      // 현재 뷰포트 격자 내의 타일만 순회하며 RenderManager에 그리기 예약
+      for (int y = gsy * TilesPerGrid; y < gey * TilesPerGrid; ++y) {
+          for (int x = gsx * TilesPerGrid; x < gex * TilesPerGrid; ++x) {
+              Tile& tile = mapData->tiles[x][y];
+              Gdiplus::Bitmap* cachedBitmap = GetOrLoadTileBitmap(tile.id);
+              
+              // 발밑 Y좌표(wy)를 zOrder 기준으로 제출하여 Y-Sorting 파이프라인과 연동
+              RenderManager::GetInstance()->AddWorldObjectCommand(
+                  cachedBitmap, wx, wy, LAYER_WORLD_TILE, wy
+              );
+          }
+      }
+  }
+
+  // 2. 카메라 화면 범위 내의 월드 오브젝트만 컬링 및 그리기 명령 제출
+  void CameraManager::RenderVisibleGameObjects()
+  {
+      ObjectManager* objectManager = ObjectManager::GetInstance();
+      std::vector<GameObject*>& visibleBuffer = m_queryBuffer; // GC 방지용 버퍼 재사용
+      visibleBuffer.clear();
+
+      // 카메라의 현재 윈도우 해상도 화면 영역(Rect) 획득
+      Gdiplus::RectF viewport = GetViewportWorldRect();
+
+      // [최적화] 공간 분할 격자판 쿼리를 통해 가시 범위의 객체만 O(1) 수집
+      objectManager->QueryObjectsInRectArea(viewport, visibleBuffer);
+
+      // 수집된 객체만 순회하며 RenderManager에 그리기 예약
+      for (GameObject* obj : visibleBuffer) {
+          obj->Render();
+        #ifdef _DEBUG
+          obj->RenderDebugOverlay(); // 그리드 격자 및 디버그 정보 출력
+        #endif
+      }
+  }
+  ```
+  - **💡 면접관을 위한 키 포인트:**
+    - **통합 뷰포트 컬링:** 배경 타일(`RenderVisibleTiles`)과 액터 오브젝트(`QueryObjectsInRectArea`) 모두 **동일한 카메라 해상도 화면 범위 사각형을 기준**으로 O(1) 필터링되어 `RenderManager`에 제출(Submit)됩니다.
+    - **동적 LRU식 캐시 클린업:** 화면 가시 구역이 바뀔 때만 미사용 타일 비트맵을 메모리에서 해제 (`CleanupUnusedTileCache`)하여, 저사양 C++ WinAPI 환경에서도 메모리 누수와 GC 오버헤드를 동시에 최소화했습니다.
+
 
 ---
 
