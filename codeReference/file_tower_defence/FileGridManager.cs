@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
@@ -88,10 +88,24 @@ public class FileGridManager : MonoBehaviour
         return x >= 0 && x < GridWidth && y >= 0 && y < GridHeight;
     }
 
+    /// <summary>그리드 정중앙 칸을 반환(보스 등장 위치 등에 사용).</summary>
+    public FileGrid GetCenterGrid()
+    {
+        if (gridArray == null) return null;
+        int centerX = GridWidth / 2;
+        int centerY = GridHeight / 2;
+        if (IsValidGridIndex(centerX, centerY))
+            return gridArray[centerX, centerY];
+        return null;
+    }
+
+    /// <summary>그리드 인덱스 → 월드 좌표 (GetGridWorldPosition 별칭).</summary>
+    public Vector2 GridIndexToWorld(int x, int y) => GetGridWorldPosition(x, y);
+
     /// <summary>
     /// 그리드 인덱스에 해당하는 월드 좌표를 반환합니다.
     /// </summary>
-    public Vector2 GridIndexToWorld(int x, int y)
+    public Vector2 GetGridWorldPosition(int x, int y)
     {
         if (gridLayout == null) return Vector2.zero;
 
@@ -199,15 +213,7 @@ public class FileGridManager : MonoBehaviour
         }
 
         // 범위 밖이면 가장 가까운 그리드 찾기
-        float minDistSqr = float.MaxValue;
-        FileGrid closestGrid = null;
-
-        foreach (FileGrid grid in gridArray)
-        {
-            SearchClosestBetter(grid, worldPos, ref minDistSqr, ref closestGrid);
-        }
-
-        return closestGrid;
+        return FindClosestGridFromAll(worldPos);
     }
 
     private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int centerY)
@@ -228,6 +234,19 @@ public class FileGridManager : MonoBehaviour
                     SearchClosestBetter(grid, worldPos, ref minDistSqr, ref closestGrid);
                 }
             }
+        }
+
+        return closestGrid;
+    }
+
+    private FileGrid FindClosestGridFromAll(Vector2 worldPos)
+    {
+        float minDistSqr = float.MaxValue;
+        FileGrid closestGrid = null;
+
+        foreach (FileGrid grid in gridArray)
+        {
+            SearchClosestBetter(grid, worldPos, ref minDistSqr, ref closestGrid);
         }
 
         return closestGrid;
@@ -390,7 +409,7 @@ public class FileGridManager : MonoBehaviour
         if (dragObjects == null || dragObjects.Length == 0)
             return;
 
-        // UI 레이캐스트로 폴더창 또는 웜 팝업 찾기
+        // UI 레이캐스트로 드롭 대상 UI 찾기
         PointerEventData ped = new PointerEventData(EventSystem.current)
         {
             position = screenPosition
@@ -399,40 +418,20 @@ public class FileGridManager : MonoBehaviour
         List<RaycastResult> results = new List<RaycastResult>();
         EventSystem.current.RaycastAll(ped, results);
 
-        UI_FolderWin folderWin = null;
-        UI_WormDeadPopUp WormDeadWin = null;
-
         for (int i = 0; i < results.Count; i++)
         {
             GameObject go = results[i].gameObject;
             if (go == null)
                 continue;
 
-            folderWin = go.GetComponent<UI_FolderWin>();
-            WormDeadWin = go.GetComponent<UI_WormDeadPopUp>();
-            if (folderWin != null || WormDeadWin != null)
-                break;
-        }
-
-        // 웜 보스 특수 처리
-        if (WormDeadWin != null)
-        {
-            foreach (IInteractable obj in dragObjects)
+            IUIDropTarget dropTarget = go.GetComponent<IUIDropTarget>();
+            if (dropTarget != null)
             {
-                if (obj is VirusBoss_WORM wormBoss)
+                if (dropTarget.HandleDrop(dragObjects, interactionHandler))
                 {
-                    WormDeadWin.DropWORM(wormBoss);
-                    interactionHandler?.RemoveSelection(wormBoss);
                     return;
                 }
             }
-        }
-
-        // UI 폴더창에 드롭
-        if (folderWin != null && !folderWin.OwnerFolder.isZip)
-        {
-            Unit_Folder.TryDropToFolder(dragObjects, folderWin);
-            return;
         }
 
         // 그리드 상의 폴더에 드롭

@@ -1,4 +1,4 @@
-﻿using UnityEngine; 
+using UnityEngine; 
 
 public interface IInteractable
 {
@@ -27,4 +27,9 @@ public interface IInteractable
 
     // 선택 상태 표시
     void OnSelected(bool isSelected);
+}
+
+public interface IUIDropTarget
+{
+    bool HandleDrop(IInteractable[] dragObjects, InteractionHandler interactionHandler);
 }

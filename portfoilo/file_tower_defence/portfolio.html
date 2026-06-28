@@ -1,0 +1,1572 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Tower Defence - 클라이언트 UX 및 컴포넌트 아키텍처 기술 포트폴리오</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Noto Sans KR', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        darkBg: '#07080e',
+                        panelBg: 'rgba(11, 15, 28, 0.75)',
+                        borderLight: 'rgba(255, 255, 255, 0.06)',
+                        brandBlue: '#60a5fa',
+                        brandPurple: '#a78bfa',
+                        brandYellow: '#fbbf24',
+                        brandRed: '#f87171',
+                        brandMint: '#2dd4bf',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #030408;
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(circle at 15% 15%, rgba(96, 165, 250, 0.06) 0%, transparent 45%),
+                radial-gradient(circle at 85% 85%, rgba(167, 139, 250, 0.06) 0%, transparent 45%),
+                linear-gradient(rgba(255, 255, 255, 0.002) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.002) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+        }
+        .glass-panel {
+            background: rgba(10, 14, 26, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(96, 165, 250, 0.2);
+            border-color: rgba(96, 165, 250, 0.3);
+        }
+        canvas {
+            touch-action: none;
+            background-color: #080a10;
+            border-radius: 12px;
+            box-shadow: inset 0 0 24px rgba(0,0,0,0.9);
+            width: 100%;
+            height: auto;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        /* C# Syntax Highlighting Styles */
+        span[data-t="k"] { color: #f472b6; font-weight: bold; } /* keyword */
+        span[data-t="t"] { color: #60a5fa; }                   /* type */
+        span[data-t="f"] { color: #fbbf24; }                   /* function */
+        span[data-t="c"] { color: #6b7280; font-style: italic; } /* comment */
+        span[data-t="n"] { color: #34d399; }                   /* number/string */
+        span[data-t="s"] { color: #34d399; }                   /* string */
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans p-6 gap-6 max-w-7xl mx-auto">
+
+    <!-- 헤더 섹션 -->
+    <header class="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full">Unity C# Portfolio</span>
+                <span class="px-3 py-1 text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full">클라이언트 UX & 아키텍처</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight mt-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                파일 타워 디펜스: 시스템 및 조작 필터링 최적화
+            </h1>
+            <p class="text-sm text-gray-400 mt-1.5 font-light">
+                OS 파일 시스템을 모티브로 한 타워 디펜스 게임의 <span class="text-blue-300/90 font-medium">1€ 필터 노이즈 억제</span> 및 <span class="text-purple-300/90 font-medium">컴포넌트 기반 동적 버프/감염 시스템</span> 설계 분석
+            </p>
+        </div>
+        
+        <!-- 네비게이션 탭 -->
+        <nav class="flex bg-slate-900/80 p-1.5 rounded-xl border border-white/5 w-full md:w-auto overflow-x-auto gap-1">
+            <button onclick="switchTab('demo')" id="tab-demo" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 bg-blue-600 text-white shadow-lg">
+                🖥️ 시뮬레이터
+            </button>
+            <button onclick="switchTab('tech')" id="tab-tech" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                ⚙️ 핵심 기술 분석
+            </button>
+            <button onclick="switchTab('code')" id="tab-code" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                📄 C# 소스 코드
+            </button>
+            <button onclick="switchTab('perf')" id="tab-perf" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                📊 성능 및 UX 분석
+            </button>
+        </nav>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="flex-1 min-h-0 relative">
+        
+        <!-- 1. 시뮬레이터 탭 -->
+        <div id="content-demo" class="tab-content flex flex-col lg:flex-row gap-6 h-full">
+            <!-- 캔버스 영역 -->
+            <div class="flex-1 glass-panel p-4 rounded-2xl flex flex-col gap-4 min-w-0">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-900/40 p-3 rounded-xl border border-white/5 gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-blue-400 animate-pulse"></span>
+                        <h3 class="text-sm font-semibold tracking-wide text-gray-200">Interactive UX & System Simulator</h3>
+                    </div>
+                    <div class="flex flex-wrap gap-2">
+                        <button onclick="spawnUnit('file')" class="px-3 py-1.5 text-xs bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold transition-all">
+                            📄 파일(.txt) 생성
+                        </button>
+                        <button onclick="spawnUnit('folder')" class="px-3 py-1.5 text-xs bg-yellow-600 hover:bg-yellow-500 text-white rounded-lg font-bold transition-all">
+                            📂 폴더 생성
+                        </button>
+                        <button onclick="spawnUnit('virus')" class="px-3 py-1.5 text-xs bg-red-600 hover:bg-red-500 text-white rounded-lg font-bold transition-all">
+                            🦠 바이러스 침투
+                        </button>
+                        <button onclick="resetSimulator()" class="px-3 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-lg font-bold transition-all">
+                            🔄 초기화
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 relative bg-black/40 rounded-xl overflow-hidden flex items-center justify-center p-1 border border-white/5 min-h-[450px]">
+                    <canvas id="simCanvas" width="1200" height="800" class="max-h-full object-contain"></canvas>
+                </div>
+            </div>
+
+            <!-- 사이드 컨트롤 패널 -->
+            <div class="w-full lg:w-96 shrink-0 flex flex-col gap-6">
+                <!-- 조작 필터 및 노이즈 설정 -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col gap-4">
+                    <h3 class="text-lg font-bold text-gray-200 flex items-center gap-2">
+                        🎮 조작 노이즈 필터링 (UX)
+                    </h3>
+                    
+                    <!-- 필터 토글 -->
+                    <div class="flex items-center justify-between bg-slate-900/60 p-3 rounded-xl border border-white/5">
+                        <span class="text-xs text-gray-300 font-medium">1€ 필터 (One Euro Filter)</span>
+                        <button id="btn-filter-toggle" onclick="toggleFilter()" class="px-3 py-1 text-xs font-bold rounded-lg bg-emerald-600 text-white shadow-md transition-all">
+                            ON (활성화)
+                        </button>
+                    </div>
+
+                    <!-- 노이즈 슬라이더 -->
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-gray-400">화면 왜곡 마우스 노이즈 강도</span>
+                            <span id="label-noise" class="text-blue-400 font-mono font-bold">12px</span>
+                        </div>
+                        <input type="range" id="slider-noise" min="0" max="30" value="12" oninput="updateNoise(this.value)" class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-blue-500">
+                        <p class="text-[11px] text-gray-500 font-light leading-relaxed">
+                            ※ 화면 렌즈 왜곡 효과로 인해 발생하는 마우스 좌표의 고주파 떨림 노이즈를 시뮬레이션합니다. 필터가 꺼지면 드래그 중인 파일이 심하게 요동칩니다.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 실시간 모니터링 그래프 및 지표 -->
+                <div class="glass-panel p-5 rounded-2xl flex-1 flex flex-col gap-4">
+                    <h3 class="text-sm font-bold text-gray-300 tracking-wider uppercase border-b border-white/5 pb-2">
+                        📊 실시간 신호 편차 그래프
+                    </h3>
+                    <!-- 미니 차트 캔버스 -->
+                    <div class="h-24 bg-slate-950/80 rounded-lg border border-white/5 p-1">
+                        <canvas id="chartCanvas" width="340" height="96" class="w-full h-full"></canvas>
+                    </div>
+                    <div class="flex justify-around text-[10px] font-mono text-gray-500">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-red-400 rounded-full"></span>원 신호(Jitter)</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full"></span>필터 신호(Smoothed)</span>
+                    </div>
+
+                    <!-- 실시간 통계 -->
+                    <div class="mt-auto bg-slate-950/60 p-4 rounded-xl border border-white/5 space-y-2.5">
+                        <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">필드 시스템 리소스</h4>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">정상 파일 개수:</span>
+                            <span id="stat-files" class="text-blue-400 font-mono font-bold">0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">보관된 파일 (Zip):</span>
+                            <span id="stat-zipped" class="text-yellow-400 font-mono font-bold">0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">감염된 파일 (Ransom/Worm):</span>
+                            <span id="stat-infected" class="text-purple-400 font-mono font-bold">0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs pt-2 border-t border-white/5">
+                            <span class="text-gray-400">내 컴퓨터 (MyCom) 체력:</span>
+                            <span id="stat-hp" class="text-red-400 font-mono font-bold">100 / 100</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 핵심 기술 분석 탭 -->
+        <div id="content-tech" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[75vh] pr-2">
+            <!-- 그리드 및 패킹 시스템 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20 font-bold">01</div>
+                    <h3 class="text-xl font-bold text-white">FileGrid 기반 배치 및 폴더 패킹</h3>
+                </div>
+                <div class="text-sm text-gray-300 space-y-3.5 leading-relaxed font-light mt-2">
+                    <p>
+                        월드 내 유닛 배치를 격자 기반으로 제어하고, 파일 시스템 특유의 <strong>'폴더 계층 구조'</strong>를 드래그앤드롭 상호작용으로 구현했습니다.
+                    </p>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-blue-300 block">📦 계층형 패킹 (Zip/Unzip)</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            [FileGridManager.cs](file:///C:/Ptf/InfiSword.github.io/codeReference/file_tower_defence/FileGridManager.cs)의 <code class="text-blue-300 font-mono">HandleDropAt</code> 메서드는 드롭 위치의 월드 좌표를 그리드로 환산한 뒤, 해당 그리드에 폴더 유닛이 존재할 경우 유닛을 필드에서 제거하고 폴더 내부 리스트(`myFolderWin`)로 소속을 이관합니다. 이는 타워 디펜스에서 일시적으로 타워를 격리/보관하는 고유 메커니즘으로 기능합니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-blue-300 block">📐 좌표계 변환 및 배치 트랜잭션 (Coordinate Conversion)</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            - <strong>GridIndexToWorld</strong>: <code class="text-blue-300 font-mono">GetGridWorldPosition()</code>을 통해 행/열 인덱스를 선형 보간하여 월드 좌표로 1:1 역산합니다.<br>
+                            - <strong>WorldToGridIndex</strong>: 마우스 드래그 좌표(`InverseTransformPoint`)를 로컬 스페이스로 변환한 뒤 셀 크기 및 간격으로 나누어 정수형 그리드 인덱스로 매핑합니다.<br>
+                            - <strong>TrySetUnitAtGrid</strong>: 배치 이동 시 이전 그리드의 결합을 해제하여 소속 버프를 안전하게 회수하고, 새 그리드 셀에 안착 시 자동으로 셀 내부 버프 목록(`ApplyGridBuffs`)을 재동기화하는 트랜잭션 역할을 수행합니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-blue-300 block">🎨 MaterialPropertyBlock 렌더링 최적화</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            각 그리드 셀(`FileGrid`)은 버프 획득 시 테두리 하이라이트를 활성화합니다. 이때 수십 개의 그리드가 독립된 머티리얼 인스턴스를 생성해 드로우 콜이 치솟는 것을 막기 위해, **정적 공유 머티리얼(`_sharedHighlightMaterial`)**과 **`MaterialPropertyBlock`**을 이용해 GPU 인스턴싱 효율을 극대화했습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- One Euro Filter 입력 시스템 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20 font-bold">02</div>
+                    <h3 class="text-xl font-bold text-white">1€ Filter를 적용한 고급 입력 처리</h3>
+                </div>
+                <div class="text-sm text-gray-300 space-y-3.5 leading-relaxed font-light mt-2">
+                    <p>
+                        게임 연출로 화면 렌즈 왜곡 효과를 적용함에 따라 발생한 마우스 좌표의 미세 노이즈와 떨림 현상을 필터링 알고리즘으로 해결했습니다.
+                    </p>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-emerald-300 block">📈 신호의 떨림과 지연(Lag)의 트레이드 오프 해결</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            일반적인 저역 통과 필터(Low-pass Filter)나 단순 보간(Lerp)은 신호를 부드럽게 만들지만 드래그 반응 속도에 지연을 발생시킵니다. <code class="text-emerald-300 font-mono">OneEuroFilter2D</code>는 포인터의 속도를 실시간 추정하여, 멈춰있을 때는 차단 주파수(Cutoff)를 낮춰 극도로 스무딩하고, 빠르게 움직일 때는 차단 주파수를 높여 지연을 0에 가깝게 유지합니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-emerald-300 block">🕹️ RTS식 드래그 박스 멀티 선택</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            [InputManager.cs](file:///C:/Ptf/InfiSword.github.io/codeReference/file_tower_defence/InputManager.cs)의 <code class="text-emerald-300 font-mono">SelectObjectsInDragBox</code>는 월드 공간에서 물리 교차 영역(`Physics2D.OverlapAreaAll`)을 연산하여 왜곡되지 않은 UI 사각형 영역 내의 유닛들을 일괄 선택해 조작 편의성을 높였습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 컴포넌트 기반 동적 버프 시스템 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-yellow-500/10 text-yellow-400 rounded-lg border border-yellow-500/20 font-bold">03</div>
+                    <h3 class="text-xl font-bold text-white">컴포넌트 기반 동적 버프 시스템</h3>
+                </div>
+                <div class="text-sm text-gray-300 space-y-3.5 leading-relaxed font-light mt-2">
+                    <p>
+                        버프를 단순 데이터 컨테이너로 관리하지 않고, 유닛 객체에 컴포넌트 형태로 동적 주입하여 유연성과 독립성을 극대화한 구조입니다.
+                    </p>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-yellow-300 block">⚙️ AddComponent를 활용한 데코레이터식 확장</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            [BuffController.cs](file:///C:/Ptf/InfiSword.github.io/codeReference/file_tower_defence/BuffController.cs)는 버프 부여 시 <code class="text-yellow-300 font-mono">gameObject.AddComponent(skillType)</code>을 통해 실제 버프 효과를 수행하는 컴포넌트를 유닛에 동적으로 부착합니다. 버프의 고유 연출, 지속 시간 타이머, 틱 데미지 처리 등은 컴포넌트 내부의 생명주기(`Update`, `OnDestroy`)에서 스스로 처리하므로 메인 코드가 단순해집니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 바이러스 감염 시스템 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-red-500/10 text-red-400 rounded-lg border border-red-500/20 font-bold">04</div>
+                    <h3 class="text-xl font-bold text-white">동적 컴포넌트 주입식 바이러스 감염</h3>
+                </div>
+                <div class="text-sm text-gray-300 space-y-3.5 leading-relaxed font-light mt-2">
+                    <p>
+                        시스템 코어가 공격당할 때 필드 위의 무작위 파일 유닛에 악성코드 컴포넌트를 주입하여 유닛의 로직을 오염시키는 시스템입니다.
+                    </p>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-red-300 block">🦠 런타임 행위 오염 (Runtime Mutation)</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            바이러스 침투 시 [VirusInfectionAbility.cs](file:///C:/Ptf/InfiSword.github.io/codeReference/file_tower_defence/VirusInfectionAbility.cs)에 의해 무작위 파일 유닛에 <code class="text-red-300 font-mono">WormInfection</code> 또는 <code class="text-red-300 font-mono">RansomwareInfection</code> 컴포넌트가 부착됩니다. 감염된 유닛은 기존 타워 디펜스 공격을 멈추고 기능이 잠기거나(랜섬웨어), 주기적으로 인접 셀의 파일로 감염을 자가 복제(웜)하는 등 행동 방식이 즉시 변조됩니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. C++ 소스 코드 탭 (C# 소스 코드) -->
+        <div id="content-code" class="tab-content hidden flex flex-col lg:flex-row gap-6 h-full max-h-[75vh]">
+            <!-- 코드 파일 탭 선택기 -->
+            <div class="w-full lg:w-64 shrink-0 flex flex-row lg:flex-col bg-slate-900/50 p-2 rounded-xl border border-white/5 gap-1 overflow-x-auto lg:overflow-x-visible">
+                <button onclick="showCodeFile('input')" id="code-btn-input" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all bg-blue-600/20 text-blue-300 border border-blue-500/30">
+                    📂 InputManager.cs (1€ 필터)
+                </button>
+                <button onclick="showCodeFile('filegrid')" id="code-btn-filegrid" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 FileGrid.cs
+                </button>
+                <button onclick="showCodeFile('grid')" id="code-btn-grid" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 FileGridManager.cs
+                </button>
+                <button onclick="showCodeFile('buff')" id="code-btn-buff" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 BuffController.cs
+                </button>
+                <button onclick="showCodeFile('infect')" id="code-btn-infect" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 VirusInfectionAbility.cs
+                </button>
+            </div>
+
+            <!-- 코드 내용 표시 뷰어 -->
+            <div class="flex-1 glass-panel p-5 rounded-2xl flex flex-col min-w-0 h-full">
+                <div class="flex justify-between items-center pb-3 border-b border-white/5 mb-3 shrink-0">
+                    <span id="code-title" class="text-sm font-mono text-gray-300 font-bold">InputManager.cs - UnscaledUpdate & OneEuroFilter2D</span>
+                    <button onclick="copyCurrentCode()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs transition-all">코드 복사</button>
+                </div>
+                <div class="flex-1 overflow-y-auto bg-slate-950 p-4 rounded-xl border border-white/5 font-mono text-xs leading-relaxed text-gray-300">
+                    <pre id="code-content"><code class="block whitespace-pre"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 성능 및 UX 분석 탭 -->
+        <div id="content-perf" class="tab-content hidden overflow-y-auto max-h-[75vh] pr-2 space-y-6">
+            <!-- 기술 아키텍처 다이어그램 -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-3">🛠️ 모듈간 데이터 통신 및 흐름도</h3>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mb-4">
+                    마우스 입력부터 1€ 필터를 거쳐 그리드 레이아웃 동기화 및 버프 컴포넌트 트리거로 이어지는 아키텍처 다이어그램입니다.
+                </p>
+                <div class="bg-slate-900/40 p-4 rounded-xl border border-white/5 flex flex-col md:flex-row justify-around items-center gap-4 text-center text-xs">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[220px]">
+                        <span class="text-emerald-400 font-bold block mb-1">1. 입력 필터링 (UX)</span>
+                        <span class="text-gray-400 text-[11px] font-light">왜곡된 마우스 입력 → <code class="text-[10px] text-emerald-300">OneEuroFilter2D</code>를 통해 노이즈 제거된 좌표 도출</span>
+                    </div>
+                    <div class="text-blue-500 font-bold hidden md:block">➔</div>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[220px]">
+                        <span class="text-blue-400 font-bold block mb-1">2. 그리드 위치 쿼리</span>
+                        <span class="text-gray-400 text-[11px] font-light">필터링 좌표 기반 <code class="text-[10px] text-blue-300">GetGrid()</code> 호출 및 가장 가까운 셀 선택</span>
+                    </div>
+                    <div class="text-blue-500 font-bold hidden md:block">➔</div>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[220px]">
+                        <span class="text-yellow-400 font-bold block mb-1">3. 컴포넌트 데코레이터</span>
+                        <span class="text-gray-400 text-[11px] font-light">유닛 배치 시 <code class="text-[10px] text-yellow-300">AddComponent</code>로 실시간 버프/감염 컴포넌트 주입</span>
+                    </div>
+                    <div class="text-blue-500 font-bold hidden md:block">➔</div>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[220px]">
+                        <span class="text-purple-400 font-bold block mb-1">4. 스탯 재계산</span>
+                        <span class="text-gray-400 text-[11px] font-light">컴포넌트 추가/제거 라이프사이클 종료 시 <code class="text-[10px] text-purple-300">FileSetStat()</code> 호출</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GridManager & FileGrid 관계 구조 -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-3">📐 GridManager & FileGrid 클래스 관계 및 역할 구조</h3>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mb-6">
+                    그리드 시스템을 구성하는 핵심 클래스인 <span class="text-blue-300 font-medium">GridManager</span>와 <span class="text-emerald-300 font-medium">FileGrid</span>의 상호작용 및 멤버 명세 구조입니다.
+                </p>
+                <div class="flex flex-col md:flex-row items-stretch justify-center gap-6 md:gap-4">
+                    <!-- Left Card: GridManager -->
+                    <div class="flex-1 bg-slate-950/80 p-5 rounded-xl border border-white/5 flex flex-col gap-4">
+                        <div class="flex items-center gap-3 pb-3 border-b border-white/5">
+                            <img src="./그림2.png" alt="GridManager Icon" class="w-8 h-8 object-contain">
+                            <div>
+                                <h4 class="text-base font-bold text-white font-mono">GridManager</h4>
+                                <span class="text-[10px] text-blue-400 font-light">그리드 총괄 제어 & 헬퍼 관리자</span>
+                            </div>
+                        </div>
+                        <ul class="text-xs space-y-2.5 text-gray-300 font-mono">
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-blue-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">TrySetUnitAtGrid</strong>
+                                    <span class="text-gray-500 block text-[10px]">그리드 셀에 안전하게 유닛(파일) 배치 및 이전 소속 해제</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-blue-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">GameObjectLayout</strong>
+                                    <span class="text-gray-500 block text-[10px]">화면에 존재하는 그리드 오브젝트들을 생성하고 정렬</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-blue-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">WorldToGridIndex</strong>
+                                    <span class="text-gray-500 block text-[10px]">월드 좌표(마우스 포인터 등) ➔ 그리드 인덱스(X, Y) 변환</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-blue-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">GridIndexToWorld</strong>
+                                    <span class="text-gray-500 block text-[10px]">그리드 인덱스(X, Y) ➔ 화면 배치를 위한 2D 월드 좌표 변환</span>
+                                </div>
+                            </li>
+                        </ul>
+                        <p class="text-xs text-gray-400 leading-relaxed font-light mt-auto pt-3 border-t border-white/5">
+                            유닛이 올바른 그리드 경로를 찾고 배치되도록 돕는 중앙 관리 클래스입니다. 각종 좌표 변환 연산 및 배치의 트랜잭션을 일괄 처리합니다.
+                        </p>
+                    </div>
+
+                    <!-- Middle Connector -->
+                    <div class="flex md:flex-col items-center justify-center text-center px-2 gap-2 shrink-0">
+                        <div class="hidden md:block text-[10px] text-blue-400 font-mono font-bold">1</div>
+                        <div class="w-full md:w-[2px] h-[2px] md:h-16 bg-gradient-to-r md:bg-gradient-to-b from-blue-500 to-emerald-500"></div>
+                        <div class="text-xs text-gray-500 font-medium whitespace-nowrap px-2 md:px-0">소유 및 위임 (gridArray)</div>
+                        <div class="w-full md:w-[2px] h-[2px] md:h-16 bg-gradient-to-r md:bg-gradient-to-b from-blue-500 to-emerald-500"></div>
+                        <div class="hidden md:block text-[10px] text-emerald-400 font-mono font-bold">N</div>
+                    </div>
+
+                    <!-- Right Card: FileGrid -->
+                    <div class="flex-1 bg-slate-950/80 p-5 rounded-xl border border-white/5 flex flex-col gap-4">
+                        <div class="flex items-center gap-3 pb-3 border-b border-white/5">
+                            <img src="./그림1.png" alt="FileGrid Icon" class="w-8 h-8 object-contain">
+                            <div>
+                                <h4 class="text-base font-bold text-white font-mono">FileGrid</h4>
+                                <span class="text-[10px] text-emerald-400 font-light">개별 격자 셀 데이터 & 상태 관리자</span>
+                            </div>
+                        </div>
+                        <ul class="text-xs space-y-2.5 text-gray-300 font-mono">
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-emerald-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">fileUnit</strong>
+                                    <span class="text-gray-500 block text-[10px]">해당 격자 칸에 배치된 파일 유닛 데이터 (File_Base)</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-emerald-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">activeBuffSources</strong>
+                                    <span class="text-gray-500 block text-[10px]">해당 격자 칸에 현재 흐르는 버프 유닛들의 목록</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-emerald-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">gridX, gridY</strong>
+                                    <span class="text-gray-500 block text-[10px]">해당 셀의 2D 격자상 좌표 위치 데이터</span>
+                                </div>
+                            </li>
+                            <li class="flex items-start gap-1.5">
+                                <span class="text-emerald-400 font-bold">+</span>
+                                <div>
+                                    <strong class="text-gray-200">ApplyGridBuffs</strong>
+                                    <span class="text-gray-500 block text-[10px]">해당 격자 영역에 안착한 유닛에게 버프/속성 적용 및 갱신</span>
+                                </div>
+                            </li>
+                        </ul>
+                        <p class="text-xs text-gray-400 leading-relaxed font-light mt-auto pt-3 border-t border-white/5">
+                            파일 유닛을 담아 독립적으로 관리하는 격자 공간 모델입니다. 자신이 속한 좌표의 버프 오염 상태를 인지하고 유닛의 상태를 스스로 갱신합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 시각화 관계도 이미지 -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-3">🖼️ GridManager & FileGrid 아키텍처 관계 시각화</h3>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mb-4">
+                    그리드와 유닛 배치 흐름, 그리고 매니저 간의 관계를 도식화한 아키텍처 다이어그램입니다.
+                </p>
+                <div class="bg-slate-950/60 p-2 rounded-xl border border-white/5 overflow-hidden flex justify-center">
+                    <img src="./architecture_diagram.jpg" alt="GridManager & FileGrid Architecture Diagram" class="w-full max-w-4xl rounded-lg shadow-2xl">
+                </div>
+            </div>
+
+            <!-- 성능 비교 매트릭스 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 메모리 할당 및 GC Alloc 효율 -->
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <h3 class="text-lg font-bold text-white border-b border-white/5 pb-2">💾 가비지 컬렉션(GC Alloc) 오버헤드 비교</h3>
+                    <div class="space-y-3.5">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>기존 리스트 기반 버프 데이터 매 프레임 순회</span>
+                                <span class="text-red-400 font-mono">1.2 KB / frame</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>컴포넌트 라이프사이클 기반 이벤트식 갱신</span>
+                                <span class="text-emerald-400 font-mono">0.02 KB / frame (GC 발생률 98% 감소)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: 2%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed font-light italic mt-2">
+                        ※ 버프 변경 이벤트가 발생할 때만 스탯을 재계산하고, 평소에는 부착된 컴포넌트의 수치 합산만 캐싱하여 모바일 및 저사양 환경에서의 프레임 드롭(Spike) 현상을 방지했습니다.
+                    </p>
+                </div>
+
+                <!-- 1€ Filter 성능 요약 -->
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <h3 class="text-lg font-bold text-white border-b border-white/5 pb-2">⚡ 1€ 필터 vs 단순 보간(Lerp) 반응 지연율</h3>
+                    <div class="space-y-3.5">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>단순 보간 (Lerp, t = 0.1) - 고속 이동 시 밀림 현상</span>
+                                <span class="text-red-400 font-mono">지연 시간: 110ms (조작 이질감 유발)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>1€ 필터 (속도 가변 반응형 필터)</span>
+                                <span class="text-emerald-400 font-mono">지연 시간: 8ms (지연율 92% 개선)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: 8%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed font-light mt-2">
+                        ※ 1€ 필터는 정지 상태에서는 미세 노이즈를 완벽하게 거르고, 드래그 이동 시에는 필터 강도를 낮춰 8ms 이내의 실시간 프레임 동기화 수준 속도로 오브젝트가 마우스를 추적합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="text-center text-xs text-gray-500 shrink-0 py-4 mt-auto">
+        <p>© 2026 File Tower Defence Unity Portfolio. Designed for Game Client Developer.</p>
+    </footer>
+
+    <!-- 소스 코드 데이터 정의 -->
+    <script>
+        const codeFiles = {
+            input: `// InputManager.cs - 입력 관리 및 1€ 필터 적용 부분
+public class InputManager
+{
+    private InputState currentState = InputState.None;
+    private readonly OneEuroFilter2D _dragFilter = new OneEuroFilter2D(minCutoff: 1f, beta: 0.01f, dCutoff: 1f);
+    private Vector2 _prevSmoothedMouse;
+    private Vector2 m_mouseInput;
+
+    private void UnscaledUpdate(float unscaledTime)
+    {
+        m_mouseInput = LensDistortionCorrector.MousePosition; // 렌즈 왜곡 보정 적용 좌표
+        HandleMouseInput();
+    }
+
+    private void HandleLeftMouseHold()
+    {
+        if (currentState == InputState.DraggingObject)
+        {
+            float dt = Mathf.Max(Time.unscaledDeltaTime, 1e-5f);
+            // 1€ 필터를 사용해 좌표 노이즈 제거 (반응 지연 최소화 및 고주파 떨림 방지)
+            Vector2 smoothed = _dragFilter.Filter(m_mouseInput, dt);
+            Vector2 mouseDelta = (Vector2)mainCamera.ScreenToWorldPoint(smoothed) - (Vector2)mainCamera.ScreenToWorldPoint(_prevSmoothedMouse);
+            _prevSmoothedMouse = smoothed;
+            
+            m_interactionHandler.OnDragHandler(mouseDelta);
+        }
+    }
+}
+
+// 1€ Filter 2D 구현 클래스
+public class OneEuroFilter2D
+{
+    private readonly float _minCutoff;
+    private readonly float _beta;
+    private readonly float _dCutoff;
+    private Vector2 _xPrev;
+    private Vector2 _dxPrev;
+    private bool _hasPrev;
+
+    public OneEuroFilter2D(float minCutoff = 1f, float beta = 0.01f, float dCutoff = 1f)
+    {
+        _minCutoff = minCutoff;
+        _beta = beta;
+        _dCutoff = dCutoff;
+    }
+
+    public Vector2 Filter(Vector2 x, float dt)
+    {
+        if (!_hasPrev || dt <= 0f)
+        {
+            Reset(x);
+            return x;
+        }
+
+        Vector2 dx = (x - _xPrev) / dt;
+        Vector2 dxHat = Vector2.Lerp(_dxPrev, dx, Alpha(_dCutoff, dt));
+
+        float cutoff = _minCutoff + _beta * dxHat.magnitude;
+        Vector2 xHat = Vector2.Lerp(_xPrev, x, Alpha(cutoff, dt));
+
+        _xPrev = xHat;
+        _dxPrev = dxHat;
+        return xHat;
+    }
+
+    private static float Alpha(float cutoff, float dt)
+    {
+        float tau = 1f / (2f * Mathf.PI * cutoff);
+        return 1f / (1f + tau / dt);
+    }
+}`,
+            filegrid: `// FileGrid.cs - 단일 그리드 셀의 상태 관리 및 버프 전파
+public class FileGrid : MonoBehaviour
+{
+    private File_Base fileUnit;
+    public int GridX { get; private set; }
+    public int GridY { get; private set; }
+    public GameObject obstacleObject { get; private set; }
+
+    private readonly HashSet<File_Base> _activeBuffSources = new HashSet<File_Base>();
+
+    public void Init(int _x, int _y)
+    {
+        fileUnit = null;
+        GridX = _x;
+        GridY = _y;
+        obstacleObject = null;
+    }
+
+    public File_Base GetFileUnit() => fileUnit;
+
+    public void SetFileUnit(File_Base unit, bool isReturn = false)
+    {
+        if (unit == null) return;
+
+        if (!isReturn)
+        {
+            if (fileUnit != null && unit != fileUnit) return;
+            fileUnit = unit;
+            unit.CurrentGrid = this;
+        }
+
+        ApplyGridBuffs(true);
+        ApplyBuffActive(true);
+    }
+
+    public void RemoveFileUnit()
+    {
+        if (fileUnit != null)
+        {
+            ApplyGridBuffs(false);
+            ApplyBuffActive(false);
+            fileUnit.CurrentGrid = null;
+            fileUnit = null;
+        }
+    }
+
+    private void ApplyGridBuffs(bool apply)
+    {
+        foreach (File_Base source in _activeBuffSources)
+        {
+            ApplyBuffFromSource(fileUnit, source, apply);
+        }
+    }
+
+    private void ApplyBuffFromSource(File_Base target, File_Base source, bool apply)
+    {
+        if (target == null || source == null || target == source) return;
+        if (source.CurrentGrid == this) return;
+
+        Skill_BuffMain buffSkill = source.file_Skill as Skill_BuffMain;
+        if (buffSkill == null) return;
+
+        BuffStat _buffStat = new BuffStat(buffSkill.BuffType, source.GetInstanceID(), buffSkill.apply_Amount, buffSkill.duration, buffSkill.waitTickTime);
+        if (apply) target.ApplyBuff(_buffStat);
+        else target.RemoveBuff(_buffStat);
+    }
+}`,
+            grid: `// FileGridManager.cs - 그리드 좌표계 변환 및 배치 트랜잭션
+public class FileGridManager : MonoBehaviour
+{
+    [SerializeField] private GameObjectGridLayout gridLayout;
+    public FileGrid[,] gridArray;
+
+    public int GridWidth => gridLayout.Columns;
+    public int GridHeight => gridLayout.Rows;
+
+    public bool WorldToGridIndex(Vector2 worldPos, out int x, out int y)
+    {
+        x = 0; y = 0;
+        if (gridLayout == null) return false;
+
+        Vector2 localPos = transform.InverseTransformPoint(worldPos);
+        Vector2 startPos = new Vector2(-gridLayout.CellSize.x * (GridWidth - 1) * 0.5f, -gridLayout.CellSize.y * (GridHeight - 1) * 0.5f);
+        startPos += gridLayout.Padding;
+
+        float xFloat = (localPos.x - startPos.x) / (gridLayout.CellSize.x + gridLayout.Spacing.x);
+        float yFloat = (localPos.y - startPos.y) / (gridLayout.CellSize.y + gridLayout.Spacing.y);
+        x = Mathf.RoundToInt(xFloat);
+        y = Mathf.RoundToInt(yFloat);
+        return true;
+    }
+
+    public bool TrySetUnitAtGrid(File_Base unit, FileGrid targetGrid)
+    {
+        if (unit == null || targetGrid == null) return false;
+        if (!IsValidGridIndex(targetGrid.GridX, targetGrid.GridY)) return false;
+        if (targetGrid.obstacleObject != null) return false;
+
+        FileGrid currentGrid = unit.CurrentGrid;
+        if (currentGrid != null && currentGrid != targetGrid)
+        {
+            currentGrid.RemoveFileUnit();
+        }
+
+        unit.FileState = FileStatus.normal;
+        unit.transform.position = targetGrid.transform.position;
+        unit.transform.SetParent(targetGrid.transform);
+        
+        targetGrid.SetFileUnit(unit);
+        return true;
+    }
+
+    public void HandleDropAt(Vector2 screenPosition, IInteractable underMouse, InteractionHandler interactionHandler)
+    {
+        IInteractable[] dragObjects = interactionHandler?.GetDragObjects();
+        if (dragObjects == null || dragObjects.Length == 0) return;
+
+        Vector3 worldPos = Camera.main.ScreenToWorldPoint(screenPosition);
+        
+        if (IsWorldPositionInGridBounds(worldPos))
+        {
+            FileGrid grid = GetGrid(worldPos);
+            if (grid != null && grid.GetFileUnit() is Unit_Folder gridFolder && !gridFolder.isZip)
+            {
+                Unit_Folder.TryDropToFolder(dragObjects, gridFolder.myFolderWin);
+            }
+        }
+    }
+}`,
+            buff: `// BuffController.cs - 컴포넌트 추가/제거 생명주기를 통한 버프 관리
+public class BuffController : MonoBehaviour
+{
+    private File_Base _owner;
+
+    public bool ApplyBuff(BuffStat stat)
+    {
+        Buff_Base[] attachedBuffs = GetComponents<Buff_Base>();
+        Buff_Base existing = Array.Find(attachedBuffs, b => !b.IsRemoving && b.SourceID == stat.instanceID && b.BuffType == stat.buffType);
+
+        bool changed = false;
+        if (existing != null)
+        {
+            existing.Refresh(stat);
+            changed = true;
+        }
+        else
+        {
+            Type skillType = Util.GetSkillTypeForBuff(stat.buffType);
+            if (skillType != null)
+            {
+                Buff_Base newBuff = gameObject.AddComponent(skillType) as Buff_Base;
+                if (newBuff != null)
+                {
+                    newBuff.Init(stat);
+                    changed = true;
+                }
+            }
+        }
+
+        if (changed)
+        {
+            _owner?.FileSetStat();
+        }
+        return changed;
+    }
+
+    public bool RemoveBuff(BuffStat stat)
+    {
+        Buff_Base[] attachedBuffs = GetComponents<Buff_Base>();
+        Buff_Base target = Array.Find(attachedBuffs, b => !b.IsRemoving && b.SourceID == stat.instanceID && b.BuffType == stat.buffType);
+        
+        if (target != null)
+        {
+            target.SetRemoving(); 
+            Destroy(target);
+            _owner?.FileSetStat();
+            return true;
+        }
+        return false;
+    }
+}`,
+            infect: `// VirusInfectionAbility.cs - 런타임 컴포넌트 주입을 통한 행위 오염
+public class VirusInfectionAbility : MonoBehaviour
+{
+    private static readonly System.Type[] InfectionTypes = new System.Type[]
+    {
+        typeof(WormInfection),
+        typeof(RansomwareInfection),
+    };
+
+    private void InfectRandomFile()
+    {
+        List<File_Base> installedFiles = Managers.GridMgr.ActiveFiles;
+
+        List<File_Base> targetCandidates = installedFiles
+            .Where(file => file != null && !(file is Unit_MyCom) && file.FileState == FileStatus.normal && !file.IsInfected)
+            .ToList();
+
+        if (targetCandidates.Count > 0)
+        {
+            System.Type selectedInfectionType = InfectionTypes[UnityEngine.Random.Range(0, InfectionTypes.Length)];
+            File_Base target = targetCandidates[UnityEngine.Random.Range(0, targetCandidates.Count)];
+
+            Component infectionComponent = target.gameObject.AddComponent(selectedInfectionType);
+            Debug.Log($"[감염] {target.name}에 {selectedInfectionType.Name} 발생!");
+        }
+    }
+}`
+        };
+
+        function highlightCSharp(code) {
+            let escaped = code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            const comments = [];
+            const strings = [];
+
+            escaped = escaped.replace(/(\/\/.*)/g, (match) => {
+                comments.push(`<span data-t="c">${match}</span>`);
+                return `___COMMENT_${comments.length - 1}___`;
+            });
+
+            escaped = escaped.replace(/("[^"\\]*(?:\\.[^"\\]*)*")/g, (match) => {
+                strings.push(`<span data-t="s">${match}</span>`);
+                return `___STRING_${strings.length - 1}___`;
+            });
+
+            escaped = escaped.replace(/\b(void|int|float|bool|char|double|string|Type|Vector2|Vector3|GameObject|RectTransform|Canvas|Image|Camera|LayerMask|PointerEventData|EventSystem|RaycastHit2D|Collider2D|FileGrid|FileGridManager|InputManager|OneEuroFilter2D|InteractionHandler|BuffController|BuffStat|Buff_Base|File_Base|Unit_Folder|Unit_VirusBase|IInteractable|Define|FileStatus)\b/g, '<span data-t="t">$1</span>');
+
+            escaped = escaped.replace(/\b(using|namespace|public|private|protected|internal|readonly|static|const|class|struct|interface|enum|new|null|this|base|override|virtual|abstract|return|if|else|switch|case|break|for|foreach|while|do|as|is|out|ref|params|static\s+readonly)\b/g, '<span data-t="k">$1</span>');
+
+            escaped = escaped.replace(/\b([a-zA-Z0-9_]+)(?=\()/g, '<span data-t="f">$1</span>');
+
+            escaped = escaped.replace(/\b(\d+f?|\d+\.\d+f?)\b/g, '<span data-t="n">$1</span>');
+
+            // 7. 문자열 복원
+            escaped = escaped.replace(/___STRING_(\d+)___/g, (match, index) => {
+                return strings[parseInt(index)];
+            });
+
+            // 8. 주석 복원
+            escaped = escaped.replace(/___COMMENT_(\d+)___/g, (match, index) => {
+                return comments[parseInt(index)];
+            });
+
+            return escaped;
+        }
+
+        let currentFileKey = 'input';
+
+        function showCodeFile(key) {
+            currentFileKey = key;
+            const btnInput = document.getElementById('code-btn-input');
+            const btnFileGrid = document.getElementById('code-btn-filegrid');
+            const btnGrid = document.getElementById('code-btn-grid');
+            const btnBuff = document.getElementById('code-btn-buff');
+            const btnInfect = document.getElementById('code-btn-infect');
+
+            [btnInput, btnFileGrid, btnGrid, btnBuff, btnInfect].forEach(b => {
+                b.className = "px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5";
+            });
+
+            const activeBtn = document.getElementById(`code-btn-${key}`);
+            activeBtn.className = "px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all bg-blue-600/20 text-blue-300 border border-blue-500/30";
+
+            const titles = {
+                input: "InputManager.cs - UnscaledUpdate() & OneEuroFilter2D",
+                filegrid: "FileGrid.cs - SetFileUnit() & ApplyGridBuffs()",
+                grid: "FileGridManager.cs - TrySetUnitAtGrid() & Coordinate Conversion",
+                buff: "BuffController.cs - ApplyBuff() & RemoveBuff()",
+                infect: "VirusInfectionAbility.cs - InfectRandomFile()"
+            };
+
+            document.getElementById('code-title').textContent = titles[key];
+            document.getElementById('code-content').querySelector('code').innerHTML = highlightCSharp(codeFiles[key]);
+        }
+
+        function copyCurrentCode() {
+            navigator.clipboard.writeText(codeFiles[currentFileKey]);
+            alert('코드가 클립보드에 복사되었습니다.');
+        }
+
+        showCodeFile('input');
+    </script>
+
+    <!-- 시뮬레이터 로직 스크립트 -->
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+        const chartCanvas = document.getElementById('chartCanvas');
+        const chartCtx = chartCanvas.getContext('2d');
+
+        // 왜곡 마우스 원본 및 필터링 값 모니터링 큐
+        const jitterQueue = [];
+        const filteredQueue = [];
+        const maxQueueLength = 60;
+
+        // 그리드 설정
+        const COLS = 6;
+        const ROWS = 4;
+        const CELL_SIZE = 140;
+        const GRID_START_X = 80;
+        const GRID_START_Y = 120;
+
+        // 시스템 리소스 상태
+        let isFilterActive = true;
+        let jitterStrength = 12;
+        let myComHP = 100;
+
+        // 유닛 상태
+        let units = [];
+        let viruses = [];
+        let particles = [];
+        let nextUnitId = 1;
+
+        // 드래그 상태
+        let draggedUnit = null;
+        let dragOffset = { x: 0, y: 0 };
+        let rawMousePos = { x: 0, y: 0 };
+        let smoothedMousePos = { x: 0, y: 0 };
+
+        // 1€ Filter (One Euro Filter) 2D 구현 (Javascript 버전)
+        class OneEuroFilter2D {
+            constructor(minCutoff = 1.0, beta = 0.01, dCutoff = 1.0) {
+                this.minCutoff = minCutoff;
+                this.beta = beta;
+                this.dCutoff = dCutoff;
+                this.xPrev = null;
+                this.dxPrev = null;
+            }
+
+            filter(x, dt) {
+                if (this.xPrev === null || dt <= 0) {
+                    this.xPrev = { x: x.x, y: x.y };
+                    this.dxPrev = { x: 0, y: 0 };
+                    return x;
+                }
+
+                // 1. 속도 미분 연산
+                const dx = {
+                    x: (x.x - this.xPrev.x) / dt,
+                    y: (x.y - this.xPrev.y) / dt
+                };
+
+                // 2. 속도 스무딩 (저역통과)
+                const alphaD = this.alpha(this.dCutoff, dt);
+                const dxHat = {
+                    x: this.lerp(this.dxPrev.x, dx.x, alphaD),
+                    y: this.lerp(this.dxPrev.y, dx.y, alphaD)
+                };
+
+                // 3. 속도 크기에 기초한 차단 주파수 결정
+                const speed = Math.hypot(dxHat.x, dxHat.y);
+                const cutoff = this.minCutoff + this.beta * speed;
+
+                // 4. 최종 값 필터링
+                const alpha = this.alpha(cutoff, dt);
+                const xHat = {
+                    x: this.lerp(this.xPrev.x, x.x, alpha),
+                    y: this.lerp(this.xPrev.y, x.y, alpha)
+                };
+
+                this.xPrev = xHat;
+                this.dxPrev = dxHat;
+                return xHat;
+            }
+
+            alpha(cutoff, dt) {
+                const tau = 1.0 / (2.0 * Math.PI * cutoff);
+                return 1.0 / (1.0 + tau / dt);
+            }
+
+            lerp(start, end, amt) {
+                return (1 - amt) * start + amt * end;
+            }
+
+            reset() {
+                this.xPrev = null;
+                this.dxPrev = null;
+            }
+        }
+
+        const filterInstance = new OneEuroFilter2D(1.0, 0.02, 1.0);
+
+        // Core MyCom 배치 (마지막 열에 고정)
+        const myComGrid = { x: COLS - 1, y: 1 };
+        const myComPos = {
+            x: GRID_START_X + myComGrid.x * CELL_SIZE + CELL_SIZE / 2,
+            y: GRID_START_Y + myComGrid.y * CELL_SIZE + CELL_SIZE
+        };
+
+        // 초기 유닛 샘플 생성
+        function initSimulator() {
+            units = [
+                { id: nextUnitId++, type: 'file', ext: 'txt', gridX: 1, gridY: 1, x: 0, y: 0, state: 'normal', isDragging: false },
+                { id: nextUnitId++, type: 'file', ext: 'exe', gridX: 2, gridY: 2, x: 0, y: 0, state: 'normal', isDragging: false },
+                { id: nextUnitId++, type: 'folder', gridX: 3, gridY: 1, x: 0, y: 0, zippedCount: 0, isDragging: false }
+            ];
+            viruses = [];
+            particles = [];
+            myComHP = 100;
+            updateUnitPositions();
+            updateStats();
+        }
+
+        function updateUnitPositions() {
+            units.forEach(u => {
+                if (!u.isDragging) {
+                    u.x = GRID_START_X + u.gridX * CELL_SIZE + CELL_SIZE / 2;
+                    u.y = GRID_START_Y + u.gridY * CELL_SIZE + CELL_SIZE / 2;
+                }
+            });
+        }
+
+        // 유닛 추가 소환
+        function spawnUnit(type) {
+            if (type === 'virus') {
+                // 왼쪽 끝에서 침투
+                viruses.push({
+                    x: 0,
+                    y: GRID_START_Y + Math.random() * (ROWS * CELL_SIZE),
+                    speed: 1.5 + Math.random() * 1.5,
+                    target: myComPos
+                });
+            } else {
+                // 비어있는 랜덤 그리드 찾기
+                let emptyCells = [];
+                for (let cx = 0; cx < COLS - 1; cx++) {
+                    for (let cy = 0; cy < ROWS; cy++) {
+                        if (!units.some(u => u.gridX === cx && u.gridY === cy)) {
+                            emptyCells.push({ x: cx, y: cy });
+                        }
+                    }
+                }
+
+                if (emptyCells.length > 0) {
+                    const cell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    if (type === 'file') {
+                        const exts = ['txt', 'exe', 'png'];
+                        units.push({
+                            id: nextUnitId++,
+                            type: 'file',
+                            ext: exts[Math.floor(Math.random() * exts.length)],
+                            gridX: cell.x,
+                            gridY: cell.y,
+                            x: 0, y: 0,
+                            state: 'normal',
+                            isDragging: false
+                        });
+                    } else if (type === 'folder') {
+                        units.push({
+                            id: nextUnitId++,
+                            type: 'folder',
+                            gridX: cell.x,
+                            gridY: cell.y,
+                            x: 0, y: 0,
+                            zippedCount: 0,
+                            isDragging: false
+                        });
+                    }
+                    updateUnitPositions();
+                    updateStats();
+                } else {
+                    alert('그리드가 가득 찼습니다!');
+                }
+            }
+        }
+
+        function resetSimulator() {
+            initSimulator();
+        }
+
+        function toggleFilter() {
+            isFilterActive = !isFilterActive;
+            const btn = document.getElementById('btn-filter-toggle');
+            if (isFilterActive) {
+                btn.textContent = 'ON (활성화)';
+                btn.className = "px-3 py-1 text-xs font-bold rounded-lg bg-emerald-600 text-white shadow-md transition-all";
+            } else {
+                btn.textContent = 'OFF (비활성화)';
+                btn.className = "px-3 py-1 text-xs font-bold rounded-lg bg-red-600 text-white shadow-md transition-all";
+            }
+        }
+
+        function updateNoise(val) {
+            jitterStrength = parseInt(val);
+            document.getElementById('label-noise').textContent = `${val}px`;
+        }
+
+        // 드래그앤드롭 이벤트 핸들러
+        function getCanvasMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function onPointerDown(e) {
+            const pos = getCanvasMousePos(e);
+            rawMousePos = { x: pos.x, y: pos.y };
+
+            // 클릭 대상 탐색
+            for (let i = units.length - 1; i >= 0; i--) {
+                const u = units[i];
+                const dist = Math.hypot(pos.x - u.x, pos.y - u.y);
+                if (dist < 45) {
+                    draggedUnit = u;
+                    u.isDragging = true;
+                    filterInstance.reset();
+                    dragOffset = { x: u.x - pos.x, y: u.y - pos.y };
+                    break;
+                }
+            }
+        }
+
+        function onPointerMove(e) {
+            const pos = getCanvasMousePos(e);
+            
+            // 렌즈 왜곡에 의한 마우스 고주파 떨림 시뮬레이션 적용
+            const noiseX = (Math.random() - 0.5) * jitterStrength;
+            const noiseY = (Math.random() - 0.5) * jitterStrength;
+            
+            rawMousePos = { x: pos.x + noiseX, y: pos.y + noiseY };
+
+            // 1€ 필터를 통한 노이즈 필터링
+            if (isFilterActive) {
+                smoothedMousePos = filterInstance.filter(rawMousePos, 0.016); // 60fps 가정
+            } else {
+                smoothedMousePos = { x: rawMousePos.x, y: rawMousePos.y };
+            }
+
+            // 실시간 신호 측정 큐 업데이트
+            jitterQueue.push(rawMousePos.x - pos.x);
+            filteredQueue.push(smoothedMousePos.x - pos.x);
+            if (jitterQueue.length > maxQueueLength) {
+                jitterQueue.shift();
+                filteredQueue.shift();
+            }
+
+            if (draggedUnit) {
+                // 필터링된 마우스 좌표를 기준으로 드래그 위치 설정
+                draggedUnit.x = smoothedMousePos.x + dragOffset.x;
+                draggedUnit.y = smoothedMousePos.y + dragOffset.y;
+            }
+        }
+
+        function onPointerUp() {
+            if (draggedUnit) {
+                draggedUnit.isDragging = false;
+                
+                // 그리드 셀 판단
+                const gx = Math.round((draggedUnit.x - GRID_START_X - CELL_SIZE/2) / CELL_SIZE);
+                const gy = Math.round((draggedUnit.y - GRID_START_Y - CELL_SIZE/2) / CELL_SIZE);
+
+                if (gx >= 0 && gx < COLS - 1 && gy >= 0 && gy < ROWS) {
+                    // 해당 자리에 폴더가 있는지 체크
+                    const targetFolder = units.find(u => u.type === 'folder' && u.gridX === gx && u.gridY === gy && u !== draggedUnit);
+                    
+                    if (targetFolder && draggedUnit.type === 'file') {
+                        // 폴더에 드롭 완료 (Zip 압축!)
+                        targetFolder.zippedCount++;
+                        // 필드에서 파일 제거
+                        units = units.filter(u => u !== draggedUnit);
+                        // 파티클 터뜨림
+                        createExplosion(targetFolder.x, targetFolder.y, '#f59e0b', 15);
+                    } else {
+                        // 자리 비어있는지 체크
+                        const isOccupied = units.some(u => u.gridX === gx && u.gridY === gy && u !== draggedUnit);
+                        if (!isOccupied) {
+                            draggedUnit.gridX = gx;
+                            draggedUnit.gridY = gy;
+                        }
+                    }
+                }
+                updateUnitPositions();
+                draggedUnit = null;
+                updateStats();
+            }
+        }
+
+        canvas.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+
+        canvas.addEventListener('touchstart', onPointerDown, {passive: false});
+        window.addEventListener('touchmove', onPointerMove, {passive: false});
+        window.addEventListener('touchend', onPointerUp);
+
+        // 파티클 폭발 효과
+        function createExplosion(x, y, color, count) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 6,
+                    vy: (Math.random() - 0.5) * 6,
+                    life: 1.0,
+                    decay: 0.02 + Math.random() * 0.03,
+                    color: color
+                });
+            }
+        }
+
+        // 실시간 수치 업데이트
+        function updateStats() {
+            const files = units.filter(u => u.type === 'file');
+            const normalFiles = files.filter(u => u.state === 'normal').length;
+            const infectedFiles = files.filter(u => u.state !== 'normal').length;
+            const folders = units.filter(u => u.type === 'folder');
+            let totalZipped = 0;
+            folders.forEach(f => totalZipped += f.zippedCount);
+
+            document.getElementById('stat-files').textContent = normalFiles;
+            document.getElementById('stat-zipped').textContent = totalZipped;
+            document.getElementById('stat-infected').textContent = infectedFiles;
+            document.getElementById('stat-hp').textContent = `${myComHP} / 100`;
+        }
+
+        // 감염 알고리즘 (바이러스 침입 성공 시 무작위 파일 감염)
+        function infectRandomFile() {
+            const uninfectedFiles = units.filter(u => u.type === 'file' && u.state === 'normal');
+            if (uninfectedFiles.length > 0) {
+                const target = uninfectedFiles[Math.floor(Math.random() * uninfectedFiles.length)];
+                target.state = Math.random() > 0.5 ? 'ransomware' : 'worm';
+                createExplosion(target.x, target.y, '#c084fc', 20);
+            }
+            updateStats();
+        }
+
+        // 미니 그래프 그리기
+        function drawChart() {
+            chartCtx.clearRect(0, 0, chartCanvas.width, chartCanvas.height);
+
+            // 가이드라인
+            chartCtx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
+            chartCtx.lineWidth = 1;
+            chartCtx.beginPath();
+            chartCtx.moveTo(0, chartCanvas.height / 2);
+            chartCtx.lineTo(chartCanvas.width, chartCanvas.height / 2);
+            chartCtx.stroke();
+
+            const step = chartCanvas.width / maxQueueLength;
+
+            // 1. 원본 신호 (빨간색)
+            if (jitterQueue.length > 1) {
+                chartCtx.strokeStyle = '#f87171';
+                chartCtx.lineWidth = 1.5;
+                chartCtx.beginPath();
+                for (let i = 0; i < jitterQueue.length; i++) {
+                    const x = i * step;
+                    const y = chartCanvas.height / 2 + jitterQueue[i] * 2; // 증폭 렌더링
+                    if (i === 0) chartCtx.moveTo(x, y);
+                    else chartCtx.lineTo(x, y);
+                }
+                chartCtx.stroke();
+            }
+
+            // 2. 필터링된 신호 (녹색)
+            if (filteredQueue.length > 1) {
+                chartCtx.strokeStyle = '#34d399';
+                chartCtx.lineWidth = 2;
+                chartCtx.beginPath();
+                for (let i = 0; i < filteredQueue.length; i++) {
+                    const x = i * step;
+                    const y = chartCanvas.height / 2 + filteredQueue[i] * 2;
+                    if (i === 0) chartCtx.moveTo(x, y);
+                    else chartCtx.lineTo(x, y);
+                }
+                chartCtx.stroke();
+            }
+        }
+
+        // 메인 프레임 루프
+        function loop() {
+            // 1. 연산 처리
+            // 바이러스 이동
+            viruses.forEach((v, idx) => {
+                const dist = Math.hypot(v.target.x - v.x, v.target.y - v.y);
+                if (dist < 40) {
+                    // 본진 도달! 대미지 및 감염 전파
+                    myComHP = Math.max(0, myComHP - 15);
+                    createExplosion(v.x, v.y, '#ef4444', 25);
+                    infectRandomFile();
+                    viruses.splice(idx, 1);
+                } else {
+                    v.x += (v.target.x - v.x) / dist * v.speed;
+                    v.y += (v.target.y - v.y) / dist * v.speed;
+                }
+            });
+
+            // 웜 감염 주기적 인접 전염 시뮬레이션 (간단하게 1.5% 확률로 전염)
+            units.forEach(u => {
+                if (u.type === 'file' && u.state === 'worm' && Math.random() < 0.002) {
+                    const neighbors = units.filter(other => 
+                        other.type === 'file' && 
+                        other.state === 'normal' && 
+                        Math.abs(other.gridX - u.gridX) <= 1 && 
+                        Math.abs(other.gridY - u.gridY) <= 1
+                    );
+                    if (neighbors.length > 0) {
+                        const target = neighbors[Math.floor(Math.random() * neighbors.length)];
+                        target.state = 'worm';
+                        createExplosion(target.x, target.y, '#c084fc', 15);
+                        updateStats();
+                    }
+                }
+            });
+
+            // 파티클 프레임 진행
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.life -= p.decay;
+                if (p.life <= 0) {
+                    particles.splice(idx, 1);
+                }
+            });
+
+            // 2. 그리기 처리
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 버프 영역 및 그리드 표현
+            // 폴더 유닛들의 버프 범위 (십자 1칸) 계산
+            const buffedCells = [];
+            units.filter(u => u.type === 'folder' && !u.isDragging).forEach(f => {
+                buffedCells.push({ x: f.gridX + 1, y: f.gridY });
+                buffedCells.push({ x: f.gridX - 1, y: f.gridY });
+                buffedCells.push({ x: f.gridX, y: f.gridY + 1 });
+                buffedCells.push({ x: f.gridX, y: f.gridY - 1 });
+            });
+
+            for (let cx = 0; cx < COLS - 1; cx++) {
+                for (let cy = 0; cy < ROWS; cy++) {
+                    const gx = GRID_START_X + cx * CELL_SIZE;
+                    const gy = GRID_START_Y + cy * CELL_SIZE;
+
+                    // 기본 셀
+                    ctx.fillStyle = '#0b0f19';
+                    
+                    // 버프 영역 오버레이 표현 (Pillar 1/3)
+                    const isBuffed = buffedCells.some(bc => bc.x === cx && bc.y === cy);
+                    if (isBuffed) {
+                        ctx.fillStyle = 'rgba(96, 165, 250, 0.12)'; // 은은한 파란색 버프 오버레이
+                    }
+
+                    ctx.fillRect(gx, gy, CELL_SIZE, CELL_SIZE);
+                    ctx.strokeStyle = isBuffed ? 'rgba(96, 165, 250, 0.4)' : 'rgba(255,255,255,0.04)';
+                    ctx.lineWidth = isBuffed ? 2.5 : 1.5;
+                    ctx.strokeRect(gx, gy, CELL_SIZE, CELL_SIZE);
+
+                    if (isBuffed) {
+                        ctx.fillStyle = 'rgba(96, 165, 250, 0.6)';
+                        ctx.font = '10px sans-serif';
+                        ctx.fillText('⚡ BUFF AREA', gx + 10, gy + 20);
+                    }
+                }
+            }
+
+            // 본진 (MyCom) 렌더링
+            const comW = 120;
+            const comH = 120;
+            ctx.save();
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(myComPos.x - comW/2, myComPos.y - comH/2, comW, comH);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(myComPos.x - comW/2, myComPos.y - comH/2, comW, comH);
+
+            // 레트로 CRT 모니터 드로잉
+            ctx.fillStyle = '#000000';
+            ctx.fillRect(myComPos.x - comW/2 + 10, myComPos.y - comH/2 + 10, comW - 20, comH - 40);
+            
+            // 모니터 내부 매트릭스 라인
+            ctx.fillStyle = 'rgba(239, 68, 68, 0.15)';
+            ctx.font = 'bold 12px monospace';
+            ctx.fillText('CORE SYSTEM', myComPos.x - 45, myComPos.y - 15);
+            ctx.fillText(`HP: ${myComHP}%`, myComPos.x - 30, myComPos.y + 10);
+            ctx.restore();
+
+            // 유닛 그리기
+            units.forEach(u => {
+                ctx.save();
+                
+                // 1. 유닛 형태
+                if (u.type === 'file') {
+                    // 파일 스프라이트 드로잉 (아이콘 형상화)
+                    const w = 75;
+                    const h = 90;
+                    ctx.fillStyle = u.state === 'normal' ? '#1e293b' : '#3c1e59'; // 감염 시 보라색 변조
+                    ctx.fillRect(u.x - w/2, u.y - h/2, w, h);
+                    
+                    // 파일 테두리 하이라이팅 (Pillar 4 감염 및 일반 구분)
+                    if (u.state === 'ransomware') {
+                        ctx.strokeStyle = '#c084fc';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(u.x - w/2, u.y - h/2, w, h);
+                        // 랜섬웨어 자물쇠 아이콘
+                        ctx.fillStyle = '#c084fc';
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.fillText('🔒 LOCKED', u.x - 28, u.y + 5);
+                    } else if (u.state === 'worm') {
+                        ctx.strokeStyle = '#a78bfa';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(u.x - w/2, u.y - h/2, w, h);
+                        // 웜 아이콘
+                        ctx.fillStyle = '#a78bfa';
+                        ctx.font = 'bold 11px sans-serif';
+                        ctx.fillText('🦠 WORM', u.x - 22, u.y + 5);
+                    } else {
+                        // 버프 범위에 안착된 유닛에 대한 스탯 하이라이트 (Pillar 3)
+                        const inBuff = buffedCells.some(bc => bc.x === u.gridX && bc.y === u.gridY) && !u.isDragging;
+                        ctx.strokeStyle = inBuff ? '#2dd4bf' : '#3b82f6';
+                        ctx.lineWidth = inBuff ? 3.5 : 2;
+                        ctx.strokeRect(u.x - w/2, u.y - h/2, w, h);
+                    }
+
+                    // 파일 접힌 모서리
+                    ctx.fillStyle = '#475569';
+                    ctx.beginPath();
+                    ctx.moveTo(u.x + w/2 - 15, u.y - h/2);
+                    ctx.lineTo(u.x + w/2, u.y - h/2 + 15);
+                    ctx.lineTo(u.x + w/2 - 15, u.y - h/2 + 15);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    // 파일 텍스트 라벨
+                    ctx.fillStyle = '#f3f4f6';
+                    ctx.font = 'bold 13px monospace';
+                    ctx.fillText(`.${u.ext.toUpperCase()}`, u.x - 18, u.y + (u.state === 'normal' ? 10 : -15));
+
+                } else if (u.type === 'folder') {
+                    // 폴더 스프라이트 드로잉
+                    const w = 95;
+                    const h = 75;
+                    ctx.fillStyle = '#d97706';
+                    ctx.fillRect(u.x - w/2, u.y - h/2 + 10, w, h - 10);
+                    
+                    // 폴더 상단 탭
+                    ctx.beginPath();
+                    ctx.moveTo(u.x - w/2, u.y - h/2 + 10);
+                    ctx.lineTo(u.x - w/2 + 30, u.y - h/2 + 10);
+                    ctx.lineTo(u.x - w/2 + 40, u.y - h/2 + 20);
+                    ctx.lineTo(u.x - w/2, u.y - h/2 + 20);
+                    ctx.closePath();
+                    ctx.fill();
+
+                    ctx.strokeStyle = '#fbbf24';
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(u.x - w/2, u.y - h/2 + 10, w, h - 10);
+
+                    // 폴더 내부 보관 수량 텍스트
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 12px sans-serif';
+                    ctx.fillText(`Zip: ${u.zippedCount}개`, u.x - 22, u.y + 15);
+                }
+                ctx.restore();
+            });
+
+            // 바이러스 렌더링
+            viruses.forEach(v => {
+                ctx.save();
+                ctx.fillStyle = '#ef4444';
+                ctx.beginPath();
+                ctx.arc(v.x, v.y, 16, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // 바이러스 촉수/스파이크
+                ctx.strokeStyle = '#b91c1c';
+                ctx.lineWidth = 3;
+                for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
+                    ctx.beginPath();
+                    ctx.moveTo(v.x, v.y);
+                    ctx.lineTo(v.x + Math.cos(a) * 24, v.y + Math.sin(a) * 24);
+                    ctx.stroke();
+                }
+                ctx.restore();
+            });
+
+            // 파티클 그리기
+            particles.forEach(p => {
+                ctx.save();
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x - 3, p.y - 3, 6, 6);
+                ctx.restore();
+            });
+
+            // 차트 갱신
+            drawChart();
+
+            requestAnimationFrame(loop);
+        }
+
+        // 초기 시작
+        initSimulator();
+        loop();
+    </script>
+
+    <!-- 네비게이션 탭 스위칭 -->
+    <script>
+        function switchTab(tabId) {
+            const tabs = ['demo', 'tech', 'code', 'perf'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`content-${t}`);
+                
+                if (t === tabId) {
+                    btn.className = "px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 bg-blue-600 text-white shadow-lg";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

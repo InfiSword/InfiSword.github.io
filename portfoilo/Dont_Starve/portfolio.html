@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Don't Starve 모작 - 공간 분할 및 렌더링 최적화 기술 포트폴리오</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Noto Sans KR', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        darkBg: '#090B11',
+                        panelBg: 'rgba(17, 22, 37, 0.75)',
+                        borderLight: 'rgba(255, 255, 255, 0.08)',
+                        brandPurple: '#818cf8',
+                        brandEmerald: '#34d399',
+                        brandCoral: '#f87171',
+                        brandBlue: '#60a5fa',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #05060b;
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(129, 140, 248, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(52, 211, 153, 0.08) 0%, transparent 40%),
+                linear-gradient(rgba(255, 255, 255, 0.003) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.003) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+        }
+        .glass-panel {
+            background: rgba(13, 17, 30, 0.7);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(129, 140, 248, 0.25);
+            border-color: rgba(129, 140, 248, 0.4);
+        }
+        canvas {
+            touch-action: none;
+            background-color: #0b0e17;
+            border-radius: 12px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            width: 100%;
+            height: auto;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        /* Code highlighting styling using data attributes to avoid regex collisions */
+        span[data-t="k"] { color: #f472b6; font-weight: bold; } /* keyword */
+        span[data-t="t"] { color: #60a5fa; }                   /* type */
+        span[data-t="f"] { color: #fbbf24; }                   /* function */
+        span[data-t="c"] { color: #6b7280; font-style: italic; } /* comment */
+        span[data-t="n"] { color: #f87171; }                   /* number */
+        span[data-t="s"] { color: #34d399; }                   /* string */
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans p-6 gap-6 max-w-7xl mx-auto">
+
+    <!-- 헤더 섹션 -->
+    <header class="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 rounded-full">Windows API C++ Portfolio</span>
+                <span class="px-3 py-1 text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-full">게임 클라이언트 최적화</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight mt-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-emerald-400 to-indigo-400">
+                그리드 공간 분할 및 뷰포트 컬링 시스템
+            </h1>
+            <p class="text-sm text-gray-400 mt-1.5 font-light">
+                2D 탑다운 생존 게임 <span class="text-yellow-300/80 font-medium">Don't Starve</span> 모작 프로젝트의 가시 영역 최적화 및 충돌 감지 성능 향상 기법 분석
+            </p>
+        </div>
+        
+        <!-- 네비게이션 탭 -->
+        <nav class="flex bg-slate-900/80 p-1.5 rounded-xl border border-white/5 w-full md:w-auto overflow-x-auto gap-1">
+            <button onclick="switchTab('demo')" id="tab-demo" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 bg-indigo-600 text-white shadow-lg">
+                🖥️ 시뮬레이터
+            </button>
+            <button onclick="switchTab('tech')" id="tab-tech" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                ⚙️ 핵심 기술 분석
+            </button>
+            <button onclick="switchTab('code')" id="tab-code" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                📄 C++ 소스 코드
+            </button>
+            <button onclick="switchTab('perf')" id="tab-perf" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                📊 성능 분석 보고서
+            </button>
+        </nav>
+    </header>
+
+    <!-- 메인 컨텐츠 영역 -->
+    <main class="flex-1 min-h-0 relative">
+        
+        <!-- 1. 시뮬레이터 탭 -->
+        <div id="content-demo" class="tab-content flex flex-col lg:flex-row gap-6 h-full">
+            <!-- 캔버스 영역 -->
+            <div class="flex-1 glass-panel p-4 rounded-2xl flex flex-col gap-4 min-w-0">
+                <div class="flex justify-between items-center bg-slate-900/40 p-3 rounded-xl border border-white/5">
+                    <div class="flex items-center gap-2">
+                        <span class="w-3 h-3 rounded-full bg-indigo-400 animate-pulse"></span>
+                        <h3 class="text-sm font-semibold tracking-wide text-gray-200">Interactive Canvas Simulation</h3>
+                    </div>
+                    <div class="flex gap-2">
+                        <button id="btn-camera" class="px-3.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold shadow-md transition-all">
+                            📷 카메라 컬링 모드
+                        </button>
+                        <button id="btn-player" class="px-3.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-gray-300 hover:text-white rounded-lg font-bold transition-all">
+                            ⚔️ 충돌 검사 모드
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex-1 relative bg-black/40 rounded-xl overflow-hidden flex items-center justify-center p-1 border border-white/5 min-h-[400px]">
+                    <!-- 논리 크기 2560x1536 (10x6 그리드) -->
+                    <canvas id="simCanvas" width="2560" height="1536" class="max-h-full object-contain"></canvas>
+                </div>
+            </div>
+
+            <!-- 사이드 컨트롤 패널 -->
+            <div class="w-full lg:w-96 shrink-0 flex flex-col gap-6">
+                <!-- 모드 가이드 패널 -->
+                <div class="glass-panel p-5 rounded-2xl">
+                    <h3 class="text-lg font-bold text-gray-200 mb-3 flex items-center gap-2">
+                        💡 시뮬레이터 안내
+                    </h3>
+                    <div class="text-sm text-gray-400 space-y-2.5 font-light leading-relaxed">
+                        <p>캔버스 위에 표시된 오브젝트들을 직접 드래그하며 시스템을 시험해 볼 수 있습니다.</p>
+                        <ul class="list-disc pl-5 space-y-1.5 text-xs">
+                            <li><span class="text-red-400 font-semibold">빨간색 실선 창</span>: 드래그 시 카메라 뷰포트($1200 \times 800$) 이동</li>
+                            <li><span class="text-red-400 font-semibold">윌슨 (플레이어)</span>: 드래그 시 플레이어 위치 이동 (Wilson_Image.png)</li>
+                            <li><span class="text-emerald-400 font-semibold">밝은 상록수 나무</span>: 활성화(가시/충돌 대상)되어 렌더링되는 오브젝트 (evergreen_*.png)</li>
+                            <li><span class="text-gray-500 font-semibold">반투명 상록수 나무</span>: 컬링되어 연산/렌더링에서 배제된 오브젝트</li>
+                            <li><span class="text-indigo-400 font-semibold">바닥 타일</span>: dirt_01.png 리소스를 활용한 타일 렌더링</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 실시간 측정 정보 -->
+                <div class="glass-panel p-6 rounded-2xl flex-1 flex flex-col gap-6">
+                    <!-- 플레이어 섹션 -->
+                    <div>
+                        <h4 class="text-sm font-bold tracking-wider text-red-400 uppercase mb-3 flex items-center gap-2 border-b border-red-500/20 pb-1.5">
+                            <span>🏃</span> 플레이어 위치 & 이사(Migrate) 감지
+                        </h4>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div class="bg-slate-900/60 p-2.5 rounded-lg border border-white/5">
+                                <span class="text-gray-500 block">월드 실시간 좌표</span>
+                                <span id="info-px" class="font-mono text-gray-200 font-medium text-sm">X: 1280, Y: 768</span>
+                            </div>
+                            <div class="bg-slate-900/60 p-2.5 rounded-lg border border-white/5">
+                                <span class="text-gray-500 block">소속 그리드 인덱스</span>
+                                <span id="info-pgrid" class="font-mono text-emerald-400 font-bold text-sm">[5], [3]</span>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <span class="text-gray-500 text-xs block mb-1">그리드 셀 동기화 상태:</span>
+                            <div id="info-pdirty" class="w-full text-center py-2 bg-slate-950 text-gray-400 rounded-lg text-xs font-mono font-bold border border-white/5 transition-all">
+                                대기 중
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 카메라 섹션 -->
+                    <div>
+                        <h4 class="text-sm font-bold tracking-wider text-indigo-400 uppercase mb-3 flex items-center gap-2 border-b border-indigo-500/20 pb-1.5">
+                            <span>📸</span> 카메라 가시 영역 (Viewport)
+                        </h4>
+                        <div class="grid grid-cols-2 gap-3 text-xs">
+                            <div class="bg-slate-900/60 p-2.5 rounded-lg border border-white/5">
+                                <span class="text-gray-500 block">카메라 좌상단 좌표</span>
+                                <span id="info-cx" class="font-mono text-gray-200 font-medium text-sm">X: 680, Y: 368</span>
+                            </div>
+                            <div class="bg-slate-900/60 p-2.5 rounded-lg border border-white/5">
+                                <span class="text-gray-500 block">검색 대상 그리드 셀</span>
+                                <span id="info-cgrid" class="font-mono text-indigo-300 font-medium text-xs">X(2 ~ 7), Y(1 ~ 4)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 렌더링 성능 요약 -->
+                    <div class="mt-auto bg-slate-950/60 p-4 rounded-xl border border-white/5 space-y-2.5">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-emerald-400 font-semibold">● 최종 렌더링/충돌 (뷰포트/접촉):</span>
+                            <span id="info-crender" class="text-emerald-400 font-mono font-bold text-sm">0 / 48</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-yellow-400 font-semibold">▲ CPU 연산/검증 대상 (그리드 내):</span>
+                            <span id="info-cgrid-total" class="text-yellow-400 font-mono font-bold text-sm">0 / 48</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-500">✖ 완전 컬링 (연산 제외):</span>
+                            <span id="info-cculled" class="text-gray-400 font-mono font-bold text-sm">0 / 48</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs pt-1.5 border-t border-white/5">
+                            <span class="text-gray-400">가시 그리드 개수 (256x256):</span>
+                            <span id="info-ctile" class="text-indigo-300 font-mono font-bold text-sm">0</span>
+                        </div>
+                        <div class="pt-1.5 border-t border-white/5 flex justify-between items-center text-xs">
+                            <span class="text-gray-400">브루트 포스 연산 횟수:</span>
+                            <span class="text-red-400 font-mono">48회 (매프레임)</span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-gray-400">공간 분할 적용 연산 횟수:</span>
+                            <span id="info-calc-opt" class="text-emerald-400 font-mono font-bold">~24회</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 핵심 기술 분석 탭 -->
+        <div id="content-tech" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[75vh] pr-2">
+            <!-- 그리드 공간 분할 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-indigo-500/10 text-indigo-400 rounded-lg border border-indigo-500/20 font-bold">01</div>
+                    <h3 class="text-xl font-bold text-white">그리드 공간 분할 및 동적 이사 메커니즘</h3>
+                </div>
+                <div class="text-sm text-gray-300 space-y-3.5 leading-relaxed font-light mt-2">
+                    <p>
+                        월드 맵 공간을 $256 \times 256$ 크기의 그리드 셀로 나눈 뒤, 각 오브젝트를 자신의 중심 좌표에 속하는 단 하나의 셀 포인터 배열(<code class="text-indigo-300 font-mono">m_spatialGrid[GRID_WIDTH][GRID_HEIGHT]</code>)에 등록합니다.
+                    </p>
+                    <div class="bg-slate-950/60 p-3 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-indigo-300 block">💡 '자신'과 '중심 좌표'의 정의</span>
+                        <p class="text-xs text-gray-400 font-light">
+                            여기서 <strong>자신</strong>이란 <code class="text-gray-300 font-mono">GameObject</code>를 상속받아 월드에 존재하는 구체적인 캐릭터, 몬스터, 트리 등의 개체(Instance)를 가리킵니다. <strong>중심 좌표</strong>는 개체의 AABB 바운딩 박스 중심점<br>
+                            <code class="text-indigo-400 font-mono">centerX = X + Width * 0.5f</code>, <code class="text-indigo-400 font-mono">centerY = Y + Height * 0.5f</code>를 뜻하며, 이 단일 점을 기준으로 소속 격자 셀을 식별합니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-indigo-300 block">🔄 실시간 셀 업데이트 (이사/Migration) 과정</span>
+                        <ol class="list-decimal pl-4 text-xs text-gray-400 space-y-1.5 font-light">
+                            <li><strong>이동 이벤트 감지</strong>: 오브젝트의 위치/스케일 변경 시 Transform 컴포넌트가 <code class="text-gray-300 font-mono">SetSpatialDirty()</code>를 트리거하여 <code class="text-red-400 font-mono">m_isGridDirty = true</code>(더티 플래그)를 설정합니다.</li>
+                            <li><strong>지연 동기화 (Lazy Evaluation)</strong>: 프레임 도중 여러 번 좌표가 흔들리더라도 즉시 갱신하지 않고, <code class="text-gray-300 font-mono">LateUpdate()</code> 시점에 <strong>단 1회만</strong> 최종 연산을 수행해 중복 연산을 완전 제거합니다.</li>
+                            <li><strong>O(1) 조기 차단 (Early Exit)</strong>: 새로운 중심점 좌표로 역산한 그리드 셀 인덱스(<code class="text-indigo-300 font-mono">newX, newY</code>)가 이전 셀 인덱스와 같다면, 리스트 조작 없이 <strong>즉시 연산을 종료</strong>합니다.</li>
+                            <li><strong>포인터 이사</strong>: 격자가 바뀐 경우에만 이전 셀 벡터에서 포인터를 삭제(<code class="text-gray-300 font-mono">std::remove</code>)하고 새 셀 벡터에 <code class="text-gray-300 font-mono">push_back</code>하여 이관을 완수합니다.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 다단계 컬링 파이프라인 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-emerald-500/10 text-emerald-400 rounded-lg border border-emerald-500/20 font-bold">02</div>
+                    <h3 class="text-xl font-bold text-white">다단계 가시성 필터링 및 뷰포트 노출 흐름</h3>
+                </div>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mt-2">
+                    카메라 가시 판정을 위해 단순 충돌 검사만을 사용하는 것이 아니라, 연산 효율에 맞춰 최적화된 다단계 필터링 구조를 취하고 있습니다.
+                </p>
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-white/5 mt-2 space-y-3">
+                    <div class="relative pl-6 border-l-2 border-emerald-500 space-y-3">
+                        <div class="text-xs">
+                            <span class="font-bold text-emerald-300 block">1단계: 공간 분할 거친 범위 검색</span>
+                            <span class="text-gray-400 font-light">카메라 뷰포트 사각형 영역과 겹쳐진 그리드 셀 목록 내의 객체들만 1차 후보군으로 압축 수집</span>
+                        </div>
+                        <div class="text-xs">
+                            <span class="font-bold text-emerald-300 block">2단계: AABB 교집합 검사</span>
+                            <span class="text-gray-400 font-light">수집된 후보군 객체의 AABB(Axis-Aligned Bounding Box) 범위와 뷰포트 Rect의 교차 연산 수행</span>
+                        </div>
+                        <div class="text-xs">
+                            <span class="font-bold text-emerald-300 block">3단계: 실제 스프라이트 영역 가시 판정</span>
+                            <span class="text-gray-400 font-light">스프라이트 스케일 및 피벗 기준의 세부 렌더 바운드로 최종 렌더링 판단 (<code class="text-indigo-300 bg-slate-950 px-1 py-0.5 rounded font-mono">IsObjectInViewport()</code>)</span>
+                        </div>
+                    </div>
+                    
+                    <!-- 플레이어 뷰포트 이동에 따른 정적 오브젝트 노출 흐름 추가 -->
+                    <div class="pt-3 border-t border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-emerald-300 block flex items-center gap-1">
+                            <span>🏃‍♂️</span> 플레이어 이동 시 정적 사물(Static Object) 노출 흐름
+                        </span>
+                        <ul class="list-decimal pl-4 text-xs text-gray-400 space-y-1.5 font-light">
+                            <li><strong>정적 사물 고정 등록</strong>: 나무, 바위 등은 게임 시작(또는 생성) 시점에 자신의 중심 좌표 격자 셀에 단 1회 등록되며, 이동하지 않으므로 추가적인 그리드 갱신 연산 비용이 전혀 들지 않습니다.</li>
+                            <li><strong>카메라 뷰포트 이동</strong>: 플레이어가 월드를 이동함에 따라 카메라의 추적 로직(<code class="text-indigo-400 font-mono">FollowTarget()</code>)이 작동하여 카메라의 월드 중심 좌표(<code class="text-indigo-400 font-mono">m_cameraPos</code>)가 갱신됩니다.</li>
+                            <li><strong>쿼리 대상 격자 자동 시프트</strong>: 매 프레임 실시간 이동한 카메라 뷰포트 Rect(<code class="text-indigo-400 font-mono">GetViewportWorldRect()</code>)를 그리드 격자 범위(<code class="text-indigo-300 font-mono">startX ~ endX, startY ~ endY</code>)로 변환합니다.</li>
+                            <li><strong>가시화 및 컬링</strong>: 새롭게 쿼리 영역에 들어온 셀 내부의 정적 오브젝트들이 자동으로 탐색되어 화면에 렌더링되고, 화면에서 멀어진 셀의 정적 오브젝트들은 자동으로 탐색에서 배제(컬링)됩니다.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 버퍼 재사용 최적화 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-yellow-500/10 text-yellow-400 rounded-lg border border-yellow-500/20 font-bold">03</div>
+                    <h3 class="text-xl font-bold text-white">버퍼 재사용 최적화 (Memory Alloc Free)</h3>
+                </div>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mt-2">
+                    매 프레임 마다 수십 마리의 몬스터나 뷰포트 객체를 쿼리할 때 발생할 수 있는 동적 힙 메모리 할당(malloc/free)의 높은 오버헤드를 막습니다.
+                </p>
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-white/5 space-y-2 mt-2">
+                    <h4 class="text-xs font-bold text-yellow-300 uppercase tracking-wider">주요 특징</h4>
+                    <p class="text-xs text-gray-300 leading-relaxed font-light">
+                        <code class="text-indigo-300 font-mono">CameraManager</code> 및 <code class="text-indigo-300 font-mono">ColliderManager</code>의 멤버 변수로 <code class="text-gray-300 font-mono">m_queryBuffer</code> 벡터를 선언하고, 게임 시작 시점에 <code class="text-indigo-300 font-mono">reserve(2048)</code>를 호출해 메모리를 미리 잡아놓습니다. 이후 쿼리 시에는 <code class="text-indigo-300 font-mono">clear()</code> 메서드를 사용해 기존 할당 주소를 보존하며 재할당 비용을 제로(0)에 가깝게 유지합니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 타일 캐싱 및 컬링 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-rose-500/10 text-rose-400 rounded-lg border border-rose-500/20 font-bold">04</div>
+                    <h3 class="text-xl font-bold text-white">타일 가시 영역 컬링 및 캐싱 (Tile Culling)</h3>
+                </div>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mt-2">
+                    $100 \times 100$의 거대한 타일맵을 드로우할 때 뷰포트에 잡히는 활성 타일만 선별하여 드로우 콜을 발행하는 최적화입니다.
+                </p>
+                <div class="bg-slate-900/60 p-4 rounded-xl border border-white/5 space-y-2 mt-2">
+                    <h4 class="text-xs font-bold text-rose-300 uppercase tracking-wider">구현 메커니즘</h4>
+                    <ul class="text-xs text-gray-300 list-disc pl-5 space-y-1 font-light">
+                        <li>카메라의 뷰포트에 패딩 영역을 추가하여 렌더링 범위를 특정하고 타일 단위 인덱스를 바로 역산합니다.</li>
+                        <li>매 프레임 리소스의 재로드나 파괴를 최소화하기 위해 활성화 타일 비트맵을 해시맵인 <code class="text-indigo-300 font-mono">m_tileCache</code>로 구성하고, 뷰포트를 벗어난 항목만 한정적으로 지연 해제(<code class="text-indigo-300 font-mono">CleanupUnusedTileCache</code>)합니다.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. C++ 소스 코드 탭 -->
+        <div id="content-code" class="tab-content hidden flex flex-col lg:flex-row gap-6 h-full max-h-[75vh]">
+            <!-- 코드 파일 탭 선택기 -->
+            <div class="w-full lg:w-64 shrink-0 flex flex-row lg:flex-col bg-slate-900/50 p-2 rounded-xl border border-white/5 gap-1 overflow-x-auto lg:overflow-x-visible">
+                <button onclick="showCodeFile('query')" id="code-btn-query" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all bg-indigo-600/20 text-indigo-300 border border-indigo-500/30">
+                    📂 ObjectManager::QueryObjectsInRect
+                </button>
+                <button onclick="showCodeFile('migrate')" id="code-btn-migrate" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 ObjectManager::UpdateObjectGridCell
+                </button>
+                <button onclick="showCodeFile('render')" id="code-btn-render" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 CameraManager::RenderVisibleGameObjects
+                </button>
+                <button onclick="showCodeFile('precise')" id="code-btn-precise" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 CameraManager::IsObjectInViewport
+                </button>
+            </div>
+
+            <!-- 코드 내용 표시 뷰어 -->
+            <div class="flex-1 glass-panel p-5 rounded-2xl flex flex-col min-w-0 h-full">
+                <div class="flex justify-between items-center pb-3 border-b border-white/5 mb-3 shrink-0">
+                    <span id="code-title" class="text-sm font-mono text-gray-300 font-bold">ObjectManager.cpp - QueryObjectsInRect</span>
+                    <button onclick="copyCurrentCode()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs transition-all">코드 복사</button>
+                </div>
+                <div class="flex-1 overflow-y-auto bg-slate-950 p-4 rounded-xl border border-white/5 font-mono text-xs leading-relaxed text-gray-300">
+                    <pre id="code-content"><code class="block whitespace-pre"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 성능 분석 보고서 탭 -->
+        <div id="content-perf" class="tab-content hidden overflow-y-auto max-h-[75vh] pr-2 space-y-6">
+            <!-- 기술 아키텍처 다이어그램 -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-3">🛠️ 시스템 아키텍처 개요</h3>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mb-4">
+                    공간 분할(Spatial Partitioning) 기술과 뷰포트 컬링이 결합되어 실시간 렌더링 파이프라인의 병목을 어떻게 해소하는지 한눈에 보여주는 흐름도입니다.
+                </p>
+                <div class="bg-slate-900/40 p-4 rounded-xl border border-white/5 flex flex-col md:flex-row justify-around items-center gap-4 text-center text-xs">
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[200px]">
+                        <span class="text-indigo-400 font-bold block mb-1">1. 월드 맵 생성</span>
+                        <span class="text-gray-400 text-[11px] font-light">전체 오브젝트를 좌표 기반으로 그리드 셀에 바인딩</span>
+                    </div>
+                    <div class="text-indigo-500 font-bold hidden md:block">➔</div>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[200px]">
+                        <span class="text-indigo-400 font-bold block mb-1">2. 카메라 업데이트</span>
+                        <span class="text-gray-400 text-[11px] font-light">매 프레임 플레이어 기준의 가시 사각형(RectF) 정의</span>
+                    </div>
+                    <div class="text-indigo-500 font-bold hidden md:block">➔</div>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[200px]">
+                        <span class="text-indigo-400 font-bold block mb-1">3. 고속 셀 쿼리</span>
+                        <span class="text-gray-400 text-[11px] font-light">해당 영역 내의 후보군 오브젝트만 그리드에서 즉시 획득</span>
+                    </div>
+                    <div class="text-indigo-500 font-bold hidden md:block">➔</div>
+                    <div class="bg-slate-950 p-4 rounded-lg border border-white/10 w-full max-w-[200px]">
+                        <span class="text-indigo-400 font-bold block mb-1">4. 2차 필터링 및 렌더</span>
+                        <span class="text-gray-400 text-[11px] font-light">피벗/스케일 영역 2차 필터링 후 렌더 커맨드 버퍼 전달</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 성능 비교 매트릭스 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- 렌더링 성능 지표 -->
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <h3 class="text-lg font-bold text-white border-b border-white/5 pb-2">📈 렌더링 연산 비용 비교</h3>
+                    <div class="space-y-3.5">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>브루트 포스 (기본 구현) - 연산량 최대</span>
+                                <span class="text-red-400 font-mono">100% (매 프레임 전수 루프)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>1차 공간 분할 쿼리 후 연산량</span>
+                                <span class="text-indigo-400 font-mono">~15% (인접 셀 후보군 선별)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-indigo-500 h-2 rounded-full" style="width: 15%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>2차 AABB & 3차 RenderBounds 필터링 통과</span>
+                                <span class="text-emerald-400 font-mono">~10% (실제 렌더 대상만 선별)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: 10%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed font-light italic">
+                        ※ 월드 오브젝트가 약 1,500개 이상 배치되었을 시 60 FPS 유지를 위한 CPU 점유율이 약 70%에서 4% 미만으로 감소하는 극적인 프레임 유지력을 보였습니다.
+                    </p>
+                </div>
+
+                <!-- 메모리 할당 빈도 비교 -->
+                <div class="glass-panel p-6 rounded-2xl space-y-4">
+                    <h3 class="text-lg font-bold text-white border-b border-white/5 pb-2">💾 힙(Heap) 메모리 프레임당 할당 횟수</h3>
+                    <div class="space-y-3.5">
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>버퍼 매 프레임 지역 변수 생성 시 (비최적화)</span>
+                                <span class="text-red-400 font-mono">~60회 / 프레임</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between text-xs mb-1 text-gray-400">
+                                <span>버퍼 재사용 (reserve) 적용 시 (최적화)</span>
+                                <span class="text-emerald-400 font-mono">0회 / 프레임 (사전 할당 완료)</span>
+                            </div>
+                            <div class="w-full bg-slate-950 rounded-full h-2">
+                                <div class="bg-emerald-500 h-2 rounded-full" style="width: 1%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed font-light mt-2">
+                        지속적인 <code class="text-indigo-300 bg-slate-950 px-1 py-0.5 rounded font-mono">new</code>, <code class="text-indigo-300 bg-slate-950 px-1 py-0.5 rounded font-mono">delete</code> 또는 동적 컨테이너 확장을 억제하여, 가비지 컬렉션이 없는 C++ 환경에서의 메모리 파편화(Fragmentation)를 사전에 방지하여 롱런 타임 플레이 환경 안정성을 크게 개선하였습니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="text-center text-xs text-gray-500 shrink-0 py-4 mt-auto">
+        <p>© 2026 Don't Starve WinAPI Project Portfolio. Designed for Game Client Engine Developer.</p>
+    </footer>
+
+    <!-- 코드 스크립트 리소스 정의 -->
+    <script>
+        // C++ 파일 코드 데이터
+        const codeFiles = {
+            query: `// ObjectManager.cpp - 월드 오브젝트 Rect 기준 쿼리
+void ObjectManager::QueryObjectsInRect(const Gdiplus::RectF& rect, std::vector<GameObject*>& outObjects)
+{
+    outObjects.clear();
+    if (m_worldObjects.empty()) return;
+
+#ifdef _DEBUG
+    if (!g_bEnableSpatialPartitioning) {
+        // [비최적화 모드] 정밀 브루트포스 가시성 체크
+        CameraManager* cameraManager = CameraManager::GetInstance();
+        for (GameObject* obj : m_worldObjects) {
+            if (!obj || !obj->IsEnabled() || obj->IsDead()) continue;
+            
+            if (cameraManager->IsObjectInViewport(obj)) {
+                outObjects.push_back(obj);
+            }
+        }
+        return;
+    }
+#endif
+
+    // [최적화 모드] 그리드 기반 쿼리 수행
+    int startX = (int)floor(rect.X / GRID_CELL_SIZE);
+    int startY = (int)floor(rect.Y / GRID_CELL_SIZE);
+    int endX = (int)ceil((rect.X + rect.Width) / GRID_CELL_SIZE) - 1;
+    int endY = (int)ceil((rect.Y + rect.Height) / GRID_CELL_SIZE) - 1;
+
+    // 인덱스 범위 클램핑 (0 ~ 51)
+    startX = (std::max<int>)(0, (std::min<int>)(GRID_WIDTH - 1, startX));
+    startY = (std::max<int>)(0, (std::min<int>)(GRID_HEIGHT - 1, startY));
+    endX = (std::max<int>)(0, (std::min<int>)(GRID_WIDTH - 1, endX));
+    endY = (std::max<int>)(0, (std::min<int>)(GRID_HEIGHT - 1, endY));
+
+    // 중복 방지용 고유 스탬프 갱신 (오버플로우 방지)
+    if (++m_spatialQueryStamp == 0) m_spatialQueryStamp = 1;
+
+    for (int y = startY; y <= endY; ++y) {
+        for (int x = startX; x <= endX; ++x) {
+            for (auto* obj : m_spatialGrid[x][y]) {
+                // 이미 확인한 객체는 건너뜀
+                if (obj->GetLastSpatialQueryStamp() == m_spatialQueryStamp) continue;
+                obj->SetLastSpatialQueryStamp(m_spatialQueryStamp);
+
+                if (!obj->IsEnabled() || obj->IsDead()) continue;
+
+                // 최종 AABB 검사
+                const Gdiplus::RectF bounds = obj->GetBounds();
+                if (rect.X < bounds.X + bounds.Width && rect.X + rect.Width > bounds.X &&
+                    rect.Y < bounds.Y + bounds.Height && rect.Y + rect.Height > bounds.Y) {
+                    outObjects.push_back(obj);
+                }
+            }
+        }
+    }
+}`,
+            migrate: `// ObjectManager.cpp - 오브젝트 그리드 셀 갱신 (위치 이동에 따른 명부 이동)
+void ObjectManager::UpdateObjectGridCell(GameObject* pObj)
+{
+    if (!pObj || pObj->GetType() == GO_TYPE_UI) return;
+
+    // 기존 소속 위치 정보 획득
+    int oldX = pObj->GetGridCellX();
+    int oldY = pObj->GetGridCellY();
+
+    // 새 위치 계산 (바운딩 박스 중심점 기준)
+    Gdiplus::RectF bounds = pObj->GetBounds();
+    int newX = (int)floor((bounds.X + bounds.Width * 0.5f) / GRID_CELL_SIZE);
+    int newY = (int)floor((bounds.Y + bounds.Height * 0.5f) / GRID_CELL_SIZE);
+
+    // 인덱스 범위 클램핑 (0 ~ 51)
+    newX = (std::max<int>)(0, (std::min<int>)(GRID_WIDTH - 1, newX));
+    newY = (std::max<int>)(0, (std::min<int>)(GRID_HEIGHT - 1, newY));
+
+    // 소속 셀에 변동이 없으면 이사 로직 건너뜀 (O(1) 조기 차단)
+    if (oldX == newX && oldY == newY) return;
+
+    // 이전 셀에서 오브젝트 삭제
+    if (oldX >= 0 && oldX < GRID_WIDTH && oldY >= 0 && oldY < GRID_HEIGHT) {
+        std::vector<GameObject*>& cell = m_spatialGrid[oldX][oldY];
+        cell.erase(std::remove(cell.begin(), cell.end(), pObj), cell.end());
+    }
+
+    // 새 셀에 오브젝트 등록 및 정보 업데이트
+    m_spatialGrid[newX][newY].push_back(pObj);
+    pObj->SetGridCell(newX, newY);
+}`,
+            render: `// CameraManager.cpp - 가시 객체 가시성 판단 및 일괄 렌더링 호출
+void CameraManager::RenderVisibleGameObjects() {
+#ifdef _DEBUG
+    const auto cullStart = std::chrono::high_resolution_clock::now();
+#endif
+
+    ObjectManager* objectManager = ObjectManager::GetInstance();
+    if (!objectManager) return;
+
+#ifdef _DEBUG
+    if (!g_bEnableOptimizationMode)
+    {
+        // [비최적화 모드]: 카메라 컬링을 끄고 전체 객체를 루핑 렌더링
+        const auto& worldObjects = objectManager->GetWorldObjects();
+        for (GameObject* obj : worldObjects) {
+            if (!obj || !obj->IsEnabled() || obj->IsDead()) continue;
+            obj->Render();
+            obj->RenderDebugOverlay();
+            RenderManager::GetInstance()->AddRenderedObject(obj->IsEntity());
+        }
+        return;
+    }
+#endif
+    {
+        const auto& worldObjects = objectManager->GetWorldObjects();
+        std::vector<GameObject*> localVisibleBuffer;
+        
+        // 디버그 옵션 활성화 여부에 따라 멤버 변수로 reserve된 버퍼를 사용할지 스위칭
+#ifdef _DEBUG
+        std::vector<GameObject*>& visibleBuffer = g_bEnableBufferReuse ? m_queryBuffer : localVisibleBuffer;
+#else
+        std::vector<GameObject*>& visibleBuffer = m_queryBuffer; // 힙 할당 최소화
+#endif
+
+        visibleBuffer.clear();
+        
+        // 핵심 최적화: 전체 순회 대신 그리드에 쿼리 전송
+        objectManager->QueryObjectsInRect(GetViewportWorldRect(), visibleBuffer);
+
+        for (GameObject* obj : visibleBuffer) {
+            // 수집된 대상을 차례대로 드로우 콜 등록
+            obj->Render();
+            obj->RenderDebugOverlay();
+#ifdef _DEBUG
+            RenderManager::GetInstance()->AddRenderedObject(obj->IsEntity());
+#endif
+        }
+    }
+}`,
+            precise: `// CameraManager.cpp - 스프라이트 렌더 영역 기준 2차 정밀 가시 영역 검증
+bool CameraManager::IsObjectInViewport(GameObject* obj) const {
+    if (!obj || !obj->IsEnabled()) return false;
+
+    Gdiplus::RectF viewportRect = GetViewportWorldRect();
+    const float M = -16.f; // 컬링 마진값
+
+    // 1차 바운딩 박스 오버랩 여부 검사
+    Gdiplus::RectF bounds = obj->GetBounds();
+    const bool overlapsObjectBounds =
+        bounds.X < viewportRect.X + viewportRect.Width + M && bounds.X + bounds.Width > viewportRect.X - M &&
+        bounds.Y < viewportRect.Y + viewportRect.Height + M && bounds.Y + bounds.Height > viewportRect.Y - M;
+    if (!overlapsObjectBounds) return false;
+
+    // 2차 정밀 컷: 스프라이트가 존재할 경우 실제 출력되는 픽셀 영역 기준으로 정확하게 재판단
+    Transform* transform = obj->GetComponent<Transform>();
+    if (!transform) return true;
+
+    std::shared_ptr<Sprite> sprite;
+    if (SpriteRenderer* spriteRenderer = obj->GetComponent<SpriteRenderer>()) {
+        sprite = spriteRenderer->GetSpriteHandle();
+    }
+    if (!sprite) {
+        if (Animator* animator = obj->GetComponent<Animator>()) {
+            sprite = animator->GetCurrentFrame().sprite;
+        }
+    }
+
+    if (!sprite || !sprite->bitmap) return true;
+
+    // 회전 및 스케일 적용한 실제 드로우 사각형 복원
+    const float width = fabsf(sprite->sourceRect.Width * transform->GetScaleX());
+    const float height = fabsf(sprite->sourceRect.Height * transform->GetScaleY());
+    if (width <= 0.0f || height <= 0.0f) return false;
+
+    const float worldX = transform->GetX();
+    const float worldY = transform->GetY();
+    Gdiplus::RectF renderBounds(
+        worldX - width * sprite->pivot.X,
+        worldY - height * sprite->pivot.Y,
+        width,
+        height);
+
+    return renderBounds.X < viewportRect.X + viewportRect.Width + M && renderBounds.X + renderBounds.Width > viewportRect.X - M &&
+           renderBounds.Y < viewportRect.Y + viewportRect.Height + M && renderBounds.Y + renderBounds.Height > viewportRect.Y - M;
+}`
+        };
+
+        // 코드 하이라이팅 적용 헬퍼 (댓글 및 문자열을 플레이스홀더로 격리하여 중복 태그 및 충돌 방지)
+        function highlightCpp(code) {
+            let escaped = code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            const comments = [];
+            const strings = [];
+
+            // 1. 주석을 먼저 플레이스홀더로 격리
+            escaped = escaped.replace(/(\/\/.*)/g, (match) => {
+                comments.push(`<span data-t="c">${match}</span>`);
+                return `___COMMENT_${comments.length - 1}___`;
+            });
+
+            // 2. 문자열 리터럴을 플레이스홀더로 격리
+            escaped = escaped.replace(/("[^"\\]*(?:\\.[^"\\]*)*")/g, (match) => {
+                strings.push(`<span data-t="s">${match}</span>`);
+                return `___STRING_${strings.length - 1}___`;
+            });
+
+            // 3. 타입(Type) 강조
+            escaped = escaped.replace(/\b(void|int|float|bool|char|double|uint32_t|std::vector|std::remove|std::max|std::min|GameObject|Player|Entity|CameraManager|ObjectManager|Transform|SpriteRenderer|Sprite|Animator|Gdiplus::RectF|Gdiplus::PointF|RenderManager)\b/g, '<span data-t="t">$1</span>');
+
+            // 4. 키워드(Keyword) 강조
+            escaped = escaped.replace(/\b(const|return|if|for|else|while|class|public|private|static|template|typename|friend|#define|#ifdef|#else|#endif|continue|break|new|delete)\b/g, '<span data-t="k">$1</span>');
+
+            // 5. 함수(Function) 강조
+            escaped = escaped.replace(/\b([a-zA-Z0-9_]+)(?=\()/g, '<span data-t="f">$1</span>');
+
+            // 6. 숫자(Number) 강조
+            escaped = escaped.replace(/\b(\d+)\b/g, '<span data-t="n">$1</span>');
+
+            // 7. 격리했던 문자열 복원
+            escaped = escaped.replace(/___STRING_(\d+)___/g, (match, index) => {
+                return strings[parseInt(index)];
+            });
+
+            // 8. 격리했던 주석 복원
+            escaped = escaped.replace(/___COMMENT_(\d+)___/g, (match, index) => {
+                return comments[parseInt(index)];
+            });
+
+            return escaped;
+        }
+
+        let currentFileKey = 'query';
+
+        function showCodeFile(key) {
+            currentFileKey = key;
+            const btnQuery = document.getElementById('code-btn-query');
+            const btnMigrate = document.getElementById('code-btn-migrate');
+            const btnRender = document.getElementById('code-btn-render');
+            const btnPrecise = document.getElementById('code-btn-precise');
+
+            // 버튼 스타일 초기화
+            [btnQuery, btnMigrate, btnRender, btnPrecise].forEach(b => {
+                b.className = "px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5";
+            });
+
+            // 선택된 버튼 활성화
+            const activeBtn = document.getElementById(`code-btn-${key}`);
+            activeBtn.className = "px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all bg-indigo-600/20 text-indigo-300 border border-indigo-500/30";
+
+            // 파일 타이틀 및 내용 업데이트
+            const titles = {
+                query: "ObjectManager.cpp - QueryObjectsInRect()",
+                migrate: "ObjectManager.cpp - UpdateObjectGridCell()",
+                render: "CameraManager.cpp - RenderVisibleGameObjects()",
+                precise: "CameraManager.cpp - IsObjectInViewport()"
+            };
+
+            document.getElementById('code-title').textContent = titles[key];
+            document.getElementById('code-content').querySelector('code').innerHTML = highlightCpp(codeFiles[key]);
+        }
+
+        function copyCurrentCode() {
+            navigator.clipboard.writeText(codeFiles[currentFileKey]);
+            alert('코드가 클립보드에 복사되었습니다.');
+        }
+
+        // 초기 로드 시 코드 로딩
+        showCodeFile('query');
+    </script>
+
+    <!-- 시뮬레이터 로직 스크립트 -->
+    <script>
+        const canvas = document.getElementById('simCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // 이미지 리소스 로드
+        const playerImg = new Image();
+        playerImg.src = 'Wilson_Image.png';
+        playerImg.onload = () => { render(); };
+
+        const treeImg = new Image();
+        treeImg.src = 'evergreen_evergreen_short_idle_short_01.png';
+        treeImg.onload = () => { render(); };
+
+        const tileImg = new Image();
+        tileImg.src = 'dirt_01.png';
+        tileImg.onload = () => { render(); };
+
+        // 논리적 상수 (C++ Define 수치 적용)
+        const GRID_CELL_SIZE = 256;
+        const CAM_W = 1200;
+        const CAM_H = 800; // C++ Define.h 매핑에 맞춤
+        
+        // 월드 크기 (10칸 x 6칸)
+        const WORLD_W = 2560;
+        const WORLD_H = 1536;
+
+        // 상태 변수
+        let mode = 'camera'; // 'camera' or 'player'
+        
+        let player = { x: WORLD_W/2, y: WORLD_H/2, radius: 40, cellX: -1, cellY: -1 };
+        let camera = { x: WORLD_W/2 - CAM_W/2, y: WORLD_H/2 - CAM_H/2, w: CAM_W, h: CAM_H };
+        let trees = [];
+
+        // 드래그 상태
+        let isDraggingPlayer = false;
+        let isDraggingCamera = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let dirtyTimer = null;
+
+        // 1. 시작 시 그리드 내부(연산 대상)이되 뷰포트 외부(노란색)에 존재할 나무 3개 수동 배치
+        // (카메라 시작 뷰포트: X 680~1880, Y 368~1168 / 그리드 쿼리 영역: X 512~2048, Y 256~1280)
+        trees.push({ x: 600, y: 600, r: 12 });  // 왼쪽 그리드 여백 (X: 512 ~ 680)
+        trees.push({ x: 1950, y: 800, r: 11 }); // 오른쪽 그리드 여백 (X: 1880 ~ 2048)
+        trees.push({ x: 1200, y: 310, r: 13 }); // 위쪽 그리드 여백 (Y: 256 ~ 368)
+
+        // 2. 나머지 45개 나무 랜덤 생성 (최소 110px 거리를 두어 고르게 분포)
+        const MIN_TREE_DIST = 110;
+        for(let i=0; i<45; i++) {
+            let tx, ty;
+            let valid = false;
+            let attempts = 0;
+
+            while (!valid && attempts < 120) {
+                tx = Math.random() * (WORLD_W - 160) + 80;
+                ty = Math.random() * (WORLD_H - 160) + 80;
+                
+                // 각 256 그리드 셀 내부에서의 상대 좌표 계산
+                let localX = tx % GRID_CELL_SIZE;
+                let localY = ty % GRID_CELL_SIZE;
+                
+                // 글자가 그려지는 좌상단 영역(가로 120px, 세로 60px)과 겹치지 않도록 조정
+                if (localX < 120 && localY < 60) {
+                    tx += 100;
+                    ty += 60;
+                }
+
+                // 기존 배치된 나무들과의 최소 거리 검사
+                valid = true;
+                for (let j = 0; j < trees.length; j++) {
+                    const dist = Math.hypot(tx - trees[j].x, ty - trees[j].y);
+                    if (dist < MIN_TREE_DIST) {
+                        valid = false;
+                        break;
+                    }
+                }
+                attempts++;
+            }
+
+            trees.push({
+                x: tx,
+                y: ty,
+                r: 10 + Math.random() * 4
+            });
+        }
+
+        // 이벤트 리스너 설정
+        const btnCamera = document.getElementById('btn-camera');
+        const btnPlayer = document.getElementById('btn-player');
+
+        btnCamera.addEventListener('click', () => { 
+            mode = 'camera'; 
+            btnCamera.className = "px-3.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold shadow-md transition-all";
+            btnPlayer.className = "px-3.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-gray-300 hover:text-white rounded-lg font-bold transition-all";
+            updateLogic();
+            render(); 
+        });
+        btnPlayer.addEventListener('click', () => { 
+            mode = 'player'; 
+            btnPlayer.className = "px-3.5 py-1.5 text-xs bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-bold shadow-md transition-all";
+            btnCamera.className = "px-3.5 py-1.5 text-xs bg-slate-800 hover:bg-slate-700 text-gray-300 hover:text-white rounded-lg font-bold transition-all";
+            updateLogic();
+            render(); 
+        });
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            let clientX = e.clientX;
+            let clientY = e.clientY;
+            
+            if(e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+
+            return {
+                x: (clientX - rect.left) * scaleX,
+                y: (clientY - rect.top) * scaleY
+            };
+        }
+
+        function onPointerDown(e) {
+            const pos = getMousePos(e);
+            
+            // 플레이어 클릭 확인
+            const dist = Math.hypot(pos.x - player.x, pos.y - player.y);
+            if (dist < player.radius * 2) {
+                isDraggingPlayer = true;
+                return;
+            }
+
+            // 카메라 클릭 확인
+            if (pos.x >= camera.x && pos.x <= camera.x + camera.w &&
+                pos.y >= camera.y && pos.y <= camera.y + camera.h) {
+                isDraggingCamera = true;
+                dragOffsetX = pos.x - camera.x;
+                dragOffsetY = pos.y - camera.y;
+            }
+        }
+
+        function onPointerMove(e) {
+            if (!isDraggingPlayer && !isDraggingCamera) return;
+            const pos = getMousePos(e);
+
+            if (isDraggingPlayer) {
+                // 월드 경계 클램프
+                player.x = Math.max(player.radius, Math.min(WORLD_W - player.radius, pos.x));
+                player.y = Math.max(player.radius, Math.min(WORLD_H - player.radius, pos.y));
+            }
+
+            if (isDraggingCamera) {
+                // 월드 경계 클램프
+                camera.x = Math.max(0, Math.min(WORLD_W - camera.w, pos.x - dragOffsetX));
+                camera.y = Math.max(0, Math.min(WORLD_H - camera.h, pos.y - dragOffsetY));
+            }
+
+            updateLogic();
+            render();
+        }
+
+        function onPointerUp() {
+            isDraggingPlayer = false;
+            isDraggingCamera = false;
+        }
+
+        canvas.addEventListener('mousedown', onPointerDown);
+        window.addEventListener('mousemove', onPointerMove);
+        window.addEventListener('mouseup', onPointerUp);
+        
+        canvas.addEventListener('touchstart', onPointerDown, {passive: false});
+        window.addEventListener('touchmove', onPointerMove, {passive: false});
+        window.addEventListener('touchend', onPointerUp);
+
+        // 나무의 AABB 바운딩 박스 계산 함수
+        function getTreeBounds(t) {
+            const w = t.r * 6.5;
+            const aspect = (treeImg.complete && treeImg.naturalWidth > 0) ? (treeImg.naturalHeight / treeImg.naturalWidth) : 2.0;
+            const h = w * aspect;
+            return {
+                left: t.x - w / 2,
+                right: t.x + w / 2,
+                top: t.y - h + t.r,
+                bottom: t.y + t.r
+            };
+        }
+
+        // 2차 정밀 컬링: 나무가 뷰포트 내부에 존재하는지 확인
+        function isTreeInViewport(t) {
+            const b = getTreeBounds(t);
+            return (b.right >= camera.x && b.left <= camera.x + camera.w &&
+                    b.bottom >= camera.y && b.top <= camera.y + camera.h);
+        }
+
+        // 충돌 검사: 플레이어와 나무의 충돌 여부 확인 (거리 기준)
+        function isTreeColliding(t) {
+            return Math.hypot(t.x - player.x, t.y - player.y) <= player.radius + t.r;
+        }
+
+        // 실시간 연산 업데이트
+        function updateLogic() {
+            // 1. 플레이어 그리드 갱신 (256 기준)
+            const newCellX = Math.max(0, Math.floor(player.x / GRID_CELL_SIZE));
+            const newCellY = Math.max(0, Math.floor(player.y / GRID_CELL_SIZE));
+
+            if (newCellX !== player.cellX || newCellY !== player.cellY) {
+                player.cellX = newCellX;
+                player.cellY = newCellY;
+                
+                // UI 갱신 애니메이션 (UpdateObjectGridCell() 이사 감지 시뮬레이션)
+                const dirtyEl = document.getElementById('info-pdirty');
+                dirtyEl.textContent = "🔥 그리드 명부 이사 갱신 (O(1))";
+                dirtyEl.className = "w-full text-center py-2 bg-red-600/90 text-white rounded-lg text-xs font-mono font-bold border border-red-500/50 shadow-lg shadow-red-500/20 transition-all";
+                
+                if(dirtyTimer) clearTimeout(dirtyTimer);
+                dirtyTimer = setTimeout(() => {
+                    dirtyEl.textContent = "대기 중";
+                    dirtyEl.className = "w-full text-center py-2 bg-slate-950 text-gray-500 rounded-lg text-xs font-mono font-bold border border-white/5 transition-all";
+                }, 800);
+            }
+
+            // 2. UI 텍스트 갱신
+            document.getElementById('info-px').textContent = `X: ${Math.round(player.x)}, Y: ${Math.round(player.y)}`;
+            document.getElementById('info-pgrid').textContent = `[${player.cellX}], [${player.cellY}]`;
+
+            // 3. 카메라 컬링 범위 계산 (오브젝트용 256 그리드)
+            const camStartX = Math.max(0, Math.floor(camera.x / GRID_CELL_SIZE));
+            const camEndX = Math.min(Math.floor((camera.x + camera.w) / GRID_CELL_SIZE), Math.floor(WORLD_W/GRID_CELL_SIZE)-1);
+            const camStartY = Math.max(0, Math.floor(camera.y / GRID_CELL_SIZE));
+            const camEndY = Math.min(Math.floor((camera.y + camera.h) / GRID_CELL_SIZE), Math.floor(WORLD_H/GRID_CELL_SIZE)-1);
+
+            document.getElementById('info-cx').textContent = `X: ${Math.round(camera.x)}, Y: ${Math.round(camera.y)}`;
+            document.getElementById('info-cgrid').textContent = `X(${camStartX} ~ ${camEndX}), Y(${camStartY} ~ ${camEndY})`;
+
+            // 렌더링/활성 나무 수 계산
+            let renderedTrees = 0; // State 3: Viewport / Collision
+            let gridQueriedTrees = 0; // State 2: Grid but not Viewport / Collision
+            let culledTrees = 0; // State 1: Completely Culled
+
+            if (mode === 'camera') {
+                trees.forEach(t => {
+                    const tx = Math.floor(t.x / GRID_CELL_SIZE);
+                    const ty = Math.floor(t.y / GRID_CELL_SIZE);
+                    
+                    const inGrid = (tx >= camStartX && tx <= camEndX && ty >= camStartY && ty <= camEndY);
+                    if (inGrid) {
+                        if (isTreeInViewport(t)) {
+                            renderedTrees++;
+                        } else {
+                            gridQueriedTrees++;
+                        }
+                    } else {
+                        culledTrees++;
+                    }
+                });
+            } else if (mode === 'player') {
+                trees.forEach(t => {
+                    const tx = Math.floor(t.x / GRID_CELL_SIZE);
+                    const ty = Math.floor(t.y / GRID_CELL_SIZE);
+                    
+                    const inGrid = (Math.abs(tx - player.cellX) <= 1 && Math.abs(ty - player.cellY) <= 1);
+                    if (inGrid) {
+                        if (isTreeColliding(t)) {
+                            renderedTrees++;
+                        } else {
+                            gridQueriedTrees++;
+                        }
+                    } else {
+                        culledTrees++;
+                    }
+                });
+            }
+
+            // CPU 연산 횟수는 1단계 공간 분할(그리드 쿼리)로 걸러진 모든 객체 수입니다.
+            const checkCount = renderedTrees + gridQueriedTrees;
+
+            document.getElementById('info-crender').textContent = `${renderedTrees} / ${trees.length}`;
+            document.getElementById('info-cgrid-total').textContent = `${gridQueriedTrees} / ${trees.length}`;
+            document.getElementById('info-cculled').textContent = `${culledTrees} / ${trees.length}`;
+            document.getElementById('info-calc-opt').textContent = `${checkCount}회 (약 ${Math.round(checkCount/trees.length*100)}%)`;
+
+            // 4. 컬링 범위 계산 (GRID_CELL_SIZE 기준)
+            const tileStartX = Math.max(0, Math.floor(camera.x / GRID_CELL_SIZE));
+            const tileEndX = Math.min(Math.floor((camera.x + camera.w) / GRID_CELL_SIZE), Math.floor(WORLD_W/GRID_CELL_SIZE)-1);
+            const tileStartY = Math.max(0, Math.floor(camera.y / GRID_CELL_SIZE));
+            const tileEndY = Math.min(Math.floor((camera.y + camera.h) / GRID_CELL_SIZE), Math.floor(WORLD_H/GRID_CELL_SIZE)-1);
+            
+            const renderedTilesCount = (tileEndX - tileStartX + 1) * (tileEndY - tileStartY + 1);
+            document.getElementById('info-ctile').textContent = renderedTilesCount;
+        }
+
+        // 그리기 (렌더링)
+        function render() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            const camStartX = Math.floor(camera.x / GRID_CELL_SIZE);
+            const camEndX = Math.floor((camera.x + camera.w) / GRID_CELL_SIZE);
+            const camStartY = Math.floor(camera.y / GRID_CELL_SIZE);
+            const camEndY = Math.floor((camera.y + camera.h) / GRID_CELL_SIZE);
+
+            // 1. GRID_CELL_SIZE 단위 그리드 표현 (배경 이미지 및 오버레이 적용)
+            for (let x = 0; x < WORLD_W; x += GRID_CELL_SIZE) {
+                for (let y = 0; y < WORLD_H; y += GRID_CELL_SIZE) {
+                    const cellX = x / GRID_CELL_SIZE;
+                    const cellY = y / GRID_CELL_SIZE;
+
+                    if (tileImg.complete && tileImg.naturalWidth > 0) {
+                        ctx.drawImage(tileImg, x, y, GRID_CELL_SIZE, GRID_CELL_SIZE);
+                    } else {
+                        ctx.fillStyle = '#1b202e';
+                        ctx.fillRect(x, y, GRID_CELL_SIZE, GRID_CELL_SIZE);
+                    }
+
+                    // 활성/비활성 그리드 투명 오버레이 레이어
+                    if (mode === 'camera' && cellX >= camStartX && cellX <= camEndX && cellY >= camStartY && cellY <= camEndY) {
+                        ctx.fillStyle = 'rgba(59, 130, 246, 0.25)';
+                        ctx.fillRect(x, y, GRID_CELL_SIZE, GRID_CELL_SIZE);
+                    } else if (mode === 'player' && Math.abs(cellX - player.cellX) <= 1 && Math.abs(cellY - player.cellY) <= 1) {
+                        const overlayColor = (cellX === player.cellX && cellY === player.cellY) ? 'rgba(239, 68, 68, 0.25)' : 'rgba(129, 140, 248, 0.15)';
+                        ctx.fillStyle = overlayColor;
+                        ctx.fillRect(x, y, GRID_CELL_SIZE, GRID_CELL_SIZE);
+                    }
+
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(x, y, GRID_CELL_SIZE, GRID_CELL_SIZE);
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+                    ctx.font = 'bold 24px monospace';
+                    ctx.fillText(`(${cellX},${cellY})`, x + 14, y + 32);
+                }
+            }
+
+            // 3. 나무(오브젝트) 그리기 (evergreen 리소스 사용)
+            trees.forEach(t => {
+                const tx = Math.floor(t.x / GRID_CELL_SIZE);
+                const ty = Math.floor(t.y / GRID_CELL_SIZE);
+                
+                let isGridQueried = false;
+                let isFinalActive = false;
+
+                if (mode === 'camera') {
+                    if (tx >= camStartX && tx <= camEndX && ty >= camStartY && ty <= camEndY) {
+                        isGridQueried = true;
+                        if (isTreeInViewport(t)) {
+                            isFinalActive = true;
+                        }
+                    }
+                } else if (mode === 'player') {
+                    if (Math.abs(tx - player.cellX) <= 1 && Math.abs(ty - player.cellY) <= 1) {
+                        isGridQueried = true;
+                        if (isTreeColliding(t)) {
+                            isFinalActive = true;
+                        }
+                    }
+                }
+
+                if (treeImg.complete && treeImg.naturalWidth > 0) {
+                    ctx.save();
+                    
+                    // 모든 나무의 투명도를 원래대로 (1.0) 유지
+
+                    const w = t.r * 6.5;
+                    const h = w * (treeImg.naturalHeight / treeImg.naturalWidth);
+                    const left = t.x - w / 2;
+                    const top = t.y - h + t.r;
+
+                    ctx.drawImage(treeImg, left, top, w, h);
+
+                    // 각 상태별 오버레이 하이라이팅 가이드라인 (밑동 서클 제거 및 실선으로 통일)
+                    if (isFinalActive) {
+                        // 최종 렌더링/충돌 대상: 민트색 실선 박스
+                        ctx.strokeStyle = '#2dd4bf';
+                        ctx.lineWidth = 2.5;
+                        ctx.strokeRect(left, top, w, h);
+                    } else if (isGridQueried) {
+                        // 그리드 활성화 범위 내 CPU 연산 후보: 황색 실선 박스
+                        ctx.strokeStyle = '#fbbf24';
+                        ctx.lineWidth = 1.5;
+                        ctx.strokeRect(left, top, w, h);
+                    }
+
+                    ctx.restore();
+                } else {
+                    // 이미지 폴백 처리
+                    ctx.beginPath();
+                    ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2);
+                    if (isFinalActive) {
+                        ctx.fillStyle = '#2dd4bf';
+                        ctx.strokeStyle = '#0d9488';
+                        ctx.lineWidth = 3.5;
+                    } else if (isGridQueried) {
+                        ctx.fillStyle = '#fbbf24';
+                        ctx.strokeStyle = '#d97706';
+                        ctx.lineWidth = 2;
+                    } else {
+                        ctx.fillStyle = '#334155';
+                        ctx.strokeStyle = '#1e293b';
+                        ctx.lineWidth = 1;
+                    }
+                    ctx.fill();
+                    ctx.stroke();
+                }
+            });
+
+            // 4. 카메라 영역 (Viewport) 그리기 (빨간색 실선)
+            ctx.setLineDash([]);
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth = 6;
+            ctx.strokeRect(camera.x, camera.y, camera.w, camera.h);
+            
+            ctx.fillStyle = '#f87171';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.fillText('1200 x 800 Viewport (Camera)', camera.x + 20, camera.y + 50);
+
+            // 5. 플레이어 그리기 (Wilson 리소스 사용)
+            if (playerImg.complete && playerImg.naturalWidth > 0) {
+                const w = player.radius * 2.5;
+                const h = w * (playerImg.naturalHeight / playerImg.naturalWidth);
+                ctx.drawImage(playerImg, player.x - w / 2, player.y - h + player.radius, w, h);
+            } else {
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#ef4444';
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.stroke();
+
+                // 플레이어 꼬리 방향 가이드선
+                ctx.beginPath();
+                ctx.moveTo(player.x, player.y);
+                ctx.lineTo(player.x + 30, player.y);
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+        }
+
+        // 초기 실행
+        updateLogic();
+        render();
+    </script>
+
+    <!-- 네비게이션 스위칭 기능 -->
+    <script>
+        function switchTab(tabId) {
+            const tabs = ['demo', 'tech', 'code', 'perf'];
+            
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`content-${t}`);
+                
+                if (t === tabId) {
+                    btn.className = "px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 bg-indigo-600 text-white shadow-lg";
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5";
+                    content.classList.add('hidden');
+                }
+            });
+
+            // 시뮬레이터 화면이 활성화될 때 렌더링 갱신
+            if (tabId === 'demo') {
+                setTimeout(() => {
+                    updateLogic();
+                    render();
+                }, 50);
+            }
+        }
+    </script>
+</body>
+</html>

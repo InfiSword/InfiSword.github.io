@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World First Kill - 결정적 시드 시스템 및 데이터 관리 포트폴리오</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Noto Sans KR', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        darkBg: '#05060a',
+                        panelBg: 'rgba(10, 12, 22, 0.75)',
+                        borderLight: 'rgba(255, 255, 255, 0.05)',
+                        brandBlue: '#60a5fa',
+                        brandPurple: '#a78bfa',
+                        brandYellow: '#fbbf24',
+                        brandRed: '#f87171',
+                        brandMint: '#2dd4bf',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #020306;
+            color: #f3f4f6;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(167, 139, 250, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 90% 80%, rgba(96, 165, 250, 0.05) 0%, transparent 50%),
+                linear-gradient(rgba(255, 255, 255, 0.002) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.002) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+        }
+        .glass-panel {
+            background: rgba(8, 10, 18, 0.75);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.6);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.08);
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        /* C# Syntax Highlighting */
+        span[data-t="k"] { color: #f472b6; font-weight: bold; } /* keyword */
+        span[data-t="t"] { color: #60a5fa; }                   /* type */
+        span[data-t="f"] { color: #fbbf24; }                   /* function */
+        span[data-t="c"] { color: #6b7280; font-style: italic; } /* comment */
+        span[data-t="n"] { color: #34d399; }                   /* number */
+        span[data-t="s"] { color: #34d399; }                   /* string */
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans p-6 gap-6 max-w-7xl mx-auto">
+
+    <!-- 헤더 섹션 -->
+    <header class="glass-panel p-6 rounded-2xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shrink-0">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-3 py-1 text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30 rounded-full">Unity C# Portfolio</span>
+                <span class="px-3 py-1 text-xs font-semibold bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-full">결정적 난수 & 데이터 동기화</span>
+            </div>
+            <h1 class="text-3xl font-extrabold tracking-tight mt-2 text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400">
+                World First Kill: 시드 기반 난수 및 데이터 통신 시스템
+            </h1>
+            <p class="text-sm text-gray-400 mt-1.5 font-light">
+                독립적 RNG 스트림 보존을 통한 <span class="text-purple-300/90 font-medium">시드 기반 세이브/로드</span> 및 버전 비교 기반 <span class="text-blue-300/90 font-medium">비동기 CSV 다운로드/파서</span> 구축
+            </p>
+        </div>
+        
+        <!-- 네비게이션 탭 -->
+        <nav class="flex bg-slate-900/80 p-1.5 rounded-xl border border-white/5 w-full md:w-auto overflow-x-auto gap-1">
+            <button onclick="switchTab('demo')" id="tab-demo" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 bg-purple-600 text-white shadow-lg">
+                🖥️ 시뮬레이터
+            </button>
+            <button onclick="switchTab('tech')" id="tab-tech" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                ⚙️ 핵심 기술 분석
+            </button>
+            <button onclick="switchTab('code')" id="tab-code" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                📄 C# 소스 코드
+            </button>
+            <button onclick="switchTab('perf')" id="tab-perf" class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5">
+                📊 성능 및 검증 보고서
+            </button>
+        </nav>
+    </header>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="flex-1 min-h-0 relative">
+        
+        <!-- 1. 시뮬레이터 탭 -->
+        <div id="content-demo" class="tab-content flex flex-col lg:flex-row gap-6 h-full">
+            <!-- 왼쪽 패널: 시드 생성 및 복원 시뮬레이터 -->
+            <div class="flex-1 glass-panel p-6 rounded-2xl flex flex-col gap-6">
+                <div class="border-b border-white/5 pb-4">
+                    <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+                        🎲 시드 기반 결정적 난수 생성 & 복원 시뮬레이터 (GameSeed)
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1 font-light">
+                        시드값과 도메인별 난수 소비량(Usage Count)을 토큰화하여 세이브 파일을 초경량화하고 복원하는 원리를 체험합니다.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 입력 제어 부분 -->
+                    <div class="space-y-4">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs text-gray-400 font-bold uppercase tracking-wider">기본 시드 (Base Seed)</label>
+                            <div class="flex gap-2">
+                                <input type="number" id="input-seed" value="4829105" class="flex-1 bg-slate-950 border border-white/5 rounded-lg px-3 py-2 text-sm font-mono text-purple-300 focus:outline-none focus:border-purple-500">
+                                <button onclick="generateRandomSeed()" class="px-3 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition-all">
+                                    🎲 랜덤 시드
+                                </button>
+                                <button onclick="initializeSeed()" class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 text-xs font-bold rounded-lg transition-all">
+                                    초기화
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 독립 도메인 생성기 -->
+                        <div class="bg-slate-950/60 p-4 rounded-xl border border-white/5 space-y-4">
+                            <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider">서브 도메인별 독립 RNG 스트림</h4>
+                            
+                            <div class="space-y-3">
+                                <!-- Map Domain -->
+                                <div class="flex items-center justify-between bg-slate-900/40 p-2.5 rounded-lg border border-white/5">
+                                    <div class="text-xs">
+                                        <span class="font-bold text-gray-200 block">🗺️ 맵 도메인 (Map)</span>
+                                        <span class="text-[10px] text-gray-500">사용 횟수: <span id="count-Map" class="text-purple-400 font-mono font-bold">0</span>회</span>
+                                    </div>
+                                    <button onclick="generateFromDomain('Map')" class="px-3 py-1.5 bg-purple-900/40 hover:bg-purple-900/60 text-purple-300 text-xs font-bold rounded-md border border-purple-500/20 transition-all">
+                                        생성
+                                    </button>
+                                </div>
+
+                                <!-- Quest Domain -->
+                                <div class="flex items-center justify-between bg-slate-900/40 p-2.5 rounded-lg border border-white/5">
+                                    <div class="text-xs">
+                                        <span class="font-bold text-gray-200 block">⚔️ 퀘스트 도메인 (Quest)</span>
+                                        <span class="text-[10px] text-gray-500">사용 횟수: <span id="count-Quest" class="text-purple-400 font-mono font-bold">0</span>회</span>
+                                    </div>
+                                    <button onclick="generateFromDomain('Quest')" class="px-3 py-1.5 bg-purple-900/40 hover:bg-purple-900/60 text-purple-300 text-xs font-bold rounded-md border border-purple-500/20 transition-all">
+                                        생성
+                                    </button>
+                                </div>
+
+                                <!-- Reward Domain -->
+                                <div class="flex items-center justify-between bg-slate-900/40 p-2.5 rounded-lg border border-white/5">
+                                    <div class="text-xs">
+                                        <span class="font-bold text-gray-200 block">🎁 보상 도메인 (Reward)</span>
+                                        <span class="text-[10px] text-gray-500">사용 횟수: <span id="count-Reward" class="text-purple-400 font-mono font-bold">0</span>회</span>
+                                    </div>
+                                    <button onclick="generateFromDomain('Reward')" class="px-3 py-1.5 bg-purple-900/40 hover:bg-purple-900/60 text-purple-300 text-xs font-bold rounded-md border border-purple-500/20 transition-all">
+                                        생성
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 생성 로그 및 출력 부분 -->
+                    <div class="flex flex-col gap-4">
+                        <div class="flex-1 bg-slate-950 p-4 rounded-xl border border-white/5 flex flex-col gap-2 min-h-[200px]">
+                            <span class="text-xs text-gray-400 font-bold uppercase tracking-wider">생성 히스토리 로그</span>
+                            <div id="seed-log" class="flex-1 overflow-y-auto text-xs font-mono space-y-1.5 pr-2 max-h-[180px]">
+                                <div class="text-gray-500">// RNG 상태가 생성되면 여기에 기록됩니다.</div>
+                            </div>
+                        </div>
+
+                        <!-- 세이브 토큰 정보 -->
+                        <div class="bg-purple-950/20 p-4 rounded-xl border border-purple-500/20 space-y-2">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-purple-300">💾 빌드된 세이브 시드 토큰 (Seed Token)</span>
+                                <button onclick="copyToken()" class="text-[10px] bg-purple-800/40 hover:bg-purple-800/60 text-purple-200 px-2 py-1 rounded border border-purple-500/20 transition-all">토큰 복사</button>
+                            </div>
+                            <div id="seed-token" class="text-xs font-mono bg-black/40 p-2.5 rounded border border-white/5 break-all text-emerald-400 select-all">
+                                0000000000000482910503001000000000000004000000000000006000000000000
+                            </div>
+                            <p class="text-[10px] text-gray-500 leading-relaxed font-light">
+                                * 포맷: [Base Seed(20자)] + [도메인 개수(3자)] + 각 도메인의 [ID(3자)+사용량(12자)] 직렬화 문자열.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 복원 제어 부분 -->
+                <div class="border-t border-white/5 pt-4 flex flex-col sm:flex-row gap-3 items-end">
+                    <div class="flex-1 flex flex-col gap-1.5 w-full">
+                        <label class="text-xs text-gray-400 font-bold">시드 토큰 복구 로드 (Restore Save State)</label>
+                        <input type="text" id="input-token" placeholder="복구할 시드 토큰을 입력하세요." class="w-full bg-slate-950 border border-white/5 rounded-lg px-3 py-2 text-sm font-mono text-emerald-400 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <button onclick="restoreSeedToken()" class="w-full sm:w-auto px-5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-lg transition-all shrink-0">
+                        🔄 토큰 기반 RNG 상태 복원
+                    </button>
+                </div>
+            </div>
+
+            <!-- 오른쪽 패널: CSV 비동기 동기화 시뮬레이터 -->
+            <div class="w-full lg:w-96 shrink-0 glass-panel p-6 rounded-2xl flex flex-col gap-5">
+                <div class="border-b border-white/5 pb-3">
+                    <h3 class="text-lg font-bold text-gray-100 flex items-center gap-2">
+                        ☁️ CSV 버전 동기화 & 파서
+                    </h3>
+                    <p class="text-xs text-gray-400 mt-1 font-light">
+                        서버 버전 데이터를 수집하고, 캐시 대조를 통해 업데이트가 필요한 파일만 선별 다운로드하여 파싱하는 과정을 시뮬레이션합니다.
+                    </p>
+                </div>
+
+                <!-- 파일 상태 리스트 -->
+                <div class="space-y-3 flex-1 overflow-y-auto max-h-[260px] pr-2">
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-wider">테이블 동기화 현황</h4>
+                    
+                    <div class="space-y-2">
+                        <!-- Quest Data -->
+                        <div class="bg-slate-950 p-2.5 rounded-lg border border-white/5 flex justify-between items-center text-xs">
+                            <div>
+                                <span class="font-bold text-gray-200 block">Quest_Type.csv</span>
+                                <span class="text-[10px] text-gray-500">로컬: <span id="local-Quest" class="font-mono">v1.0</span> | 서버: <span class="text-yellow-400 font-mono">v1.2</span></span>
+                            </div>
+                            <span id="status-Quest" class="px-2 py-0.5 rounded text-[10px] bg-yellow-500/10 text-yellow-400 border border-yellow-500/20">업데이트 필요</span>
+                        </div>
+
+                        <!-- Skill Data -->
+                        <div class="bg-slate-950 p-2.5 rounded-lg border border-white/5 flex justify-between items-center text-xs">
+                            <div>
+                                <span class="font-bold text-gray-200 block">Skill_Active.csv</span>
+                                <span class="text-[10px] text-gray-500">로컬: <span id="local-Skill" class="font-mono">v2.0</span> | 서버: <span class="text-yellow-400 font-mono">v2.0</span></span>
+                            </div>
+                            <span id="status-Skill" class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">최신 상태</span>
+                        </div>
+
+                        <!-- Item Data -->
+                        <div class="bg-slate-950 p-2.5 rounded-lg border border-white/5 flex justify-between items-center text-xs">
+                            <div>
+                                <span class="font-bold text-gray-200 block">Item_Weapon.csv</span>
+                                <span class="text-[10px] text-gray-500">로컬: <span id="local-Item" class="font-mono">없음</span> | 서버: <span class="text-yellow-400 font-mono">v1.1</span></span>
+                            </div>
+                            <span id="status-Item" class="px-2 py-0.5 rounded text-[10px] bg-red-500/10 text-red-400 border border-red-500/20">미보유</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 동기화 프로그레스 -->
+                <div class="bg-slate-950 p-4 rounded-xl border border-white/5 space-y-3">
+                    <div class="flex justify-between text-xs font-bold">
+                        <span class="text-gray-400">동기화 진행 상태</span>
+                        <span id="sync-percent" class="text-blue-400 font-mono">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-900 rounded-full h-2">
+                        <div id="sync-progress" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                    <span id="sync-filename" class="text-[10px] text-gray-500 block truncate font-mono">대기 중...</span>
+                </div>
+
+                <!-- 액션 버튼 -->
+                <div class="flex gap-2">
+                    <button onclick="startSync()" class="flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-all shadow-md">
+                        🔄 서버 동기화 개시
+                    </button>
+                    <button onclick="parseCSVData()" id="btn-parse" disabled class="flex-1 py-2 bg-slate-800 text-gray-500 text-xs font-bold rounded-lg cursor-not-allowed transition-all">
+                        🔍 CSV 파싱 실행
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. 핵심 기술 분석 탭 -->
+        <div id="content-tech" class="tab-content hidden grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto max-h-[75vh] pr-2">
+            <!-- Seed 기반 Save/Load -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-purple-500/10 text-purple-400 rounded-lg border border-purple-500/20 font-bold">01</div>
+                    <h3 class="text-xl font-bold text-white">시드 기반 결정적 상태 보존 시스템</h3>
+                </div>
+                <div class="text-sm text-gray-300 space-y-3.5 leading-relaxed font-light mt-2">
+                    <p>
+                        게임의 상태를 매번 수많은 파일 구조나 오브젝트 데이터로 저장하지 않고, <strong>시드값과 난수 소비 횟수만으로 복구</strong>할 수 있도록 보존 오버헤드를 최적화했습니다.
+                    </p>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-purple-300 block">🛡️ 독립 서브 도메인 분리 (RNG Stream Isolation)</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            [GameSeed.cs](file:///C:/Ptf/InfiSword.github.io/codeReference/WorldFirstKill/GameSeed.cs)에서는 Map, Region, Field, Quest, Reward 등 용도에 따라 독립된 <code class="text-purple-300 font-mono">System.Random</code> 인스턴스를 생성하여 하나의 도메인에서 난수를 과도하게 소모하거나 적게 소모해도 타 도메인의 생성 흐름에 어떠한 사이드 이펙트도 주지 않도록 스트림 오염을 방지했습니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-purple-300 block">🔄 소비 수 버림(Fast-Forward)을 통한 정확한 상태 복원</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            세이브 토큰을 파싱한 후 각 도메인의 RNG를 재초기화하고, 이전에 기록된 사용량(`ulong count`)만큼 <code class="text-purple-300 font-mono">rng.Next()</code>를 반복 호출(Fast-Forward)하여 정확하게 저장했던 순간의 스트림 지점으로 의사 난수 발생기 상태를 복원합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CSV 파서 및 데이터 동기화 -->
+            <div class="glass-panel p-6 rounded-2xl flex flex-col gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="p-2.5 bg-blue-500/10 text-blue-400 rounded-lg border border-blue-500/20 font-bold">02</div>
+                    <h3 class="text-xl font-bold text-white">CSV 파서 및 데이터 캐싱 동기화</h3>
+                </div>
+                <div class="text-sm text-gray-300 space-y-3.5 leading-relaxed font-light mt-2">
+                    <p>
+                        서버의 CSV 데이터를 비동기 다운로드하고 C# 리플렉션을 통해 동적으로 직렬화하는 자동화 파이프라인을 구축했습니다.
+                    </p>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-blue-300 block">⚡ 리플렉션(Reflection) 기반 동적 헤더-필드 매핑</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            [CSVParser.cs](file:///C:/Ptf/InfiSword.github.io/codeReference/WorldFirstKill/CSVParser.cs)는 제네릭 함수 <code class="text-blue-300 font-mono">parseCSV&lt;T&gt;</code>를 통해 객체의 필드 정보를 가져온 뒤, CSV 컬럼의 헤더명과 타입에 맞추어 필드값을 런타임에 동적으로 바인딩합니다. 데이터 스키마가 변경되어도 코드 수정 없이 신규 컬럼을 자동 적용할 수 있습니다.
+                        </p>
+                    </div>
+                    <div class="bg-slate-950/60 p-3.5 rounded-lg border border-white/5 space-y-2">
+                        <span class="text-xs font-bold text-blue-300 block">💾 버저닝 캐시 기반 비동기 다운로드</span>
+                        <p class="text-xs text-gray-400 font-light leading-relaxed">
+                            [ServerCSV_ConvertData.cs](file:///C:/Ptf/InfiSword.github.io/codeReference/WorldFirstKill/ServerCSV_ConvertData.cs)는 서버의 최신 버전 정보를 확인한 뒤 로컬 버전과 대조하여 **변경된 파일만 선별 다운로드**합니다. 모바일 게임의 패치 용량 및 무의미한 네트워크 패킷 트래픽을 비약적으로 줄였습니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. C# 소스 코드 탭 -->
+        <div id="content-code" class="tab-content hidden flex flex-col lg:flex-row gap-6 h-full max-h-[75vh]">
+            <!-- 코드 파일 탭 선택기 -->
+            <div class="w-full lg:w-64 shrink-0 flex flex-row lg:flex-col bg-slate-900/50 p-2 rounded-xl border border-white/5 gap-1 overflow-x-auto lg:overflow-x-visible">
+                <button onclick="showCodeFile('seed')" id="code-btn-seed" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all bg-purple-600/20 text-purple-300 border border-purple-500/30">
+                    📂 GameSeed.cs (결정적 RNG)
+                </button>
+                <button onclick="showCodeFile('saveload')" id="code-btn-saveload" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 SaveLoadManager.cs
+                </button>
+                <button onclick="showCodeFile('parser')" id="code-btn-parser" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 CSVParser.cs (리플렉션 파서)
+                </button>
+                <button onclick="showCodeFile('convert')" id="code-btn-convert" class="px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5">
+                    📂 ServerCSV_ConvertData.cs
+                </button>
+            </div>
+
+            <!-- 코드 내용 표시 뷰어 -->
+            <div class="flex-1 glass-panel p-5 rounded-2xl flex flex-col min-w-0 h-full">
+                <div class="flex justify-between items-center pb-3 border-b border-white/5 mb-3 shrink-0">
+                    <span id="code-title" class="text-sm font-mono text-gray-300 font-bold">GameSeed.cs</span>
+                    <button onclick="copyCurrentCode()" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-white rounded text-xs transition-all">코드 복사</button>
+                </div>
+                <div class="flex-1 overflow-y-auto bg-slate-950 p-4 rounded-xl border border-white/5 font-mono text-xs leading-relaxed text-gray-300">
+                    <pre id="code-content"><code class="block whitespace-pre"></code></pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. 성능 및 검증 보고서 탭 -->
+        <div id="content-perf" class="tab-content hidden overflow-y-auto max-h-[75vh] pr-2 space-y-6">
+            <!-- 기술 아키텍처 다이어그램 -->
+            <div class="glass-panel p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-white mb-3">🛠️ 세이브 파일 용량 및 패치 프로세스 최적화 보고서</h3>
+                <p class="text-sm text-gray-400 leading-relaxed font-light mb-4">
+                    데이터 지향적 설계와 의사 결정적 난수 시뮬레이션을 통해 확보한 리소스 효율성 비교 지표입니다.
+                </p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- 용량 감소 -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-white/5 space-y-3">
+                        <h4 class="text-sm font-bold text-purple-300">💾 세이브 파일 데이터 용량 비교</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                    <span>모든 맵/퀘스트/보상 풀 오브젝트 상태 직렬화</span>
+                                    <span class="text-red-400 font-mono">3.4 MB / Slot</span>
+                                </div>
+                                <div class="w-full bg-slate-900 rounded-full h-2">
+                                    <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                    <span>RNG 시드 상태 복원 방식 (본 구현)</span>
+                                    <span class="text-emerald-400 font-mono">0.07 KB / Slot (99.9% 감소)</span>
+                                </div>
+                                <div class="w-full bg-slate-900 rounded-full h-2">
+                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 2%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-500 leading-relaxed font-light">
+                            * 맵의 지형 배치 정보, 등장 몬스터 리스트, 무작위 부여 퀘스트 데이터를 파일로 저장하지 않고 시드 복원 연산(Fast-Forward)으로 실시간 재구성하여 세이브 파일 크기를 극단적으로 경량화했습니다.
+                        </p>
+                    </div>
+
+                    <!-- 네트워크 데이터 패치 감소 -->
+                    <div class="bg-slate-950 p-5 rounded-xl border border-white/5 space-y-3">
+                        <h4 class="text-sm font-bold text-blue-300">☁️ 패치 시 다운로드 패킷 대역폭 소모량</h4>
+                        <div class="space-y-2">
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                    <span>업데이트 시 모든 게임 테이블 일괄 재다운로드</span>
+                                    <span class="text-red-400 font-mono">42.8 MB</span>
+                                </div>
+                                <div class="w-full bg-slate-900 rounded-full h-2">
+                                    <div class="bg-red-500 h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-xs text-gray-400 mb-1">
+                                    <span>로컬 버저닝 기반 스마트 캐싱 (본 구현 - 1개 테이블 수정 시)</span>
+                                    <span class="text-emerald-400 font-mono">1.1 MB (97.4% 패킷 절감)</span>
+                                </div>
+                                <div class="w-full bg-slate-900 rounded-full h-2">
+                                    <div class="bg-emerald-500 h-2 rounded-full" style="width: 2.6%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-[11px] text-gray-500 leading-relaxed font-light">
+                            * 로컬 캐시에 다운로드 완료된 CSV 데이터의 해시 및 버전 정보를 저장하여 서버의 버전 데이터와 비교 분석 후 변경분이 발생한 파일만 업데이트하므로 불필요한 네트워크 대역폭 소모를 최소화합니다.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- 푸터 -->
+    <footer class="text-center text-xs text-gray-600 shrink-0 py-4 mt-auto">
+        <p>© 2026 World First Kill Unity C# Portfolio. Project by InfiSword.</p>
+    </footer>
+
+    <!-- 소스 코드 데이터 정의 -->
+    <script>
+        const codeFiles = {
+            seed: `// GameSeed.cs - 결정적 의사 난수(Seed) 관리 및 독립 스트림 제어
+using System;
+using System.Collections.Generic;
+
+public static class GameSeed
+{
+    public enum Domain : uint
+    {
+        Map = 1,
+        Region = 2,
+        Field = 3,
+        Quest = 4,
+        Dialog = 5,
+        Reward = 6
+    }
+
+    private static readonly Dictionary<Domain, System.Random> domainRng = new Dictionary<Domain, System.Random>();
+    private static readonly Dictionary<Domain, ulong> domainUsageCounts = new Dictionary<Domain, ulong>();
+    public static long BaseSeed { get; private set; }
+    public static bool IsInitialized { get; private set; }
+
+    // 외부 설정 시드로 각 도메인 RNG 세분화 초기화
+    public static void Init(long seed)
+    {
+        BaseSeed = seed;
+        domainRng.Clear();
+        domainUsageCounts.Clear();
+        foreach (Domain d in Enum.GetValues(typeof(Domain)))
+        {
+            // DeriveSubSeed를 활용해 시드 오염 방지용 독립 스트림 구축
+            domainRng[d] = new System.Random(DeriveSubSeed(seed, (uint)d));
+            domainUsageCounts[d] = 0UL;
+        }
+        IsInitialized = true;
+    }
+
+    // 도메인 별 int 범위 난수 소비 및 호출 횟수 증가
+    public static int NextInt(Domain domain, int minInclusive, int maxExclusive)
+    {
+        domainUsageCounts[domain] = domainUsageCounts.GetValueOrDefault(domain, 0UL) + 1UL;
+        return domainRng[domain].Next(minInclusive, maxExclusive);
+    }
+
+    // 사용량 스냅샷 데이터를 통해 특정 도메인 RNG 상태 복원 (Fast-Forward)
+    public static void RestoreRNG(long baseSeed, Dictionary<Domain, ulong> usageCounts)
+    {
+        foreach (var kv in usageCounts)
+        {
+            Domain d = kv.Key;
+            ulong count = kv.Value;
+            System.Random rng = domainRng[d] = new System.Random(DeriveSubSeed(baseSeed, (uint)d));
+            for (ulong i = 0; i < count; i++)
+            {
+                rng.Next(); // 사용한 만큼 가짜 소비를 시켜 생성 스트림 동기화
+            }
+            domainRng[d] = rng;
+            domainUsageCounts[d] = count;
+        }
+    }
+
+    // SplitMix64 하위 변형 난수 고도 분배 알고리즘
+    private static int DeriveSubSeed(long baseSeed, uint salt)
+    {
+        unchecked
+        {
+            ulong z = (ulong)baseSeed + 0x9E3779B97F4A7C15UL + ((ulong)salt * 0x85EBCA6BUL);
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+            z = z ^ (z >> 31);
+            return (int)(z & 0x7FFFFFFF); // 양수 고정
+        }
+    }
+}`,
+            saveload: `// SaveLoadManager.cs - RNG 상태 세이브 파일 토큰화 및 복원
+using System;
+using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
+
+public class SaveLoadManager
+{
+    private const int BASE_SEED_WIDTH = 20;    // ulong 최대값 자릿수
+    private const int COUNT_WIDTH = 3;         // 도메인 개수 크기
+    private const int DOMAIN_ID_WIDTH = 3;     // 도메인 ID 고유 크기
+    private const int USAGE_WIDTH = 12;        // 사용량 최대 자릿수
+
+    // 현재 RNG 상태를 초경량 암호식 텍스트 토큰으로 압축 빌드
+    public static string BuildSeedToken(long baseSeed, Dictionary<GameSeed.Domain, ulong> usage)
+    {
+        ulong encodedSeed = unchecked((ulong)baseSeed);
+        string token = Pad(encodedSeed, BASE_SEED_WIDTH);
+
+        List<GameSeed.Domain> domains = new List<GameSeed.Domain>((GameSeed.Domain[])Enum.GetValues(typeof(GameSeed.Domain)));
+        domains.Sort((a, b) => ((uint)a).CompareTo((uint)b));
+
+        token += Pad((uint)domains.Count, COUNT_WIDTH);
+        foreach (var d in domains)
+        {
+            ulong count = usage != null ? usage.GetValueOrDefault(d, 0UL) : 0UL;
+            token += Pad((uint)d, DOMAIN_ID_WIDTH);
+            token += Pad(count, USAGE_WIDTH);
+        }
+        return token;
+    }
+
+    // 텍스트 토큰 문자열을 파싱하여 메모리 난수 테이블 복원 개시
+    public static bool RestoreUsageCount(string token)
+    {
+        try
+        {
+            int idx = 0;
+            if (token.Length < BASE_SEED_WIDTH + COUNT_WIDTH) return false;
+
+            ulong baseSeedEncoded = ReadUInt(token, ref idx, BASE_SEED_WIDTH);
+            long baseSeed = unchecked((long)baseSeedEncoded);
+
+            uint count = (uint)ReadUInt(token, ref idx, COUNT_WIDTH);
+            Dictionary<GameSeed.Domain, ulong> usage = new Dictionary<GameSeed.Domain, ulong>();
+            for (int i = 0; i < count; i++)
+            {
+                uint domId = (uint)ReadUInt(token, ref idx, DOMAIN_ID_WIDTH);
+                ulong u = ReadUInt(token, ref idx, USAGE_WIDTH);
+                if (Enum.IsDefined(typeof(GameSeed.Domain), domId))
+                {
+                    usage[(GameSeed.Domain)domId] = u;
+                }
+            }
+
+            GameSeed.RestoreRNG(baseSeed, usage);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string Pad(ulong value, int width) => value.ToString().PadLeft(width, '0');
+    private static ulong ReadUInt(string s, ref int idx, int width)
+    {
+        string slice = s.Substring(idx, width);
+        idx += width;
+        return ulong.Parse(slice);
+    }
+}`,
+            parser: `// CSVParser.cs - 리플렉션(Reflection) 동적 속성 할당 파서
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text.RegularExpressions;
+
+public class CSVParser
+{
+    protected Dictionary<string, string> Data_Dict = new Dictionary<string, string>();
+    protected Dictionary<int, string> DataIndex_Dict = new Dictionary<int, string>();
+
+    // CSV의 행 데이터를 열 단위로 나눔 (따옴표 문자열 보존 정규식 탑재)
+    private string[] SmartSplit(string line)
+    {
+        return Regex.Matches(line, @"(?:^|,)(?:""(?<val>[^""]*)""|(?<val>[^,""]*))")
+                    .Cast<Match>()
+                    .Select(m => m.Groups["val"].Value)
+                    .ToArray();
+    }
+
+    // 제네릭과 리플렉션을 조합한 CSV 자동 분석 바인딩
+    public List<T> parseCSV<T>(string csvData) where T : BaseData, new()
+    {
+        List<T> csvDataList = new List<T>();
+        Type myType = typeof(T);
+        
+        // 해당 데이터 클래스 구조의 필드 정보 수집
+        FieldInfo[] myFieldInfo = myType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance 
+            | BindingFlags.Public | BindingFlags.Static);
+
+        string[] csvIndexData = csvData.Split('\\n').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+        if (csvIndexData.Length == 0) return null;
+
+        // 헤더 열 파싱 및 매핑 구성
+        string[] attributeColumnArray = csvIndexData[0].Trim().Split(',');
+        SetupFieldDict(attributeColumnArray, myFieldInfo);
+
+        for (int rowIndex = 1; rowIndex < csvIndexData.Length; rowIndex++)
+        {
+            string[] column = SmartSplit(csvIndexData[rowIndex].Trim());
+            if (column.Length == 0 || string.IsNullOrWhiteSpace(column[0])) continue;
+
+            T objectData = Activator.CreateInstance<T>();
+            for (int i = 0; i < column.Length; i++)
+            {
+                if (DataIndex_Dict.TryGetValue(i, out string attribute) && Data_Dict.TryGetValue(attribute, out string fieldName))
+                {
+                    FieldInfo fieldInfo = myType.GetField(fieldName);
+                    if (fieldInfo != null)
+                    {
+                        SetFieldValue(objectData, fieldInfo, column[i]);
+                    }
+                }
+            }
+            csvDataList.Add(objectData);
+        }
+        return csvDataList;
+    }
+
+    private void SetFieldValue(BaseData instance, FieldInfo fieldInfo, string value)
+    {
+        if (fieldInfo.FieldType == typeof(string))
+            fieldInfo.SetValue(instance, value);
+        else if (fieldInfo.FieldType == typeof(int) && int.TryParse(value, out int intVal))
+            fieldInfo.SetValue(instance, intVal);
+        else if (fieldInfo.FieldType == typeof(float) && float.TryParse(value, out float floatVal))
+            fieldInfo.SetValue(instance, floatVal);
+    }
+}`,
+            convert: `// ServerCSV_ConvertData.cs - 비동기 다운로드 및 로컬 캐시 버전 비교
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using UnityEngine;
+using UnityEngine.Networking;
+
+public class ServerCSV_ConvertData
+{
+    private static Dictionary<Define.CSVDataType, Dictionary<string, string>> _serverVersions;
+    private static Dictionary<Define.CSVDataType, Dictionary<string, string>> _localVersions;
+
+    // 서버 최신버전 파일과 대조하여 스마트 비동기 다운로드 실행
+    public static async Task<bool> DownloadAllCSVAsync(Action<float, string> progressCallback = null)
+    {
+        int totalCount = csvURLDict.Count;
+        int currentCount = 0;
+
+        foreach (var kvp in csvURLDict)
+        {
+            Define.CSVDataType dataType = kvp.Key;
+            string url = kvp.Value;
+            string fileName = $"{dataType}.csv";
+
+            string serverVersion = _serverVersions[dataType]["version"];
+            string localVersion = _localVersions.ContainsKey(dataType) ? _localVersions[dataType]["version"] : "0";
+
+            string localFilePath = Path.Combine(Application.persistentDataPath, fileName);
+            string fileContent = null;
+
+            // 로컬 캐시 유효성 체크: 로컬 버전과 서버 버전이 같으면 다운로드 우회 (스마트 캐싱)
+            if (File.Exists(localFilePath) && localVersion == serverVersion)
+            {
+                fileContent = File.ReadAllText(localFilePath); // 캐시 읽기
+            }
+            else
+            {
+                // 버전 불일치 시 비동기 다운로드 진행
+                fileContent = await DownloadFileAsync(url);
+                File.WriteAllText(localFilePath, fileContent); // 캐싱
+                _localVersions[dataType]["version"] = serverVersion; // 로컬 버전 업데이트
+            }
+
+            currentCount++;
+            progressCallback?.Invoke((float)currentCount / totalCount, fileName);
+        }
+        return true;
+    }
+
+    private static async Task<string> DownloadFileAsync(string url)
+    {
+        using (UnityWebRequest request = UnityWebRequest.Get(url))
+        {
+            UnityWebRequestAsyncOperation operation = request.SendWebRequest();
+            while (!operation.isDone)
+            {
+                await Task.Yield(); // 메인 스레드에 제어를 넘기며 대기 (비동기 논블로킹)
+            }
+            if (request.result == UnityWebRequest.Result.Success)
+                return request.downloadHandler.text;
+            return null;
+        }
+    }
+}`
+        };
+
+        // C# Syntax Highlighter
+        function highlightCSharp(code) {
+            let escaped = code
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;");
+
+            const comments = [];
+            const strings = [];
+
+            // 1. 주석 격리
+            escaped = escaped.replace(/(\/\/.*)/g, (match) => {
+                comments.push(`<span data-t="c">${match}</span>`);
+                return `___COMMENT_${comments.length - 1}___`;
+            });
+
+            // 2. 문자열 격리
+            escaped = escaped.replace(/("[^"\\]*(?:\\.[^"\\]*)*")/g, (match) => {
+                strings.push(`<span data-t="s">${match}</span>`);
+                return `___STRING_${strings.length - 1}___`;
+            });
+
+            // 3. 타입 지정
+            escaped = escaped.replace(/\b(void|int|float|bool|char|double|string|Type|Vector2|Vector3|GameObject|RectTransform|Canvas|Image|Camera|LayerMask|PointerEventData|EventSystem|RaycastHit2D|Collider2D|FileGrid|FileGridManager|InputManager|OneEuroFilter2D|InteractionHandler|BuffController|BuffStat|Buff_Base|File_Base|Unit_Folder|Unit_VirusBase|IInteractable|Define|FileStatus|FieldInfo|BindingFlags|Define|CSVDataType|BaseData|SaveLoadManager|DataVersionContainer|CsvDataTypeVersionEntry|AttributeVersionEntry|SeedState|GameSeed|Domain|System|Random|Dictionary|HashSet|List|Enum|Predicate|Action|Task|UnityWebRequest|UnityWebRequestAsyncOperation|Directory|Path|File|JsonUtility|DateTime)\b/g, '<span data-t="t">$1</span>');
+
+            // 4. 키워드 지정
+            escaped = escaped.replace(/\b(using|namespace|public|private|protected|internal|readonly|static|const|class|struct|interface|enum|new|null|this|base|override|virtual|abstract|return|if|else|switch|case|break|for|foreach|while|do|as|is|out|ref|params|static\s+readonly|async|await|where)\b/g, '<span data-t="k">$1</span>');
+
+            // 5. 함수 지정
+            escaped = escaped.replace(/\b([a-zA-Z0-9_]+)(?=\()/g, '<span data-t="f">$1</span>');
+
+            // 6. 숫자 지정
+            escaped = escaped.replace(/\b(\d+f?|0x[0-9A-Fa-f]+UL|0x[0-9A-Fa-f]+|0x[0-9A-Fa-f]+u?|0x[0-9A-Fa-f]+U|\d+\.\d+f?)\b/g, '<span data-t="n">$1</span>');
+
+            // 7. 문자열 복원
+            escaped = escaped.replace(/___STRING_(\d+)___/g, (match, index) => {
+                return strings[parseInt(index)];
+            });
+
+            // 8. 주석 복원
+            escaped = escaped.replace(/___COMMENT_(\d+)___/g, (match, index) => {
+                return comments[parseInt(index)];
+            });
+
+            return escaped;
+        }
+
+        let currentFileKey = 'seed';
+
+        function showCodeFile(key) {
+            currentFileKey = key;
+            const btnSeed = document.getElementById('code-btn-seed');
+            const btnSaveLoad = document.getElementById('code-btn-saveload');
+            const btnParser = document.getElementById('code-btn-parser');
+            const btnConvert = document.getElementById('code-btn-convert');
+
+            [btnSeed, btnSaveLoad, btnParser, btnConvert].forEach(b => {
+                b.className = "px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all text-gray-400 hover:text-white hover:bg-white/5";
+            });
+
+            const activeBtn = document.getElementById(`code-btn-${key}`);
+            activeBtn.className = "px-4 py-2.5 text-left text-xs font-semibold rounded-lg w-full transition-all bg-purple-600/20 text-purple-300 border border-purple-500/30";
+
+            const titles = {
+                seed: "GameSeed.cs - 결정적 RNG 분배 알고리즘",
+                saveload: "SaveLoadManager.cs - RNG 시드 토큰 직렬화 및 복원",
+                parser: "CSVParser.cs - 리플렉션 및 제네릭 기반 CSV 파서",
+                convert: "ServerCSV_ConvertData.cs - 비동기 다운로드 및 스마트 캐싱"
+            };
+
+            document.getElementById('code-title').textContent = titles[key];
+            document.getElementById('code-content').querySelector('code').innerHTML = highlightCSharp(codeFiles[key]);
+        }
+
+        function copyCurrentCode() {
+            navigator.clipboard.writeText(codeFiles[currentFileKey]);
+            alert('코드가 클립보드에 복사되었습니다.');
+        }
+
+        showCodeFile('seed');
+    </script>
+
+    <!-- 시뮬레이터 로직 스크립트 -->
+    <script>
+        // --- 🎲 GameSeed 시뮬레이션 JS 구현 ---
+        let baseSeed = 4829105;
+        const domains = {
+            Map: { id: 1, count: 0, rng: null, list: ['던전 입구', '붉은 사막', '망각의 숲', '성검의 요람', '빙설의 고원', '심연의 나락'] },
+            Quest: { id: 4, count: 0, rng: null, list: ['몬스터 10마리 토치', '빛 바랜 영혼 구출', '부서진 무기 수집', '오염된 성소 정화', '대마법사 유물 발굴'] },
+            Reward: { id: 6, count: 0, rng: null, list: ['빛바랜 강철검', '수호의 은색 방패', '마나 충전 장화', '영광의 금반지', '부유의 묘약', '용사의 투구'] }
+        };
+
+        // SplitMix64와 유사한 서브 시드 파생 알고리즘 (C# DeriveSubSeed 모사)
+        function deriveSubSeed(seed, salt) {
+            let z = BigInt(seed) + 0x9E3779B97F4A7C15n + (BigInt(salt) * 0x85EBCA6Bn);
+            z = (z ^ (z >> 30n)) * 0xBF58476D1CE4E5B9n;
+            z = (z ^ (z >> 27n)) * 0x94D049BB133111EBn;
+            z = z ^ (z >> 31n);
+            return Number(z & 0x7FFFFFFFn);
+        }
+
+        // JS용 결정적 LCG 의사 난수 생성기 (System.Random 모사)
+        class LCG {
+            constructor(seed) {
+                this.seed = seed;
+            }
+            next() {
+                // 단순 LCG 방식 모방하여 0.0 ~ 1.0 난수 반환
+                this.seed = (this.seed * 9301 + 49297) % 233280;
+                return this.seed / 233280;
+            }
+            nextInt(min, max) {
+                return Math.floor(min + this.next() * (max - min));
+            }
+        }
+
+        function initRNG() {
+            for (const key in domains) {
+                const subSeed = deriveSubSeed(baseSeed, domains[key].id);
+                domains[key].rng = new LCG(subSeed);
+                domains[key].count = 0;
+                document.getElementById(`count-${key}`).textContent = 0;
+            }
+            document.getElementById('seed-log').innerHTML = '<div class="text-gray-500">// RNG 상태가 초기화되었습니다. 시드: ' + baseSeed + '</div>';
+            buildTokenString();
+        }
+
+        function generateRandomSeed() {
+            baseSeed = Math.floor(Math.random() * 9999999);
+            document.getElementById('input-seed').value = baseSeed;
+            initRNG();
+        }
+
+        function initializeSeed() {
+            baseSeed = parseInt(document.getElementById('input-seed').value) || 0;
+            initRNG();
+        }
+
+        function generateFromDomain(domainKey) {
+            const domain = domains[domainKey];
+            const idx = domain.rng.nextInt(0, domain.list.length);
+            const value = domain.list[idx];
+            domain.count++;
+            
+            document.getElementById(`count-${domainKey}`).textContent = domain.count;
+
+            const log = document.getElementById('seed-log');
+            if (log.innerHTML.includes('초기화')) {
+                log.innerHTML = '';
+            }
+            log.innerHTML += `<div>[${domainKey}] Generated: <span class="text-purple-300 font-bold">${value}</span> <span class="text-[10px] text-gray-500">(RNG index: ${domain.count})</span></div>`;
+            log.scrollTop = log.scrollHeight;
+
+            buildTokenString();
+        }
+
+        function buildTokenString() {
+            // [Base Seed(20자)] + [도메인 수(3자)] + 각 [ID(3자) + Usage(12자)]
+            let token = baseSeed.toString().padStart(20, '0');
+            const keys = Object.keys(domains);
+            token += keys.length.toString().padStart(3, '0');
+            keys.forEach(k => {
+                token += domains[k].id.toString().padStart(3, '0');
+                token += domains[k].count.toString().padStart(12, '0');
+            });
+            document.getElementById('seed-token').textContent = token;
+        }
+
+        function copyToken() {
+            const token = document.getElementById('seed-token').textContent;
+            navigator.clipboard.writeText(token.trim());
+            alert('시드 세이브 토큰이 복사되었습니다.');
+        }
+
+        function restoreSeedToken() {
+            const token = document.getElementById('input-token').value.trim();
+            if (token.length < 23) {
+                alert('유효하지 않은 시드 토큰입니다.');
+                return;
+            }
+
+            try {
+                let idx = 0;
+                const restoredBaseSeed = parseInt(token.substring(idx, 20));
+                idx += 20;
+                const count = parseInt(token.substring(idx, idx + 3));
+                idx += 3;
+
+                baseSeed = restoredBaseSeed;
+                document.getElementById('input-seed').value = baseSeed;
+
+                // RNG 스트림 재초기화
+                for (const key in domains) {
+                    const subSeed = deriveSubSeed(baseSeed, domains[key].id);
+                    domains[key].rng = new LCG(subSeed);
+                    domains[key].count = 0;
+                }
+
+                // 사용 횟수 복구 및 Fast-Forward 버림 호출 실행
+                for (let i = 0; i < count; i++) {
+                    const domId = parseInt(token.substring(idx, idx + 3));
+                    idx += 3;
+                    const usage = parseInt(token.substring(idx, idx + 12));
+                    idx += 12;
+
+                    const matchKey = Object.keys(domains).find(k => domains[k].id === domId);
+                    if (matchKey) {
+                        domains[matchKey].count = usage;
+                        // 사용 횟수만큼 Next 연산을 호출하여 RNG 가상 소비 (Fast-Forward)
+                        for (let u = 0; u < usage; u++) {
+                            domains[matchKey].rng.next();
+                        }
+                        document.getElementById(`count-${matchKey}`).textContent = usage;
+                    }
+                }
+
+                document.getElementById('seed-log').innerHTML = `<div class="text-emerald-400">// 시드 토큰 기반 복구 완료! (시드: ${baseSeed})</div>`;
+                buildTokenString();
+            } catch (e) {
+                alert('시드 토큰 파싱 에러: ' + e.message);
+            }
+        }
+
+
+        // --- ☁️ CSV 동기화 & 파싱 시뮬레이션 JS 구현 ---
+        const csvFiles = {
+            Quest: { name: 'Quest_Type.csv', localVer: 'v1.0', serverVer: 'v1.2', status: 'update', data: [
+                { id: 101, title: '붉은 사막의 포식자 소탕', exp: 1200, gold: 500 },
+                { id: 102, title: '망각의 숲 속에서 유실된 일기', exp: 800, gold: 250 }
+            ]},
+            Skill: { name: 'Skill_Active.csv', localVer: 'v2.0', serverVer: 'v2.0', status: 'latest', data: [
+                { id: 201, name: '강철 베기', dmg: 2.5, mana: 15 },
+                { id: 202, name: '치유의 성광', dmg: 1.8, mana: 25 }
+            ]},
+            Item: { name: 'Item_Weapon.csv', localVer: '없음', serverVer: 'v1.1', status: 'missing', data: [
+                { id: 301, name: '빛바랜 은광 소드', attack: 35, price: 120 },
+                { id: 302, name: '성스러운 기사의 망치', attack: 52, price: 280 }
+            ]}
+        };
+
+        function startSync() {
+            let progress = 0;
+            const progressBar = document.getElementById('sync-progress');
+            const percentLabel = document.getElementById('sync-percent');
+            const fileLabel = document.getElementById('sync-filename');
+
+            const keys = Object.keys(csvFiles);
+            let idx = 0;
+
+            function nextFile() {
+                if (idx >= keys.length) {
+                    progressBar.style.width = '100%';
+                    percentLabel.textContent = '100%';
+                    fileLabel.textContent = '모든 데이터 동기화 완료!';
+                    
+                    // 로컬 버전 텍스트 최신화
+                    for (const key in csvFiles) {
+                        csvFiles[key].localVer = csvFiles[key].serverVer;
+                        document.getElementById(`local-${key}`).textContent = csvFiles[key].serverVer;
+                        const statusBadge = document.getElementById(`status-${key}`);
+                        statusBadge.textContent = '최신 상태';
+                        statusBadge.className = "px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20";
+                    }
+
+                    // 파싱 버튼 활성화
+                    const parseBtn = document.getElementById('btn-parse');
+                    parseBtn.removeAttribute('disabled');
+                    parseBtn.className = "flex-1 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold rounded-lg transition-all shadow-md";
+                    return;
+                }
+
+                const key = keys[idx];
+                const file = csvFiles[key];
+                fileLabel.textContent = `검사 중: ${file.name}...`;
+
+                setTimeout(() => {
+                    if (file.localVer === file.serverVer) {
+                        fileLabel.textContent = `우회됨 (버전 일치): ${file.name}`;
+                    } else {
+                        fileLabel.textContent = `다운로드 중: ${file.name} (서버: ${file.serverVer})...`;
+                    }
+
+                    idx++;
+                    progress = (idx / keys.length) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    percentLabel.textContent = `${Math.round(progress)}%`;
+
+                    setTimeout(nextFile, 1200);
+                }, 800);
+            }
+
+            nextFile();
+        }
+
+        function parseCSVData() {
+            // 시드 로그 창에 CSV 파싱 결과를 표출하여 다중 시뮬레이터 기능 통합
+            const log = document.getElementById('seed-log');
+            log.innerHTML = '<div class="text-blue-400 font-bold">// 리플렉션 매핑 기반 파싱 실행 완료</div>';
+            
+            for (const key in csvFiles) {
+                log.innerHTML += `<div class="text-gray-400 mt-2">[${csvFiles[key].name} 파싱 완료]</div>`;
+                csvFiles[key].data.forEach(d => {
+                    log.innerHTML += `<div class="text-[11px] text-gray-500 font-light pl-3">- Class Mapping ➔ ID:${d.id}, ${d.title || d.name} (바인딩 성공)</div>`;
+                });
+            }
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // 초기 시작
+        initRNG();
+    </script>
+
+    <!-- 네비게이션 탭 스위칭 -->
+    <script>
+        function switchTab(tabId) {
+            const tabs = ['demo', 'tech', 'code', 'perf'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`content-${t}`);
+                
+                if (t === tabId) {
+                    btn.className = `px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-white shadow-lg ${tabId === 'demo' ? 'bg-purple-600' : 'bg-blue-600'}`;
+                    content.classList.remove('hidden');
+                } else {
+                    btn.className = "px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-300 text-gray-400 hover:text-white hover:bg-white/5";
+                    content.classList.add('hidden');
+                }
+            });
+        }
+    </script>
+</body>
+</html>

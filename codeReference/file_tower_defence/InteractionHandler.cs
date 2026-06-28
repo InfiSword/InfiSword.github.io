@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +12,7 @@ public class InteractionHandler
     public List<IInteractable> DragObjects { get; private set; } = new List<IInteractable>();
     private Dictionary<IInteractable, Vector3> OriginalPositions = new Dictionary<IInteractable, Vector3>();
     public int DragObjectsCount => DragObjects.Count;
-
+    
     public InteractionHandler()
     {
     }
@@ -24,29 +24,28 @@ public class InteractionHandler
     public void OnClickEnterHandler(IInteractable obj, bool isMultiSelect)
     {
         if (obj == null) return;
-
+        
         // 각 객체의 OnClickEnter 호출
         obj.OnClickEnter();
-
+        
         // 선택 처리 (SelectionData 기능 통합)
-        if (!obj.IsSelectable) return;
-
-        if (!isMultiSelect)
+        if (obj.IsSelectable)
         {
-            if (!SelectedObjects.Contains(obj))
+            if (!isMultiSelect)
             {
-                ClearSelections();
-                AddSelection(obj);
-                obj.OnSelectSingle();
+                if (!SelectedObjects.Contains(obj))
+                {
+                    ClearSelections();
+                    SelectSingle(obj);
+                }
+            }
+            else
+            {
+                if (!SelectedObjects.Contains(obj)) AddSelection(obj);
+                else RemoveSelection(obj);
             }
         }
-        else
-        {
-            if (!SelectedObjects.Contains(obj)) AddSelection(obj);
-            else RemoveSelection(obj);
-        }
-
-
+        
         // 각 객체의 OnClick 호출
         obj.OnClick();
     }
@@ -63,17 +62,7 @@ public class InteractionHandler
         if (SelectedObjects.Count == 0 || !SelectedObjects.Contains(obj))
             return;
 
-        DragObjects.Clear();
-        OriginalPositions.Clear();
-
-        foreach (IInteractable o in SelectedObjects)
-        {
-            if (o != null && o.IsDraggable)
-            {
-                DragObjects.Add(o);
-                OriginalPositions.TryAdd(o, o.transform.position);
-            }
-        }
+        StartDrag();
 
         // 각 객체의 OnBeginDrag 호출 - 각자 알아서 처리
         foreach (IInteractable dragObj in DragObjects)
@@ -84,7 +73,7 @@ public class InteractionHandler
             }
         }
     }
-
+    
     /// <summary>
     /// 드래그 중 처리
     /// </summary>
@@ -99,16 +88,16 @@ public class InteractionHandler
             }
         }
     }
-
+    
     /// <summary>
     /// 드래그 종료 처리
     /// </summary>
     public void OnEndDragHandler(IInteractable obj)
     {
-        if (obj == null) return;
-
+        if (obj == null) return;       
+        
         IInteractable[] ended = DragObjects.ToArray();
-
+        
         // 각 객체의 OnEndDrag에서 그리드 제거 및 시각 정리/게임 로직 처리
         foreach (IInteractable dragObj in ended)
         {
@@ -118,21 +107,20 @@ public class InteractionHandler
             }
         }
 
-        DragObjects.Clear();
-        OriginalPositions.Clear();
+        EndDrag();
         ClearSelections();
     }
-
+    
     /// <summary>
     /// 더블클릭 처리
     /// </summary>
     public void OnDoubleClickHandler(IInteractable obj)
     {
         if (obj == null) return;
-
+        
         // 각 객체의 OnDoubleClick 호출
         obj.OnDoubleClick();
-
+        
         ClearSelections();
     }
 
@@ -141,11 +129,10 @@ public class InteractionHandler
     /// </summary>
     public void OnRightClickHandler(IInteractable obj)
     {
-        if (obj == null || !obj.IsSelectable) return;
+        if (obj == null) return;
 
-        AddSelection(obj);
-        obj.OnSelectSingle();
-
+        SelectSingle(obj);
+        
         // 각 객체의 OnRightClick 호출
         obj.OnRightClick();
     }
@@ -168,7 +155,7 @@ public class InteractionHandler
     {
         // 툴팁 처리는 StageMain_UI에서 담당
         StageMain stageMain = Managers.UI.GetSceneUI<StageMain>();
-        stageMain?.UICom?.UpdateTooltip(obj, unscaledDeltaTime);
+        stageMain?.UpdateTooltip(obj, unscaledDeltaTime);
     }
 
     /// <summary>
@@ -180,18 +167,40 @@ public class InteractionHandler
 
         // 툴팁 숨김
         StageMain stageMain = Managers.UI.GetSceneUI<StageMain>();
-        stageMain?.UICom?.HideTooltip();
+        stageMain?.HideTooltip();
 
         // 각 객체의 OnHoverExit 호출
         obj.OnHoverExit();
     }
-
+    
     /// <summary>
     /// 빈 공간 클릭 처리
     /// </summary>
     public void ClearSelectionsHandler()
     {
         ClearSelections();
+    }
+
+    /// <summary>
+    /// 드래그 실패 시 원래 위치로 복원
+    /// </summary>
+    public void RestoreOriginalPositions()
+    {
+        foreach (var (obj, originalPosition) in OriginalPositions)
+        {
+            if (obj != null)
+            {
+                obj.transform.position = originalPosition;
+            }
+        }
+    }
+
+    public void RestoreOriginalPosition(IInteractable unit)
+    {
+        if (unit != null && OriginalPositions.TryGetValue(unit, out Vector3 originPos))
+        {
+            unit.transform.position = originPos;
+        }
     }
 
     /// <summary>
@@ -206,7 +215,7 @@ public class InteractionHandler
             if (o != null && o.IsSelectable) AddSelection(o);
         }
     }
-
+    
     /// <summary>
     /// 현재 선택된 객체들 반환
     /// </summary>
@@ -214,7 +223,7 @@ public class InteractionHandler
     {
         return SelectedObjects.ToArray();
     }
-
+    
     /// <summary>
     /// 현재 드래그 중인 객체들 반환
     /// </summary>
@@ -222,7 +231,7 @@ public class InteractionHandler
     {
         return DragObjects.ToArray();
     }
-
+    
     /// <summary>
     /// 객체를 선택 목록에 추가
     /// </summary>
@@ -234,7 +243,7 @@ public class InteractionHandler
             SelectedObjects.Add(obj);
         }
     }
-
+    
     /// <summary>
     /// 객체를 선택 목록에서 제거
     /// </summary>
@@ -248,13 +257,23 @@ public class InteractionHandler
     }
 
     /// <summary>
+    /// 단일 선택으로 강제 설정
+    /// </summary>
+    public void SelectSingle(IInteractable obj)
+    {
+        if (obj == null || !obj.IsSelectable) return;
+        AddSelection(obj);
+        obj.OnSelectSingle();
+    }
+
+    /// <summary>
     /// 모든 선택 해제
     /// </summary>
-    private void ClearSelections()
+    public void ClearSelections()
     {
         if (SelectedObjects == null || SelectedObjects.Count == 0)
             return;
-
+            
         List<IInteractable> snapshot = new List<IInteractable>(SelectedObjects);
         foreach (var obj in snapshot)
         {
@@ -264,6 +283,33 @@ public class InteractionHandler
             }
         }
         SelectedObjects.Clear();
+    }
+
+    /// <summary>
+    /// 드래그 시작 - 선택된 객체들을 드래그 목록에 복사하고 원본 위치 저장
+    /// </summary>
+    private void StartDrag()
+    {
+        DragObjects.Clear();
+        OriginalPositions.Clear();
+        
+        foreach (IInteractable obj in SelectedObjects)
+        {
+            if (obj != null && obj.IsDraggable)
+            {
+                DragObjects.Add(obj);
+                OriginalPositions.TryAdd(obj, obj.transform.position);
+            }
+        }
+    }
+    
+    /// <summary>
+    /// 드래그 종료 - 드래그 목록 초기화
+    /// </summary>
+    private void EndDrag()
+    {
+        DragObjects.Clear();
+        OriginalPositions.Clear();
     }
     #endregion
 

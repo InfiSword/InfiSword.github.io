@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -27,8 +27,13 @@ public class InputManager
 
     private IInteractable _hoveredObject;
     private IInteractable _pressedObject;
-    private Vector2 _dragStartPosition;
+    private Vector2 _dragStartPosition;       // mousedown 시점의 "보정" 좌표 (박스 선택 판정용)
+    private Vector2 _dragStartRaw;            // mousedown 시점의 "raw" 좌표 (박스 그리기용 - 박스는 왜곡 안 됨)
     private Vector2 _previousMousePosition;
+
+    // 파일 드래그 떨림 방지: 렌즈 왜곡 보정이 마우스 미세 노이즈를 증폭하므로, 보정 좌표를 1€ 필터로 스무딩한다.
+    private readonly OneEuroFilter2D _dragFilter = new OneEuroFilter2D(minCutoff: 1f, beta: 0.01f, dCutoff: 1f);
+    private Vector2 _prevSmoothedMouse;
 
     // 이벤트 기반 상호작용 핸들러
     private InteractionHandler m_interactionHandler;
@@ -103,7 +108,7 @@ public class InputManager
         if (Managers.newStep == Define.StageState.ReadyState)
             return;
 
-        m_mouseInput = Input.mousePosition;
+        m_mouseInput = LensDistortionCorrector.MousePosition; // 렌즈 왜곡 보정
         // 마우스 월드 좌표 갱신 (메뉴/드롭 등 월드 기준 로직에서 사용)
         m_mouseWorldPosition = mainCamera.ScreenToWorldPoint(m_mouseInput);
 
@@ -128,12 +133,13 @@ public class InputManager
     {
         if (currentState == InputState.None || currentState == InputState.Pressing)
         {
-            if (IsPointerOverUI(Input.mousePosition))
+            if (IsPointerOverUI())
             {
-                if (_hoveredObject == null) return;
-
-                m_interactionHandler.OnHoverExitHandler(_hoveredObject);
-                _hoveredObject = null;
+                if (_hoveredObject != null)
+                {
+                    m_interactionHandler.OnHoverExitHandler(_hoveredObject);
+                    _hoveredObject = null;
+                }
 
                 return;
             }
@@ -141,18 +147,20 @@ public class InputManager
             IInteractable objectUnderMouse = GetInteractableUnderMouse();
             if (objectUnderMouse != _hoveredObject)
             {
-                if (_hoveredObject == null) return;
-                m_interactionHandler.OnHoverExitHandler(_hoveredObject);
+                if (_hoveredObject != null)
+                    m_interactionHandler.OnHoverExitHandler(_hoveredObject);
 
                 _hoveredObject = objectUnderMouse;
 
-                if (_hoveredObject == null) return;
-                m_interactionHandler.OnHoverEnterHandler(_hoveredObject);
+                if (_hoveredObject != null)
+                    m_interactionHandler.OnHoverEnterHandler(_hoveredObject);
             }
             else
             {
-                if (_hoveredObject == null) return;
-                m_interactionHandler.UpdateTooltipHandler(_hoveredObject, Time.unscaledDeltaTime);
+                if (_hoveredObject != null)
+                {
+                    m_interactionHandler.UpdateTooltipHandler(_hoveredObject, Time.unscaledDeltaTime);
+                }
             }
         }
     }
@@ -187,16 +195,21 @@ public class InputManager
     private void HandleLeftMouseDown()
     {
         // UI 위에 있으면 드래그 관련 로직을 모두 무시
-        if (IsPointerOverUI(Input.mousePosition))
+        if (IsPointerOverUI())
             return;
 
         IInteractable prePressedObject = _pressedObject;
         _dragStartPosition = m_mouseInput;
+        _dragStartRaw = Input.mousePosition;
         _pressedObject = _hoveredObject;
 
         //if (prePressedObject == null) return;
 
         currentState = InputState.Pressing;
+
+        // UI가 아닌 게임 필드(파일/빈땅) 클릭에도 UI와 동일한 클릭음을 재생한다.
+        // (HandleLeftMouseDown은 IsOverUI()면 이미 return하므로 여기는 필드 클릭 전용 → UI 클릭음과 중복되지 않음)
+        Managers.soundManager?.PlaySfx(Define.SFX.SFX_click);
 
         if (_pressedObject != null)
         {
@@ -214,7 +227,7 @@ public class InputManager
         }
         else
         {
-            stageMain?.UICom?.HandleLeftClickEmpty();
+            stageMain?.HandleLeftClickEmpty();
             m_interactionHandler.ClearSelectionsHandler();
         }
     }
@@ -222,7 +235,9 @@ public class InputManager
     private void HandleLeftMouseHold()
     {
         // 드래그 시작 조건 확인
-        if (currentState == InputState.Pressing && Vector2.Distance(m_mouseInput, _dragStartPosition) > dragThreshold)
+        // 드래그/클릭 판정은 raw 좌표 기준으로 한다. 렌즈 왜곡 보정 좌표는 비선형 증폭 때문에
+        // 짧은 클릭에도 임계값을 넘어 드래그로 오인되므로 사용하지 않는다.
+        if (currentState == InputState.Pressing && Vector2.Distance((Vector2)Input.mousePosition, _dragStartRaw) > dragThreshold)
         {
             if (_pressedObject != null)
             {
@@ -237,7 +252,11 @@ public class InputManager
         // 드래그 중 처리
         if (currentState == InputState.DraggingObject)
         {
-            Vector2 mouseDelta = (Vector2)mainCamera.ScreenToWorldPoint(m_mouseInput) - (Vector2)mainCamera.ScreenToWorldPoint(_previousMousePosition);
+            // 보정 좌표를 1€ 필터로 스무딩해 떨림 제거 (느릴 땐 강하게, 빠를 땐 거의 지연 없이)
+            float dt = Mathf.Max(Time.unscaledDeltaTime, 1e-5f);
+            Vector2 smoothed = _dragFilter.Filter(m_mouseInput, dt);
+            Vector2 mouseDelta = (Vector2)mainCamera.ScreenToWorldPoint(smoothed) - (Vector2)mainCamera.ScreenToWorldPoint(_prevSmoothedMouse);
+            _prevSmoothedMouse = smoothed;
             m_interactionHandler.OnDragHandler(mouseDelta);
         }
         else if (currentState == InputState.DraggingBox)
@@ -249,8 +268,9 @@ public class InputManager
                 ? dragBoxCanvas.worldCamera
                 : null;
 
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(dragBoxParent, _dragStartPosition, uiCamera, out Vector2 startLocal);
-            RectTransformUtility.ScreenPointToLocalPointInRectangle(dragBoxParent, m_mouseInput, uiCamera, out Vector2 currentLocal);
+            // 박스는 왜곡되지 않는 UI 오버레이이므로 raw 마우스 좌표로 그린다 (보정 시 떨림 + 위치 오프셋 발생)
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(dragBoxParent, _dragStartRaw, uiCamera, out Vector2 startLocal);
+            RectTransformUtility.ScreenPointToLocalPointInRectangle(dragBoxParent, Input.mousePosition, uiCamera, out Vector2 currentLocal);
 
             Vector2 lowerLeft = new Vector2(Mathf.Min(startLocal.x, currentLocal.x), Mathf.Min(startLocal.y, currentLocal.y));
             Vector2 upperRight = new Vector2(Mathf.Max(startLocal.x, currentLocal.x), Mathf.Max(startLocal.y, currentLocal.y));
@@ -288,8 +308,11 @@ public class InputManager
     {
         IInteractable objectUnderMouse = GetInteractableUnderMouse();
 
-        if (IsPointerOverUI(Input.mousePosition))
+        if (IsPointerOverUI())
             return;
+
+        // 우클릭(파일/빈땅)에도 클릭음 재생 (UI는 위에서 return하므로 중복 없음)
+        Managers.soundManager?.PlaySfx(Define.SFX.SFX_click);
 
         if (objectUnderMouse != null)
         {
@@ -297,13 +320,16 @@ public class InputManager
         }
         else
         {
-            stageMain?.UICom?.HandleRightClickEmpty(m_mouseWorldPosition);
+            stageMain?.HandleRightClickEmpty(m_mouseWorldPosition);
         }
     }
 
     private void StartDraggingObject()
     {
         currentState = InputState.DraggingObject;
+        // 스무딩 필터를 현재 위치로 초기화해 드래그 시작 시 튐 방지
+        _dragFilter.Reset(m_mouseInput);
+        _prevSmoothedMouse = m_mouseInput;
         m_interactionHandler.OnBeginDragHandler(_pressedObject);
     }
 
@@ -407,87 +433,64 @@ public class InputManager
     }
     #endregion
 
-    #region UI Check Logic
-
-    public T GetUIComponentAt<T>(Vector2 screenPos) where T : Component
+    private bool IsPointerOverUI()
     {
-        if (EventSystem.current == null)
-            return null;
+        return EventSystem.current != null && EventSystem.current.IsPointerOverGameObject();
+    }
+}
 
-        PointerEventData ped = new PointerEventData(EventSystem.current) { position = screenPos };
-        List<RaycastResult> results = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(ped, results);
+/// <summary>
+/// 1€ Filter (Casiez et al.) 2D 버전. 포인터 신호의 고주파 떨림은 억제하면서
+/// 빠르게 움직일 때는 지연을 최소화한다. (천천히 움직이거나 멈춰 있을 때만 강하게 스무딩)
+/// </summary>
+public class OneEuroFilter2D
+{
+    private readonly float _minCutoff;
+    private readonly float _beta;
+    private readonly float _dCutoff;
 
-        foreach (var result in results)
-        {
-            if (result.gameObject != null)
-            {
-                T component = result.gameObject.GetComponent<T>()
-                                ?? result.gameObject.GetComponentInParent<T>();
+    private Vector2 _xPrev;
+    private Vector2 _dxPrev;
+    private bool _hasPrev;
 
-                if (component != null)
-                    return component;
-            }
-        }
-        return null;
+    public OneEuroFilter2D(float minCutoff = 1f, float beta = 0.01f, float dCutoff = 1f)
+    {
+        _minCutoff = minCutoff;
+        _beta = beta;
+        _dCutoff = dCutoff;
     }
 
-    /// <summary>
-    /// 현재 마우스 위치 또는 지정된 위치가 UI에 가려져 있는지 확인
-    /// 게임 오브젝트와 UI의 Sorting Layer/Order를 비교하여 실제 가려짐 여부를 판단
-    /// </summary>
-    public bool IsPointerOverUI(Vector2 screenPos)
+    public void Reset(Vector2 value)
     {
-        if (EventSystem.current == null) return false;
-
-        PointerEventData ped = new PointerEventData(EventSystem.current) { position = screenPos };
-        List<RaycastResult> uiResults = new List<RaycastResult>();
-        EventSystem.current.RaycastAll(ped, uiResults);
-
-        if (uiResults.Count == 0)
-            return false;
-
-        Canvas uiCanvas = uiResults[0].gameObject.GetComponentInParent<Canvas>();
-        if (uiCanvas == null)
-            return true;
-
-        Vector3 worldPos = mainCamera.ScreenToWorldPoint(screenPos);
-        RaycastHit2D gameObjectHit = Physics2D.Raycast(worldPos, Vector2.zero, 0f, interactableLayerMask);
-
-        IInteractable interactable = gameObjectHit.collider?.GetComponent<IInteractable>()
-                                  ?? gameObjectHit.collider?.GetComponentInParent<IInteractable>();
-
-        if (interactable != null && interactable.IsSelectable)
-        {
-            if (interactable.targetObj.TryGetComponent(out SpriteRenderer spriteRenderer))
-            {
-                int spriteLayerValue = SortingLayer.GetLayerValueFromName(spriteRenderer.sortingLayerName);
-                int canvasLayerValue = SortingLayer.GetLayerValueFromName(uiCanvas.sortingLayerName);
-
-                if (canvasLayerValue > spriteLayerValue)
-                    return true;
-                if (canvasLayerValue == spriteLayerValue && uiCanvas.sortingOrder > spriteRenderer.sortingOrder)
-                    return true;
-                return false;
-            }
-
-            Canvas gameObjectCanvas = interactable.targetObj.GetComponentInChildren<Canvas>();
-            if (gameObjectCanvas == null)
-                return false;
-
-            int objCanvasLayerValue = SortingLayer.GetLayerValueFromName(gameObjectCanvas.sortingLayerName);
-            int uiCanvasLayerValue = SortingLayer.GetLayerValueFromName(uiCanvas.sortingLayerName);
-
-            if (uiCanvasLayerValue > objCanvasLayerValue)
-                return true;
-            if (uiCanvasLayerValue == objCanvasLayerValue && uiCanvas.sortingOrder > gameObjectCanvas.sortingOrder)
-                return true;
-
-            return false;
-        }
-
-        return true; // 레이캐스트된 게임 오브젝트가 없는데 UI는 있으면 UI 위로 간주
+        _xPrev = value;
+        _dxPrev = Vector2.zero;
+        _hasPrev = true;
     }
 
-    #endregion
+    public Vector2 Filter(Vector2 x, float dt)
+    {
+        if (!_hasPrev || dt <= 0f)
+        {
+            Reset(x);
+            return x;
+        }
+
+        // 미분(속도) 추정 후 저역통과
+        Vector2 dx = (x - _xPrev) / dt;
+        Vector2 dxHat = Vector2.Lerp(_dxPrev, dx, Alpha(_dCutoff, dt));
+
+        // 속도가 클수록 cutoff를 높여 지연을 줄임
+        float cutoff = _minCutoff + _beta * dxHat.magnitude;
+        Vector2 xHat = Vector2.Lerp(_xPrev, x, Alpha(cutoff, dt));
+
+        _xPrev = xHat;
+        _dxPrev = dxHat;
+        return xHat;
+    }
+
+    private static float Alpha(float cutoff, float dt)
+    {
+        float tau = 1f / (2f * Mathf.PI * cutoff);
+        return 1f / (1f + tau / dt);
+    }
 }
