@@ -7,6 +7,8 @@ permalink: /project/file-tower-defense/
 tags: [Unity, Optimization, Architecture, Algorithms]
 toc: true
 toc_sticky: true
+classes: wide
+mermaid: true
 ---
 
 <style>
@@ -262,6 +264,11 @@ graph TD
     style L fill:#17a2b8,stroke:#117a8b,color:#fff
 ```
 
+<div class="pf-visual-frame">
+    <img src="{{ '/assets/Gifs/file-tower-defense-interaction.gif' | relative_url }}" alt="File Tower Defense Input Interaction Demo" style="width: 100%; border-radius: 8px;">
+    <p style="color: #666; font-size: 0.85rem; margin-top: 10px; font-family: 'Fira Code', monospace;">[DEMO] InputManager 기반 마우스 호버 및 클릭 감지</p>
+</div>
+
 #### 객체 중첩 판정 알고리즘
 마우스 아래에 여러 유닛이나 바이러스, 혹은 UI 판정이 겹쳐있을 때, 다음과 같은 우선순위 기준을 사용하여 모호함을 해결합니다.
 1.  **UI 레이어 우선:** `EventSystem.current.IsPointerOverGameObject()`를 통해 UI 상호작용 우선 처리.
@@ -271,6 +278,11 @@ graph TD
 ### 2.2 IInteractable 인터페이스 기반 확장성
 
 클릭 및 드래그 상호작용이 필요한 모든 인게임 오브젝트(유닛 파일, 바이러스 등)는 [IInteractable](file:///D:/Workspace/codeReference/file_tower_defence/IInteractable.cs) 인터페이스를 상속받아 유연하게 확장할 수 있습니다.
+
+<div class="pf-visual-frame">
+    <img src="{{ '/assets/Gifs/file-tower-defense-drag.gif' | relative_url }}" alt="File Tower Defense Mouse Drag Event Demo" style="width: 100%; border-radius: 8px;">
+    <p style="color: #666; font-size: 0.85rem; margin-top: 10px; font-family: 'Fira Code', monospace;">[DEMO] IInteractable 상속 객체의 실시간 마우스 드래그 & 배치 흐름</p>
+</div>
 
 <details class="pf-details" markdown="1">
 <summary>코드 보기: IInteractable 인터페이스</summary>

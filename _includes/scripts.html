@@ -27,3 +27,28 @@
     <script src="{{ script | relative_url }}"></script>
   {% endfor %}
 {% endif %}
+
+{% if page.mermaid %}
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      // Find all elements with class 'language-mermaid'
+      const mermaidCodes = document.querySelectorAll('.language-mermaid code');
+      mermaidCodes.forEach((codeEl) => {
+        const preEl = codeEl.parentElement;
+        const container = preEl.parentElement;
+        
+        // Create a new div with class 'mermaid' and insert the code
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.className = 'mermaid';
+        mermaidDiv.textContent = codeEl.textContent;
+        
+        // Replace the pre element with the new div
+        container.replaceChild(mermaidDiv, preEl);
+      });
+      mermaid.run();
+    });
+  </script>
+{% endif %}

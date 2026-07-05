@@ -7,6 +7,7 @@ permalink: /project/slime-project/
 tags: [Unity, AI, FSM, Design Pattern]
 toc: true
 toc_sticky: true
+classes: wide
 ---
 
 <style>
