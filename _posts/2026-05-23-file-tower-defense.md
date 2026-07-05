@@ -312,7 +312,10 @@ public interface IInteractable {
 
 ### 3.2 원자적 배치 트랜잭션 (Transactional Pattern)
 
-드래그 앤 드롭으로 유닛의 그리드 위치를 옮길 때 발생할 수 있는 데이터 불일치 및 예외 상황을 원자적으로 보장하기 위해 3단계 배치 트랜잭션 흐름을 설계했습니다.
+드래그 앤 드롭으로 유닛의 그리드 위치를 옮길 때 발생할 수 있는 데이터 불일치 및 예외 상황을 원자적으로 보장하기 위해 배치 트랜잭션 흐름을 **탐색/검증, 성공(Commit), 실패(Rollback)**의 3가지 흐름으로 분할 설계하여 안전성을 확보했습니다.
+
+#### 1. 탐색 및 검증 단계 (Search & Validation)
+배치 위치의 그리드를 감지하고, 해당 그리드가 배치 가능한 지역인지(장애물이나 다른 유닛 유무) 검사합니다.
 
 ```mermaid
 sequenceDiagram
@@ -321,26 +324,42 @@ sequenceDiagram
     participant IM as InputManager
     participant IH as InteractionHandler
     participant FGM as FileGridManager
-    participant FG_Old as Old FileGrid
-    participant FG_New as New FileGrid
-    participant Unit as File Unit (File_Base)
-
+    
     Player->>IM: Drag & Release Unit
     IM->>IH: End Drag Event
     IH->>FGM: GetGrid(Release Position)
     FGM-->>IH: Return Target Grid (New Grid)
-    
-    rect rgb(240, 248, 255)
-        Note over IH, Unit: Transaction Phase
-        IH->>FGM: Validate Placement (New Grid, No Obstacles)
-        alt Validation Fails (Rollback)
-            IH->>Unit: Rollback (Return to Old Grid)
-        else Validation Success (Commit)
-            IH->>FG_Old: RemoveFileUnit() (Clear occupant & remove old buffs)
-            IH->>FG_New: SetFileUnit(Unit) (Assign occupant & apply new buffs)
-            IH->>Unit: Commit Position (Smooth Lerp / Snap)
-        end
-    end
+    IH->>FGM: Validate Placement (New Grid, No Obstacles)
+```
+
+#### 2. 트랜잭션 확정 단계 (Commit - 검증 성공 시)
+검증에 성공하면 기존 그리드의 점유를 해제하고, 새 그리드에 유닛을 정식 등록한 후 스탯(버프) 정보를 동적으로 갱신합니다.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant IH as InteractionHandler
+    participant FG_Old as Old FileGrid
+    participant FG_New as New FileGrid
+    participant Unit as File Unit (File_Base)
+
+    Note over IH, Unit: Validation Success (Commit)
+    IH->>FG_Old: RemoveFileUnit() (Clear occupant & remove old buffs)
+    IH->>FG_New: SetFileUnit(Unit) (Assign occupant & apply new buffs)
+    IH->>Unit: Commit Position (Smooth Lerp / Snap)
+```
+
+#### 3. 트랜잭션 복구 단계 (Rollback - 검증 실패 시)
+새 그리드가 유효하지 않거나 장애물이 감지된 경우, 상태를 복구하고 유닛을 드래그 시작 전 원래의 그리드 위치로 되돌립니다.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant IH as InteractionHandler
+    participant Unit as File Unit (File_Base)
+
+    Note over IH, Unit: Validation Fails (Rollback)
+    IH->>Unit: Rollback (Return to Old Grid position)
 ```
 
 ### 3.3 동적 양방향 좌표 변환 시스템
