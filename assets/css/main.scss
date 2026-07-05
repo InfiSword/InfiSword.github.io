@@ -7,3 +7,40 @@ search: false
 
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
+
+
+/* Custom TOC Sticky Override on Wide Layouts */
+.wide {
+  .page {
+    @include breakpoint($large) {
+      padding-inline-end: $right-sidebar-width-narrow;
+    }
+    @include breakpoint($x-large) {
+      padding-inline-end: $right-sidebar-width;
+    }
+  }
+
+  .sidebar__right {
+    @include breakpoint($large) {
+      position: absolute;
+      top: 0;
+      inset-inline-end: 0;
+      width: $right-sidebar-width-narrow;
+      margin-inline-end: -1 * $right-sidebar-width-narrow;
+      padding-inline-start: 1em;
+      z-index: 10;
+
+      &.sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 2em;
+        float: inline-end;
+      }
+    }
+
+    @include breakpoint($x-large) {
+      width: $right-sidebar-width;
+      margin-inline-end: -1 * $right-sidebar-width;
+    }
+  }
+}

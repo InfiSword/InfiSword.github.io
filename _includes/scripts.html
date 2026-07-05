@@ -34,19 +34,23 @@
     mermaid.initialize({ startOnLoad: false, theme: 'default' });
     
     document.addEventListener("DOMContentLoaded", function () {
-      // Find all elements with class 'language-mermaid'
-      const mermaidCodes = document.querySelectorAll('.language-mermaid code');
-      mermaidCodes.forEach((codeEl) => {
-        const preEl = codeEl.parentElement;
-        const container = preEl.parentElement;
+      const mermaidElements = document.querySelectorAll('code.language-mermaid, .language-mermaid code, pre.mermaid, code.mermaid');
+      
+      mermaidElements.forEach((el) => {
+        const codeText = el.textContent.trim();
         
-        // Create a new div with class 'mermaid' and insert the code
+        let targetToReplace = el.closest('.highlighter-rouge, .language-mermaid');
+        if (!targetToReplace) {
+          targetToReplace = el.closest('pre') || el;
+        }
+        
         const mermaidDiv = document.createElement('div');
         mermaidDiv.className = 'mermaid';
-        mermaidDiv.textContent = codeEl.textContent;
+        mermaidDiv.textContent = codeText;
         
-        // Replace the pre element with the new div
-        container.replaceChild(mermaidDiv, preEl);
+        if (targetToReplace.parentElement) {
+          targetToReplace.parentElement.replaceChild(mermaidDiv, targetToReplace);
+        }
       });
       mermaid.run();
     });

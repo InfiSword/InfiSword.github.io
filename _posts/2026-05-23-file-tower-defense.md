@@ -166,11 +166,6 @@ mermaid: true
 
 **File Tower Defense** 프로젝트의 코어 시스템 설계를 담당하며, 유니티의 좌표계 특성을 분석한 아키텍처 재설계부터 대규모 객체의 입력 처리, 동적 버프 시스템, 그리고 그리드 기반 배치 로직까지 전반적인 시스템 개선 과정을 기록한 리포트입니다.
 
-<div class="pf-visual-frame">
-    <img src="{{ '/assets/Gifs/file-tower-defense.gif' | relative_url }}" alt="File Tower Defense Gameplay Demo" style="width: 100%; border-radius: 8px;">
-    <p style="color: #666; font-size: 0.85rem; margin-top: 10px; font-family: 'Fira Code', monospace;">[DEMO] File Tower Defense 인게임 플레이 데모</p>
-</div>
-
 ---
 
 ## 1. 시스템 리팩토링 및 개선
