@@ -42,3 +42,8 @@ search: false
     padding-inline-end: $right-sidebar-width !important;
   }
 }
+
+/* Remove footer panel globally */
+.page__footer {
+  display: none !important;
+}
