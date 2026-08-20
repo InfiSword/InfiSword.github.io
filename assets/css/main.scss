@@ -7,3 +7,43 @@ search: false
 
 @import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
 @import "minimal-mistakes"; // main partials
+
+
+/* Universal Sticky TOC Override for All Pages */
+.sidebar__right {
+  @include breakpoint($large) {
+    position: absolute !important;
+    top: 0 !important;
+    inset-inline-end: 0 !important;
+    width: $right-sidebar-width-narrow !important;
+    margin-inline-end: -1 * $right-sidebar-width-narrow !important;
+    padding-inline-start: 1em !important;
+    z-index: 10 !important;
+
+    &.sticky {
+      position: -webkit-sticky !important;
+      position: sticky !important;
+      top: 2em !important;
+      float: inline-end !important;
+    }
+  }
+
+  @include breakpoint($x-large) {
+    width: $right-sidebar-width !important;
+    margin-inline-end: -1 * $right-sidebar-width !important;
+  }
+}
+
+.page {
+  @include breakpoint($large) {
+    padding-inline-end: $right-sidebar-width-narrow !important;
+  }
+  @include breakpoint($x-large) {
+    padding-inline-end: $right-sidebar-width !important;
+  }
+}
+
+/* Remove footer panel globally */
+.page__footer {
+  display: none !important;
+}

@@ -27,3 +27,32 @@
     <script src="{{ script | relative_url }}"></script>
   {% endfor %}
 {% endif %}
+
+{% if page.mermaid %}
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'default' });
+    
+    document.addEventListener("DOMContentLoaded", function () {
+      const mermaidElements = document.querySelectorAll('code.language-mermaid, .language-mermaid code, pre.mermaid, code.mermaid');
+      
+      mermaidElements.forEach((el) => {
+        const codeText = el.textContent.trim();
+        
+        let targetToReplace = el.closest('.highlighter-rouge, .language-mermaid');
+        if (!targetToReplace) {
+          targetToReplace = el.closest('pre') || el;
+        }
+        
+        const mermaidDiv = document.createElement('div');
+        mermaidDiv.className = 'mermaid';
+        mermaidDiv.textContent = codeText;
+        
+        if (targetToReplace.parentElement) {
+          targetToReplace.parentElement.replaceChild(mermaidDiv, targetToReplace);
+        }
+      });
+      mermaid.run();
+    });
+  </script>
+{% endif %}

@@ -183,6 +183,8 @@ exclude:
   - LICENSE
   - log
   - minimal-mistakes-jekyll.gemspec
+  - portfoilo
+  - Context
   - node_modules
   - package.json
   - package-lock.json

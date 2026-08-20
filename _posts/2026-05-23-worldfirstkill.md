@@ -7,6 +7,7 @@ permalink: /project/worldfirstkill/
 tags: [Data Structure, Server, C#, System Design]
 toc: true
 toc_sticky: true
+classes: wide
 ---
 
 <style>
