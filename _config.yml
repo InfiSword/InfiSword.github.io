@@ -116,11 +116,10 @@ analytics:
 author:
   name: "이민혁 (Minhyuk Lee)"
   avatar           : # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "I am an **amazing** person."
+  bio              : "안녕하세요! 탄탄한 **Computer Science** 기초를 바탕으로 복잡한 게임 시스템 아키텍처를 설계하고, **컴퓨터 그래픽스(Rendering / DirectX 11 / HLSL)** 및 **강화학습(ML-Agents)**을 깊이 있게 탐구하는 게임 클라이언트 프로그래머입니다."
   location         : "South Korea"
-  email            :
-  # fediverse      : "@you@instance.social"  # used for fediverse:creator meta tag
-links:
+  email            : "seif4688@gmail.com"
+  links:
     - label: "Email"
       icon: "fas fa-fw fa-envelope-square"
       url: "mailto:seif4688@gmail.com"

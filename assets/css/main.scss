@@ -9,16 +9,20 @@ search: false
 @import "minimal-mistakes"; // main partials
 
 
-/* Universal Sticky TOC Override for All Pages */
+/* ==========================================================================
+   CLEAN & RESPONSIVE CONTENT-CENTRIC LAYOUT OVERRIDES
+   ========================================================================== */
+
+/* Universal Sticky TOC Override */
 .sidebar__right {
   @include breakpoint($large) {
     position: absolute !important;
     top: 0 !important;
     inset-inline-end: 0 !important;
     width: $right-sidebar-width-narrow !important;
-    margin-inline-end: -1 * $right-sidebar-width-narrow !important;
-    padding-inline-start: 1em !important;
-    z-index: 10 !important;
+    margin-inline-end: 0 !important;
+    padding-inline-start: 1.5em !important;
+    z-index: 20 !important;
 
     &.sticky {
       position: -webkit-sticky !important;
@@ -30,27 +34,28 @@ search: false
 
   @include breakpoint($x-large) {
     width: $right-sidebar-width !important;
-    margin-inline-end: -1 * $right-sidebar-width !important;
   }
 }
 
-/* Normal Single Pages with Sidebar */
-.layout--single:not(.wide) .page {
-  @include breakpoint($large) {
-    padding-inline-end: $right-sidebar-width-narrow !important;
-  }
-  @include breakpoint($x-large) {
-    padding-inline-end: $right-sidebar-width !important;
-  }
-}
-
-/* Wide Content-Centric Pages (Full Width) */
+/* Wide Content-Centric Pages (Full Width & No Sidebar Collisions) */
 .wide {
+  /* Hide the floating left author sidebar on wide tech report posts to prevent text overlap */
+  .sidebar:not(.sidebar__right) {
+    display: none !important;
+  }
+
+  #main {
+    max-width: $max-width !important;
+    margin-inline: auto !important;
+    padding-inline: 1.5em !important;
+  }
+
   .page {
     width: 100% !important;
     max-width: 100% !important;
-    padding-inline-end: 0 !important;
     float: none !important;
+    clear: both !important;
+    margin-inline: auto !important;
 
     .page__inner-wrap {
       width: 100% !important;
@@ -59,13 +64,70 @@ search: false
       .page__content {
         width: 100% !important;
         float: none !important;
+        position: relative !important;
       }
+    }
+  }
+
+  /* When TOC is active on a wide page, reserve space on the right so text never collides */
+  &:has(.sidebar__right) .page .page__inner-wrap {
+    @include breakpoint($large) {
+      padding-inline-end: calc(#{$right-sidebar-width-narrow} + 1.5em) !important;
+    }
+    @include breakpoint($x-large) {
+      padding-inline-end: calc(#{$right-sidebar-width} + 2em) !important;
     }
   }
 
   .page__related {
     width: 100% !important;
     padding-inline-end: 0 !important;
+    float: none !important;
+    clear: both !important;
+  }
+}
+
+/* Normal Single Pages with Sidebar */
+.layout--single:not(.wide) {
+  .page {
+    @include breakpoint($large) {
+      width: calc(100% - #{$right-sidebar-width-narrow}) !important;
+      padding-inline-end: 1em !important;
+    }
+    @include breakpoint($x-large) {
+      width: calc(100% - #{$right-sidebar-width}) !important;
+    }
+  }
+}
+
+/* Author Profile Styling & Bio Polish */
+.author__bio {
+  font-size: 0.85rem !important;
+  line-height: 1.65 !important;
+  color: #64748b !important;
+  margin-top: 8px !important;
+  margin-bottom: 16px !important;
+
+  strong {
+    color: #1e293b !important;
+    font-weight: 600 !important;
+  }
+}
+
+.author__urls.social-icons {
+  font-size: 0.82rem !important;
+  
+  li {
+    margin-bottom: 6px !important;
+  }
+
+  a {
+    color: #475569 !important;
+    transition: color 0.2s ease !important;
+
+    &:hover {
+      color: #2563eb !important;
+    }
   }
 }
 
