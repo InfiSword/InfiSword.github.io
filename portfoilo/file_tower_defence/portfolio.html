@@ -157,8 +157,26 @@
                     </div>
                 </div>
                 
-                <div class="flex-1 relative bg-black/40 rounded-xl overflow-hidden flex items-center justify-center p-1 border border-white/5 min-h-[450px]">
-                    <canvas id="simCanvas" width="1200" height="800" class="max-h-full object-contain"></canvas>
+                <div class="flex-1 relative bg-black/60 rounded-xl overflow-hidden flex flex-col border border-white/10 shadow-2xl min-h-[480px]">
+                    <!-- macOS/IDE Style Window Titlebar -->
+                    <div class="flex items-center justify-between px-4 py-2 bg-slate-950/90 border-b border-white/5 select-none">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                            <span class="ml-2 text-xs font-mono text-gray-400">FileGrid_Simulation.exe [1200x800]</span>
+                        </div>
+                        <div class="flex items-center gap-3 font-mono text-[11px]">
+                            <span class="text-gray-400">FPS: <strong class="text-emerald-400 font-bold" id="sim-fps">60</strong></span>
+                            <span class="text-gray-600">|</span>
+                            <span class="text-gray-400">Latency: <strong class="text-blue-400 font-bold" id="sim-latency">0.2ms</strong></span>
+                            <span class="text-gray-600">|</span>
+                            <span class="text-gray-400">Noise: <strong class="text-red-400 font-bold" id="sim-noise-val">12px</strong></span>
+                        </div>
+                    </div>
+                    <div class="relative flex-1 flex items-center justify-center p-2 bg-gradient-to-b from-[#070913] to-[#04050a]">
+                        <canvas id="simCanvas" width="1200" height="800" class="max-h-full object-contain rounded-lg shadow-inner"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -943,10 +961,13 @@ public class VirusInfectionAbility : MonoBehaviour
         const chartCanvas = document.getElementById('chartCanvas');
         const chartCtx = chartCanvas.getContext('2d');
 
-        // 왜곡 마우스 원본 및 필터링 값 모니터링 큐
+        // 왜곡 마우스 원본 및 필터링 값 모니터링 큐 & 궤적(Trails)
         const jitterQueue = [];
         const filteredQueue = [];
         const maxQueueLength = 60;
+        const rawTrail = [];
+        const smoothedTrail = [];
+        const maxTrailLength = 24;
 
         // 그리드 설정
         const COLS = 6;
@@ -959,6 +980,12 @@ public class VirusInfectionAbility : MonoBehaviour
         let isFilterActive = true;
         let jitterStrength = 12;
         let myComHP = 100;
+
+        // FPS 측정
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+        let currentFps = 60;
+        let fpsTimer = 0;
 
         // 유닛 상태
         let units = [];
@@ -1126,18 +1153,23 @@ public class VirusInfectionAbility : MonoBehaviour
         function toggleFilter() {
             isFilterActive = !isFilterActive;
             const btn = document.getElementById('btn-filter-toggle');
+            const latencyBadge = document.getElementById('sim-latency');
             if (isFilterActive) {
                 btn.textContent = 'ON (활성화)';
                 btn.className = "px-3 py-1 text-xs font-bold rounded-lg bg-emerald-600 text-white shadow-md transition-all";
+                if (latencyBadge) latencyBadge.textContent = "0.2ms (Filtered)";
             } else {
                 btn.textContent = 'OFF (비활성화)';
                 btn.className = "px-3 py-1 text-xs font-bold rounded-lg bg-red-600 text-white shadow-md transition-all";
+                if (latencyBadge) latencyBadge.textContent = "0.0ms (Jittering)";
             }
         }
 
         function updateNoise(val) {
             jitterStrength = parseInt(val);
             document.getElementById('label-noise').textContent = `${val}px`;
+            const noiseBadge = document.getElementById('sim-noise-val');
+            if (noiseBadge) noiseBadge.textContent = `${val}px`;
         }
 
         // 드래그앤드롭 이벤트 핸들러
@@ -1171,6 +1203,8 @@ public class VirusInfectionAbility : MonoBehaviour
                     draggedUnit = u;
                     u.isDragging = true;
                     filterInstance.reset();
+                    rawTrail.length = 0;
+                    smoothedTrail.length = 0;
                     dragOffset = { x: u.x - pos.x, y: u.y - pos.y };
                     break;
                 }
@@ -1205,12 +1239,22 @@ public class VirusInfectionAbility : MonoBehaviour
                 // 필터링된 마우스 좌표를 기준으로 드래그 위치 설정
                 draggedUnit.x = smoothedMousePos.x + dragOffset.x;
                 draggedUnit.y = smoothedMousePos.y + dragOffset.y;
+
+                // 궤적 기록
+                rawTrail.push({ x: rawMousePos.x + dragOffset.x, y: rawMousePos.y + dragOffset.y });
+                smoothedTrail.push({ x: smoothedMousePos.x + dragOffset.x, y: smoothedMousePos.y + dragOffset.y });
+                if (rawTrail.length > maxTrailLength) {
+                    rawTrail.shift();
+                    smoothedTrail.shift();
+                }
             }
         }
 
         function onPointerUp() {
             if (draggedUnit) {
                 draggedUnit.isDragging = false;
+                rawTrail.length = 0;
+                smoothedTrail.length = 0;
                 
                 // 그리드 셀 판단
                 const gx = Math.round((draggedUnit.x - GRID_START_X - CELL_SIZE/2) / CELL_SIZE);
@@ -1226,7 +1270,7 @@ public class VirusInfectionAbility : MonoBehaviour
                         // 필드에서 파일 제거
                         units = units.filter(u => u !== draggedUnit);
                         // 파티클 터뜨림
-                        createExplosion(targetFolder.x, targetFolder.y, '#f59e0b', 15);
+                        createExplosion(targetFolder.x, targetFolder.y, '#f59e0b', 20);
                     } else {
                         // 자리 비어있는지 체크
                         const isOccupied = units.some(u => u.gridX === gx && u.gridY === gy && u !== draggedUnit);
@@ -1336,14 +1380,28 @@ public class VirusInfectionAbility : MonoBehaviour
 
         // 메인 프레임 루프
         function loop() {
+            // FPS 계산
+            const now = performance.now();
+            const delta = now - lastFrameTime;
+            lastFrameTime = now;
+            frameCount++;
+            fpsTimer += delta;
+            if (fpsTimer >= 500) {
+                currentFps = Math.round((frameCount * 1000) / fpsTimer);
+                const fpsBadge = document.getElementById('sim-fps');
+                if (fpsBadge) fpsBadge.textContent = currentFps;
+                frameCount = 0;
+                fpsTimer = 0;
+            }
+
             // 1. 연산 처리
-            // 바이러스 이동
+            // 바이러스 이동 및 공격 판정
             viruses.forEach((v, idx) => {
                 const dist = Math.hypot(v.target.x - v.x, v.target.y - v.y);
                 if (dist < 40) {
                     // 본진 도달! 대미지 및 감염 전파
                     myComHP = Math.max(0, myComHP - 15);
-                    createExplosion(v.x, v.y, '#ef4444', 25);
+                    createExplosion(v.x, v.y, '#ef4444', 30);
                     infectRandomFile();
                     viruses.splice(idx, 1);
                 } else {
@@ -1539,6 +1597,40 @@ public class VirusInfectionAbility : MonoBehaviour
                 }
                 ctx.restore();
             });
+
+            // 궤적(Trails) 렌더링: 드래그 중일 때 노이즈(빨간 점선) vs 필터(에메랄드 실선) 시각화
+            if (draggedUnit && rawTrail.length > 1) {
+                // 1. 노이즈 궤적 (빨간색 점선)
+                ctx.save();
+                ctx.strokeStyle = 'rgba(248, 113, 113, 0.7)';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                for (let i = 0; i < rawTrail.length; i++) {
+                    if (i === 0) ctx.moveTo(rawTrail[i].x, rawTrail[i].y);
+                    else ctx.lineTo(rawTrail[i].x, rawTrail[i].y);
+                }
+                ctx.stroke();
+
+                // 2. 1€ 필터 스무딩 궤적 (에메랄드 실선)
+                ctx.strokeStyle = 'rgba(52, 211, 153, 0.9)';
+                ctx.lineWidth = 3.5;
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                for (let i = 0; i < smoothedTrail.length; i++) {
+                    if (i === 0) ctx.moveTo(smoothedTrail[i].x, smoothedTrail[i].y);
+                    else ctx.lineTo(smoothedTrail[i].x, smoothedTrail[i].y);
+                }
+                ctx.stroke();
+
+                // 필터 궤적 끝점에 글로우 인디케이터
+                const lastPt = smoothedTrail[smoothedTrail.length - 1];
+                ctx.fillStyle = '#10b981';
+                ctx.beginPath();
+                ctx.arc(lastPt.x, lastPt.y, 6, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
 
             // 파티클 그리기
             particles.forEach(p => {

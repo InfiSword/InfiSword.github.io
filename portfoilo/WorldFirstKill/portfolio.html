@@ -953,7 +953,13 @@ public class ServerCSV_ConvertData
                     }
                 }
 
-                document.getElementById('seed-log').innerHTML = `<div class="text-emerald-400">// 시드 토큰 기반 복구 완료! (시드: ${baseSeed})</div>`;
+                // 복구 성공 피드백 (하이라이트 애니메이션)
+                const logContainer = document.getElementById('seed-log');
+                const logEntry = document.createElement('div');
+                logEntry.className = 'p-2 rounded bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 font-mono text-xs animate-pulse';
+                logEntry.innerHTML = `✅ [FAST-FORWARD RESTORED] Seed: <strong class="text-white">${baseSeed}</strong> / Usage Sync: Map(${domains.Map.count}), Quest(${domains.Quest.count}), Reward(${domains.Reward.count}) ➜ 100% Deterministic State!`;
+                logContainer.prepend(logEntry);
+                
                 buildTokenString();
             } catch (e) {
                 alert('시드 토큰 파싱 에러: ' + e.message);

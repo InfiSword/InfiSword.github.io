@@ -150,9 +150,27 @@
                     </div>
                 </div>
                 
-                <div class="flex-1 relative bg-black/40 rounded-xl overflow-hidden flex items-center justify-center p-1 border border-white/5 min-h-[400px]">
-                    <!-- 논리 크기 2560x1536 (10x6 그리드) -->
-                    <canvas id="simCanvas" width="2560" height="1536" class="max-h-full object-contain"></canvas>
+                <div class="flex-1 relative bg-black/60 rounded-xl overflow-hidden flex flex-col border border-white/10 shadow-2xl min-h-[450px]">
+                    <!-- macOS/IDE Style Window Titlebar -->
+                    <div class="flex items-center justify-between px-4 py-2 bg-slate-950/90 border-b border-white/5 select-none">
+                        <div class="flex items-center gap-2">
+                            <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                            <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+                            <span class="ml-2 text-xs font-mono text-gray-400">Viewport_Culling_Pipeline.exe [2560x1536 World]</span>
+                        </div>
+                        <div class="flex items-center gap-3 font-mono text-[11px]">
+                            <span class="text-gray-400">FPS: <strong class="text-emerald-400 font-bold" id="ds-fps">60</strong></span>
+                            <span class="text-gray-600">|</span>
+                            <span class="text-gray-400">Culled: <strong class="text-yellow-400 font-bold" id="ds-cull-rate">84.2%</strong></span>
+                            <span class="text-gray-600">|</span>
+                            <span class="text-gray-400">DrawCalls: <strong class="text-indigo-400 font-bold" id="ds-dc-count">15 / 96</strong></span>
+                        </div>
+                    </div>
+                    <div class="relative flex-1 flex items-center justify-center p-2 bg-gradient-to-b from-[#090b14] to-[#04050a]">
+                        <!-- 논리 크기 2560x1536 (10x6 그리드) -->
+                        <canvas id="simCanvas" width="2560" height="1536" class="max-h-full object-contain rounded-lg shadow-inner"></canvas>
+                    </div>
                 </div>
             </div>
 
@@ -1055,6 +1073,15 @@ bool CameraManager::IsObjectInViewport(GameObject* obj) const {
             
             const renderedTilesCount = (tileEndX - tileStartX + 1) * (tileEndY - tileStartY + 1);
             document.getElementById('info-ctile').textContent = renderedTilesCount;
+
+            // 5. 상단 윈도우 타이틀바 지표 동기화
+            const totalEntities = trees.length + (WORLD_W/GRID_CELL_SIZE * WORLD_H/GRID_CELL_SIZE);
+            const renderedEntities = renderedTrees + renderedTilesCount;
+            const cullRate = ((1 - (renderedEntities / totalEntities)) * 100).toFixed(1);
+            const cullRateBadge = document.getElementById('ds-cull-rate');
+            const dcCountBadge = document.getElementById('ds-dc-count');
+            if (cullRateBadge) cullRateBadge.textContent = `${cullRate}%`;
+            if (dcCountBadge) dcCountBadge.textContent = `${renderedEntities} / ${totalEntities}`;
         }
 
         // 그리기 (렌더링)
