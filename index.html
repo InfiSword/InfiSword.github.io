@@ -43,12 +43,15 @@
         color: #e2e8f0;
         line-height: 1.6;
         position: relative;
-        background-color: #050711;
-        border-radius: 20px;
-        padding: 36px 32px;
+        background:
+            radial-gradient(circle at 12% 4%, rgba(59, 130, 246, 0.12), transparent 28rem),
+            radial-gradient(circle at 92% 48%, rgba(168, 85, 247, 0.09), transparent 32rem),
+            #050711;
+        border-radius: 28px;
+        padding: clamp(24px, 4vw, 52px);
         margin-bottom: 40px;
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        border: 1px solid rgba(148, 163, 184, 0.14);
+        box-shadow: 0 28px 80px rgba(2, 6, 23, 0.48);
         overflow: hidden;
     }
 
@@ -302,11 +305,33 @@
 
     /* Project Cards */
     #pf-custom-portfolio .pf-project-card {
-        padding: 30px;
+        padding: 32px;
         margin-bottom: 22px;
         display: flex;
         flex-direction: column;
         gap: 18px;
+        overflow: hidden;
+        isolation: isolate;
+    }
+    #pf-custom-portfolio .pf-project-card::before {
+        content: '';
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 3px;
+        background: linear-gradient(180deg, #38bdf8, #6366f1, #c084fc);
+        opacity: 0.85;
+    }
+    #pf-custom-portfolio .pf-project-card::after {
+        content: attr(data-project);
+        position: absolute;
+        top: 18px;
+        right: 24px;
+        z-index: -1;
+        color: rgba(148, 163, 184, 0.07);
+        font-family: 'Fira Code', monospace;
+        font-size: clamp(3.8rem, 8vw, 6.5rem);
+        font-weight: 800;
+        line-height: 1;
     }
     #pf-custom-portfolio .pf-card-top {
         display: flex;
@@ -329,6 +354,14 @@
         color: #f8fafc;
         margin: 0;
         letter-spacing: -0.02em;
+    }
+    #pf-custom-portfolio .pf-project-name a {
+        color: inherit;
+        text-decoration: none;
+    }
+    #pf-custom-portfolio .pf-project-name a:hover,
+    #pf-custom-portfolio .pf-project-name a:focus-visible {
+        color: #bfdbfe;
     }
     #pf-custom-portfolio .pf-project-desc {
         font-size: 0.92rem;
@@ -374,16 +407,17 @@
         font-family: 'Fira Code', monospace;
         font-size: 0.8rem;
         font-weight: 600;
-        padding: 8px 16px;
+        min-height: 42px;
+        padding: 9px 16px;
         border-radius: 8px;
         cursor: pointer;
         transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
         text-decoration: none;
     }
     #pf-custom-portfolio .pf-btn-modal {
-        background: rgba(255, 255, 255, 0.06);
-        color: #93c5fd;
-        border: 1px solid rgba(96, 165, 250, 0.25);
+        background: rgba(255, 255, 255, 0.045);
+        color: #cbd5e1;
+        border: 1px solid rgba(148, 163, 184, 0.2);
     }
     #pf-custom-portfolio .pf-btn-modal:hover {
         background: rgba(96, 165, 250, 0.15);
@@ -392,15 +426,24 @@
         transform: translateY(-1px);
     }
     #pf-custom-portfolio .pf-btn-post {
-        background: transparent;
-        color: #94a3b8;
-        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: linear-gradient(135deg, #2563eb, #4f46e5);
+        color: #ffffff;
+        border: 1px solid rgba(147, 197, 253, 0.5);
+        box-shadow: 0 10px 28px rgba(37, 99, 235, 0.24);
     }
     #pf-custom-portfolio .pf-btn-post:hover {
-        background: rgba(255, 255, 255, 0.04);
-        color: #f1f5f9;
-        border-color: rgba(255, 255, 255, 0.2);
+        background: linear-gradient(135deg, #3b82f6, #6366f1);
+        color: #ffffff;
+        border-color: rgba(191, 219, 254, 0.82);
+        transform: translateY(-2px);
+        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.34);
         text-decoration: none;
+    }
+    #pf-custom-portfolio .pf-btn:focus-visible,
+    #pf-custom-portfolio .pf-project-name a:focus-visible,
+    .pf-modal-close:focus-visible {
+        outline: 3px solid rgba(125, 211, 252, 0.75);
+        outline-offset: 3px;
     }
 
     /* ==========================================================================
@@ -528,6 +571,127 @@
         .pf-modal-container {
             padding: 24px 16px;
         }
+    }
+
+    /* Light blue portfolio theme — derived from the primary detail button */
+    #pf-custom-portfolio {
+        color: #1e293b;
+        background:
+            radial-gradient(circle at 8% 0%, rgba(59, 130, 246, 0.12), transparent 28rem),
+            radial-gradient(circle at 96% 54%, rgba(99, 102, 241, 0.08), transparent 34rem),
+            linear-gradient(180deg, #ffffff 0%, #f5f8ff 100%);
+        border-color: #dbe5f2;
+        box-shadow: 0 28px 80px rgba(37, 99, 235, 0.10);
+    }
+    #pf-custom-portfolio::before {
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.14), transparent 70%);
+    }
+    #pf-custom-portfolio::after {
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.10), transparent 70%);
+    }
+    #pf-custom-portfolio .pf-glass-card {
+        background: rgba(255, 255, 255, 0.88);
+        border-color: #dce6f3;
+        box-shadow: 0 12px 34px rgba(30, 64, 175, 0.07);
+        backdrop-filter: blur(12px);
+    }
+    #pf-custom-portfolio .pf-glass-card:hover {
+        border-color: #93c5fd;
+        box-shadow: 0 18px 42px rgba(37, 99, 235, 0.13);
+    }
+    #pf-custom-portfolio .pf-section-heading {
+        color: #2563eb;
+    }
+    #pf-custom-portfolio .pf-section-heading::after {
+        background: linear-gradient(90deg, rgba(37, 99, 235, 0.35), rgba(37, 99, 235, 0.02));
+    }
+    #pf-custom-portfolio .pf-hero-title {
+        background: linear-gradient(135deg, #0f172a 12%, #2563eb 58%, #4f46e5 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    #pf-custom-portfolio .pf-hero-desc,
+    #pf-custom-portfolio .pf-project-desc,
+    #pf-custom-portfolio .pf-exp-list {
+        color: #526178;
+    }
+    #pf-custom-portfolio .pf-hero-desc strong,
+    #pf-custom-portfolio .pf-project-desc strong,
+    #pf-custom-portfolio .pf-highlight {
+        color: #172033;
+    }
+    #pf-custom-portfolio .pf-exp-header,
+    #pf-custom-portfolio .pf-project-name {
+        color: #172033;
+    }
+    #pf-custom-portfolio .pf-exp-header,
+    #pf-custom-portfolio .pf-card-actions {
+        border-color: #e2e8f0;
+    }
+    #pf-custom-portfolio .pf-tech-chip {
+        background: #f8fbff;
+        border-color: #dbe7f5;
+        color: #334155;
+    }
+    #pf-custom-portfolio .pf-tech-chip:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+    }
+    #pf-custom-portfolio .pf-project-card {
+        background: linear-gradient(145deg, #ffffff, #f8fbff);
+    }
+    #pf-custom-portfolio .pf-project-card::after {
+        color: rgba(37, 99, 235, 0.065);
+    }
+    #pf-custom-portfolio .pf-project-name a:hover,
+    #pf-custom-portfolio .pf-project-name a:focus-visible {
+        color: #2563eb;
+    }
+    #pf-custom-portfolio .pf-keyword-badge {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1d4ed8;
+    }
+    #pf-custom-portfolio .pf-btn-modal {
+        background: #ffffff;
+        color: #2563eb;
+        border-color: #bfdbfe;
+    }
+    #pf-custom-portfolio .pf-btn-modal:hover {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: #60a5fa;
+    }
+    .pf-modal-overlay {
+        background: rgba(30, 41, 59, 0.54);
+    }
+    .pf-modal-container {
+        color: #1e293b;
+        background: linear-gradient(145deg, #ffffff, #f6f9ff);
+        border-color: #dbe5f2;
+        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+    }
+    .pf-modal-header {
+        border-color: #e2e8f0;
+    }
+    .pf-modal-title {
+        color: #172033;
+    }
+    .pf-modal-close {
+        background: #f8fafc;
+        border-color: #dbe5f2;
+        color: #64748b;
+    }
+    .pf-modal-item {
+        background: #f8fbff;
+        border-color: #dce6f3;
+    }
+    .pf-modal-item-desc {
+        color: #526178;
+    }
+    .pf-modal-item-desc strong {
+        color: #172033;
     }
 </style>
 
@@ -689,10 +853,10 @@
     <div id="projects" class="pf-section-heading">02. FEATURED GAME PROJECTS</div>
 
     <!-- 1. FILE TOWER DEFENSE -->
-    <article class="pf-glass-card pf-project-card">
+    <article class="pf-glass-card pf-project-card" data-project="01">
         <div class="pf-card-top">
             <span class="pf-project-tag pf-mono">● Systems Engineering & Optimization</span>
-            <h3 class="pf-project-name">File Tower Defense (지스타 수상작)</h3>
+            <h3 class="pf-project-name"><a href="/project/file-tower-defense/">File Tower Defense (지스타 수상작)</a></h3>
         </div>
         <p class="pf-project-desc">
             유니티의 좌표계 특성을 분석하여 <strong>RectTransform(UI)에서 Transform(GameObject) 기반</strong>으로 아키텍처를 전면 재설계. 
@@ -706,20 +870,20 @@
             <span class="pf-keyword-badge">#Dynamic Buff System</span>
         </div>
         <div class="pf-card-actions">
-            <button class="pf-btn pf-btn-modal" onclick="pfOpenModal('fileTowerDefense');">
+            <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="fileTowerDefense" onclick="pfOpenModal('fileTowerDefense');">
                 <span>⚡</span> 핵심 아키텍처 요약
             </button>
-            <a href="/project/file-tower-defense/" class="pf-btn pf-btn-post">
-                <span>🔗</span> 상세 포스트
+            <a href="/project/file-tower-defense/" class="pf-btn pf-btn-post" aria-label="File Tower Defense 상세 포스트 보기">
+                상세 포스트 보기 <span aria-hidden="true">↗</span>
             </a>
         </div>
     </article>
 
     <!-- 2. WINAPI DONT STARVE CLONE -->
-    <article class="pf-glass-card pf-project-card">
+    <article class="pf-glass-card pf-project-card" data-project="02">
         <div class="pf-card-top">
             <span class="pf-project-tag pf-mono" style="color: #818cf8;">● Windows API C++ & Rendering Optimization</span>
-            <h3 class="pf-project-name">WinAPI Don't Starve Clone</h3>
+            <h3 class="pf-project-name"><a href="/project/winapi-dont-starve/">WinAPI Don't Starve Clone</a></h3>
         </div>
         <p class="pf-project-desc">
             <strong>C++, WinAPI GDI/GDI+</strong> 환경에서 Don't Starve의 탑다운 생존 메커니즘을 순수 엔진 프리로 구현. 
@@ -732,20 +896,20 @@
             <span class="pf-keyword-badge">#Component Architecture</span>
         </div>
         <div class="pf-card-actions">
-            <button class="pf-btn pf-btn-modal" onclick="pfOpenModal('dontStarve');">
+            <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="dontStarve" onclick="pfOpenModal('dontStarve');">
                 <span>⚡</span> 핵심 아키텍처 요약
             </button>
-            <a href="/project/winapi-dont-starve/" class="pf-btn pf-btn-post">
-                <span>🔗</span> 상세 포스트
+            <a href="/project/winapi-dont-starve/" class="pf-btn pf-btn-post" aria-label="WinAPI Don't Starve Clone 상세 포스트 보기">
+                상세 포스트 보기 <span aria-hidden="true">↗</span>
             </a>
         </div>
     </article>
 
     <!-- 3. WORLD FIRST KILL -->
-    <article class="pf-glass-card pf-project-card">
+    <article class="pf-glass-card pf-project-card" data-project="03">
         <div class="pf-card-top">
             <span class="pf-project-tag pf-mono" style="color: #c084fc;">● Deterministic RNG & Network Data Sync</span>
-            <h3 class="pf-project-name">WorldFirstKill</h3>
+            <h3 class="pf-project-name"><a href="/project/worldfirstkill/">WorldFirstKill</a></h3>
         </div>
         <p class="pf-project-desc">
             <strong>C# 리플렉션(Reflection) 기반 CSV 자동 파싱 시스템</strong>과 <strong>구글 시트 버전 비교 기반 비동기 데이터 동기화 파이프라인</strong> 구축. 
@@ -758,20 +922,20 @@
             <span class="pf-keyword-badge">#Fixed Token Serialization</span>
         </div>
         <div class="pf-card-actions">
-            <button class="pf-btn pf-btn-modal" onclick="pfOpenModal('wfk');">
+            <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="wfk" onclick="pfOpenModal('wfk');">
                 <span>⚡</span> 핵심 아키텍처 요약
             </button>
-            <a href="/project/worldfirstkill/" class="pf-btn pf-btn-post">
-                <span>🔗</span> 상세 포스트
+            <a href="/project/worldfirstkill/" class="pf-btn pf-btn-post" aria-label="WorldFirstKill 상세 포스트 보기">
+                상세 포스트 보기 <span aria-hidden="true">↗</span>
             </a>
         </div>
     </article>
 
     <!-- 4. AUTONOMOUS RACING AGENT -->
-    <article class="pf-glass-card pf-project-card">
+    <article class="pf-glass-card pf-project-card" data-project="04">
         <div class="pf-card-top">
             <span class="pf-project-tag pf-mono" style="color: #38bdf8;">● Reinforcement Learning & Autonomous Driving</span>
-            <h3 class="pf-project-name">Autonomous Racing Agent</h3>
+            <h3 class="pf-project-name"><a href="/project/autonomous-racing-agent/">Autonomous Racing Agent</a></h3>
         </div>
         <p class="pf-project-desc">
             <strong>Unity ML-Agents (PPO)</strong> 기반의 자율 주행 경주차 강화학습 에이전트. 
@@ -784,20 +948,20 @@
             <span class="pf-keyword-badge">#Continuous Action Space</span>
         </div>
         <div class="pf-card-actions">
-            <button class="pf-btn pf-btn-modal" onclick="pfOpenModal('racing');">
+            <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="racing" onclick="pfOpenModal('racing');">
                 <span>⚡</span> 핵심 아키텍처 요약
             </button>
-            <a href="/project/autonomous-racing-agent/" class="pf-btn pf-btn-post">
-                <span>🔗</span> 상세 포스트
+            <a href="/project/autonomous-racing-agent/" class="pf-btn pf-btn-post" aria-label="Autonomous Racing Agent 상세 포스트 보기">
+                상세 포스트 보기 <span aria-hidden="true">↗</span>
             </a>
         </div>
     </article>
 
     <!-- 5. SLIME PROJECT -->
-    <article class="pf-glass-card pf-project-card">
+    <article class="pf-glass-card pf-project-card" data-project="05">
         <div class="pf-card-top">
             <span class="pf-project-tag pf-mono" style="color: #fb923c;">● Hierarchical FSM & Composition Architecture</span>
-            <h3 class="pf-project-name">Slime Project (하드코어 액션 플랫포머)</h3>
+            <h3 class="pf-project-name"><a href="/project/slime-project/">Slime Project (하드코어 액션 플랫포머)</a></h3>
         </div>
         <p class="pf-project-desc">
             <strong>Finite State Machine (FSM)</strong> 기반으로 플레이어와 몬스터의 복합 행동 패턴을 모듈화. 
@@ -810,11 +974,11 @@
             <span class="pf-keyword-badge">#Dynamic AI Behavior</span>
         </div>
         <div class="pf-card-actions">
-            <button class="pf-btn pf-btn-modal" onclick="pfOpenModal('slime');">
+            <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="slime" onclick="pfOpenModal('slime');">
                 <span>⚡</span> 핵심 아키텍처 요약
             </button>
-            <a href="/project/slime-project/" class="pf-btn pf-btn-post">
-                <span>🔗</span> 상세 포스트
+            <a href="/project/slime-project/" class="pf-btn pf-btn-post" aria-label="Slime Project 상세 포스트 보기">
+                상세 포스트 보기 <span aria-hidden="true">↗</span>
             </a>
         </div>
     </article>
@@ -826,7 +990,7 @@
 <!-- ========================================== -->
 
 <!-- 1. FILE TOWER DEFENSE MODAL -->
-<div id="fileTowerDefense" class="pf-modal-overlay" onclick="pfCloseModal('fileTowerDefense')">
+<div id="fileTowerDefense" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="File Tower Defense 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('fileTowerDefense')">
     <div class="pf-modal-container" onclick="event.stopPropagation()">
         <div class="pf-modal-header">
             <div>
@@ -858,7 +1022,7 @@
 </div>
 
 <!-- 2. WINAPI DONT STARVE MODAL -->
-<div id="dontStarve" class="pf-modal-overlay" onclick="pfCloseModal('dontStarve')">
+<div id="dontStarve" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="WinAPI Don't Starve 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('dontStarve')">
     <div class="pf-modal-container" onclick="event.stopPropagation()">
         <div class="pf-modal-header">
             <div>
@@ -890,7 +1054,7 @@
 </div>
 
 <!-- 3. WORLDFIRSTKILL MODAL -->
-<div id="wfk" class="pf-modal-overlay" onclick="pfCloseModal('wfk')">
+<div id="wfk" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="WorldFirstKill 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('wfk')">
     <div class="pf-modal-container" onclick="event.stopPropagation()">
         <div class="pf-modal-header">
             <div>
@@ -922,7 +1086,7 @@
 </div>
 
 <!-- 4. RACING AGENT MODAL -->
-<div id="racing" class="pf-modal-overlay" onclick="pfCloseModal('racing')">
+<div id="racing" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="Autonomous Racing 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('racing')">
     <div class="pf-modal-container" onclick="event.stopPropagation()">
         <div class="pf-modal-header">
             <div>
@@ -954,7 +1118,7 @@
 </div>
 
 <!-- 5. SLIME PROJECT MODAL -->
-<div id="slime" class="pf-modal-overlay" onclick="pfCloseModal('slime')">
+<div id="slime" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="Slime Project 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('slime')">
     <div class="pf-modal-container" onclick="event.stopPropagation()">
         <div class="pf-modal-header">
             <div>
@@ -1015,6 +1179,12 @@
 
     </div>
   </main>
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <p><span class="site-footer__mark">ML</span> 게임의 구조와 플레이 감각을 함께 설계합니다.</p>
+      <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
+    </div>
+  </footer>
   <script src="/assets/js/site.js"></script>
 </body>
 </html>

@@ -473,6 +473,12 @@ function renderShell({ title, description, body, pageClass = "" }) {
   <main id="main" class="site-main">
 ${body}
   </main>
+  <footer class="site-footer">
+    <div class="site-footer__inner">
+      <p><span class="site-footer__mark">ML</span> 게임의 구조와 플레이 감각을 함께 설계합니다.</p>
+      <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
+    </div>
+  </footer>
   <script src="/assets/js/site.js"></script>
 </body>
 </html>
@@ -502,7 +508,8 @@ function outputPathForPost(data, sourceFile) {
 
 function renderProject(sourceFile) {
   const parsed = stripFrontMatter(readText(sourceFile));
-  const article = renderMarkdown(parsed.body);
+  const articleSource = parsed.body.replace(/<style\b[^>]*>[\s\S]*?<\/style>\s*/gi, "");
+  const article = renderMarkdown(articleSource);
   const tags = Array.isArray(parsed.data.tags) ? parsed.data.tags : [];
   const title = parsed.data.title || path.basename(sourceFile, ".md");
   const description = parsed.data.excerpt || site.description;

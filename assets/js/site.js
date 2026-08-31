@@ -1,24 +1,36 @@
 (function () {
+  let modalTrigger = null;
+
   window.pfOpenModal = function (modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
+    modalTrigger = document.activeElement;
     modal.style.display = "flex";
+    modal.setAttribute("aria-hidden", "false");
     document.body.style.overflow = "hidden";
+    const closeButton = modal.querySelector(".pf-modal-close");
+    if (closeButton) closeButton.focus();
   };
 
   window.pfCloseModal = function (modalId) {
     const modal = document.getElementById(modalId);
     if (!modal) return;
     modal.style.display = "none";
-    document.body.style.overflow = "auto";
+    modal.setAttribute("aria-hidden", "true");
+    document.body.style.overflow = "";
+    if (modalTrigger && typeof modalTrigger.focus === "function") modalTrigger.focus();
+    modalTrigger = null;
   };
 
   document.addEventListener("keydown", function (event) {
     if (event.key !== "Escape") return;
     document.querySelectorAll(".pf-modal-overlay").forEach(function (modal) {
       modal.style.display = "none";
+      modal.setAttribute("aria-hidden", "true");
     });
-    document.body.style.overflow = "auto";
+    document.body.style.overflow = "";
+    if (modalTrigger && typeof modalTrigger.focus === "function") modalTrigger.focus();
+    modalTrigger = null;
   });
 
   const tocLinks = Array.from(document.querySelectorAll(".toc-list a"));
