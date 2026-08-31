@@ -1,27 +1,13 @@
 {
-  "name": "minimal-mistakes",
+  "name": "infisword-portfolio",
   "private": true,
-  "version": "4.28.0",
-  "description": "Minimal Mistakes 2 column Jekyll theme.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/mmistakes/minimal-mistakes.git"
+  "version": "1.0.0",
+  "description": "Static portfolio site for GitHub Pages.",
+  "scripts": {
+    "build": "node scripts/build-static-site.js",
+    "serve": "node scripts/serve-static-site.js"
   },
-  "keywords": [
-    "jekyll",
-    "theme",
-    "minimal"
-  ],
-  "author": "Michael Rose",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/mmistakes/minimal-mistakes/issues"
-  },
-  "homepage": "https://mmistakes.github.io/minimal-mistakes/",
   "engines": {
-    "node": ">= 0.10.0"
-  },
-  "devDependencies": {
-    "uglify-js": "^3.17.4"
+    "node": ">= 18"
   }
 }
