@@ -13,33 +13,9 @@ search: false
    CLEAN & RESPONSIVE CONTENT-CENTRIC LAYOUT OVERRIDES
    ========================================================================== */
 
-/* Universal Sticky TOC Override */
-.sidebar__right {
-  @include breakpoint($large) {
-    position: absolute !important;
-    top: 0 !important;
-    inset-inline-end: 0 !important;
-    width: $right-sidebar-width-narrow !important;
-    margin-inline-end: 0 !important;
-    padding-inline-start: 1.5em !important;
-    z-index: 20 !important;
-
-    &.sticky {
-      position: -webkit-sticky !important;
-      position: sticky !important;
-      top: 2em !important;
-      float: inline-end !important;
-    }
-  }
-
-  @include breakpoint($x-large) {
-    width: $right-sidebar-width !important;
-  }
-}
-
-/* Wide Content-Centric Pages (Full Width & No Sidebar Collisions) */
+/* Wide Content-Centric Pages */
 .wide {
-  /* Hide the floating left author sidebar on wide tech report posts to prevent text overlap */
+  /* Keep the same outer width as the masthead and portfolio home. */
   .sidebar:not(.sidebar__right) {
     display: none !important;
   }
@@ -65,17 +41,56 @@ search: false
         width: 100% !important;
         float: none !important;
         position: relative !important;
+
+        &.page__content--with-toc {
+          @include breakpoint($large) {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) calc(#{$right-sidebar-width-narrow} + 1rem);
+            column-gap: 1.5rem;
+            align-items: start;
+          }
+
+          @include breakpoint($x-large) {
+            grid-template-columns: minmax(0, 1fr) calc(#{$right-sidebar-width} + 1.25rem);
+            column-gap: 2rem;
+          }
+        }
       }
     }
   }
 
-  /* When TOC is active on a wide page, reserve space on the right so text never collides */
-  &:has(.sidebar__right) .page .page__inner-wrap {
+  .page__content-body {
+    min-width: 0;
+  }
+
+  .page__content--with-toc > .page__content-body {
     @include breakpoint($large) {
-      padding-inline-end: calc(#{$right-sidebar-width-narrow} + 1.5em) !important;
+      grid-column: 1;
+      grid-row: 1;
     }
+  }
+
+  .page__content--with-toc > .sidebar__right {
+    margin-bottom: 1.5rem;
+
+    @include breakpoint($large) {
+      grid-column: 2;
+      grid-row: 1;
+      position: -webkit-sticky !important;
+      position: sticky !important;
+      top: 2rem !important;
+      align-self: start;
+      float: none !important;
+      width: 100% !important;
+      margin: 0 !important;
+      padding-inline-start: 1rem !important;
+      border-inline-start: 1px solid $border-color;
+      box-sizing: border-box;
+      z-index: 2 !important;
+    }
+
     @include breakpoint($x-large) {
-      padding-inline-end: calc(#{$right-sidebar-width} + 2em) !important;
+      padding-inline-start: 1.25rem !important;
     }
   }
 
