@@ -182,7 +182,12 @@ exclude:
   - LICENSE
   - log
   - minimal-mistakes-jekyll.gemspec
-  - portfoilo
+  - portfoilo/D
+  - portfoilo/포폴이미지
+  - portfoilo/자소서.txt
+  - portfoilo/리얼 포폴.pptx
+  - portfoilo/리얼 포폴 수정.pptx
+  - portfoilo/~$리얼 포폴.pptx
   - Context
   - node_modules
   - package.json
