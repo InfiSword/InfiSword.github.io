@@ -1015,6 +1015,34 @@
         </div>
     </article>
 
+    <!-- 6. MOONLIGHT -->
+    <article class="pf-glass-card pf-project-card" data-project="06">
+        <div class="pf-card-top">
+            <span class="pf-project-tag pf-mono" style="color: #d97706;">● A* Pathfinding & Tycoon NPC Simulation</span>
+            <h3 class="pf-project-name"><a href="/project/moonlight/">보름달 방앗간 (MoonLight)</a></h3>
+        </div>
+        <p class="pf-project-desc">
+            Unity Tilemap의 셀 좌표와 월드 좌표를 연결한 <strong>커스텀 그리드·타일 데이터 시스템</strong>을 설계하고,
+            <strong>A* 길찾기</strong>를 직원과 손님의 공통 이동 기반으로 구현했습니다.
+            테이블·의자·조리 도구의 점유 상태를 관리하며 <strong>손님의 입장–착석–주문–식사–퇴장</strong>과
+            <strong>직원의 배회–조리–서빙</strong>을 상태 머신과 주문 큐로 연결해 타이쿤의 서비스 루프를 완성했습니다.
+        </p>
+        <div class="pf-keyword-row">
+            <span class="pf-keyword-badge">#A* Pathfinding</span>
+            <span class="pf-keyword-badge">#Custom Tile Data</span>
+            <span class="pf-keyword-badge">#NPC State Machine</span>
+            <span class="pf-keyword-badge">#Resource Reservation</span>
+        </div>
+        <div class="pf-card-actions">
+            <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="moonlight" onclick="pfOpenModal('moonlight');">
+                <span>⚡</span> 핵심 아키텍처 요약
+            </button>
+            <a href="/project/moonlight/" class="pf-btn pf-btn-post" aria-label="보름달 방앗간 상세 포스트 보기">
+                상세 포스트 보기 <span aria-hidden="true">↗</span>
+            </a>
+        </div>
+    </article>
+
 </div> <!-- pf-custom-portfolio END -->
 
 <!-- ========================================== -->
@@ -1176,6 +1204,37 @@
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #fb923c;"><span>👾</span> 4. 상속 기반 일반 몬스터 AI 확장</div>
                 <p class="pf-modal-item-desc">공통 정찰/추적 상태를 베이스로 돌진(곰), 도약(거미), 순찰(개미) 등 개별 몬스터의 특화 패턴을 손쉽게 파생할 수 있도록 확장성을 확보했습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 6. MOONLIGHT MODAL -->
+<div id="moonlight" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="보름달 방앗간 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('moonlight')">
+    <div class="pf-modal-container" onclick="event.stopPropagation()">
+        <div class="pf-modal-header">
+            <div>
+                <div class="pf-modal-tag" style="color: #f59e0b;">ARCHITECTURE REPORT // MOONLIGHT</div>
+                <h2 class="pf-modal-title">보름달 방앗간: 타일 기반 NPC 서비스 시스템</h2>
+            </div>
+            <button class="pf-modal-close" onclick="pfCloseModal('moonlight')">✕ CLOSE</button>
+        </div>
+        <div class="pf-modal-grid">
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🧭</span> 1. A* 기반 공통 이동 계층</div>
+                <p class="pf-modal-item-desc">G/H/F 비용, Manhattan 휴리스틱, Open/Closed Set을 사용하는 4방향 A*를 구현하고 직원과 손님이 동일한 경로 데이터로 이동하도록 구성했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🧱</span> 2. 커스텀 타일·점유 데이터</div>
+                <p class="pf-modal-item-desc">테이블과 의자 타일을 좌표 기반 Dictionary로 관리하고, 사용 가능 여부와 테이블 수용 상태를 별도 데이터로 분리해 NPC의 자리 탐색과 반환 로직에 연결했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>👥</span> 3. 직원·손님 상태 머신</div>
+                <p class="pf-modal-item-desc">손님의 입장부터 퇴장까지, 직원의 배회부터 조리와 서빙까지를 독립 상태로 나누어 코루틴 기반의 비동기 행동 흐름으로 제어했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🍽️</span> 4. 주문 큐와 자원 예약</div>
+                <p class="pf-modal-item-desc">음식과 손님을 대응되는 Queue로 관리하고 조리 도구·좌석의 점유 플래그를 선점/반납하여 여러 NPC가 동시에 같은 자원을 선택하는 충돌을 줄였습니다.</p>
             </div>
         </div>
     </div>
