@@ -272,11 +272,11 @@ mermaid: true
 ## 2. 파일/바이러스/UI 입력 및 상호작용 시스템
 {: .chapter-title }
 
-수많은 유닛이 각자 `Update()`에서 마우스 충돌을 검사하면 연산량이 기하급수적으로 늘어납니다. 이를 방지하기 위해 **Mediator 패턴**을 활용하여 **InputManager**가 모든 마우스 입력을 통합 관리하고, **IInteractable** 인터페이스를 구현한 대상 객체에게만 이벤트를 전송하도록 설계했습니다.
+수많은 유닛이 각자 `Update()`에서 마우스 충돌을 검사하는 것은 비효율적이고 관리하기 어렵다고 판단했습니다. 이를 개선하기 위해 **Mediator 패턴**을 도입하여 **InputManager**가 모든 마우스 입력을 중앙 집중식으로 수집·판정하고, 상호작용 중재자인 **InteractionHandler**가 유닛의 선택 및 드래그 상태를 통합 관리하며, **IInteractable** 인터페이스를 구현한 대상 객체에게만 이벤트를 안전하게 전파하도록 설계했습니다.
 
 ### 2.1 중앙 집중식 입력 아키텍처
 
-`InputManager`는 마우스의 상태 머신(`InputState`)을 기반으로 클릭, 드래그, 다중 선택(Ctrl+드래그)을 판단하여 `InteractionHandler`를 통해 이벤트를 전파합니다.
+`InputManager`가 렌즈 왜곡 보정 및 레이캐스트 판정을 거쳐 마우스 상태 머신(`InputState`)을 기반으로 클릭, 드래그, 다중 선택(Ctrl+드래그)을 판정하면, 중재자인 `InteractionHandler`가 단일/다중 선택 객체 목록(`SelectedObjects`)과 드래그 대상군(`DragObjects`)을 제어하고 배치 실패 시 위치 복원(`RestoreOriginalPositions`)까지 책임지며 대상 `IInteractable` 객체들에게 이벤트를 일괄 전파합니다.
 
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">

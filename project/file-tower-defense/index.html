@@ -125,9 +125,9 @@
 <ul><li><strong>컴포넌트 중심의 유연한 제어:</strong> 에디터 인스펙터에서 행과 열(<code>Columns: 14</code>, <code>Rows: 8</code>), 패딩 및 스페이싱을 설정하면 오르토그래픽 카메라의 가로·세로 월드 크기를 실시간 계산하여 최적의 셀 크기(<code>Cell Size</code>)를 자동으로 도출합니다.</li><li><strong>실제 초록색 그리드(World Grid) 영역:</strong> 씬 뷰 화면에 초록색 라인으로 표시되는 격자가 <strong>실제 인게임 파일 유닛과 바이러스가 배치·이동하는 물리적 그리드</strong>입니다. <code>Bottom Offset Ratio(0.1)</code> 설정을 통해 하단 작업표시줄 UI 영역(약 10%)을 비워두고, 상단 가용 영역에만 정확히 14×8 격자가 피팅되도록 중심점을 자동 보정합니다.</li></ul>
 <hr>
 <h2 id="2-파일바이러스ui-입력-및-상호작용-시스템" class="chapter-title">2. 파일/바이러스/UI 입력 및 상호작용 시스템</h2>
-<p>수많은 유닛이 각자 <code>Update()</code>에서 마우스 충돌을 검사하면 연산량이 기하급수적으로 늘어납니다. 이를 방지하기 위해 <strong>Mediator 패턴</strong>을 활용하여 <strong>InputManager</strong>가 모든 마우스 입력을 통합 관리하고, <strong>IInteractable</strong> 인터페이스를 구현한 대상 객체에게만 이벤트를 전송하도록 설계했습니다.</p>
+<p>수많은 유닛이 각자 <code>Update()</code>에서 마우스 충돌을 검사하는 것은 비효율적이고 관리하기 어렵다고 판단했습니다. 이를 개선하기 위해 <strong>Mediator 패턴</strong>을 도입하여 <strong>InputManager</strong>가 모든 마우스 입력을 중앙 집중식으로 수집·판정하고, 상호작용 중재자인 <strong>InteractionHandler</strong>가 유닛의 선택 및 드래그 상태를 통합 관리하며, <strong>IInteractable</strong> 인터페이스를 구현한 대상 객체에게만 이벤트를 안전하게 전파하도록 설계했습니다.</p>
 <h3 id="21-중앙-집중식-입력-아키텍처">2.1 중앙 집중식 입력 아키텍처</h3>
-<p><code>InputManager</code>는 마우스의 상태 머신(<code>InputState</code>)을 기반으로 클릭, 드래그, 다중 선택(Ctrl+드래그)을 판단하여 <code>InteractionHandler</code>를 통해 이벤트를 전파합니다.</p>
+<p><code>InputManager</code>가 렌즈 왜곡 보정 및 레이캐스트 판정을 거쳐 마우스 상태 머신(<code>InputState</code>)을 기반으로 클릭, 드래그, 다중 선택(Ctrl+드래그)을 판정하면, 중재자인 <code>InteractionHandler</code>가 단일/다중 선택 객체 목록(<code>SelectedObjects</code>)과 드래그 대상군(<code>DragObjects</code>)을 제어하고 배치 실패 시 위치 복원(<code>RestoreOriginalPositions</code>)까지 책임지며 대상 <code>IInteractable</code> 객체들에게 이벤트를 일괄 전파합니다.</p>
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
     <!-- 0. START -->
@@ -154,7 +154,7 @@
     <!-- STEP 02: 조건 판단 1 (UI 판정 & Raycast) -->
     <div class="pf-fc-decision">
       <div class="pf-fc-decision-header">
-        <span class="pf-fc-decision-badge">STEP 02. 판단 01</span>
+        <span class="pf-fc-decision-badge">판단 01</span>
         <h4 class="pf-fc-decision-title">마우스 포인터가 UI 위에 위치하는가? (IsPointerOverUI)</h4>
       </div>
       <div class="pf-fc-branch-grid">
@@ -164,7 +164,8 @@
             <span class="pf-fc-tag-yes">[YES] UI 감지</span>
             <span style="font-size: 0.68rem; color: #dc2626; font-weight: 700;">(종료 경로)</span>
           </div>
-          <div class="pf-fc-branch-title">UI 상호작용 우선 처리</div>          
+          <div class="pf-fc-branch-title">UI 상호작용 우선 처리</div>
+          <p class="pf-fc-branch-desc">인게임 월드 입력 차단 및 UI 이벤트 위임 후 <code>return</code> (단일 프레임 처리 조기 종료)</p>
         </div>
         <!-- NO 분기: 월드 타깃팅 -->
         <div class="pf-fc-branch-item" style="border-color: #bbf7d0; background: #fdfffe;">
@@ -173,7 +174,7 @@
             <span style="font-size: 0.68rem; color: #059669; font-weight: 700;">(진행 경로)</span>
           </div>
           <div class="pf-fc-branch-title">Physics2D.RaycastNonAlloc</div>
-          <p class="pf-fc-branch-desc"><code>Sorting Order</code> 순 정렬로 최상단 <code>IInteractable</code> 타깃 식별</p>
+          <p class="pf-fc-branch-desc"><code>Sorting Order</code> 순 정렬로 최상단 <code>IInteractable</code> 타깃 식별 후 STEP 03으로 전개</p>
         </div>
       </div>
     </div>
@@ -185,23 +186,26 @@
     <div class="pf-fc-decision">
       <div class="pf-fc-decision-header">
         <span class="pf-fc-decision-badge">판단 02</span>
-        <h4 class="pf-fc-decision-title">STEP 03. 입력 이벤트 상태 머신 (InputState FSM)</h4>
+        <h4 class="pf-fc-decision-title">조작 행위 상태 머신 판정 (InputState FSM)</h4>
       </div>
       <div class="pf-fc-branch-grid">
         <!-- 1. 클릭 -->
         <div class="pf-fc-branch-item">
           <span class="pf-fc-tag-state">Pressing</span>
           <div class="pf-fc-branch-title">① 클릭 (Click / Hover)</div>
+          <p class="pf-fc-branch-desc">드래그 임계값(<code>Threshold</code>) 이내 마우스 릴리즈 시 단순 클릭 판정 및 <code>OnClick</code> 트리거</p>
         </div>
         <!-- 2. 드래그 -->
         <div class="pf-fc-branch-item">
           <span class="pf-fc-tag-state">DraggingObject</span>
           <div class="pf-fc-branch-title">② 드래그 (Drag &amp; Drop)</div>
+          <p class="pf-fc-branch-desc">임계값 초과 이동 시 1€ 필터 스무딩으로 떨림을 제거하고 유닛 실시간 위치 동기화 및 그리드 배치</p>
         </div>
         <!-- 3. 다중 선택 -->
         <div class="pf-fc-branch-item">
           <span class="pf-fc-tag-state">DraggingBox</span>
           <div class="pf-fc-branch-title">③ 다중 선택 (Ctrl+드래그)</div>
+          <p class="pf-fc-branch-desc">빈 공간 드래그 또는 Ctrl+드래그 시 사각형 영역(<code>OverlapAreaAll</code>) 내 유닛 군집 일괄 선택</p>
         </div>
       </div>
     </div>
@@ -215,7 +219,7 @@
         <h4 class="pf-fc-title">STEP 04. InteractionHandler: Mediator 이벤트 일괄 디스패치</h4>
         <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">MEDIATOR</span>
       </div>
-      <p class="pf-fc-desc">중재자(Mediator) 패턴을 기반으로 판정된 조작 행위(클릭/드래그/다중 선택)를 대상 객체에게 일괄 전파</p>
+      <p class="pf-fc-desc">중재자(Mediator) 패턴을 기반으로 판정된 조작 행위(클릭/드래그/다중 선택)를 대상 객체에게 일괄 전파 (<code>Trigger Interface Methods</code>)</p>
     </div>
     <!-- Arrow -->
     <div class="pf-fc-arrow">
@@ -227,7 +231,16 @@
         <h4 class="pf-fc-title" style="color: #1d4ed8;">STEP 05. IInteractable: 인게임 객체 메서드 실행</h4>
         <span class="pf-fc-badge">EXECUTION</span>
       </div>
-      <p class="pf-fc-desc">유닛 파일, 바이러스 등 객체가 <code>OnClick()</code>, <code>OnDrag()</code>, <code>OnSelected()</code> 등 입력 이벤트를 실행하여 자체 동작 완수</p>
+      <p class="pf-fc-desc">유닛 파일, 바이러스, 폴더 객체가 <code>OnClick()</code>, <code>OnDrag()</code>, <code>OnSelected()</code>를 실행하여 자체 동작 완수</p>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- 6. END / RESULT -->
+    <div class="pf-fc-pill-end">
+      <span>⚡</span>
+      <span>성능 최적화 완료: 개별 객체 Update() 폴링 연산 0% &amp; 60+ FPS 무결점 방어</span>
     </div>
   </div>
 </div>
