@@ -177,17 +177,26 @@ mermaid: true
 <div class="pf-visual-frame">
   <div class="pf-comp-container">
     <div class="pf-comp-box old">
-      <strong>RectTransform (UI)</strong><br>
-      - Anchor/Pivot Dependent<br>
-      - Frequent Canvas Rebuilds<br>
-      - Heavy Screen-to-World conversions
+      <span class="pf-comp-badge old">기존 방식 (Before)</span>
+      <div class="pf-comp-title">RectTransform (UI 시스템)</div>
+      <ul class="pf-comp-list">
+        <li><span class="icon">❌</span><span><strong>좌표계 종속성:</strong> 캔버스 앵커·피벗·해상도에 따라 월드 좌표 변동</span></li>
+        <li><span class="icon">❌</span><span><strong>Canvas Rebuild 부하:</strong> 드래그/호버 시 매 프레임 강제 캔버스 재빌드</span></li>
+        <li><span class="icon">❌</span><span><strong>좌표 변환 오버헤드:</strong> 충돌 판정을 위한 월드-스크린 좌표 변환 함수 남발</span></li>
+      </ul>
     </div>
-    <div class="pf-flow-arrow">>>></div>
+    <div class="pf-comp-transition">
+      <span class="pf-comp-pill">MIGRATION</span>
+      <div class="pf-flow-arrow">➔</div>
+    </div>
     <div class="pf-comp-box new">
-      <strong>Transform (World)</strong><br>
-      - Absolute 2D Coordinates<br>
-      - Zero Canvas Overhead<br>
-      - Native Physics 2D & Colliders
+      <span class="pf-comp-badge new">개선 방식 (After)</span>
+      <div class="pf-comp-title">Transform (월드 GameObject)</div>
+      <ul class="pf-comp-list">
+        <li><span class="icon">✅</span><span><strong>절대 2D 좌표계:</strong> 카메라 기준의 절대 직교 좌표 및 수학적 인덱싱</span></li>
+        <li><span class="icon">✅</span><span><strong>캔버스 부하 0%:</strong> UI Rebuild로부터 완전히 독립된 드로우콜 격리</span></li>
+        <li><span class="icon">✅</span><span><strong>Physics2D 네이티브:</strong> Collider2D 및 RaycastNonAlloc 직접 호환</span></li>
+      </ul>
     </div>
   </div>
 </div>
@@ -449,12 +458,15 @@ sequenceDiagram
 <div class="pf-visual-frame">
   <div class="pf-coord-flow">
     <div class="pf-coord-box">
-      <div class="pf-coord-box-title">World Position</div>
+      <div class="pf-coord-box-title">World Position (월드 좌표)</div>
       <div class="pf-coord-box-formula">InverseTransformPoint(worldPos)</div>
     </div>
-    <div style="display: flex; align-items: center; font-size: 1.5rem; color: #007bff;">⇄</div>
+    <div class="pf-comp-transition" style="padding: 0 8px;">
+      <span class="pf-comp-pill">양방향 변환</span>
+      <div class="pf-flow-arrow" style="width: 36px; height: 36px; font-size: 1.1rem;">⇄</div>
+    </div>
     <div class="pf-coord-box">
-      <div class="pf-coord-box-title">Grid Index (X, Y)</div>
+      <div class="pf-coord-box-title">Grid Index (행·열 인덱스)</div>
       <div class="pf-coord-box-formula">RoundToInt((local - start) / cellSize)</div>
     </div>
   </div>
@@ -467,11 +479,14 @@ sequenceDiagram
 
 <div class="pf-visual-frame">
   <div class="pf-diagram-grid">
-    <div class="pf-grid-cell near"></div><div class="pf-grid-cell near"></div><div class="pf-grid-cell near"></div>
-    <div class="pf-grid-cell near"></div><div class="pf-grid-cell active"></div><div class="pf-grid-cell near"></div>
-    <div class="pf-grid-cell near"></div><div class="pf-grid-cell near"></div><div class="pf-grid-cell near"></div>
+    <div class="pf-grid-cell near">(-1, 1)</div><div class="pf-grid-cell near">(0, 1)</div><div class="pf-grid-cell near">(1, 1)</div>
+    <div class="pf-grid-cell near">(-1, 0)</div><div class="pf-grid-cell active">Target</div><div class="pf-grid-cell near">(1, 0)</div>
+    <div class="pf-grid-cell near">(-1,-1)</div><div class="pf-grid-cell near">(0,-1)</div><div class="pf-grid-cell near">(1,-1)</div>
   </div>
-  <p style="font-size: 0.85rem; color: #666; margin-top: 10px;">Spatial Partitioning: Searching 9 cells instead of Entire Grids</p>
+  <p style="font-size: 0.88rem; color: #64748b; margin-top: 14px; text-align: center; font-weight: 500;">
+    <span style="display: inline-block; width: 12px; height: 12px; background: #2563eb; border-radius: 3px; vertical-align: middle; margin-right: 4px;"></span> <strong>타깃 셀 (Center)</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
+    <span style="display: inline-block; width: 12px; height: 12px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 3px; vertical-align: middle; margin-right: 4px;"></span> <strong>인접 3×3 한정 탐색 (총 9개 셀)</strong>
+  </p>
 </div>
 
 <details class="pf-details">

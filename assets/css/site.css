@@ -410,10 +410,7 @@ video {
 }
 
 .pf-grid,
-.pf-diagram-grid,
-.pf-domain-grid,
-.reward-container,
-.pf-comp-container {
+.pf-domain-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 14px;
@@ -421,14 +418,229 @@ video {
 
 .pf-grid-item,
 .pf-domain-item,
-.pf-comp-box,
 .pf-arch-item,
-.pf-flow-step,
-.pf-grid-cell {
+.pf-flow-step {
   border: 1px solid rgba(148, 163, 184, 0.16) !important;
   border-radius: 10px !important;
   background: rgba(15, 23, 42, 0.68) !important;
   color: #d7e0ed !important;
+}
+
+/* --- Comparison Container (Before vs After) --- */
+.pf-comp-container {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.pf-comp-box {
+  flex: 1 1 300px;
+  max-width: 440px;
+  border-radius: 12px !important;
+  padding: 22px 24px !important;
+  text-align: left;
+  line-height: 1.65;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.pf-comp-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.pf-comp-box.old {
+  border: 1.5px solid #fca5a5 !important;
+  background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%) !important;
+  color: #334155 !important;
+}
+
+.pf-comp-box.new {
+  border: 1.5px solid #86efac !important;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%) !important;
+  color: #334155 !important;
+}
+
+.pf-comp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 20px;
+  width: fit-content;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.pf-comp-badge.old {
+  background: #fee2e2;
+  color: #dc2626;
+  border: 1px solid #fca5a5;
+}
+
+.pf-comp-badge.new {
+  background: #dcfce7;
+  color: #16a34a;
+  border: 1px solid #86efac;
+}
+
+.pf-comp-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+.pf-comp-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.pf-comp-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.pf-comp-list li span.icon {
+  flex-shrink: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.pf-comp-transition {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: center;
+  padding: 10px;
+}
+
+.pf-comp-transition .pf-flow-arrow {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #eff6ff;
+  border: 1.5px solid #bfdbfe;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  font-weight: bold;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+  transition: transform 0.2s ease;
+}
+
+.pf-comp-transition:hover .pf-flow-arrow {
+  transform: scale(1.08);
+}
+
+.pf-comp-pill {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 1px solid #dbeafe;
+  white-space: nowrap;
+}
+
+/* --- 3x3 Spatial Partitioning Diagram Grid --- */
+.pf-diagram-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 44px) !important;
+  grid-template-rows: repeat(3, 44px) !important;
+  gap: 6px !important;
+  justify-content: center !important;
+  margin: 16px auto !important;
+  width: fit-content !important;
+}
+
+.pf-grid-cell {
+  width: 44px !important;
+  height: 44px !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  border: 1.5px solid #cbd5e1 !important;
+  background: #f8fafc !important;
+  transition: all 0.2s ease !important;
+}
+
+.pf-grid-cell.active {
+  border-color: #2563eb !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+  box-shadow: 0 0 14px rgba(37, 99, 235, 0.45) !important;
+  transform: scale(1.06);
+}
+
+.pf-grid-cell.near {
+  border-color: #93c5fd !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+/* --- Reward Containers --- */
+.reward-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.reward-box {
+  padding: 20px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+}
+
+.reward-box.positive {
+  border: 1.5px solid #86efac !important;
+  background: linear-gradient(180deg, #f0fdf4 0%, #ffffff 100%) !important;
+}
+
+.reward-box.positive .reward-title {
+  color: #16a34a !important;
+}
+
+.reward-box.negative {
+  border: 1.5px solid #fca5a5 !important;
+  background: linear-gradient(180deg, #fff5f5 0%, #ffffff 100%) !important;
+}
+
+.reward-box.negative .reward-title {
+  color: #dc2626 !important;
+}
+
+.reward-box.info {
+  border: 1.5px solid #93c5fd !important;
+  background: linear-gradient(180deg, #eff6ff 0%, #ffffff 100%) !important;
+}
+
+.reward-box.info .reward-title {
+  color: #2563eb !important;
 }
 
 .pf-arch-diagram,
@@ -473,7 +685,7 @@ video {
 
 .pf-flow-arrow,
 .flow-arrow {
-  color: #60a5fa;
+  color: #2563eb;
   font-weight: 800;
 }
 
@@ -799,7 +1011,6 @@ body::before {
 
 .pf-visual-frame,
 .highlight-box,
-.reward-box,
 .pf-token-box,
 .pf-coord-box {
   border-color: #cfe0f4 !important;
@@ -809,10 +1020,8 @@ body::before {
 
 .pf-grid-item,
 .pf-domain-item,
-.pf-comp-box,
 .pf-arch-item,
 .pf-flow-step,
-.pf-grid-cell,
 .pf-arch-layer,
 .pf-logic-row,
 .pf-token-row {
