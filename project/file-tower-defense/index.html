@@ -237,7 +237,7 @@
 <p>마우스 아래에 여러 유닛이나 바이러스, 혹은 UI 판정이 겹쳐있을 때, 다음과 같은 우선순위 기준을 사용하여 모호함을 해결합니다.</p>
 <ol><li><strong>UI 레이어 우선:</strong> <code>EventSystem.current.IsPointerOverGameObject()</code>를 통해 UI 상호작용 우선 처리.</li><li><strong>물리 레이어 필터링:</strong> <code>Physics2D.RaycastNonAlloc</code>을 활용하여 쓰레기 메모리(GC Alloc) 없이 감지된 콜라이더 배열을 가져옴.</li><li><strong>정렬 레이어(Sorting Order) 정렬:</strong> 감지된 객체들의 <code>SpriteRenderer</code> 내 <code>Sorting Layer ID</code> 및 <code>Order in Layer</code> 값을 비교하여 카메라와 가장 가까운(최상단에 렌더링된) 오브젝트를 타깃으로 최종 선택.</li></ol>
 <h3 id="22-iinteractable-인터페이스-기반-확장성">2.2 IInteractable 인터페이스 기반 확장성</h3>
-<p>클릭 및 드래그 상호작용이 필요한 모든 인게임 오브젝트(유닛 파일, 바이러스 등)는 <a href="/codeReference/file_tower_defence/IInteractable.cs">IInteractable</a> 인터페이스를 상속받아 유연하게 확장할 수 있습니다.</p>
+<p>클릭 및 드래그 상호작용이 필요한 모든 인게임 오브젝트(유닛 파일, 바이러스 등)는 <strong>IInteractable</strong> 인터페이스를 상속받아 유연하게 확장할 수 있습니다.</p>
 <div class="pf-visual-frame">
     <img src="../../assets/Gifs/file-tower-defense-drag.gif" alt="File Tower Defense Mouse Drag Event Demo" style="width: 100%; border-radius: 8px;">
     <p style="color: #666; font-size: 0.85rem; margin-top: 10px; font-family: 'Fira Code', monospace;">[DEMO] IInteractable 상속 객체의 실시간 마우스 드래그 & 배치 흐름</p>
@@ -277,7 +277,7 @@
 <hr>
 <h2 id="3-그리드-기반-오브젝트-배치-시스템" class="chapter-title">3. 그리드 기반 오브젝트 배치 시스템</h2>
 <h3 id="31-filegrid-데이터-중심의-지능형-셀-매니저">3.1 FileGrid: 데이터 중심의 지능형 셀 매니저</h3>
-<p><a href="/codeReference/file_tower_defence/FileGrid.cs">FileGrid</a>는 단순한 위치 정보 홀더가 아니라, 유닛 배치 상태와 해당 셀에 작용 중인 오라(버프) 목록을 독자적으로 관리하는 지능형 컨테이너입니다.</p>
+<p><strong>FileGrid</strong>는 단순한 위치 정보 홀더가 아니라, 유닛 배치 상태와 해당 셀에 작용 중인 오라(버프) 목록을 독자적으로 관리하는 지능형 컨테이너입니다.</p>
 <ul><li><strong>HashSet 기반 버프 소스 관리:</strong> 현재 그리드 공간에 영향을 주는 버프 제공 유닛의 목록을 <code>HashSet&lt;File_Base&gt;</code>로 관리하여 버프의 중복 적용을 제거하고 $O(1)$의 빠른 조회 속도를 유지합니다.</li><li><strong>유닛 탈부착 시 자동 스탯 갱신:</strong> 유닛이 배치되거나 이탈할 때 그리드에 축적된 버프 목록을 분석하여 대상 유닛의 스탯을 실시간으로 갱신해 줍니다.</li></ul>
 <h3 id="32-원자적-배치-트랜잭션-transactional-pattern">3.2 원자적 배치 트랜잭션 (Transactional Pattern)</h3>
 <p>드래그 앤 드롭으로 유닛의 그리드 위치를 옮길 때 발생할 수 있는 데이터 불일치 및 예외 상황을 원자적으로 보장하기 위해 배치 트랜잭션 흐름을 <strong>탐색/검증, 성공(Commit), 실패(Rollback)</strong>의 3가지 흐름으로 분할 설계하여 안전성을 확보했습니다.</p>
@@ -485,7 +485,7 @@
     style G fill:#17a2b8,stroke:#117a8b,color:#fff
     style J fill:#17a2b8,stroke:#117a8b,color:#fff</pre>
 <ul><li><strong>버프 전파 흐름:</strong></li></ul>
-<ol><li>버프 특성을 가진 파일 유닛(예: <code>.mp3</code> 힐링 버프)이 그리드에 배치되면, 자신의 사거리(Aura Area) 내에 존재하는 모든 주변 <code>FileGrid</code> 셀들을 찾아 자신을 버프 소스로 등록(<code>AddBuffSource(this)</code>)합니다.</li><li>이후 새로운 유닛이 해당 버프 영향권 내부의 빈 그리드로 들어올 경우, <a href="/codeReference/file_tower_defence/FileGrid.cs">FileGrid</a>가 즉각 감지하여 보관하고 있던 버프 데이터 목록(<code>_activeBuffSources</code>)을 진입한 유닛에게 자동으로 갱신/적용(<code>ApplyBuffFromSource</code>)합니다.</li><li>버프 유닛이 죽거나 이동하면, 영향권 내의 모든 그리드에서 버프 소스를 제거(<code>RemoveBuffSource</code>)하고 즉시 피적용 유닛의 스탯을 원복시킵니다.</li></ol>
+<ol><li>버프 특성을 가진 파일 유닛(예: <code>.mp3</code> 힐링 버프)이 그리드에 배치되면, 자신의 사거리(Aura Area) 내에 존재하는 모든 주변 <code>FileGrid</code> 셀들을 찾아 자신을 버프 소스로 등록(<code>AddBuffSource(this)</code>)합니다.</li><li>이후 새로운 유닛이 해당 버프 영향권 내부의 빈 그리드로 들어올 경우, <strong>FileGrid</strong>가 즉각 감지하여 보관하고 있던 버프 데이터 목록(<code>_activeBuffSources</code>)을 진입한 유닛에게 자동으로 갱신/적용(<code>ApplyBuffFromSource</code>)합니다.</li><li>버프 유닛이 죽거나 이동하면, 영향권 내의 모든 그리드에서 버프 소스를 제거(<code>RemoveBuffSource</code>)하고 즉시 피적용 유닛의 스탯을 원복시킵니다.</li></ol>
 <h3 id="42-다형성을-활용한-틱tick-기반-버프-아키텍처">4.2 다형성을 활용한 틱(Tick) 기반 버프 아키텍처</h3>
 <p>단순 스탯 증가 버프 외에도 주기적인 리젠(HP 회복), 지속 피해(도트 데미지) 등을 단일 코루틴 남발 없이 처리하기 위해 <code>MyBuff</code> 추상 클래스와 <code>BuffData</code> 구조를 결합한 중앙 업데이트 방식을 채택했습니다.</p>
 <details class="pf-details">

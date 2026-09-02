@@ -406,7 +406,7 @@ mermaid: true
 
 ### 2.2 IInteractable 인터페이스 기반 확장성
 
-클릭 및 드래그 상호작용이 필요한 모든 인게임 오브젝트(유닛 파일, 바이러스 등)는 [IInteractable](/codeReference/file_tower_defence/IInteractable.cs) 인터페이스를 상속받아 유연하게 확장할 수 있습니다.
+클릭 및 드래그 상호작용이 필요한 모든 인게임 오브젝트(유닛 파일, 바이러스 등)는 **IInteractable** 인터페이스를 상속받아 유연하게 확장할 수 있습니다.
 
 <div class="pf-visual-frame">
     <img src="/assets/Gifs/file-tower-defense-drag.gif" alt="File Tower Defense Mouse Drag Event Demo" style="width: 100%; border-radius: 8px;">
@@ -456,7 +456,7 @@ public interface IInteractable
 
 ### 3.1 FileGrid: 데이터 중심의 지능형 셀 매니저
 
-[FileGrid](/codeReference/file_tower_defence/FileGrid.cs)는 단순한 위치 정보 홀더가 아니라, 유닛 배치 상태와 해당 셀에 작용 중인 오라(버프) 목록을 독자적으로 관리하는 지능형 컨테이너입니다.
+**FileGrid**는 단순한 위치 정보 홀더가 아니라, 유닛 배치 상태와 해당 셀에 작용 중인 오라(버프) 목록을 독자적으로 관리하는 지능형 컨테이너입니다.
 *   **HashSet 기반 버프 소스 관리:** 현재 그리드 공간에 영향을 주는 버프 제공 유닛의 목록을 `HashSet<File_Base>`로 관리하여 버프의 중복 적용을 제거하고 $O(1)$의 빠른 조회 속도를 유지합니다.
 *   **유닛 탈부착 시 자동 스탯 갱신:** 유닛이 배치되거나 이탈할 때 그리드에 축적된 버프 목록을 분석하여 대상 유닛의 스탯을 실시간으로 갱신해 줍니다.
 
@@ -706,7 +706,7 @@ graph TD
 
 *   **버프 전파 흐름:**
     1.  버프 특성을 가진 파일 유닛(예: `.mp3` 힐링 버프)이 그리드에 배치되면, 자신의 사거리(Aura Area) 내에 존재하는 모든 주변 `FileGrid` 셀들을 찾아 자신을 버프 소스로 등록(`AddBuffSource(this)`)합니다.
-    2.  이후 새로운 유닛이 해당 버프 영향권 내부의 빈 그리드로 들어올 경우, [FileGrid](/codeReference/file_tower_defence/FileGrid.cs)가 즉각 감지하여 보관하고 있던 버프 데이터 목록(`_activeBuffSources`)을 진입한 유닛에게 자동으로 갱신/적용(`ApplyBuffFromSource`)합니다.
+    2.  이후 새로운 유닛이 해당 버프 영향권 내부의 빈 그리드로 들어올 경우, **FileGrid**가 즉각 감지하여 보관하고 있던 버프 데이터 목록(`_activeBuffSources`)을 진입한 유닛에게 자동으로 갱신/적용(`ApplyBuffFromSource`)합니다.
     3.  버프 유닛이 죽거나 이동하면, 영향권 내의 모든 그리드에서 버프 소스를 제거(`RemoveBuffSource`)하고 즉시 피적용 유닛의 스탯을 원복시킵니다.
 
 ### 4.2 다형성을 활용한 틱(Tick) 기반 버프 아키텍처
