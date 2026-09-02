@@ -1,0 +1,461 @@
+[
+  {
+    "id": "award-tu-challenge",
+    "title": "제3회 TU Game Challenge 우수상",
+    "date": "2025.10.24",
+    "category": "certificates",
+    "desc": "동명대학교 게임공학과 주최, 파일타워 디펜스(팀 일석이조: 최윤환, 김재우, 이민혁, 강동준) 우수상 상장",
+    "tag": "수상 상장",
+    "src": "/assets/awards/certificates/tu_game_challenge_award_2025.png"
+  },
+  {
+    "id": "award-gstar-trophy",
+    "title": "지스타 2025 인디어워즈 Best Experimental Game 상패",
+    "date": "2025.11.16",
+    "category": "certificates",
+    "desc": "G-STAR 2025 INDIE SHOWCASE 2.0: GALAXY - Best Experimental Game 상패 (팀 UpTrAnd - 파일타워 디펜스)",
+    "tag": "어워즈 상패",
+    "src": "/assets/awards/certificates/gstar_indie_award_trophy.jpg"
+  },
+  {
+    "id": "award-gstar-cert",
+    "title": "지스타 2025 인디어워즈 수상 인증서",
+    "date": "2025.11.16",
+    "category": "certificates",
+    "desc": "G-STAR 2025 인디 쇼케이스 Best Experimental Game 공식 수상 증서 (스폰서: STEAM DECK, KOMODO)",
+    "tag": "어워즈 인증서",
+    "src": "/assets/awards/certificates/gstar_indie_award_cert.jpg"
+  },
+  {
+    "id": "award-gstar-trophy-detail",
+    "title": "지스타 2025 어워즈 상패 세부",
+    "date": "2025.11.16",
+    "category": "certificates",
+    "desc": "Best Experimental Game 크리스탈 어워즈 상패 클로즈업",
+    "tag": "어워즈 상패",
+    "src": "/assets/awards/certificates/gstar_indie_award_trophy_detail.jpg"
+  },
+  {
+    "id": "award-ict-ares",
+    "title": "창의혁신 아이디어상 (동명대학교 ICT융합대학장상)",
+    "date": "2026.07.13",
+    "category": "certificates",
+    "desc": "「산학연계 제품개발 성과공유」 과정 참여 - 화성 탐사 머신러닝 ARES 학습 시뮬레이션 우수 성과 상장",
+    "tag": "학장상",
+    "src": "/assets/awards/certificates/ict_ares_idea_award_2026.jpg"
+  },
+  {
+    "id": "award-tu-scholarship",
+    "title": "동명대학교 TU장학회 장학증서",
+    "date": "2026.06.10",
+    "category": "certificates",
+    "desc": "학업 성적이 우수하고 타의 모범이 되어 수여된 동명대학교 TU장학회 장학생 선발 장학증서",
+    "tag": "장학증서",
+    "src": "/assets/awards/certificates/tu_scholarship_cert_2026.jpg"
+  },
+  {
+    "id": "award-rise-startup",
+    "title": "2025 창업아이디어 경진대회 우수상",
+    "date": "2025.12.11",
+    "category": "certificates",
+    "desc": "동명대학교 RISE사업단 주관 2025 창업아이디어 경진대회 우수상 상장 (이민혁 외 4명)",
+    "tag": "경진대회 우수상",
+    "src": "/assets/awards/certificates/rise_startup_idea_award_2025.jpg"
+  },
+  {
+    "id": "award-busan-talent",
+    "title": "2025년도 부산지역인재 장학금 장학증서 (IT 분야)",
+    "date": "2025.12.02",
+    "category": "certificates",
+    "desc": "주택도시보증공사 기부, 부산광역시·부산테크노파크 등 주관 IT 분야 인재 장학증서",
+    "tag": "지역인재 장학증서",
+    "src": "/assets/awards/certificates/busan_talent_scholarship_2025.jpg"
+  },
+  {
+    "id": "award-daedong-scholarship",
+    "title": "재단법인 대동장학재단 장학증서",
+    "date": "2025.11.10",
+    "category": "certificates",
+    "desc": "학업 성적이 우수하고 사회에 공헌하는 인재 선발 대동장학재단 장학증서",
+    "tag": "장학재단 증서",
+    "src": "/assets/awards/certificates/daedong_scholarship_2025.jpg"
+  },
+  {
+    "id": "award-daedong-case",
+    "title": "대동장학재단 장학증서 케이스",
+    "date": "2025.11.10",
+    "category": "certificates",
+    "desc": "재단법인 대동장학재단 장학증서 커버",
+    "tag": "장학증서",
+    "src": "/assets/awards/certificates/daedong_scholarship_case_2025.jpg"
+  },
+  {
+    "id": "award-tu-livinglab",
+    "title": "TU-SEED 리빙랩 경진대회 입상",
+    "date": "2021.12.30",
+    "category": "certificates",
+    "desc": "동명대학교 SW중심대학사업단 주관 TU-SEED 리빙랩 경진대회 입상 상장",
+    "tag": "리빙랩 입상",
+    "src": "/assets/awards/certificates/tu_seed_livinglab_award_2021.jpg"
+  },
+  {
+    "id": "gstar-booth-screen",
+    "title": "G-STAR 2025 인디 쇼케이스 2.0 시연 부스",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 제1전시장 인디 쇼케이스 2.0 파일타워 디펜스 부스 플레이 화면",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_booth_screen.jpg"
+  },
+  {
+    "id": "gstar-booth-desk",
+    "title": "G-STAR 2025 시연대 및 굿즈 배치",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "관람객 시연용 PC 세팅, 인게임 조합표 리플렛 및 캐릭터 스티커 굿즈",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_booth_desk.jpg"
+  },
+  {
+    "id": "gstar-leaflet-front",
+    "title": "파일타워 디펜스 지스타 조합표 리플렛 (앞면)",
+    "date": "2025.11.13",
+    "category": "gstar",
+    "desc": "관람객 배포용 파일 조합표 및 스토브인디 다운로드 안내 리플렛",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_leaflet_front.jpg"
+  },
+  {
+    "id": "gstar-leaflet-back",
+    "title": "파일타워 디펜스 지스타 조합표 리플렛 (뒷면)",
+    "date": "2025.11.13",
+    "category": "gstar",
+    "desc": "압축 조합표, 파일 드랍 합성 가이드 및 QR 안내문",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_leaflet_back.jpg"
+  },
+  {
+    "id": "gstar2025-photo-1",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #1",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_01.jpg"
+  },
+  {
+    "id": "gstar2025-photo-2",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #2",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_02.jpg"
+  },
+  {
+    "id": "gstar2025-photo-3",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #3",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_03.jpg"
+  },
+  {
+    "id": "gstar2025-photo-4",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #4",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_04.jpg"
+  },
+  {
+    "id": "gstar2025-photo-5",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #5",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_05.jpg"
+  },
+  {
+    "id": "gstar2025-photo-6",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #6",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_06.jpg"
+  },
+  {
+    "id": "gstar2025-photo-7",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #7",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_07.jpg"
+  },
+  {
+    "id": "gstar2025-photo-8",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #8",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_08.jpg"
+  },
+  {
+    "id": "gstar2025-photo-9",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #9",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_09.jpg"
+  },
+  {
+    "id": "gstar2025-photo-10",
+    "title": "G-STAR 2025 인디 쇼케이스 현장 운영 #10",
+    "date": "2025.11.13 ~ 11.16",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2025 인디 쇼케이스 2.0 및 학교 부스 관람객 시연, 현장 부스 전경",
+    "tag": "지스타 2025",
+    "src": "/assets/awards/gstar2025/gstar2025_photo_10.jpg"
+  },
+  {
+    "id": "gstar2024-photo-1",
+    "title": "G-STAR 2024 학교 부스 전시 현장 #1",
+    "date": "2024.11.14 ~ 11.17",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2024 동명대학교 B2C 부스 작품 출품 및 현장 시연 운영",
+    "tag": "지스타 2024",
+    "src": "/assets/awards/gstar2024/gstar2024_photo_01.jpg"
+  },
+  {
+    "id": "gstar2024-photo-2",
+    "title": "G-STAR 2024 학교 부스 전시 현장 #2",
+    "date": "2024.11.14 ~ 11.17",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2024 동명대학교 B2C 부스 작품 출품 및 현장 시연 운영",
+    "tag": "지스타 2024",
+    "src": "/assets/awards/gstar2024/gstar2024_photo_02.jpg"
+  },
+  {
+    "id": "gstar2024-photo-3",
+    "title": "G-STAR 2024 학교 부스 전시 현장 #3",
+    "date": "2024.11.14 ~ 11.17",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2024 동명대학교 B2C 부스 작품 출품 및 현장 시연 운영",
+    "tag": "지스타 2024",
+    "src": "/assets/awards/gstar2024/gstar2024_photo_03.jpg"
+  },
+  {
+    "id": "gstar2024-photo-4",
+    "title": "G-STAR 2024 학교 부스 전시 현장 #4",
+    "date": "2024.11.14 ~ 11.17",
+    "category": "gstar",
+    "desc": "벡스코 G-STAR 2024 동명대학교 B2C 부스 작품 출품 및 현장 시연 운영",
+    "tag": "지스타 2024",
+    "src": "/assets/awards/gstar2024/gstar2024_photo_04.jpg"
+  },
+  {
+    "id": "ares-2025-photo-1",
+    "title": "ARES 머신러닝 탐사 시뮬레이션 연구 #1",
+    "date": "2025.12",
+    "category": "ares",
+    "desc": "화성 탐사 로버 머신러닝 ARES 시뮬레이션 1차 개발 및 연구 세션",
+    "tag": "ARES 2025.12",
+    "src": "/assets/awards/ares/ares2025_12_photo_01.jpg"
+  },
+  {
+    "id": "ares-2025-photo-2",
+    "title": "ARES 머신러닝 탐사 시뮬레이션 연구 #2",
+    "date": "2025.12",
+    "category": "ares",
+    "desc": "화성 탐사 로버 머신러닝 ARES 시뮬레이션 1차 개발 및 연구 세션",
+    "tag": "ARES 2025.12",
+    "src": "/assets/awards/ares/ares2025_12_photo_02.jpg"
+  },
+  {
+    "id": "ares-2025-photo-3",
+    "title": "ARES 머신러닝 탐사 시뮬레이션 연구 #3",
+    "date": "2025.12",
+    "category": "ares",
+    "desc": "화성 탐사 로버 머신러닝 ARES 시뮬레이션 1차 개발 및 연구 세션",
+    "tag": "ARES 2025.12",
+    "src": "/assets/awards/ares/ares2025_12_photo_03.jpg"
+  },
+  {
+    "id": "ares-2025-photo-4",
+    "title": "ARES 머신러닝 탐사 시뮬레이션 연구 #4",
+    "date": "2025.12",
+    "category": "ares",
+    "desc": "화성 탐사 로버 머신러닝 ARES 시뮬레이션 1차 개발 및 연구 세션",
+    "tag": "ARES 2025.12",
+    "src": "/assets/awards/ares/ares2025_12_photo_04.jpg"
+  },
+  {
+    "id": "ares-2025-photo-5",
+    "title": "ARES 머신러닝 탐사 시뮬레이션 연구 #5",
+    "date": "2025.12",
+    "category": "ares",
+    "desc": "화성 탐사 로버 머신러닝 ARES 시뮬레이션 1차 개발 및 연구 세션",
+    "tag": "ARES 2025.12",
+    "src": "/assets/awards/ares/ares2025_12_photo_05.jpg"
+  },
+  {
+    "id": "ares-2025-photo-6",
+    "title": "ARES 머신러닝 탐사 시뮬레이션 연구 #6",
+    "date": "2025.12",
+    "category": "ares",
+    "desc": "화성 탐사 로버 머신러닝 ARES 시뮬레이션 1차 개발 및 연구 세션",
+    "tag": "ARES 2025.12",
+    "src": "/assets/awards/ares/ares2025_12_photo_06.jpg"
+  },
+  {
+    "id": "ares-2026-photo-1",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #1",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_01.jpg"
+  },
+  {
+    "id": "ares-2026-photo-2",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #2",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_02.jpg"
+  },
+  {
+    "id": "ares-2026-photo-3",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #3",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_03.jpg"
+  },
+  {
+    "id": "ares-2026-photo-4",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #4",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_04.jpg"
+  },
+  {
+    "id": "ares-2026-photo-5",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #5",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_05.jpg"
+  },
+  {
+    "id": "ares-2026-photo-6",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #6",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_06.jpg"
+  },
+  {
+    "id": "ares-2026-photo-7",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #7",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_07.jpg"
+  },
+  {
+    "id": "ares-2026-photo-8",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #8",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_08.jpg"
+  },
+  {
+    "id": "ares-2026-photo-9",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #9",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_09.jpg"
+  },
+  {
+    "id": "ares-2026-photo-10",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #10",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_10.png"
+  },
+  {
+    "id": "ares-2026-photo-11",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #11",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_11.jpg"
+  },
+  {
+    "id": "ares-2026-photo-12",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #12",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_12.jpg"
+  },
+  {
+    "id": "ares-2026-photo-13",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #13",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_13.jpg"
+  },
+  {
+    "id": "ares-2026-photo-14",
+    "title": "ARES 산학연계 제품개발 성과공유 발표 #14",
+    "date": "2026.08",
+    "category": "ares",
+    "desc": "화성 탐사 로버 ARES 강화학습 결과물 최종 발표, 포스터 세션 및 부스 시연 (창의혁신 아이디어상 수상)",
+    "tag": "ARES 2026.08",
+    "src": "/assets/awards/ares/ares2026_08_photo_14.jpg"
+  },
+  {
+    "id": "comicworld-booth",
+    "title": "제179회 서울 코믹월드 인디 게임 부스",
+    "date": "2025.12.20 ~ 12.21",
+    "category": "comicworld",
+    "desc": "일산 킨텍스 제1전시장 서울 코믹월드 파일타워 디펜스 인디 부스 전시 및 굿즈 판매 현장",
+    "tag": "코믹월드",
+    "src": "/assets/awards/comicworld/comicworld_booth_2025.jpg"
+  },
+  {
+    "id": "comicworld-ticket",
+    "title": "서울 코믹월드 부스 참가 티켓 및 안내",
+    "date": "2025.12.20 ~ 12.21",
+    "category": "comicworld",
+    "desc": "2025년 12월 20일~21일 일산 킨텍스 제1전시장 행사 참가 안내",
+    "tag": "코믹월드",
+    "src": "/assets/awards/comicworld/comicworld_ticket_2025.png"
+  }
+]
