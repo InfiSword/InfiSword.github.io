@@ -1101,9 +1101,10 @@
     /* Quick Access Banner */
     .pf-awards-gallery-banner {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: space-between;
-        gap: 20px;
+        text-align: center;
+        gap: 16px;
         background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 58, 138, 0.35));
         border: 1px solid rgba(96, 165, 250, 0.3);
         border-radius: 14px;
@@ -1113,8 +1114,7 @@
         backdrop-filter: blur(12px);
     }
     .pf-awards-banner-info {
-        flex: 1;
-        min-width: 280px;
+        text-align: center;
     }
     .pf-awards-banner-badge {
         display: inline-flex;
@@ -1144,24 +1144,19 @@
         50% { opacity: 0.4; transform: scale(0.85); }
     }
     .pf-awards-banner-title {
-        font-size: 1.22rem;
+        font-size: 1.25rem;
         font-weight: 800;
         color: #f8fafc;
-        margin: 0 0 6px;
-        letter-spacing: -0.01em;
-    }
-    .pf-awards-banner-desc {
-        font-size: 0.88rem;
-        color: #94a3b8;
         margin: 0;
-        line-height: 1.55;
+        letter-spacing: -0.01em;
     }
     .pf-awards-banner-actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        justify-content: flex-end;
+        gap: 10px;
+        justify-content: center;
         align-items: center;
+        width: 100%;
     }
     .pf-gallery-action-btn {
         display: inline-flex;
@@ -1570,9 +1565,6 @@
                 <span>VERIFIED PROOFS & ACTIVITIES</span>
             </div>
             <h3 class="pf-awards-banner-title">활동 및 수상 사진 갤러리 뷰어 (총 51장)</h3>
-            <p class="pf-awards-banner-desc">
-                지스타 인디어워즈 상패, ICT융합대학장상 및 장학증서, G-STAR 2025/2024 부스 시연, ARES 머신러닝 성과 발표회, 서울 코믹월드 현장 사진을 고화질 라이트박스 뷰어로 확인하실 수 있습니다.
-            </p>
         </div>
         <div class="pf-awards-banner-actions">
             <button type="button" class="pf-gallery-action-btn primary" onclick="pfOpenAwardGallery('all', 0)">
