@@ -691,6 +691,7 @@
 
     /* 03. Other Projects Media */
     #pf-custom-portfolio .pf-other-media {
+        display: block;
         border-radius: 10px;
         overflow: hidden;
         border: 1px solid #dce6f3;
@@ -699,6 +700,8 @@
         aspect-ratio: 16 / 9;
         position: relative;
         cursor: pointer;
+        color: inherit;
+        text-decoration: none;
     }
     #pf-custom-portfolio .pf-other-media img {
         width: 100%;
@@ -710,7 +713,8 @@
     #pf-custom-portfolio .pf-other-media:hover img {
         transform: scale(1.04);
     }
-    #pf-custom-portfolio .pf-media-badge {
+    #pf-custom-portfolio .pf-media-badge,
+    .pf-modal-banner .pf-media-badge {
         position: absolute;
         bottom: 8px;
         right: 8px;
@@ -723,6 +727,9 @@
         border-radius: 4px;
         border: 1px solid rgba(255, 255, 255, 0.15);
         font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
     }
 
     /* Modal Image Banner */
@@ -739,6 +746,9 @@
     .pf-modal-banner a {
         display: block;
         max-height: 300px;
+        position: relative;
+        color: inherit;
+        text-decoration: none;
     }
     .pf-modal-banner img {
         width: 100%;
@@ -1109,8 +1119,9 @@
                     </a>
                 </div>
             </div>
-            <a href="/project/file-tower-defense/" class="pf-card-media" aria-label="File Tower Defense 프로젝트 보기">
+            <a href="https://www.youtube.com/watch?v=LNJKQiQ8ahs" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="File Tower Defense 유튜브 영상 보기">
                 <img src="/assets/images/File%20Tower%20Defences/sujung_file_tower_defense_intro.png" alt="File Tower Defense 인게임 스크린샷" loading="lazy">
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
             </a>
         </div>
     </article>
@@ -1147,8 +1158,9 @@
                     </a>
                 </div>
             </div>
-            <a href="/project/winapi-dont-starve/" class="pf-card-media" aria-label="WinAPI Don't Starve Clone 프로젝트 보기">
+            <a href="https://www.youtube.com/watch?v=TTdIN2U3gnQ" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="WinAPI Don't Starve Clone 유튜브 영상 보기">
                 <img src="/assets/images/Dont%20Starve/sujung_dont_starve_intro.png" alt="WinAPI Don't Starve Clone 인게임 스크린샷" loading="lazy">
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
             </a>
         </div>
     </article>
@@ -1185,8 +1197,9 @@
                     </a>
                 </div>
             </div>
-            <a href="/project/worldfirstkill/" class="pf-card-media" aria-label="WorldFirstKill 프로젝트 보기">
+            <a href="https://www.youtube.com/watch?v=EWD2YidSgp0" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="WorldFirstKill 유튜브 영상 보기">
                 <img src="/assets/images/World%20First%20Kill/스크린샷%202026-06-28%20173659.png" alt="WorldFirstKill 인게임 스크린샷" loading="lazy">
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
             </a>
         </div>
     </article>
@@ -1225,6 +1238,7 @@
             </div>
             <a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="Autonomous Racing Agent 유튜브 영상 보기">
                 <img src="/assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Autonomous Racing Agent 주행 시뮬레이션 스크린샷" loading="lazy">
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
             </a>
         </div>
     </article>
@@ -1261,8 +1275,9 @@
                     </a>
                 </div>
             </div>
-            <a href="/project/slime-project/" class="pf-card-media" aria-label="Slime Project 프로젝트 보기">
+            <a href="https://www.youtube.com/watch?v=83lMfQY1Rwo" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="Slime Project 유튜브 영상 보기">
                 <img src="/assets/images/Other%20Game/slide_40_img_31.png" alt="Slime Project 인게임 스크린샷" loading="lazy">
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
             </a>
         </div>
     </article>
@@ -1299,8 +1314,9 @@
                     </a>
                 </div>
             </div>
-            <a href="/project/moonlight/" class="pf-card-media" aria-label="보름달 방앗간 프로젝트 보기">
+            <a href="https://www.youtube.com/shorts/Z-IKELImAMo" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="보름달 방앗간 유튜브 영상 보기">
                 <img src="/assets/images/Other%20Game/slide_42_img_30.png" alt="보름달 방앗간 인게임 스크린샷" loading="lazy">
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
             </a>
         </div>
     </article>
@@ -1313,10 +1329,10 @@
 
         <!-- OTHER 1: LUCKY WWE -->
         <article class="pf-glass-card pf-other-card">
-            <div class="pf-other-media" onclick="pfOpenModal('luckyWwe');">
+            <a href="https://www.youtube.com/watch?v=5oXijTkkfQk" target="_blank" rel="noopener noreferrer" class="pf-other-media" aria-label="럭키 WWE 유튜브 영상 보기">
                 <img src="/assets/images/Other%20Game/slide_38_img_30.png" alt="럭키 WWE 스크린샷" loading="lazy">
-                <span class="pf-media-badge">PREVIEW</span>
-            </div>
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
+            </a>
             <div class="pf-card-top">
                 <span class="pf-project-tag pf-mono" style="color: #c084fc;">● Global Game Jam 2026 // Unity & TCG</span>
                 <h3 class="pf-project-name">럭키 WWE</h3>
@@ -1345,10 +1361,10 @@
 
         <!-- OTHER 2: HEY HONEYBEE -->
         <article class="pf-glass-card pf-other-card">
-            <div class="pf-other-media" onclick="pfOpenModal('honeybee');">
+            <a href="https://verse8.io/c6C4f9v" target="_blank" rel="noopener noreferrer" class="pf-other-media" aria-label="Hey! HoneyBee! Verse8 링크 열기">
                 <img src="/assets/images/Other%20Game/slide_39_img_30.png" alt="Hey! HoneyBee! 스크린샷" loading="lazy">
-                <span class="pf-media-badge">PREVIEW</span>
-            </div>
+                <span class="pf-media-badge">PLAY</span>
+            </a>
             <div class="pf-card-top">
                 <span class="pf-project-tag pf-mono" style="color: #d97706;">● Game Jam // HTML & Verse8</span>
                 <h3 class="pf-project-name">Hey! HoneyBee!</h3>
@@ -1377,10 +1393,10 @@
 
         <!-- OTHER 3: WINAPI SHOOTING GAME -->
         <article class="pf-glass-card pf-other-card">
-            <div class="pf-other-media" onclick="pfOpenModal('shooting');">
+            <a href="https://www.youtube.com/watch?v=XoW4OQZUVJs" target="_blank" rel="noopener noreferrer" class="pf-other-media" aria-label="WinAPI Shooting Game 유튜브 영상 보기">
                 <img src="/assets/images/Other%20Game/slide_43_img_30.png" alt="WinAPI Shooting Game 스크린샷" loading="lazy">
-                <span class="pf-media-badge">PREVIEW</span>
-            </div>
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
+            </a>
             <div class="pf-card-top">
                 <span class="pf-project-tag pf-mono" style="color: #818cf8;">● Windows API C++ // 2D Arcade</span>
                 <h3 class="pf-project-name">WinAPI Shooting Game</h3>
@@ -1409,10 +1425,10 @@
 
         <!-- OTHER 4: PIPEGAME -->
         <article class="pf-glass-card pf-other-card">
-            <div class="pf-other-media" onclick="pfOpenModal('pipegame');">
+            <a href="https://www.youtube.com/watch?v=iz2g9ujFx-A" target="_blank" rel="noopener noreferrer" class="pf-other-media" aria-label="PipeGame 유튜브 영상 보기">
                 <img src="/assets/images/Other%20Game/slide_41_img_30.png" alt="PipeGame 스크린샷" loading="lazy">
-                <span class="pf-media-badge">PREVIEW</span>
-            </div>
+                <span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span>
+            </a>
             <div class="pf-card-top">
                 <span class="pf-project-tag pf-mono" style="color: #34d399;">● Solo Project // Mobile Puzzle</span>
                 <h3 class="pf-project-name">PipeGame</h3>
@@ -1463,7 +1479,7 @@
             <button class="pf-modal-close" onclick="pfCloseModal('fileTowerDefense')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><img src="/assets/images/File%20Tower%20Defences/sujung_file_tower_defense_intro.png" alt="File Tower Defense 게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=LNJKQiQ8ahs" target="_blank" rel="noopener noreferrer" aria-label="File Tower Defense 유튜브 영상 보기"><img src="/assets/images/File%20Tower%20Defences/sujung_file_tower_defense_intro.png" alt="File Tower Defense 게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title"><span>📐</span> 1. 아키텍처 전면 재설계 (UI → World)</div>
@@ -1501,7 +1517,7 @@
             <button class="pf-modal-close" onclick="pfCloseModal('dontStarve')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><img src="/assets/images/Dont%20Starve/sujung_dont_starve_intro.png" alt="WinAPI Don't Starve Clone 인게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=TTdIN2U3gnQ" target="_blank" rel="noopener noreferrer" aria-label="WinAPI Don't Starve Clone 유튜브 영상 보기"><img src="/assets/images/Dont%20Starve/sujung_dont_starve_intro.png" alt="WinAPI Don't Starve Clone 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #818cf8;"><span>🗺️</span> 1. 그리드 공간 분할 (Grid Partitioning)</div>
@@ -1539,7 +1555,7 @@
             <button class="pf-modal-close" onclick="pfCloseModal('wfk')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><img src="/assets/images/World%20First%20Kill/스크린샷%202026-06-28%20173659.png" alt="WorldFirstKill 인게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=EWD2YidSgp0" target="_blank" rel="noopener noreferrer" aria-label="WorldFirstKill 유튜브 영상 보기"><img src="/assets/images/World%20First%20Kill/스크린샷%202026-06-28%20173659.png" alt="WorldFirstKill 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #c084fc;"><span>⚙️</span> 1. 리플렉션 기반 CSV 자동 파서</div>
@@ -1577,7 +1593,7 @@
             <button class="pf-modal-close" onclick="pfCloseModal('racing')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" aria-label="Autonomous Racing Agent 유튜브 영상 보기"><img src="/assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Autonomous Racing Agent 시뮬레이션 화면" loading="lazy"></a></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" aria-label="Autonomous Racing Agent 유튜브 영상 보기"><img src="/assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Autonomous Racing Agent 시뮬레이션 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #38bdf8;"><span>📡</span> 1. 다방향 레이캐스트 환경 감지</div>
@@ -1615,7 +1631,7 @@
             <button class="pf-modal-close" onclick="pfCloseModal('slime')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><img src="/assets/images/Other%20Game/slide_40_img_31.png" alt="Slime Project 인게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=83lMfQY1Rwo" target="_blank" rel="noopener noreferrer" aria-label="Slime Project 유튜브 영상 보기"><img src="/assets/images/Other%20Game/slide_40_img_31.png" alt="Slime Project 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #fb923c;"><span>🧠</span> 1. Finite State Machine (FSM)</div>
@@ -1652,7 +1668,7 @@
             </div>
             <button class="pf-modal-close" onclick="pfCloseModal('moonlight')">✕ CLOSE</button>
         </div>
-        <div class="pf-modal-banner"><img src="/assets/images/Other%20Game/slide_42_img_30.png" alt="보름달 방앗간 인게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/shorts/Z-IKELImAMo" target="_blank" rel="noopener noreferrer" aria-label="보름달 방앗간 유튜브 영상 보기"><img src="/assets/images/Other%20Game/slide_42_img_30.png" alt="보름달 방앗간 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🧭</span> 1. A* 기반 공통 이동 계층</div>
@@ -1690,7 +1706,7 @@
             </div>
             <button class="pf-modal-close" onclick="pfCloseModal('luckyWwe')">✕ CLOSE</button>
         </div>
-        <div class="pf-modal-banner"><img src="/assets/images/Other%20Game/slide_38_img_30.png" alt="럭키 WWE 게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=5oXijTkkfQk" target="_blank" rel="noopener noreferrer" aria-label="럭키 WWE 유튜브 영상 보기"><img src="/assets/images/Other%20Game/slide_38_img_30.png" alt="럭키 WWE 게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #c084fc;"><span>🎲</span> 1. Yacht Dice 결합 배틀 루프</div>
@@ -1727,7 +1743,7 @@
             </div>
             <button class="pf-modal-close" onclick="pfCloseModal('honeybee')">✕ CLOSE</button>
         </div>
-        <div class="pf-modal-banner"><img src="/assets/images/Other%20Game/slide_39_img_30.png" alt="Hey! HoneyBee! 게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://verse8.io/c6C4f9v" target="_blank" rel="noopener noreferrer" aria-label="Hey! HoneyBee! Verse8 링크 열기"><img src="/assets/images/Other%20Game/slide_39_img_30.png" alt="Hey! HoneyBee! 게임 화면" loading="lazy"><span class="pf-media-badge">PLAY</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🍯</span> 1. 그리드 슬라이딩 & 합 연산</div>
@@ -1764,7 +1780,7 @@
             </div>
             <button class="pf-modal-close" onclick="pfCloseModal('shooting')">✕ CLOSE</button>
         </div>
-        <div class="pf-modal-banner"><img src="/assets/images/Other%20Game/slide_43_img_30.png" alt="WinAPI Shooting Game 인게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=XoW4OQZUVJs" target="_blank" rel="noopener noreferrer" aria-label="WinAPI Shooting Game 유튜브 영상 보기"><img src="/assets/images/Other%20Game/slide_43_img_30.png" alt="WinAPI Shooting Game 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #818cf8;"><span>🚀</span> 1. 순수 C++ / WinAPI 아키텍처</div>
@@ -1801,7 +1817,7 @@
             </div>
             <button class="pf-modal-close" onclick="pfCloseModal('pipegame')">✕ CLOSE</button>
         </div>
-        <div class="pf-modal-banner"><img src="/assets/images/Other%20Game/slide_41_img_30.png" alt="PipeGame 인게임 화면" loading="lazy"></div>
+        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=iz2g9ujFx-A" target="_blank" rel="noopener noreferrer" aria-label="PipeGame 유튜브 영상 보기"><img src="/assets/images/Other%20Game/slide_41_img_30.png" alt="PipeGame 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span> YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #34d399;"><span>🔧</span> 1. 타일 회전 & 입출구 포트 매핑</div>
