@@ -1268,3 +1268,177 @@ code.hljs {
   }
 }
 
+/* ==========================================================================
+   Architecture Flow Pipeline (.pf-flow-*)
+   ========================================================================== */
+
+.pf-flow-wrapper {
+  padding: 34px 24px !important;
+  background: #f8fbff !important;
+  border: 1px solid #dce8f6 !important;
+  border-radius: 16px !important;
+  margin: 28px 0 !important;
+}
+
+.pf-flow-pipeline {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 14px !important;
+  flex-wrap: wrap !important;
+}
+
+.pf-flow-card {
+  flex: 1 1 210px !important;
+  min-width: 200px !important;
+  max-width: 280px !important;
+  background: #ffffff !important;
+  border: 1.5px solid #dce5f0 !important;
+  border-radius: 14px !important;
+  padding: 22px 18px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.05) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+  text-align: left !important;
+  position: relative !important;
+}
+
+.pf-flow-card:hover {
+  transform: translateY(-4px) !important;
+  box-shadow: 0 14px 32px rgba(37, 99, 235, 0.1) !important;
+  border-color: #93c5fd !important;
+}
+
+.pf-flow-step-badge {
+  display: inline-block !important;
+  font-size: 0.7rem !important;
+  font-weight: 800 !important;
+  font-family: 'Fira Code', monospace !important;
+  letter-spacing: 0.5px !important;
+  padding: 3px 8px !important;
+  border-radius: 6px !important;
+  margin-bottom: 12px !important;
+  width: fit-content !important;
+}
+
+.pf-flow-card:nth-child(1) .pf-flow-step-badge {
+  background: #eff6ff !important;
+  color: #2563eb !important;
+  border: 1px solid #bfdbfe !important;
+}
+
+.pf-flow-card:nth-child(3) .pf-flow-step-badge {
+  background: #fefce8 !important;
+  color: #ca8a04 !important;
+  border: 1px solid #fef08a !important;
+}
+
+.pf-flow-card:nth-child(5) .pf-flow-step-badge {
+  background: #fdf4ff !important;
+  color: #a855f7 !important;
+  border: 1px solid #f5d0fe !important;
+}
+
+.pf-flow-card:nth-child(7) .pf-flow-step-badge {
+  background: #f0fdf4 !important;
+  color: #16a34a !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.pf-flow-title {
+  font-size: 1.12rem !important;
+  font-weight: 800 !important;
+  color: #1e293b !important;
+  margin: 0 0 6px 0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  letter-spacing: -0.01em !important;
+}
+
+.pf-flow-subtitle {
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  color: #64748b !important;
+  margin-bottom: 14px !important;
+  padding-bottom: 10px !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+}
+
+.pf-flow-list {
+  list-style: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 8px !important;
+  font-size: 0.85rem !important;
+  color: #475569 !important;
+  line-height: 1.45 !important;
+  flex: 1 !important;
+}
+
+.pf-flow-list li {
+  display: flex !important;
+  align-items: flex-start !important;
+  gap: 6px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.pf-flow-list li::before {
+  content: "•";
+  color: #3b82f6;
+  font-weight: bold;
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.pf-flow-separator {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #3b82f6 !important;
+  font-size: 1.3rem !important;
+  font-weight: 800 !important;
+  padding: 0 2px !important;
+}
+
+@media (max-width: 900px) {
+  .pf-flow-separator {
+    width: 100% !important;
+    transform: rotate(90deg) !important;
+    margin: 4px 0 !important;
+  }
+}
+
+/* Dark mode overrides for .pf-flow-* */
+@media (prefers-color-scheme: dark) {
+  .pf-flow-wrapper {
+    background: rgba(9, 14, 28, 0.76) !important;
+    border-color: rgba(96, 165, 250, 0.18) !important;
+  }
+  .pf-flow-card {
+    background: rgba(15, 23, 42, 0.85) !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+  }
+  .pf-flow-card:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 14px 32px rgba(0, 0, 0, 0.5) !important;
+  }
+  .pf-flow-title {
+    color: #f1f5f9 !important;
+  }
+  .pf-flow-subtitle {
+    color: #94a3b8 !important;
+    border-bottom-color: rgba(148, 163, 184, 0.12) !important;
+  }
+  .pf-flow-list {
+    color: #cbd5e1 !important;
+  }
+  .pf-flow-separator {
+    color: #60a5fa !important;
+  }
+}
+
+

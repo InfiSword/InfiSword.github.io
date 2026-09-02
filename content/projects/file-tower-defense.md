@@ -278,24 +278,112 @@ mermaid: true
 
 `InputManager`는 마우스의 상태 머신(`InputState`)을 기반으로 클릭, 드래그, 다중 선택(Ctrl+드래그)을 판단하여 `InteractionHandler`를 통해 이벤트를 전파합니다.
 
-```mermaid
-graph TD
-    A[Mouse / Touch Input] --> B[InputManager]
-    B -->|1. Raycast & UI Check| C{Is Pointer Over UI?}
-    C -->|Yes| D[Ignore World Interaction / Handle UI]
-    C -->|No| E[GetInteractableUnderMouse]
-    E -->|2. Sort by Layer/Order| F[Identify Target IInteractable]
-    B -->|3. Update InputState| G{InputState}
-    G -->|Pressing| H[Check Drag Threshold]
-    G -->|DraggingObject| I[OnDragHandler]
-    G -->|DraggingBox| J[Multi-Select Drag Box]
-    B -->|4. Dispatch Events| K[InteractionHandler]
-    K -->|Trigger Interface Methods| L[IInteractable Objects]
-    
-    style B fill:#007bff,stroke:#0056b3,color:#fff
-    style K fill:#28a745,stroke:#1e7e34,color:#fff
-    style L fill:#17a2b8,stroke:#117a8b,color:#fff
-```
+<div class="pf-visual-frame pf-flow-wrapper">
+  <!-- 대형 4단계 관계 흐름도 파이프라인 -->
+  <div class="pf-flow-pipeline">
+    <!-- STEP 01 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 01 // INPUT</span>
+      <h4 class="pf-flow-title">InputManager</h4>
+      <div class="pf-flow-subtitle">입력 이벤트 중앙 수신</div>
+      <ul class="pf-flow-list">
+        <li>마우스/터치 다운·업·이동 통합 감지</li>
+        <li>프레임 단위 마우스 월드 좌표 수집</li>
+      </ul>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-flow-separator">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </div>
+
+    <!-- STEP 02 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 02 // FILTER</span>
+      <h4 class="pf-flow-title">레이어 판정</h4>
+      <div class="pf-flow-subtitle">UI 우선순위 및 타깃팅</div>
+      <ul class="pf-flow-list">
+        <li><strong>UI 우선:</strong> IsPointerOverUI() 검사</li>
+        <li><strong>NonAlloc:</strong> Physics2D 레이캐스트</li>
+        <li>정렬 순서(Order)로 최상단 타깃 식별</li>
+      </ul>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-flow-separator">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </div>
+
+    <!-- STEP 03 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 03 // STATE</span>
+      <h4 class="pf-flow-title">InputState 머신</h4>
+      <div class="pf-flow-subtitle">입력 행위 상태 분기</div>
+      <ul class="pf-flow-list">
+        <li><strong>클릭 / 호버:</strong> 임계값 내 단순 릴리즈</li>
+        <li><strong>드래그:</strong> 임계값 초과 시 이동 모드</li>
+        <li><strong>다중 선택:</strong> 드래그 박스 영역 판정</li>
+      </ul>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-flow-separator">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </div>
+
+    <!-- STEP 04 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 04 // DISPATCH</span>
+      <h4 class="pf-flow-title">InteractionHandler</h4>
+      <div class="pf-flow-subtitle">Mediator 이벤트 디스패치</div>
+      <ul class="pf-flow-list">
+        <li>선택된 대상 객체들에게 이벤트 일괄 전파</li>
+        <li><strong>IInteractable:</strong> OnClick / OnDrag 호출</li>
+        <li>개별 객체 Update() 탐색 0% 달성</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 간략화된 단계별 아키텍처 요약 표 -->
+  <div style="margin-top: 24px; overflow-x: auto;">
+    <table class="pf-data-table" style="width: 100%; font-size: 0.88rem; text-align: left;">
+      <thead>
+        <tr>
+          <th style="width: 14%;">단계</th>
+          <th style="width: 22%;">핵심 모듈</th>
+          <th style="width: 40%;">주요 역할 및 알고리즘</th>
+          <th style="width: 24%;">전달 데이터 / 결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 01</span></td>
+          <td><strong>InputManager</strong></td>
+          <td>마우스 다운/업/이동 이벤트 감지 및 매 프레임 입력 좌표 수집</td>
+          <td><code>Vector2</code> 포인터 좌표</td>
+        </tr>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 02</span></td>
+          <td><strong>UI & 레이어 판정</strong></td>
+          <td><code>IsPointerOverGameObject</code> 검사 후 <code>RaycastNonAlloc</code> 최상단 타깃 추출</td>
+          <td>타깃 <code>IInteractable</code></td>
+        </tr>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 03</span></td>
+          <td><strong>InputState 머신</strong></td>
+          <td>클릭, 길게 누름, 드래그 임계값 검사 (단일 유닛 이동 vs 다중 드래그 박스)</td>
+          <td><code>InputState</code> 상태 전환</td>
+        </tr>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 04</span></td>
+          <td><strong>InteractionHandler</strong></td>
+          <td>Mediator 패턴을 통해 대상 객체들에게 인터페이스 이벤트 일괄 전파</td>
+          <td><code>OnClick()</code>, <code>OnDrag()</code> 실행</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 <div class="pf-visual-frame">
     <img src="/assets/Gifs/file-tower-defense-interaction.gif" alt="File Tower Defense Input Interaction Demo" style="width: 100%; border-radius: 8px;">
@@ -626,25 +714,112 @@ private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int cente
 
 파일 유닛이 그리드 상에 배치되거나 이동할 때, 버프 영역을 동적으로 계산하고 전파하기 위해 **Observer 패턴** 구조를 활용했습니다.
 
-```mermaid
-graph TD
-    A[Place Unit on Grid] --> B{Is Unit a Buff Source?}
-    
-    B -->|Yes| C[ApplyBuffActive]
-    C -->|Register Aura Area| D[Skill_BuffMain.ApplyBuffArea]
-    D -->|For each grid in range| E[Grid.AddBuffSource]
-    E -->|If grid has occupant| F[ApplyBuffFromSource]
-    F -->|Apply BuffStat| G[Target Unit.ApplyBuff]
-    
-    B -->|No| H[ApplyGridBuffs]
-    H -->|For each source in Grid._activeBuffSources| I[ApplyBuffFromSource]
-    I -->|Apply BuffStat| J[Placed Unit.ApplyBuff]
+<div class="pf-visual-frame pf-flow-wrapper">
+  <!-- 대형 4단계 관계 흐름도 파이프라인 -->
+  <div class="pf-flow-pipeline">
+    <!-- STEP 01 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 01 // INPUT</span>
+      <h4 class="pf-flow-title">InputManager</h4>
+      <div class="pf-flow-subtitle">입력 이벤트 중앙 수신</div>
+      <ul class="pf-flow-list">
+        <li>마우스/터치 다운·업·이동 통합 감지</li>
+        <li>프레임 단위 마우스 월드 좌표 수집</li>
+      </ul>
+    </div>
 
-    style C fill:#007bff,stroke:#0056b3,color:#fff
-    style H fill:#28a745,stroke:#1e7e34,color:#fff
-    style G fill:#17a2b8,stroke:#117a8b,color:#fff
-    style J fill:#17a2b8,stroke:#117a8b,color:#fff
-```
+    <!-- Arrow -->
+    <div class="pf-flow-separator">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </div>
+
+    <!-- STEP 02 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 02 // FILTER</span>
+      <h4 class="pf-flow-title">레이어 판정</h4>
+      <div class="pf-flow-subtitle">UI 우선순위 및 타깃팅</div>
+      <ul class="pf-flow-list">
+        <li><strong>UI 우선:</strong> IsPointerOverUI() 검사</li>
+        <li><strong>NonAlloc:</strong> Physics2D 레이캐스트</li>
+        <li>정렬 순서(Order)로 최상단 타깃 식별</li>
+      </ul>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-flow-separator">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </div>
+
+    <!-- STEP 03 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 03 // STATE</span>
+      <h4 class="pf-flow-title">InputState 머신</h4>
+      <div class="pf-flow-subtitle">입력 행위 상태 분기</div>
+      <ul class="pf-flow-list">
+        <li><strong>클릭 / 호버:</strong> 임계값 내 단순 릴리즈</li>
+        <li><strong>드래그:</strong> 임계값 초과 시 이동 모드</li>
+        <li><strong>다중 선택:</strong> 드래그 박스 영역 판정</li>
+      </ul>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-flow-separator">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+    </div>
+
+    <!-- STEP 04 -->
+    <div class="pf-flow-card">
+      <span class="pf-flow-step-badge">STEP 04 // DISPATCH</span>
+      <h4 class="pf-flow-title">InteractionHandler</h4>
+      <div class="pf-flow-subtitle">Mediator 이벤트 디스패치</div>
+      <ul class="pf-flow-list">
+        <li>선택된 대상 객체들에게 이벤트 일괄 전파</li>
+        <li><strong>IInteractable:</strong> OnClick / OnDrag 호출</li>
+        <li>개별 객체 Update() 탐색 0% 달성</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 간략화된 단계별 아키텍처 요약 표 -->
+  <div style="margin-top: 24px; overflow-x: auto;">
+    <table class="pf-data-table" style="width: 100%; font-size: 0.88rem; text-align: left;">
+      <thead>
+        <tr>
+          <th style="width: 14%;">단계</th>
+          <th style="width: 22%;">핵심 모듈</th>
+          <th style="width: 40%;">주요 역할 및 알고리즘</th>
+          <th style="width: 24%;">전달 데이터 / 결과</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 01</span></td>
+          <td><strong>InputManager</strong></td>
+          <td>마우스 다운/업/이동 이벤트 감지 및 매 프레임 입력 좌표 수집</td>
+          <td><code>Vector2</code> 포인터 좌표</td>
+        </tr>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 02</span></td>
+          <td><strong>UI & 레이어 판정</strong></td>
+          <td><code>IsPointerOverGameObject</code> 검사 후 <code>RaycastNonAlloc</code> 최상단 타깃 추출</td>
+          <td>타깃 <code>IInteractable</code></td>
+        </tr>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 03</span></td>
+          <td><strong>InputState 머신</strong></td>
+          <td>클릭, 길게 누름, 드래그 임계값 검사 (단일 유닛 이동 vs 다중 드래그 박스)</td>
+          <td><code>InputState</code> 상태 전환</td>
+        </tr>
+        <tr>
+          <td><span class="pf-flow-step-badge" style="margin: 0;">STEP 04</span></td>
+          <td><strong>InteractionHandler</strong></td>
+          <td>Mediator 패턴을 통해 대상 객체들에게 인터페이스 이벤트 일괄 전파</td>
+          <td><code>OnClick()</code>, <code>OnDrag()</code> 실행</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 *   **버프 전파 흐름:**
     1.  버프 특성을 가진 파일 유닛(예: `.mp3` 힐링 버프)이 그리드에 배치되면, 자신의 사거리(Aura Area) 내에 존재하는 모든 주변 `FileGrid` 셀들을 찾아 자신을 버프 소스로 등록(`AddBuffSource(this)`)합니다.
