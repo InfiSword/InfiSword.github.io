@@ -422,67 +422,29 @@ public interface IInteractable
 {
     GameObject targetObj { get; }
     Transform transform { get; }
-    Sprite TooltipImg { get; }
-    string ToolTipDes { get; }
-
-    // 선택 및 드래그 상태 플래그
+    Sprite TooltipImg { get; }  // 툴팁은 클래스로 만들까 고민
+    string ToolTipDes { get; }  
+    
+    // 선택 상태 관리
     bool IsSelectable { get; }
     bool IsDraggable { get; }
     bool IsTooltipEnabled { get; }
+    
+    // 이벤트 메서드
+    void OnHoverEnter();     // 마우스가 객체 위로 올라올 때 (ToolTip 타이밍 리셋용)
+    void OnHoverExit();      // 마우스가 객체에서 벗어날 때 (ToolTip 숨김)
+    void OnClickEnter();     // 마우스 버튼을 누를 때
+    void OnClickExit();      // 마우스 버튼을 뗄 때
+    void OnBeginDrag();
+    void OnDrag(Vector2 mouseDelta); 
+    void OnEndDrag();
+    void OnClick();          // 클릭 처리
+    void OnDoubleClick();    // 더블클릭 처리
+    void OnRightClick();     // 우클릭 처리
+    void OnSelectSingle();
 
-    // 이벤트 라이프사이클 메서드
-    void OnHoverEnter();             // 마우스 진입 (툴팁 타이머 리셋)
-    void OnHoverExit();              // 마우스 이탈 (툴팁 숨김)
-    void OnClickEnter();             // 마우스 버튼 누름
-    void OnClickExit();              // 마우스 버튼 뗌
-    void OnBeginDrag();              // 드래그 시작
-    void OnDrag(Vector2 mouseDelta); // 드래그 중 위치 이동
-    void OnEndDrag();                // 드래그 종료
-    void OnClick();                  // 클릭 처리
-    void OnDoubleClick();            // 더블클릭 처리
-    void OnRightClick();             // 우클릭 처리
-    void OnSelected(bool isSelected);// 선택 테두리 시각화
-}
-
-// InteractionHandler.cs: Mediator 패턴 기반 다중 드래그 & 이벤트 디스패처
-public class InteractionHandler
-{
-    public List<IInteractable> SelectedObjects { get; private set; } = new List<IInteractable>();
-    public List<IInteractable> DragObjects { get; private set; } = new List<IInteractable>();
-
-    // 포인터 다운 시 단일/다중(Ctrl) 선택 및 클릭 이벤트 동기화
-    public void OnClickEnterHandler(IInteractable obj, bool isMultiSelect)
-    {
-        if (obj == null) return;
-        obj.OnClickEnter();
-
-        if (obj.IsSelectable)
-        {
-            if (!isMultiSelect)
-            {
-                if (!SelectedObjects.Contains(obj))
-                {
-                    ClearSelections();
-                    SelectSingle(obj);
-                }
-            }
-            else
-            {
-                if (!SelectedObjects.Contains(obj)) AddSelection(obj);
-                else RemoveSelection(obj);
-            }
-        }
-        obj.OnClick();
-    }
-
-    // 드래그 대상 전체 유닛의 델타 이동 일괄 디스패치
-    public void OnDragHandler(Vector2 mouseDelta)
-    {
-        foreach (IInteractable obj in DragObjects)
-        {
-            if (obj != null) obj.OnDrag(mouseDelta);
-        }
-    }
+    // 선택 상태 표시
+    void OnSelected(bool isSelected);
 }
 ```
 </details>

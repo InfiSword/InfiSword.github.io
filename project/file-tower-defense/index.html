@@ -235,9 +235,7 @@
 </div>
 <h4 id="객체-중첩-판정-알고리즘">객체 중첩 판정 알고리즘</h4>
 <p>마우스 아래에 여러 유닛이나 바이러스, 혹은 UI 판정이 겹쳐있을 때, 다음과 같은 우선순위 기준을 사용하여 모호함을 해결합니다.</p>
-<ol><li><strong>UI 레이어 우선:</strong> <code>EventSystem.current.IsPointerOverGameObject()</code>를 통해 UI 상호작용 우선 처리.
-</li><li><strong>Raycast로 객체 서칭:</strong> <code>Physics2D.Raycast</code>을 활용하여 객체를 찾음.
-</li><li><strong>정렬 레이어(Sorting Order) 정렬:</strong> 감지된 객체들의 <code>Sorting Layer</code> 및 <code>Sorting Order</code> 값을 비교하여 카메라와 가장 가까운(최상단에 렌더링된) 오브젝트를 타깃으로 최종 선택.</li></ol>
+<ol><li><strong>UI 레이어 우선:</strong> <code>EventSystem.current.IsPointerOverGameObject()</code>를 통해 UI 상호작용 우선 처리.</li><li><strong>물리 레이어 필터링:</strong> <code>Physics2D.RaycastNonAlloc</code>을 활용하여 쓰레기 메모리(GC Alloc) 없이 감지된 콜라이더 배열을 가져옴.</li><li><strong>정렬 레이어(Sorting Order) 정렬:</strong> 감지된 객체들의 <code>SpriteRenderer</code> 내 <code>Sorting Layer ID</code> 및 <code>Order in Layer</code> 값을 비교하여 카메라와 가장 가까운(최상단에 렌더링된) 오브젝트를 타깃으로 최종 선택.</li></ol>
 <h3 id="22-iinteractable-인터페이스-기반-확장성">2.2 IInteractable 인터페이스 기반 확장성</h3>
 <p>클릭 및 드래그 상호작용이 필요한 모든 인게임 오브젝트(유닛 파일, 바이러스 등)는 <a href="/codeReference/file_tower_defence/IInteractable.cs">IInteractable</a> 인터페이스를 상속받아 유연하게 확장할 수 있습니다.</p>
 <div class="pf-visual-frame">
@@ -251,67 +249,29 @@
 {
     <span class="hljs-title class_">GameObject</span> targetObj { <span class="hljs-keyword">get</span>; }
     <span class="hljs-title class_">Transform</span> transform { <span class="hljs-keyword">get</span>; }
-    <span class="hljs-title class_">Sprite</span> TooltipImg { <span class="hljs-keyword">get</span>; }
-    <span class="hljs-built_in">string</span> ToolTipDes { <span class="hljs-keyword">get</span>; }
-
-    <span class="hljs-comment">// 선택 및 드래그 상태 플래그</span>
+    <span class="hljs-title class_">Sprite</span> TooltipImg { <span class="hljs-keyword">get</span>; }  <span class="hljs-comment">// 툴팁은 클래스로 만들까 고민</span>
+    <span class="hljs-built_in">string</span> ToolTipDes { <span class="hljs-keyword">get</span>; }  
+    
+    <span class="hljs-comment">// 선택 상태 관리</span>
     <span class="hljs-built_in">bool</span> IsSelectable { <span class="hljs-keyword">get</span>; }
     <span class="hljs-built_in">bool</span> IsDraggable { <span class="hljs-keyword">get</span>; }
     <span class="hljs-built_in">bool</span> IsTooltipEnabled { <span class="hljs-keyword">get</span>; }
+    
+    <span class="hljs-comment">// 이벤트 메서드</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverEnter</span>()</span>;     <span class="hljs-comment">// 마우스가 객체 위로 올라올 때 (ToolTip 타이밍 리셋용)</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverExit</span>()</span>;      <span class="hljs-comment">// 마우스가 객체에서 벗어날 때 (ToolTip 숨김)</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClickEnter</span>()</span>;     <span class="hljs-comment">// 마우스 버튼을 누를 때</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClickExit</span>()</span>;      <span class="hljs-comment">// 마우스 버튼을 뗄 때</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnBeginDrag</span>()</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDrag</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> mouseDelta</span>)</span>; 
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnEndDrag</span>()</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClick</span>()</span>;          <span class="hljs-comment">// 클릭 처리</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDoubleClick</span>()</span>;    <span class="hljs-comment">// 더블클릭 처리</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnRightClick</span>()</span>;     <span class="hljs-comment">// 우클릭 처리</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnSelectSingle</span>()</span>;
 
-    <span class="hljs-comment">// 이벤트 라이프사이클 메서드</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverEnter</span>()</span>;             <span class="hljs-comment">// 마우스 진입 (툴팁 타이머 리셋)</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverExit</span>()</span>;              <span class="hljs-comment">// 마우스 이탈 (툴팁 숨김)</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClickEnter</span>()</span>;             <span class="hljs-comment">// 마우스 버튼 누름</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClickExit</span>()</span>;              <span class="hljs-comment">// 마우스 버튼 뗌</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnBeginDrag</span>()</span>;              <span class="hljs-comment">// 드래그 시작</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDrag</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> mouseDelta</span>)</span>; <span class="hljs-comment">// 드래그 중 위치 이동</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnEndDrag</span>()</span>;                <span class="hljs-comment">// 드래그 종료</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClick</span>()</span>;                  <span class="hljs-comment">// 클릭 처리</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDoubleClick</span>()</span>;            <span class="hljs-comment">// 더블클릭 처리</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnRightClick</span>()</span>;             <span class="hljs-comment">// 우클릭 처리</span>
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnSelected</span>(<span class="hljs-params"><span class="hljs-built_in">bool</span> isSelected</span>)</span>;<span class="hljs-comment">// 선택 테두리 시각화</span>
-}
-
-<span class="hljs-comment">// <span class="hljs-title class_">InteractionHandler</span>.cs: Mediator 패턴 기반 다중 드래그 &amp; 이벤트 디스패처</span>
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">InteractionHandler</span></span>
-{
-    <span class="hljs-keyword">public</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt; SelectedObjects { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt;();
-    <span class="hljs-keyword">public</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt; DragObjects { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt;();
-
-    <span class="hljs-comment">// 포인터 다운 시 단일/다중(Ctrl) 선택 및 클릭 이벤트 동기화</span>
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnClickEnterHandler</span>(<span class="hljs-params"><span class="hljs-title class_">IInteractable</span> obj, <span class="hljs-built_in">bool</span> isMultiSelect</span>)</span>
-    {
-        <span class="hljs-keyword hljs-control-flow">if</span> (obj == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
-        obj.<span class="hljs-title function_">OnClickEnter</span>();
-
-        <span class="hljs-keyword hljs-control-flow">if</span> (obj.IsSelectable)
-        {
-            <span class="hljs-keyword hljs-control-flow">if</span> (!isMultiSelect)
-            {
-                <span class="hljs-keyword hljs-control-flow">if</span> (!SelectedObjects.<span class="hljs-title function_">Contains</span>(obj))
-                {
-                    <span class="hljs-title function_">ClearSelections</span>();
-                    <span class="hljs-title function_">SelectSingle</span>(obj);
-                }
-            }
-            <span class="hljs-keyword hljs-control-flow">else</span>
-            {
-                <span class="hljs-keyword hljs-control-flow">if</span> (!SelectedObjects.<span class="hljs-title function_">Contains</span>(obj)) <span class="hljs-title function_">AddSelection</span>(obj);
-                <span class="hljs-keyword hljs-control-flow">else</span> <span class="hljs-title function_">RemoveSelection</span>(obj);
-            }
-        }
-        obj.<span class="hljs-title function_">OnClick</span>();
-    }
-
-    <span class="hljs-comment">// 드래그 대상 전체 유닛의 델타 이동 일괄 디스패치</span>
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnDragHandler</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> mouseDelta</span>)</span>
-    {
-        <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-title class_">IInteractable</span> obj <span class="hljs-keyword">in</span> DragObjects)
-        {
-            <span class="hljs-keyword hljs-control-flow">if</span> (obj != <span class="hljs-literal">null</span>) obj.<span class="hljs-title function_">OnDrag</span>(mouseDelta);
-        }
-    }
+    <span class="hljs-comment">// 선택 상태 표시</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnSelected</span>(<span class="hljs-params"><span class="hljs-built_in">bool</span> isSelected</span>)</span>;
 }</code></pre>
 </details>
 <hr>
