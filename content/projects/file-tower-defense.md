@@ -528,28 +528,7 @@ public interface IInteractable
   </div>
 </div>
 
-### 3.3 동적 양방향 좌표 변환 시스템
-
-마우스의 월드 스페이스 좌표와 그리드의 인덱스(Row, Column) 좌표계를 상호 변환하기 위해 오프셋 기반의 연산 로직을 정밀하게 구현했습니다.
-
-<div class="pf-visual-frame">
-  <div class="pf-coord-flow">
-    <div class="pf-coord-box">
-      <div class="pf-coord-box-title">World Position (월드 좌표)</div>
-      <div class="pf-coord-box-formula">InverseTransformPoint(worldPos)</div>
-    </div>
-    <div class="pf-comp-transition" style="padding: 0 8px;">
-      <span class="pf-comp-pill">양방향 변환</span>
-      <div class="pf-flow-arrow" style="width: 36px; height: 36px; font-size: 1.1rem;">⇄</div>
-    </div>
-    <div class="pf-coord-box">
-      <div class="pf-coord-box-title">Grid Index (행·열 인덱스)</div>
-      <div class="pf-coord-box-formula">RoundToInt((local - start) / cellSize)</div>
-    </div>
-  </div>
-</div>
-
-### 3.4 공간 분할 기반 탐색 최적화 (O(1))
+### 3.3 공간 분할 기반 탐색 최적화 (O(1))
 
 마우스를 드래그할 때 가장 가까운 그리드를 찾기 위해 전체 그리드($N \times M$개)를 전수 검사하는 것은 낭비입니다. 이를 극복하기 위해 **공간 분할(Spatial Partitioning)** 개념을 도입했습니다. 
 마우스 월드 좌표를 기반으로 연산 $O(1)$ 만에 예상되는 타깃 그리드 인덱스를 수학적으로 산출하고, 해당 인덱스를 중심으로 **인접한 3x3 그리드 셀(총 9개)**만 가중치(거리 제곱) 계산을 수행하여 탐색 성능을 획기적으로 개선했습니다.
@@ -638,7 +617,7 @@ private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int cente
 
 </details>
 
-### 3.5 플래그 기반 확장 가능한 검색 시스템
+### 3.4 플래그 기반 확장 가능한 검색 시스템
 
 그리드를 검색할 때 '비어 있는 곳', '장애물이 없는 곳', '이미 아군이 배치된 곳' 등 다양한 복합 조건을 비트 플래그 형태로 손쉽게 검색할 수 있도록 가변 플래그 검색 시스템을 설계했습니다.
 
