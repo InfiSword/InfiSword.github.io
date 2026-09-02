@@ -528,70 +528,63 @@ public interface IInteractable
   </div>
 </div>
 
-### 3.3 공간 분할 기반 탐색 최적화 (O(1))
+### 3.3 공간 분할 기반 국소 탐색 시스템
 
-마우스를 드래그할 때 가장 가까운 그리드를 찾기 위해 전체 그리드($N \times M$개)를 전수 검사하는 것은 낭비입니다. 이를 극복하기 위해 **공간 분할(Spatial Partitioning)** 개념을 도입했습니다. 
-마우스 월드 좌표를 기반으로 연산 $O(1)$ 만에 예상되는 타깃 그리드 인덱스를 수학적으로 산출하고, 해당 인덱스를 중심으로 **인접한 3x3 그리드 셀(총 9개)**만 가중치(거리 제곱) 계산을 수행하여 탐색 성능을 획기적으로 개선했습니다.
+마우스 드래그 좌표로부터 목표 그리드 인덱스를 수학적으로 산출하고, 해당 인덱스를 중심으로 **인접한 3×3 그리드 셀(총 9개)**만을 국소 탐색하여 최적의 그리드를 신속하게 판정합니다.
 
-<div class="pf-visual-frame">
-  <div class="pf-diagram-grid">
-    <div class="pf-grid-cell near">(-1, 1)</div><div class="pf-grid-cell near">(0, 1)</div><div class="pf-grid-cell near">(1, 1)</div>
-    <div class="pf-grid-cell near">(-1, 0)</div><div class="pf-grid-cell active">Target</div><div class="pf-grid-cell near">(1, 0)</div>
-    <div class="pf-grid-cell near">(-1,-1)</div><div class="pf-grid-cell near">(0,-1)</div><div class="pf-grid-cell near">(1,-1)</div>
+<div class="pf-visual-frame" style="padding: 28px 20px; background: #f8fbff; border: 1px solid #dce8f6; border-radius: 16px;">
+  <!-- LOCAL 3x3 SEARCH MATRIX -->
+  <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+    <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; font-weight: 800; color: #2563eb; letter-spacing: 0.5px; margin-bottom: 16px;">LOCAL 3×3 SEARCH MATRIX</span>
+
+    <div style="display: grid; grid-template-columns: repeat(3, 76px); grid-template-rows: repeat(3, 76px); gap: 8px;">
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, +1)
+      </div>
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(0, +1)
+      </div>
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, +1)
+      </div>
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, 0)
+      </div>
+      <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: 2px solid #1e40af; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">
+        <span style="font-size: 1.1rem; margin-bottom: 2px;">🎯</span>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; font-weight: 800;">Target</span>
+        <span style="font-size: 0.62rem; opacity: 0.9; font-family: 'Fira Code', monospace;">(0, 0)</span>
+      </div>
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, 0)
+      </div>
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, -1)
+      </div>
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(0, -1)
+      </div>
+      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, -1)
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 14px; margin-top: 16px; font-size: 0.76rem; color: #64748b; font-weight: 600;">
+      <span><strong style="color: #2563eb;">■</strong> Target (Center)</span>
+      <span><strong style="color: #93c5fd;">■</strong> dx, dy 오프셋 탐색 (9개 셀)</span>
+    </div>
   </div>
-  <p style="font-size: 0.88rem; color: #64748b; margin-top: 14px; text-align: center; font-weight: 500;">
-    <span style="display: inline-block; width: 12px; height: 12px; background: #2563eb; border-radius: 3px; vertical-align: middle; margin-right: 4px;"></span> <strong>타깃 셀 (Center)</strong> &nbsp;&nbsp;|&nbsp;&nbsp; 
-    <span style="display: inline-block; width: 12px; height: 12px; background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 3px; vertical-align: middle; margin-right: 4px;"></span> <strong>인접 3×3 한정 탐색 (총 9개 셀)</strong>
-  </p>
 </div>
 
 <details class="pf-details">
-<summary>코드 보기: 공간 분할 탐색 알고리즘</summary>
+<summary>코드 보기: 3×3 국소 탐색 루프 (FindClosestGridInRange)</summary>
 
 <div class="details-desc">
-월드 좌표를 인덱스로 즉시 변환한 뒤, 해당 인덱스를 중심으로 3x3 영역 내의 그리드만 제곱 거리(`sqrMagnitude`)로 비교하여 최적의 그리드를 탐색합니다.
+타깃 인덱스(<code>centerX, centerY</code>)를 기준으로 <code>dx</code>, <code>dy</code>를 각각 -1부터 1까지 순회하며 인접 9개 셀에 대해서만 유효성 검사 및 최단 거리 비교를 수행합니다.
 </div>
 
 ```csharp
-// FileGridManager.cs: 공간 분할 기반 월드 좌표 인덱스 변환 및 3x3 탐색
-
-// 1. 월드 좌표를 O(1)에 2차원 그리드 인덱스로 수학적 역산
-private bool WorldToGridIndex(Vector2 worldPos, out int x, out int y)
-{
-    x = 0; y = 0;
-    if (gridLayout == null) return false;
-
-    Vector2 localPos = transform.InverseTransformPoint(worldPos);
-    Vector2 startPos = new Vector2(
-        -gridLayout.CellSize.x * (GridWidth - 1) * 0.5f,
-        -gridLayout.CellSize.y * (GridHeight - 1) * 0.5f
-    ) + gridLayout.Padding;
-
-    float xFloat = (localPos.x - startPos.x) / (gridLayout.CellSize.x + gridLayout.Spacing.x);
-    float yFloat = (localPos.y - startPos.y) / (gridLayout.CellSize.y + gridLayout.Spacing.y);
-
-    x = Mathf.RoundToInt(xFloat);
-    y = Mathf.RoundToInt(yFloat);
-    return true;
-}
-
-// 2. 마우스 월드 위치 기준 최단 거리 그리드 탐색
-public FileGrid GetGrid(Vector2 worldPos)
-{
-    if (!WorldToGridIndex(worldPos, out int xCenter, out int yCenter))
-        return null;
-
-    // 인덱스 유효 범위인 경우 3x3 (총 9개 셀)만 제한 탐색
-    if (IsValidGridIndex(xCenter, yCenter))
-    {
-        return FindClosestGridInRange(worldPos, xCenter, yCenter);
-    }
-
-    // 예외적인 바운드 외곽 드래그 시에만 전체 전수 검사 수행
-    return FindClosestGridFromAll(worldPos);
-}
-
-// 3. 3x3 탐색 영역 루프 (제곱 거리 sqrMagnitude 사용으로 Sqrt 연산 회피)
+// FileGridManager.cs: 3x3 국소 탐색 루프
 private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int centerY)
 {
     float minDistSqr = float.MaxValue;
@@ -621,55 +614,75 @@ private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int cente
 
 그리드를 검색할 때 '비어 있는 곳', '장애물이 없는 곳', '이미 아군이 배치된 곳' 등 다양한 복합 조건을 비트 플래그 형태로 손쉽게 검색할 수 있도록 가변 플래그 검색 시스템을 설계했습니다.
 
-<div class="pf-visual-frame">
-<div class="pf-table-wrapper">
-<table class="pf-data-table" style="width: 100% !important; table-layout: fixed !important;">
-    <thead>
-        <tr>
-            <th style="width: 20%; text-align: center;">플래그</th>
-            <th style="width: 35%; text-align: center;">설명</th>
-            <th style="width: 45%; text-align: center;">사용 예시 및 기대 결과</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td style="text-align: center;"><code>Occupied</code></td>
-            <td style="text-align: left;">현재 파일 유닛이 배치되어 점유 중인 그리드 셀만을 탐색 대상으로 한정합니다.</td>
-            <td style="text-align: left;">이미 설치된 특정 타워의 위치를 추적하거나, 인접한 유닛의 시너지를 계산할 때 활용됩니다.</td>
-        </tr>
-        <tr>
-            <td style="text-align: center;"><code>NotOccupied</code></td>
-            <td style="text-align: left;">파일 유닛이 배치되지 않은 비어있는 상태의 그리드 셀만을 필터링하여 검색합니다.</td>
-            <td style="text-align: left;">플레이어가 새로운 파일 유닛을 드래그하여 설치 가능한 빈 공간을 유효성 검사할 때 필수적으로 사용됩니다.</td>
-        </tr>
-        <tr>
-            <td style="text-align: center;"><code>Obstacle</code></td>
-            <td style="text-align: left;">시스템 장애물(땅굴 등)이 생성되어 일반적인 유닛 배치가 불가능한 그리드만을 검색합니다.</td>
-            <td style="text-align: left;">맵 파괴 이벤트나 바이러스의 특수 공격으로 인해 생성된 장애물 객체의 위치를 파악할 때 사용됩니다.</td>
-        </tr>
-        <tr>
-            <td style="text-align: center;"><code>NotObstacle</code></td>
-            <td style="text-align: left;">장애물이 존재하지 않아 물리적으로 객체 배치가 가능한 클린한 상태의 그리드만을 검색합니다.</td>
-            <td style="text-align: left;">장애물을 피해 안전하게 유닛을 배치하거나, 투사체가 지나갈 수 있는 경로를 계산할 때 필터로 활용됩니다.</td>
-        </tr>
-        <tr>
-            <td style="text-align: center;"><code>None</code></td>
-            <td style="text-align: left;">별도의 필터 조건을 적용하지 않고 그리드 레이아웃 내의 모든 셀을 탐색 범위에 포함합니다.</td>
-            <td style="text-align: left;">전체 그리드의 초기화, 일괄 색상 변경, 또는 모든 셀에 대한 거리 기반 전수 조사가 필요할 때 사용됩니다.</td>
-        </tr>
-    </tbody>
-</table>
-</div>
+<div class="pf-visual-frame" style="padding: 28px 24px; background: #f8fbff; border: 1px solid #dce8f6; border-radius: 16px;">
 
-<div style="margin-top: 20px; padding: 20px; background: rgba(88, 166, 255, 0.05); border-radius: 8px; border: 1px solid #e1e4e8; text-align: left;">
-    <div style="color: #007bff; font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code', monospace; font-size: 1rem; border-bottom: 1px solid #eee; padding-bottom: 8px;">💡 복합 쿼리 조합 예시 (High-Density Logic)</div>
-    <div style="color: #333; font-size: 0.95rem; font-family: 'Fira Code', monospace; line-height: 1.8;">
-        <code style="background: #eef5ff; padding: 4px 8px; border-radius: 4px; color: #0056b3; font-weight: bold;">FindFlagGridWorld(pos, NotOccupied, NotObstacle)</code><br/>
-        <span style="color: #555; display: inline-block; margin-top: 10px;">➔ <strong>"유닛이 없고 + 동시에 장애물도 없는"</strong> 가장 인접한 유효 그리드를 즉시 검색해 줍니다.</span>
+  <!-- 플래그 카드 그리드 -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+
+    <!-- Card 1: Occupied -->
+    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bfdbfe;">Occupied</span>
+        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">점유 셀</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">파일 유닛이 배치되어 있는 셀 한정 탐색 (타워 추적 및 아군 시너지 계산)</p>
     </div>
-</div>
-</div>
 
+    <!-- Card 2: NotOccupied -->
+    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #059669; background: #ecfdf5; padding: 2px 7px; border-radius: 5px; border: 1px solid #a7f3d0;">NotOccupied</span>
+        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">빈 셀</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">유닛이 없는 빈 그리드 필터링 (신규 유닛 설치 유효성 검증)</p>
+    </div>
+
+    <!-- Card 3: Obstacle -->
+    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 2px 7px; border-radius: 5px; border: 1px solid #fecaca;">Obstacle</span>
+        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">장애물</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">시스템 장애물(땅굴 등)이 위치한 셀 검색 (공격 회피 및 배치 제한 영역)</p>
+    </div>
+
+    <!-- Card 4: NotObstacle -->
+    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #0284c7; background: #f0f9ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bae6fd;">NotObstacle</span>
+        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">통과 가능</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">장애물이 없어 객체 배치 및 투사체 궤적 형성이 가능한 클린 셀</p>
+    </div>
+
+    <!-- Card 5: None -->
+    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 7px; border-radius: 5px; border: 1px solid #cbd5e1;">None</span>
+        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">전체 필터</span>
+      </div>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">필터 조건 없이 레이아웃 내 전체 셀 탐색 (초기화 및 일괄 갱신)</p>
+    </div>
+
+  </div>
+
+  <!-- 복합 쿼리 카드 (Terminal Box) -->
+  <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 6px 18px rgba(37,99,235,0.04);">
+    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+      <span style="font-size: 1rem;">💡</span>
+      <span style="font-family: 'Fira Code', monospace; font-size: 0.9rem; font-weight: 800; color: #1e293b;">복합 쿼리 조합 (High-Density Logic)</span>
+    </div>
+    <div style="background: #0f172a; padding: 14px 18px; border-radius: 10px; font-family: 'Fira Code', monospace; font-size: 0.86rem; color: #f8fafc; overflow-x: auto; margin-bottom: 12px; border: 1px solid #1e293b;">
+      <span style="color: #38bdf8;">FileGrid</span> target = FindFlagGridWorld(mousePos, <span style="color: #4ade80;">GridFlag.NotOccupied</span> | <span style="color: #4ade80;">GridFlag.NotObstacle</span>);
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.82rem; color: #475569;">
+      <span style="background: #eff6ff; color: #2563eb; font-weight: 700; padding: 3px 8px; border-radius: 5px; border: 1px solid #bfdbfe;">비트 AND 연산</span>
+      <span>➔</span>
+      <span><strong>&quot;유닛이 없고 + 동시에 장애물도 없는&quot;</strong> 가장 인접한 유효 그리드를 즉시 검색</span>
+    </div>
+  </div>
+
+</div>
 ---
 
 ## 4. 다형성 기반 동적 버프 시스템
