@@ -1197,3 +1197,244 @@ code.hljs {
   border: 1px solid #cbd5e1;
   font-weight: 500;
 }
+
+/* ==========================================================================
+   Ultra-Modern High-End Comparison Cards (Before vs After)
+   ========================================================================== */
+.pf-comp-container {
+  display: flex !important;
+  align-items: stretch !important;
+  justify-content: center !important;
+  gap: 20px !important;
+  flex-wrap: wrap !important;
+  margin: 24px 0 !important;
+}
+
+.pf-comp-box {
+  flex: 1 1 340px !important;
+  max-width: 480px !important;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
+}
+
+.pf-comp-box:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.1) !important;
+}
+
+/* Before / Legacy Card */
+.pf-comp-box.old {
+  border: 1.5px solid #fca5a5 !important;
+  background: linear-gradient(180deg, #fff8f8 0%, #ffffff 100%) !important;
+}
+
+.pf-comp-box.old::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #f87171, #ef4444);
+}
+
+/* After / Optimized Card */
+.pf-comp-box.new {
+  border: 1.5px solid #86efac !important;
+  background: linear-gradient(180deg, #f3fdf6 0%, #ffffff 100%) !important;
+}
+
+.pf-comp-box.new::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #34d399, #10b981);
+}
+
+/* Card Header */
+.pf-comp-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px dashed rgba(148, 163, 184, 0.35);
+  padding-bottom: 14px;
+}
+
+.pf-comp-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 0.76rem !important;
+  font-weight: 700 !important;
+  padding: 5px 12px !important;
+  border-radius: 9999px !important;
+  width: fit-content !important;
+  letter-spacing: 0.04em !important;
+  text-transform: uppercase !important;
+}
+
+.pf-comp-badge.old {
+  background: #fee2e2 !important;
+  color: #dc2626 !important;
+  border: 1px solid #fecaca !important;
+}
+
+.pf-comp-badge.new {
+  background: #dcfce7 !important;
+  color: #15803d !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+.pf-comp-title {
+  font-size: 1.22rem !important;
+  font-weight: 800 !important;
+  color: #0f172a !important;
+  margin: 0 !important;
+  line-height: 1.35 !important;
+  letter-spacing: -0.01em !important;
+}
+
+.pf-comp-subtitle {
+  font-size: 0.82rem !important;
+  color: #64748b !important;
+  font-weight: 500 !important;
+}
+
+/* Content List using Div Items */
+.pf-comp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  flex: 1;
+}
+
+.pf-comp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+.pf-comp-box.old .pf-comp-item {
+  border: 1px solid rgba(254, 202, 202, 0.65);
+  background: rgba(254, 242, 242, 0.45);
+}
+
+.pf-comp-box.new .pf-comp-item {
+  border: 1px solid rgba(187, 247, 208, 0.65);
+  background: rgba(240, 253, 244, 0.45);
+}
+
+.pf-comp-item-icon {
+  font-size: 1.15rem;
+  line-height: 1.2;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.pf-comp-item-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pf-comp-item-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.pf-comp-item-desc {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+/* Footer summary banner */
+.pf-comp-footer {
+  margin-top: auto;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.pf-comp-footer.old {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fee2e2 !important;
+}
+
+.pf-comp-footer.new {
+  background: #f0fdf4 !important;
+  color: #15803d !important;
+  border: 1px solid #dcfce7 !important;
+}
+
+.pf-comp-footer p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Center Bridge */
+.pf-comp-bridge {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  align-self: center !important;
+  padding: 8px 4px !important;
+}
+
+.pf-bridge-pill {
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  color: #2563eb !important;
+  background: #eff6ff !important;
+  padding: 4px 10px !important;
+  border-radius: 20px !important;
+  border: 1px solid #bfdbfe !important;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08) !important;
+  letter-spacing: 0.05em !important;
+}
+
+.pf-bridge-circle {
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: #ffffff !important;
+  border: 2px solid #3b82f6 !important;
+  color: #2563eb !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 1.35rem !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16) !important;
+  transition: all 0.25s ease !important;
+}
+
+.pf-comp-bridge:hover .pf-bridge-circle {
+  transform: scale(1.1) !important;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.25) !important;
+  background: #2563eb !important;
+  color: #ffffff !important;
+}

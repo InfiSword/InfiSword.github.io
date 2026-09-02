@@ -177,26 +177,74 @@ mermaid: true
 <div class="pf-visual-frame">
   <div class="pf-comp-container">
     <div class="pf-comp-box old">
-      <span class="pf-comp-badge old">기존 방식 (Before)</span>
-      <div class="pf-comp-title">RectTransform (UI 시스템)</div>
-      <ul class="pf-comp-list">
-        <li><span class="icon">❌</span><span><strong>좌표계 종속성:</strong> 캔버스 앵커·피벗·해상도에 따라 월드 좌표 변동</span></li>
-        <li><span class="icon">❌</span><span><strong>Canvas Rebuild 부하:</strong> 드래그/호버 시 매 프레임 강제 캔버스 재빌드</span></li>
-        <li><span class="icon">❌</span><span><strong>좌표 변환 오버헤드:</strong> 충돌 판정을 위한 월드-스크린 좌표 변환 함수 남발</span></li>
-      </ul>
+      <div class="pf-comp-header">
+        <span class="pf-comp-badge old">⚠️ 기존 방식 (AS-IS)</span>
+        <div class="pf-comp-title">RectTransform (UI 시스템)</div>
+        <div class="pf-comp-subtitle">초기 윈도우 UI 기반 프로토타입 설계</div>
+      </div>
+      <div class="pf-comp-body">
+        <div class="pf-comp-item">
+          <div class="pf-comp-item-icon">❌</div>
+          <div class="pf-comp-item-content">
+            <div class="pf-comp-item-title">좌표계 종속성</div>
+            <div class="pf-comp-item-desc">캔버스 앵커 및 해상도 변화 시 월드 좌표 왜곡, 정밀 사거리 판정 난항</div>
+          </div>
+        </div>
+        <div class="pf-comp-item">
+          <div class="pf-comp-item-icon">❌</div>
+          <div class="pf-comp-item-content">
+            <div class="pf-comp-item-title">Canvas Rebuild 부하</div>
+            <div class="pf-comp-item-desc">유닛 드래그/호버 시마다 캔버스 강제 재빌드로 심각한 CPU 프레임 드랍</div>
+          </div>
+        </div>
+        <div class="pf-comp-item">
+          <div class="pf-comp-item-icon">❌</div>
+          <div class="pf-comp-item-content">
+            <div class="pf-comp-item-title">충돌 판정 연산 낭비</div>
+            <div class="pf-comp-item-desc">적 바이러스와의 물리 연산을 위해 Camera.WorldToScreenPoint 매 프레임 호출</div>
+          </div>
+        </div>
+      </div>
+      <div class="pf-comp-footer old">
+        ⚠️ 성능 한계: 드로우콜 폭증 & Canvas Rebuilding 오버헤드
+      </div>
     </div>
-    <div class="pf-comp-transition">
-      <span class="pf-comp-pill">MIGRATION</span>
-      <div class="pf-flow-arrow">➔</div>
+    <div class="pf-comp-bridge">
+      <span class="pf-bridge-pill">MIGRATION</span>
+      <div class="pf-bridge-circle">➔</div>
     </div>
     <div class="pf-comp-box new">
-      <span class="pf-comp-badge new">개선 방식 (After)</span>
-      <div class="pf-comp-title">Transform (월드 GameObject)</div>
-      <ul class="pf-comp-list">
-        <li><span class="icon">✅</span><span><strong>절대 2D 좌표계:</strong> 카메라 기준의 절대 직교 좌표 및 수학적 인덱싱</span></li>
-        <li><span class="icon">✅</span><span><strong>캔버스 부하 0%:</strong> UI Rebuild로부터 완전히 독립된 드로우콜 격리</span></li>
-        <li><span class="icon">✅</span><span><strong>Physics2D 네이티브:</strong> Collider2D 및 RaycastNonAlloc 직접 호환</span></li>
-      </ul>
+      <div class="pf-comp-header">
+        <span class="pf-comp-badge new">✨ 개선 방식 (TO-BE)</span>
+        <div class="pf-comp-title">Transform (월드 GameObject)</div>
+        <div class="pf-comp-subtitle">고성능 2D 물리 엔진 직결 아키텍처</div>
+      </div>
+      <div class="pf-comp-body">
+        <div class="pf-comp-item">
+          <div class="pf-comp-item-icon">✅</div>
+          <div class="pf-comp-item-content">
+            <div class="pf-comp-item-title">절대 2D 좌표계 확립</div>
+            <div class="pf-comp-item-desc">오르토그래픽 카메라 기준 절대 직교 좌표 및 O(1) 수학적 인덱싱</div>
+          </div>
+        </div>
+        <div class="pf-comp-item">
+          <div class="pf-comp-item-icon">✅</div>
+          <div class="pf-comp-item-content">
+            <div class="pf-comp-item-title">캔버스 재빌드 부하 0%</div>
+            <div class="pf-comp-item-desc">UI Rebuilding 루프에서 완전히 분리되어 일정한 60+ FPS 방어</div>
+          </div>
+        </div>
+        <div class="pf-comp-item">
+          <div class="pf-comp-item-icon">✅</div>
+          <div class="pf-comp-item-content">
+            <div class="pf-comp-item-title">Physics2D 네이티브 호환</div>
+            <div class="pf-comp-item-desc">Collider2D 및 RaycastNonAlloc 직접 활용으로 쓰레기 메모리(GC) 차단</div>
+          </div>
+        </div>
+      </div>
+      <div class="pf-comp-footer new">
+        ✨ 최적화 성과: 60 FPS 무결점 방어 & 물리 엔진 직결
+      </div>
     </div>
   </div>
 </div>
