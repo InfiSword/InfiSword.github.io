@@ -68,18 +68,27 @@
 <p><code>GridManager</code>는 Tilemap의 각 셀을 순회하며 셀 좌표, 월드 좌표, 이동 가능 여부를 가진 <code>Grid</code> 노드를 생성합니다. NPC는 월드 좌표를 직접 비교하지 않고 <code>WorldToCell</code>과 <code>CellToWorld</code>를 통해 동일한 그리드 좌표계를 사용합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: Tilemap을 Grid 노드로 변환</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> x = <span class="hljs-number">0</span>; x &lt; gridSize.x; x++)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GridManager</span>.cs: Tilemap의 모든 셀을 순회하여 A* 탐색용 Grid 노드 2차원 리스트 구축</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">CreateGrid</span>()</span>
 {
-    <span class="hljs-keyword">var</span> row = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;Grid&gt;();
-    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> y = <span class="hljs-number">0</span>; y &lt; gridSize.y; y++)
-    {
-        Vector3Int cell = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Vector3Int</span>(x, y, <span class="hljs-number">0</span>);
-        <span class="hljs-title class_">Vector3</span> worldPosition = tilemap.<span class="hljs-title function_">CellToWorld</span>(cell);
-        <span class="hljs-built_in">bool</span> isWalkable = tilemap.<span class="hljs-title function_">HasTile</span>(cell);
+    grid = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">List</span>&lt;Grid&gt;&gt;();
 
-        row.<span class="hljs-title function_">Add</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">Grid</span>(isWalkable, worldPosition, x, y));
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> x = <span class="hljs-number">0</span>; x &lt; gridSize.x; x++)
+    {
+        <span class="hljs-title class_">List</span>&lt;Grid&gt; row = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;Grid&gt;();
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> y = <span class="hljs-number">0</span>; y &lt; gridSize.y; y++)
+        {
+            Vector3Int cellPosition = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Vector3Int</span>(x, y, <span class="hljs-number">0</span>);
+            <span class="hljs-title class_">Vector3</span> worldPosition = tilemap.<span class="hljs-title function_">CellToWorld</span>(cellPosition);
+
+            <span class="hljs-comment">// 타일 존재 여부 및 충돌 장애물 확인을 통한 보행 가능(isWalkable) 판정</span>
+            <span class="hljs-built_in">bool</span> isWalkable = tilemap.<span class="hljs-title function_">HasTile</span>(cellPosition);
+
+            <span class="hljs-comment">// 그리드 노드 생성 및 행 리스트에 추가</span>
+            row.<span class="hljs-title function_">Add</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">Grid</span>(isWalkable, worldPosition, x, y));
+        }
+        grid.<span class="hljs-title function_">Add</span>(row);
     }
-    grid.<span class="hljs-title function_">Add</span>(row);
 }</code></pre>
 </details>
 <p>이 구조를 통해 클릭 지점, 좌석 위치, 조리 도구 위치처럼 서로 다른 출처의 좌표도 A*가 사용하는 노드로 일관되게 변환할 수 있습니다.</p>
@@ -87,14 +96,34 @@
 <p>테이블과 의자는 단순한 이미지 타일이 아니라 게임 상태를 가진 커스텀 타일입니다. <code>CustomTableTile</code>과 <code>CustomChairTile</code>에 사용 가능 여부를 저장하고, <code>GridManager</code>가 이를 셀 좌표 기반 Dictionary로 관리합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 커스텀 타일 데이터와 좌표별 Dictionary</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomTableTile</span>&gt; tablesDictionary;
-<span class="hljs-keyword">public</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomChairTile</span>&gt; chairesDictionary;
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GridManager</span>.cs &amp; TableTileData: 좌표별 가구 데이터 및 실시간 점유 상태 딕셔너리 관리</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">GridManager</span></span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
+{
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomTableTile</span>&gt; tablesDictionary = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomTableTile</span>&gt;();
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomChairTile</span>&gt; chairesDictionary = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomChairTile</span>&gt;();
 
+    <span class="hljs-comment">// 테이블 주변 인접 의자(좌/우) 탐색 및 착석 가능 여부 조회</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title class_">CustomChairTile</span> <span class="hljs-title">GetAvailableChairNearTable</span>(<span class="hljs-params">Vector3Int tableCell</span>)</span>
+    {
+        Vector3Int[] neighborOffsets = { Vector3Int.left, Vector3Int.right };
+        <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> offset <span class="hljs-keyword">in</span> neighborOffsets)
+        {
+            Vector3Int chairPos = tableCell + offset;
+            <span class="hljs-keyword hljs-control-flow">if</span> (chairesDictionary.<span class="hljs-title function_">TryGetValue</span>(chairPos, <span class="hljs-keyword">out</span> <span class="hljs-title class_">CustomChairTile</span> chair))
+            {
+                <span class="hljs-keyword hljs-control-flow">if</span> (chair.isUseAble) <span class="hljs-keyword hljs-control-flow">return</span> chair;
+            }
+        }
+        <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
+    }
+}
+
+<span class="hljs-comment">// 테이블 타일 데이터 구조</span>
 <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">TableTileData</span>
 {
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> isUseAble;
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">string</span> tileName;
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> tableUseAbleIndex = <span class="hljs-number">4</span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> isUseAble = <span class="hljs-literal">true</span>;      <span class="hljs-comment">// 점유 상태 (손님 사용 중 여부)</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">string</span> tileName;            <span class="hljs-comment">// 타일 식별자</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> tableUseAbleIndex = <span class="hljs-number">4</span>;  <span class="hljs-comment">// 잔여 수용 인원 (4인 테이블 기본값)</span>
 }</code></pre>
 </details>
 <p>초기화 시 타일별 데이터를 복제해 등록했기 때문에, 같은 타일 에셋을 사용하는 좌석이라도 각 셀의 점유 상태를 독립적으로 다룰 수 있습니다.</p>
@@ -116,33 +145,102 @@
 <h2 id="3-a-길찾기-알고리즘" class="chapter-title">3. A* 길찾기 알고리즘</h2>
 <h3 id="31-노드-비용과-탐색-기준">3.1 노드 비용과 탐색 기준</h3>
 <p>각 <code>Grid</code> 노드는 시작점부터의 실제 비용 <code>gCost</code>, 목적지까지의 휴리스틱 비용 <code>hCost</code>, 그리고 부모 노드를 보관합니다. 최종 우선순위는 두 비용의 합인 <code>FCost</code>로 결정합니다.</p>
+<h3 id="32-a-핵심-알고리즘-및-openclosed-set-탐색">3.2 A* 핵심 알고리즘 및 Open/Closed Set 탐색</h3>
+<p>탐색할 후보 노드는 <code>OpenSet(List&lt;Grid&gt;)</code>, 방문이 완료된 노드는 <code>ClosedSet(HashSet&lt;Grid&gt;)</code>으로 분리하여 관리합니다. 매 스텝마다 $F = G + H$ 비용이 가장 낮은 노드를 선택하고, $F$ 비용이 동일할 경우 목적지에 더 가까운 $H$ 비용이 낮은 노드를 우선 선택하여 최적의 경로를 탐색합니다.</p>
 <details class="pf-details">
-<summary>코드 보기: A* 노드의 F 비용 계산</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> FCost =&gt; gCost + hCost;</code></pre>
-</details>
-<p>매장 이동은 상·하·좌·우 4방향으로 제한했고, 이에 맞춰 Manhattan Distance를 휴리스틱으로 사용했습니다.</p>
-<details class="pf-details">
-<summary>코드 보기: Manhattan Distance 휴리스틱</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-function"><span class="hljs-built_in">int</span> <span class="hljs-title">GetDistance</span>(<span class="hljs-params">Grid nodeA, Grid nodeB</span>)</span>
+<summary>코드 보기: Pathfinding.cs - A* FindPath 전체 구현</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Pathfinding</span>.cs: Open Set / Closed Set 기반의 A* 최단 경로 탐색 알고리즘</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title class_">List</span>&lt;Grid&gt; <span class="hljs-title">FindPath</span>(<span class="hljs-params"><span class="hljs-title class_">Vector3</span> startPos, <span class="hljs-title class_">Vector3</span> targetPos</span>)</span>
+{
+    Grid startNode = Grid.<span class="hljs-title function_">GetNodeAtPosition</span>(startPos);
+    Grid targetNode = Grid.<span class="hljs-title function_">GetNodeAtPosition</span>(targetPos);
+
+    <span class="hljs-keyword hljs-control-flow">if</span> (startNode == <span class="hljs-literal">null</span> || targetNode == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
+
+    <span class="hljs-title class_">List</span>&lt;Grid&gt; openSet = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;Grid&gt; { startNode };
+    <span class="hljs-title class_">HashSet</span>&lt;Grid&gt; closedSet = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashSet</span>&lt;Grid&gt;();
+
+    <span class="hljs-keyword hljs-control-flow">while</span> (openSet.Count &gt; <span class="hljs-number">0</span>)
+    {
+        <span class="hljs-comment">// 1. Open Set에서 <span class="hljs-title function_">FCost</span>(G+H)가 가장 작은 노드 선택 (동률 시 hCost 비교)</span>
+        Grid currentNode = openSet[<span class="hljs-number">0</span>];
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">1</span>; i &lt; openSet.Count; i++)
+        {
+            <span class="hljs-keyword hljs-control-flow">if</span> (openSet[i].FCost &lt; currentNode.FCost || 
+               (openSet[i].FCost == currentNode.FCost &amp;&amp; openSet[i].hCost &lt; currentNode.hCost))
+            {
+                currentNode = openSet[i];
+            }
+        }
+
+        openSet.<span class="hljs-title function_">Remove</span>(currentNode);
+        closedSet.<span class="hljs-title function_">Add</span>(currentNode);
+
+        <span class="hljs-comment">// 2. 목적지 도달 시 시작 노드까지 역추적하여 최종 경로 반환</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (currentNode == targetNode)
+        {
+            <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-title function_">RetracePath</span>(startNode, targetNode);
+        }
+
+        <span class="hljs-comment">// 3. 인접 4방향 이웃 노드 탐색 및 비용 갱신</span>
+        <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-function">Grid neighbor <span class="hljs-keyword">in</span> <span class="hljs-title">GetNeighbors</span>(<span class="hljs-params">currentNode</span>))</span>
+        {
+            <span class="hljs-keyword hljs-control-flow">if</span> (!neighbor.isWalkable || closedSet.<span class="hljs-title function_">Contains</span>(neighbor))
+                <span class="hljs-keyword hljs-control-flow">continue</span>;
+
+            <span class="hljs-comment">// 이동 비용 계산 (상하좌우 맨해튼 거리 기반)</span>
+            <span class="hljs-built_in">int</span> newCostToNeighbor = currentNode.gCost + <span class="hljs-title function_">GetDistance</span>(currentNode, neighbor);
+            <span class="hljs-keyword hljs-control-flow">if</span> (newCostToNeighbor &lt; neighbor.gCost || !openSet.<span class="hljs-title function_">Contains</span>(neighbor))
+            {
+                neighbor.gCost = newCostToNeighbor;
+                neighbor.hCost = <span class="hljs-title function_">GetDistance</span>(neighbor, targetNode);
+                neighbor.parent = currentNode; <span class="hljs-comment">// 역추적용 부모 노드 지정</span>
+
+                <span class="hljs-keyword hljs-control-flow">if</span> (!openSet.<span class="hljs-title function_">Contains</span>(neighbor))
+                {
+                    openSet.<span class="hljs-title function_">Add</span>(neighbor);
+                }
+            }
+        }
+    }
+    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>; <span class="hljs-comment">// 경로 없음</span>
+}
+
+<span class="hljs-comment">// Manhattan Distance 휴리스틱 계산 (4방향 직교 이동 비용: 10)</span>
+<span class="hljs-function"><span class="hljs-built_in">int</span> <span class="hljs-title">GetDistance</span>(<span class="hljs-params">Grid nodeA, Grid nodeB</span>)</span>
 {
     <span class="hljs-built_in">int</span> distanceX = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">Abs</span>(nodeA.gridX - nodeB.gridX);
     <span class="hljs-built_in">int</span> distanceY = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">Abs</span>(nodeA.gridY - nodeB.gridY);
     <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-number">10</span> * (distanceX + distanceY);
 }</code></pre>
 </details>
-<h3 id="32-open-set과-closed-set-탐색">3.2 Open Set과 Closed Set 탐색</h3>
-<p>탐색할 후보는 Open Set, 검사가 끝난 노드는 Closed Set으로 분리합니다. 현재 후보 중 <code>FCost</code>가 가장 낮은 노드를 선택하고, 비용이 같다면 목적지에 더 가까운 <code>hCost</code>가 낮은 노드를 우선합니다.</p>
-<details class="pf-details">
-<summary>코드 보기: Open Set의 최우선 노드 선택</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword hljs-control-flow">if</span> (candidate.FCost &lt; current.FCost ||
-    candidate.FCost == current.FCost &amp;&amp; candidate.hCost &lt; current.hCost)
-{
-    current = candidate;
-}</code></pre>
-</details>
 <p>이후 이동 불가능하거나 이미 방문한 이웃은 제외하고, 더 짧은 경로가 발견되면 비용과 부모 노드를 갱신합니다.</p>
 <h3 id="33-경로-역추적과-npc-이동">3.3 경로 역추적과 NPC 이동</h3>
-<p>목적지에 도달하면 각 노드가 가진 <code>parent</code>를 시작점까지 역추적한 뒤 리스트를 뒤집어 이동 경로를 생성합니다. <code>NPCMovement</code>와 <code>CustomerMovement</code>는 이 리스트를 순서대로 소비하며 셀의 월드 위치로 이동합니다.</p>
+<p>목적지에 도달하면 각 노드가 보관하고 있던 <code>parent</code> 포인터를 시작점까지 거슬러 올라간 뒤, 리스트를 역순으로 반환하여 NPC의 실시간 이동 경로를 생성합니다.</p>
+<details class="pf-details">
+<summary>코드 보기: Pathfinding.cs - RetracePath 부모 역추적 로직</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Pathfinding</span>.cs: 목적지에서 시작점까지 부모 노드를 추적하여 이동 경로 완성</span>
+<span class="hljs-function"><span class="hljs-title class_">List</span>&lt;Grid&gt; <span class="hljs-title">RetracePath</span>(<span class="hljs-params">Grid startNode, Grid endNode</span>)</span>
+{
+    <span class="hljs-title class_">List</span>&lt;Grid&gt; path = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;Grid&gt;();
+    Grid currentNode = endNode;
+
+    <span class="hljs-comment">// 목적지에서 시작 노드까지 거슬러 올라감</span>
+    <span class="hljs-keyword hljs-control-flow">while</span> (currentNode != startNode)
+    {
+        <span class="hljs-comment">// 타일 중앙 월드 좌표 산출 (캐릭터 발 위치 오프셋 +0.12f 보정)</span>
+        <span class="hljs-title class_">Vector3</span> centerPos = Grid.tilemap.<span class="hljs-title function_">CellToWorld</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">Vector3Int</span>(currentNode.gridX, currentNode.gridY, <span class="hljs-number">0</span>));
+        centerPos.y += <span class="hljs-number">0.12f</span>;
+        currentNode.worldPosition = centerPos;
+
+        path.<span class="hljs-title function_">Add</span>(currentNode);
+        currentNode = currentNode.parent;
+    }
+
+    path.<span class="hljs-title function_">Reverse</span>(); <span class="hljs-comment">// 순방향(시작점 -&gt; 목적지)으로 뒤집기</span>
+    <span class="hljs-keyword hljs-control-flow">return</span> path;
+}</code></pre>
+</details>
 <div class="pf-visual-frame">
     <div class="pf-transaction-flow">
         <div class="pf-flow-step">World Position</div>
@@ -184,13 +282,45 @@
 <h3 id="52-음식손님을-연결하는-주문-큐">5.2 음식·손님을 연결하는 주문 큐</h3>
 <p>직원은 <code>Queue&lt;FoodItem&gt;</code>과 <code>Queue&lt;CustomerAI&gt;</code>를 함께 사용합니다. 새로운 주문이 들어오면 음식과 손님을 같은 순서로 enqueue하고, 서빙 완료 시 각각 dequeue해 해당 손님에게 조리된 음식과 가격 정보를 전달합니다.</p>
 <details class="pf-details">
-<summary>코드 보기: 음식·손님 주문 큐 처리</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-title class_">Queue</span>&lt;FoodItem&gt; order_foodType = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Queue</span>&lt;FoodItem&gt;();
-<span class="hljs-keyword">public</span> <span class="hljs-title class_">Queue</span>&lt;<span class="hljs-title class_">CustomerAI</span>&gt; order_Customer = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Queue</span>&lt;<span class="hljs-title class_">CustomerAI</span>&gt;();
+<summary>코드 보기: Staff_AI.cs - 주문 큐 및 조리/서빙 파이프라인</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Staff_AI</span>.cs: 선입선출(FIFO) 큐 기반 주문 접수 및 서빙 코루틴 파이프라인</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">Staff_AI</span></span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
+{
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">Queue</span>&lt;FoodItem&gt; order_foodType = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Queue</span>&lt;FoodItem&gt;();
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">Queue</span>&lt;<span class="hljs-title class_">CustomerAI</span>&gt; order_Customer = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Queue</span>&lt;<span class="hljs-title class_">CustomerAI</span>&gt;();
 
-<span class="hljs-title class_">CustomerAI</span> customer = order_Customer.<span class="hljs-title function_">Dequeue</span>();
-FoodItem food = order_foodType.<span class="hljs-title function_">Dequeue</span>();
-customer.<span class="hljs-title function_">TakeFoodToStaff</span>(food.foodPrice);</code></pre>
+    <span class="hljs-comment">// 서빙 코루틴: 손님 위치로 이동 후 음식 전달 및 주문 큐 소비</span>
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title class_">IEnumerator</span> <span class="hljs-title">ServingTaskCoroutine</span>()</span>
+    {
+        <span class="hljs-keyword hljs-control-flow">if</span> (order_Customer.Count == <span class="hljs-number">0</span> || order_foodType.Count == <span class="hljs-number">0</span>)
+        {
+            currentState = StaffStateEnum.Roaming;
+            <span class="hljs-keyword hljs-control-flow">yield</span> <span class="hljs-keyword hljs-control-flow">break</span>;
+        }
+
+        currentState = StaffStateEnum.ServingDish;
+
+        <span class="hljs-title class_">CustomerAI</span> targetCustomer = order_Customer.<span class="hljs-title function_">Peek</span>();
+        FoodItem targetFood = order_foodType.<span class="hljs-title function_">Peek</span>();
+
+        <span class="hljs-comment">// 1. 손님 테이블 위치로 A* 이동</span>
+        <span class="hljs-title class_">Vector3</span> chairPos = targetCustomer.transform.position;
+        <span class="hljs-function"><span class="hljs-keyword hljs-control-flow">yield</span> <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-title">StartCoroutine</span>(<span class="hljs-params">movement.<span class="hljs-title function_">MoveToPositionCoroutine</span>(chairPos</span>))</span>;
+
+        <span class="hljs-comment">// 2. 손님에게 음식 서빙 완료 전달 및 결제 금액 정산</span>
+        targetCustomer.<span class="hljs-title function_">TakeFoodToStaff</span>(targetFood.foodPrice);
+
+        <span class="hljs-comment">// 3. 처리 완료된 주문 큐에서 제거</span>
+        order_Customer.<span class="hljs-title function_">Dequeue</span>();
+        order_foodType.<span class="hljs-title function_">Dequeue</span>();
+
+        <span class="hljs-comment">// 남은 주문이 있으면 다음 조리 진행, 없으면 배회(Roaming) 상태로 복귀</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (order_Customer.Count &gt; <span class="hljs-number">0</span>)
+            currentState = StaffStateEnum.MovingToCook;
+        <span class="hljs-keyword hljs-control-flow">else</span>
+            currentState = StaffStateEnum.Roaming;
+    }
+}</code></pre>
 </details>
 <p>주문이 더 남아 있다면 다음 손님과 음식으로 다시 <code>MovingToCook</code> 상태에 진입하고, 큐가 비면 <code>Roaming</code>으로 복귀합니다.</p>
 <h3 id="53-메뉴에-맞는-조리-도구-예약">5.3 메뉴에 맞는 조리 도구 예약</h3>
@@ -245,7 +375,7 @@ customer.<span class="hljs-title function_">TakeFoodToStaff</span>(food.foodPric
 <li class="toc-list__item toc-list__item--h3"><a href="#23-좌석과-조리-도구의-점유-관리">2.3 좌석과 조리 도구의 점유 관리</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#3-a-길찾기-알고리즘">3. A* 길찾기 알고리즘</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#31-노드-비용과-탐색-기준">3.1 노드 비용과 탐색 기준</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#32-open-set과-closed-set-탐색">3.2 Open Set과 Closed Set 탐색</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#32-a-핵심-알고리즘-및-openclosed-set-탐색">3.2 A* 핵심 알고리즘 및 Open/Closed Set 탐색</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#33-경로-역추적과-npc-이동">3.3 경로 역추적과 NPC 이동</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#4-손님-ai-입장부터-퇴장까지의-서비스-루프">4. 손님 AI: 입장부터 퇴장까지의 서비스 루프</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#41-상태-기반-행동-분리">4.1 상태 기반 행동 분리</a></li>

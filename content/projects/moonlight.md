@@ -55,18 +55,27 @@ tags: [Unity, C#, A* Pathfinding, Tilemap, NPC AI]
 <summary>코드 보기: Tilemap을 Grid 노드로 변환</summary>
 
 ```csharp
-for (int x = 0; x < gridSize.x; x++)
+// GridManager.cs: Tilemap의 모든 셀을 순회하여 A* 탐색용 Grid 노드 2차원 리스트 구축
+public void CreateGrid()
 {
-    var row = new List<Grid>();
-    for (int y = 0; y < gridSize.y; y++)
-    {
-        Vector3Int cell = new Vector3Int(x, y, 0);
-        Vector3 worldPosition = tilemap.CellToWorld(cell);
-        bool isWalkable = tilemap.HasTile(cell);
+    grid = new List<List<Grid>>();
 
-        row.Add(new Grid(isWalkable, worldPosition, x, y));
+    for (int x = 0; x < gridSize.x; x++)
+    {
+        List<Grid> row = new List<Grid>();
+        for (int y = 0; y < gridSize.y; y++)
+        {
+            Vector3Int cellPosition = new Vector3Int(x, y, 0);
+            Vector3 worldPosition = tilemap.CellToWorld(cellPosition);
+
+            // 타일 존재 여부 및 충돌 장애물 확인을 통한 보행 가능(isWalkable) 판정
+            bool isWalkable = tilemap.HasTile(cellPosition);
+
+            // 그리드 노드 생성 및 행 리스트에 추가
+            row.Add(new Grid(isWalkable, worldPosition, x, y));
+        }
+        grid.Add(row);
     }
-    grid.Add(row);
 }
 ```
 
@@ -82,14 +91,34 @@ for (int x = 0; x < gridSize.x; x++)
 <summary>코드 보기: 커스텀 타일 데이터와 좌표별 Dictionary</summary>
 
 ```csharp
-public Dictionary<Vector3Int, CustomTableTile> tablesDictionary;
-public Dictionary<Vector3Int, CustomChairTile> chairesDictionary;
+// GridManager.cs & TableTileData: 좌표별 가구 데이터 및 실시간 점유 상태 딕셔너리 관리
+public class GridManager : MonoBehaviour
+{
+    public Dictionary<Vector3Int, CustomTableTile> tablesDictionary = new Dictionary<Vector3Int, CustomTableTile>();
+    public Dictionary<Vector3Int, CustomChairTile> chairesDictionary = new Dictionary<Vector3Int, CustomChairTile>();
 
+    // 테이블 주변 인접 의자(좌/우) 탐색 및 착석 가능 여부 조회
+    public CustomChairTile GetAvailableChairNearTable(Vector3Int tableCell)
+    {
+        Vector3Int[] neighborOffsets = { Vector3Int.left, Vector3Int.right };
+        foreach (var offset in neighborOffsets)
+        {
+            Vector3Int chairPos = tableCell + offset;
+            if (chairesDictionary.TryGetValue(chairPos, out CustomChairTile chair))
+            {
+                if (chair.isUseAble) return chair;
+            }
+        }
+        return null;
+    }
+}
+
+// 테이블 타일 데이터 구조
 public class TableTileData
 {
-    public bool isUseAble;
-    public string tileName;
-    public int tableUseAbleIndex = 4;
+    public bool isUseAble = true;      // 점유 상태 (손님 사용 중 여부)
+    public string tileName;            // 타일 식별자
+    public int tableUseAbleIndex = 4;  // 잔여 수용 인원 (4인 테이블 기본값)
 }
 ```
 
@@ -124,21 +153,72 @@ public class TableTileData
 
 각 `Grid` 노드는 시작점부터의 실제 비용 `gCost`, 목적지까지의 휴리스틱 비용 `hCost`, 그리고 부모 노드를 보관합니다. 최종 우선순위는 두 비용의 합인 `FCost`로 결정합니다.
 
-<details class="pf-details">
-<summary>코드 보기: A* 노드의 F 비용 계산</summary>
+### 3.2 A* 핵심 알고리즘 및 Open/Closed Set 탐색
 
-```csharp
-public int FCost => gCost + hCost;
-```
-
-</details>
-
-매장 이동은 상·하·좌·우 4방향으로 제한했고, 이에 맞춰 Manhattan Distance를 휴리스틱으로 사용했습니다.
+탐색할 후보 노드는 `OpenSet(List<Grid>)`, 방문이 완료된 노드는 `ClosedSet(HashSet<Grid>)`으로 분리하여 관리합니다. 매 스텝마다 $F = G + H$ 비용이 가장 낮은 노드를 선택하고, $F$ 비용이 동일할 경우 목적지에 더 가까운 $H$ 비용이 낮은 노드를 우선 선택하여 최적의 경로를 탐색합니다.
 
 <details class="pf-details">
-<summary>코드 보기: Manhattan Distance 휴리스틱</summary>
+<summary>코드 보기: Pathfinding.cs - A* FindPath 전체 구현</summary>
 
 ```csharp
+// Pathfinding.cs: Open Set / Closed Set 기반의 A* 최단 경로 탐색 알고리즘
+public List<Grid> FindPath(Vector3 startPos, Vector3 targetPos)
+{
+    Grid startNode = Grid.GetNodeAtPosition(startPos);
+    Grid targetNode = Grid.GetNodeAtPosition(targetPos);
+
+    if (startNode == null || targetNode == null) return null;
+
+    List<Grid> openSet = new List<Grid> { startNode };
+    HashSet<Grid> closedSet = new HashSet<Grid>();
+
+    while (openSet.Count > 0)
+    {
+        // 1. Open Set에서 FCost(G+H)가 가장 작은 노드 선택 (동률 시 hCost 비교)
+        Grid currentNode = openSet[0];
+        for (int i = 1; i < openSet.Count; i++)
+        {
+            if (openSet[i].FCost < currentNode.FCost || 
+               (openSet[i].FCost == currentNode.FCost && openSet[i].hCost < currentNode.hCost))
+            {
+                currentNode = openSet[i];
+            }
+        }
+
+        openSet.Remove(currentNode);
+        closedSet.Add(currentNode);
+
+        // 2. 목적지 도달 시 시작 노드까지 역추적하여 최종 경로 반환
+        if (currentNode == targetNode)
+        {
+            return RetracePath(startNode, targetNode);
+        }
+
+        // 3. 인접 4방향 이웃 노드 탐색 및 비용 갱신
+        foreach (Grid neighbor in GetNeighbors(currentNode))
+        {
+            if (!neighbor.isWalkable || closedSet.Contains(neighbor))
+                continue;
+
+            // 이동 비용 계산 (상하좌우 맨해튼 거리 기반)
+            int newCostToNeighbor = currentNode.gCost + GetDistance(currentNode, neighbor);
+            if (newCostToNeighbor < neighbor.gCost || !openSet.Contains(neighbor))
+            {
+                neighbor.gCost = newCostToNeighbor;
+                neighbor.hCost = GetDistance(neighbor, targetNode);
+                neighbor.parent = currentNode; // 역추적용 부모 노드 지정
+
+                if (!openSet.Contains(neighbor))
+                {
+                    openSet.Add(neighbor);
+                }
+            }
+        }
+    }
+    return null; // 경로 없음
+}
+
+// Manhattan Distance 휴리스틱 계산 (4방향 직교 이동 비용: 10)
 int GetDistance(Grid nodeA, Grid nodeB)
 {
     int distanceX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
@@ -149,28 +229,40 @@ int GetDistance(Grid nodeA, Grid nodeB)
 
 </details>
 
-### 3.2 Open Set과 Closed Set 탐색
-
-탐색할 후보는 Open Set, 검사가 끝난 노드는 Closed Set으로 분리합니다. 현재 후보 중 `FCost`가 가장 낮은 노드를 선택하고, 비용이 같다면 목적지에 더 가까운 `hCost`가 낮은 노드를 우선합니다.
-
-<details class="pf-details">
-<summary>코드 보기: Open Set의 최우선 노드 선택</summary>
-
-```csharp
-if (candidate.FCost < current.FCost ||
-    candidate.FCost == current.FCost && candidate.hCost < current.hCost)
-{
-    current = candidate;
-}
-```
-
-</details>
-
 이후 이동 불가능하거나 이미 방문한 이웃은 제외하고, 더 짧은 경로가 발견되면 비용과 부모 노드를 갱신합니다.
 
 ### 3.3 경로 역추적과 NPC 이동
 
-목적지에 도달하면 각 노드가 가진 `parent`를 시작점까지 역추적한 뒤 리스트를 뒤집어 이동 경로를 생성합니다. `NPCMovement`와 `CustomerMovement`는 이 리스트를 순서대로 소비하며 셀의 월드 위치로 이동합니다.
+목적지에 도달하면 각 노드가 보관하고 있던 `parent` 포인터를 시작점까지 거슬러 올라간 뒤, 리스트를 역순으로 반환하여 NPC의 실시간 이동 경로를 생성합니다.
+
+<details class="pf-details">
+<summary>코드 보기: Pathfinding.cs - RetracePath 부모 역추적 로직</summary>
+
+```csharp
+// Pathfinding.cs: 목적지에서 시작점까지 부모 노드를 추적하여 이동 경로 완성
+List<Grid> RetracePath(Grid startNode, Grid endNode)
+{
+    List<Grid> path = new List<Grid>();
+    Grid currentNode = endNode;
+
+    // 목적지에서 시작 노드까지 거슬러 올라감
+    while (currentNode != startNode)
+    {
+        // 타일 중앙 월드 좌표 산출 (캐릭터 발 위치 오프셋 +0.12f 보정)
+        Vector3 centerPos = Grid.tilemap.CellToWorld(new Vector3Int(currentNode.gridX, currentNode.gridY, 0));
+        centerPos.y += 0.12f;
+        currentNode.worldPosition = centerPos;
+
+        path.Add(currentNode);
+        currentNode = currentNode.parent;
+    }
+
+    path.Reverse(); // 순방향(시작점 -> 목적지)으로 뒤집기
+    return path;
+}
+```
+
+</details>
 
 <div class="pf-visual-frame">
     <div class="pf-transaction-flow">
@@ -252,15 +344,47 @@ Roaming → MovingToCook → Cooking → ServingDish
 직원은 `Queue<FoodItem>`과 `Queue<CustomerAI>`를 함께 사용합니다. 새로운 주문이 들어오면 음식과 손님을 같은 순서로 enqueue하고, 서빙 완료 시 각각 dequeue해 해당 손님에게 조리된 음식과 가격 정보를 전달합니다.
 
 <details class="pf-details">
-<summary>코드 보기: 음식·손님 주문 큐 처리</summary>
+<summary>코드 보기: Staff_AI.cs - 주문 큐 및 조리/서빙 파이프라인</summary>
 
 ```csharp
-public Queue<FoodItem> order_foodType = new Queue<FoodItem>();
-public Queue<CustomerAI> order_Customer = new Queue<CustomerAI>();
+// Staff_AI.cs: 선입선출(FIFO) 큐 기반 주문 접수 및 서빙 코루틴 파이프라인
+public class Staff_AI : MonoBehaviour
+{
+    public Queue<FoodItem> order_foodType = new Queue<FoodItem>();
+    public Queue<CustomerAI> order_Customer = new Queue<CustomerAI>();
 
-CustomerAI customer = order_Customer.Dequeue();
-FoodItem food = order_foodType.Dequeue();
-customer.TakeFoodToStaff(food.foodPrice);
+    // 서빙 코루틴: 손님 위치로 이동 후 음식 전달 및 주문 큐 소비
+    private IEnumerator ServingTaskCoroutine()
+    {
+        if (order_Customer.Count == 0 || order_foodType.Count == 0)
+        {
+            currentState = StaffStateEnum.Roaming;
+            yield break;
+        }
+
+        currentState = StaffStateEnum.ServingDish;
+
+        CustomerAI targetCustomer = order_Customer.Peek();
+        FoodItem targetFood = order_foodType.Peek();
+
+        // 1. 손님 테이블 위치로 A* 이동
+        Vector3 chairPos = targetCustomer.transform.position;
+        yield return StartCoroutine(movement.MoveToPositionCoroutine(chairPos));
+
+        // 2. 손님에게 음식 서빙 완료 전달 및 결제 금액 정산
+        targetCustomer.TakeFoodToStaff(targetFood.foodPrice);
+
+        // 3. 처리 완료된 주문 큐에서 제거
+        order_Customer.Dequeue();
+        order_foodType.Dequeue();
+
+        // 남은 주문이 있으면 다음 조리 진행, 없으면 배회(Roaming) 상태로 복귀
+        if (order_Customer.Count > 0)
+            currentState = StaffStateEnum.MovingToCook;
+        else
+            currentState = StaffStateEnum.Roaming;
+    }
+}
 ```
 
 </details>
