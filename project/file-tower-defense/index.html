@@ -280,43 +280,62 @@
 <p><strong>FileGrid</strong>는 단순한 위치 정보 홀더가 아니라, 유닛 배치 상태와 해당 셀에 작용 중인 오라(버프) 목록을 독자적으로 관리하는 지능형 컨테이너입니다.</p>
 <ul><li><strong>HashSet 기반 버프 소스 관리:</strong> 현재 그리드 공간에 영향을 주는 버프 제공 유닛의 목록을 <code>HashSet&lt;File_Base&gt;</code>로 관리하여 버프의 중복 적용을 제거하고 $O(1)$의 빠른 조회 속도를 유지합니다.</li><li><strong>유닛 탈부착 시 자동 스탯 갱신:</strong> 유닛이 배치되거나 이탈할 때 그리드에 축적된 버프 목록을 분석하여 대상 유닛의 스탯을 실시간으로 갱신해 줍니다.</li></ul>
 <h3 id="32-원자적-배치-트랜잭션-transactional-pattern">3.2 원자적 배치 트랜잭션 (Transactional Pattern)</h3>
-<p>드래그 앤 드롭으로 유닛의 그리드 위치를 옮길 때 발생할 수 있는 데이터 불일치 및 예외 상황을 원자적으로 보장하기 위해 배치 트랜잭션 흐름을 <strong>탐색/검증, 성공(Commit), 실패(Rollback)</strong>의 3가지 흐름으로 분할 설계하여 안전성을 확보했습니다.</p>
-<h4 id="1-탐색-및-검증-단계-search-validation">1. 탐색 및 검증 단계 (Search & Validation)</h4>
-<p>배치 위치의 그리드를 감지하고, 해당 그리드가 배치 가능한 지역인지(장애물이나 다른 유닛 유무) 검사합니다.</p>
-<pre class="mermaid">sequenceDiagram
-    autonumber
-    actor Player
-    participant IM as InputManager
-    participant IH as InteractionHandler
-    participant FGM as FileGridManager
-    
-    Player-&gt;&gt;IM: Drag &amp; Release Unit
-    IM-&gt;&gt;IH: End Drag Event
-    IH-&gt;&gt;FGM: GetGrid(Release Position)
-    FGM--&gt;&gt;IH: Return Target Grid (New Grid)
-    IH-&gt;&gt;FGM: Validate Placement (New Grid, No Obstacles)</pre>
-<h4 id="2-트랜잭션-확정-단계-commit-검증-성공-시">2. 트랜잭션 확정 단계 (Commit - 검증 성공 시)</h4>
-<p>검증에 성공하면 기존 그리드의 점유를 해제하고, 새 그리드에 유닛을 정식 등록한 후 스탯(버프) 정보를 동적으로 갱신합니다.</p>
-<pre class="mermaid">sequenceDiagram
-    autonumber
-    participant IH as InteractionHandler
-    participant FG_Old as Old FileGrid
-    participant FG_New as New FileGrid
-    participant Unit as File Unit (File_Base)
-
-    Note over IH, Unit: Validation Success (Commit)
-    IH-&gt;&gt;FG_Old: RemoveFileUnit() (Clear occupant &amp; remove old buffs)
-    IH-&gt;&gt;FG_New: SetFileUnit(Unit) (Assign occupant &amp; apply new buffs)
-    IH-&gt;&gt;Unit: Commit Position (Smooth Lerp / Snap)</pre>
-<h4 id="3-트랜잭션-복구-단계-rollback-검증-실패-시">3. 트랜잭션 복구 단계 (Rollback - 검증 실패 시)</h4>
-<p>새 그리드가 유효하지 않거나 장애물이 감지된 경우, 상태를 복구하고 유닛을 드래그 시작 전 원래의 그리드 위치로 되돌립니다.</p>
-<pre class="mermaid">sequenceDiagram
-    autonumber
-    participant IH as InteractionHandler
-    participant Unit as File Unit (File_Base)
-
-    Note over IH, Unit: Validation Fails (Rollback)
-    IH-&gt;&gt;Unit: Rollback (Return to Old Grid position)</pre>
+<p>드래그 앤 드롭으로 유닛의 그리드 위치를 옮길 때 발생할 수 있는 데이터 불일치 및 예외 상황을 방지하기 위해, 데이터베이스의 트랜잭션 개념을 차용한 <strong>원자적 배치(Atomic Placement) 파이프라인</strong>을 구축했습니다. <strong>탐색/검증(Validation) ➔ 확정(Commit) ➔ 복구(Rollback)</strong> 흐름을 단일 프로세스로 통합하여 상태 결함을 원천 차단합니다.</p>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+    <!-- 0. START -->
+    <div class="pf-fc-pill-start">
+      <span>📦</span>
+      <span>Drag &amp; Drop Release (유닛 드롭)</span>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- STEP 01: 탐색 및 검증 -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. Search &amp; Validation (목표 셀 탐색 및 검증)</h4>
+        <span class="pf-fc-badge">VALIDATE</span>
+      </div>
+      <p class="pf-fc-desc">드롭 좌표 기반 목표 그리드 식별 (인접 3x3 탐색) ➔ 유효 영역 및 장애물/기존 유닛 점유 여부 판정</p>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- STEP 02: 조건 분기 (Commit vs Rollback) -->
+    <div class="pf-fc-decision pf-fc-compact">
+      <div class="pf-fc-decision-header">
+        <span class="pf-fc-decision-badge">분기 판정</span>
+        <h4 class="pf-fc-decision-title">배치 가능 여부 판정 (Can Place Unit?)</h4>
+      </div>
+      <div class="pf-fc-branch-grid">
+        <!-- COMMIT 분기 -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+          <span class="pf-fc-tag-no">Commit (검증 성공)</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">2. 트랜잭션 확정</div>
+          <p class="pf-fc-branch-desc">• 이전 그리드 점유 해제 (OldGrid.Remove)<br>• 신규 그리드 점유 등록 (NewGrid.Set)<br>• 스탯 및 오라 버프 실시간 재계산<br>• 목표 셀 위치로 유닛 좌표 확정</p>
+        </div>
+        <!-- ROLLBACK 분기 -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #fecaca; background: #fffdfd;">
+          <span class="pf-fc-tag-yes">Rollback (검증 실패)</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">3. 트랜잭션 복구</div>
+          <p class="pf-fc-branch-desc">• 유효하지 않은 셀 또는 장애물 충돌<br>• 배치 트랜잭션 즉시 취소<br>• RestoreOriginalPosition() 호출<br>• 드래그 전 원래 그리드 위치로 안전 복원</p>
+        </div>
+      </div>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- 4. END -->
+    <div class="pf-fc-pill-end">
+      <span>🔒</span>
+      <span>원자성(Atomicity) 확보 &amp; 데이터 무결성 100% 유지</span>
+    </div>
+  </div>
+</div>
 <h3 id="33-동적-양방향-좌표-변환-시스템">3.3 동적 양방향 좌표 변환 시스템</h3>
 <p>마우스의 월드 스페이스 좌표와 그리드의 인덱스(Row, Column) 좌표계를 상호 변환하기 위해 오프셋 기반의 연산 로직을 정밀하게 구현했습니다.</p>
 <div class="pf-visual-frame">
@@ -583,9 +602,6 @@
 <li class="toc-list__item toc-list__item--h2"><a href="#3-그리드-기반-오브젝트-배치-시스템">3. 그리드 기반 오브젝트 배치 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#31-filegrid-데이터-중심의-지능형-셀-매니저">3.1 FileGrid: 데이터 중심의 지능형 셀 매니저</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#32-원자적-배치-트랜잭션-transactional-pattern">3.2 원자적 배치 트랜잭션 (Transactional Pattern)</a></li>
-<li class="toc-list__item toc-list__item--h4"><a href="#1-탐색-및-검증-단계-search-validation">1. 탐색 및 검증 단계 (Search &amp; Validation)</a></li>
-<li class="toc-list__item toc-list__item--h4"><a href="#2-트랜잭션-확정-단계-commit-검증-성공-시">2. 트랜잭션 확정 단계 (Commit - 검증 성공 시)</a></li>
-<li class="toc-list__item toc-list__item--h4"><a href="#3-트랜잭션-복구-단계-rollback-검증-실패-시">3. 트랜잭션 복구 단계 (Rollback - 검증 실패 시)</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#33-동적-양방향-좌표-변환-시스템">3.3 동적 양방향 좌표 변환 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#34-공간-분할-기반-탐색-최적화-o1">3.4 공간 분할 기반 탐색 최적화 (O(1))</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#35-플래그-기반-확장-가능한-검색-시스템">3.5 플래그 기반 확장 가능한 검색 시스템</a></li>

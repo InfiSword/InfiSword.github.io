@@ -462,55 +462,71 @@ public interface IInteractable
 
 ### 3.2 원자적 배치 트랜잭션 (Transactional Pattern)
 
-드래그 앤 드롭으로 유닛의 그리드 위치를 옮길 때 발생할 수 있는 데이터 불일치 및 예외 상황을 원자적으로 보장하기 위해 배치 트랜잭션 흐름을 **탐색/검증, 성공(Commit), 실패(Rollback)**의 3가지 흐름으로 분할 설계하여 안전성을 확보했습니다.
+드래그 앤 드롭으로 유닛의 그리드 위치를 옮길 때 발생할 수 있는 데이터 불일치 및 예외 상황을 방지하기 위해, 데이터베이스의 트랜잭션 개념을 차용한 **원자적 배치(Atomic Placement) 파이프라인**을 구축했습니다. **탐색/검증(Validation) ➔ 확정(Commit) ➔ 복구(Rollback)** 흐름을 단일 프로세스로 통합하여 상태 결함을 원천 차단합니다.
 
-#### 1. 탐색 및 검증 단계 (Search & Validation)
-배치 위치의 그리드를 감지하고, 해당 그리드가 배치 가능한 지역인지(장애물이나 다른 유닛 유무) 검사합니다.
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Player
-    participant IM as InputManager
-    participant IH as InteractionHandler
-    participant FGM as FileGridManager
-    
-    Player->>IM: Drag & Release Unit
-    IM->>IH: End Drag Event
-    IH->>FGM: GetGrid(Release Position)
-    FGM-->>IH: Return Target Grid (New Grid)
-    IH->>FGM: Validate Placement (New Grid, No Obstacles)
-```
+    <!-- 0. START -->
+    <div class="pf-fc-pill-start">
+      <span>📦</span>
+      <span>Drag &amp; Drop Release (유닛 드롭)</span>
+    </div>
 
-#### 2. 트랜잭션 확정 단계 (Commit - 검증 성공 시)
-검증에 성공하면 기존 그리드의 점유를 해제하고, 새 그리드에 유닛을 정식 등록한 후 스탯(버프) 정보를 동적으로 갱신합니다.
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant IH as InteractionHandler
-    participant FG_Old as Old FileGrid
-    participant FG_New as New FileGrid
-    participant Unit as File Unit (File_Base)
+    <!-- STEP 01: 탐색 및 검증 -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. Search &amp; Validation (목표 셀 탐색 및 검증)</h4>
+        <span class="pf-fc-badge">VALIDATE</span>
+      </div>
+      <p class="pf-fc-desc">드롭 좌표 기반 목표 그리드 식별 (인접 3x3 탐색) ➔ 유효 영역 및 장애물/기존 유닛 점유 여부 판정</p>
+    </div>
 
-    Note over IH, Unit: Validation Success (Commit)
-    IH->>FG_Old: RemoveFileUnit() (Clear occupant & remove old buffs)
-    IH->>FG_New: SetFileUnit(Unit) (Assign occupant & apply new buffs)
-    IH->>Unit: Commit Position (Smooth Lerp / Snap)
-```
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-#### 3. 트랜잭션 복구 단계 (Rollback - 검증 실패 시)
-새 그리드가 유효하지 않거나 장애물이 감지된 경우, 상태를 복구하고 유닛을 드래그 시작 전 원래의 그리드 위치로 되돌립니다.
+    <!-- STEP 02: 조건 분기 (Commit vs Rollback) -->
+    <div class="pf-fc-decision pf-fc-compact">
+      <div class="pf-fc-decision-header">
+        <span class="pf-fc-decision-badge">분기 판정</span>
+        <h4 class="pf-fc-decision-title">배치 가능 여부 판정 (Can Place Unit?)</h4>
+      </div>
+      <div class="pf-fc-branch-grid">
+        <!-- COMMIT 분기 -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+          <span class="pf-fc-tag-no">Commit (검증 성공)</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">2. 트랜잭션 확정</div>
+          <p class="pf-fc-branch-desc">• 이전 그리드 점유 해제 (OldGrid.Remove)<br>• 신규 그리드 점유 등록 (NewGrid.Set)<br>• 스탯 및 오라 버프 실시간 재계산<br>• 목표 셀 위치로 유닛 좌표 확정</p>
+        </div>
+        <!-- ROLLBACK 분기 -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #fecaca; background: #fffdfd;">
+          <span class="pf-fc-tag-yes">Rollback (검증 실패)</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">3. 트랜잭션 복구</div>
+          <p class="pf-fc-branch-desc">• 유효하지 않은 셀 또는 장애물 충돌<br>• 배치 트랜잭션 즉시 취소<br>• RestoreOriginalPosition() 호출<br>• 드래그 전 원래 그리드 위치로 안전 복원</p>
+        </div>
+      </div>
+    </div>
 
-```mermaid
-sequenceDiagram
-    autonumber
-    participant IH as InteractionHandler
-    participant Unit as File Unit (File_Base)
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-    Note over IH, Unit: Validation Fails (Rollback)
-    IH->>Unit: Rollback (Return to Old Grid position)
-```
+    <!-- 4. END -->
+    <div class="pf-fc-pill-end">
+      <span>🔒</span>
+      <span>원자성(Atomicity) 확보 &amp; 데이터 무결성 100% 유지</span>
+    </div>
+
+  </div>
+</div>
 
 ### 3.3 동적 양방향 좌표 변환 시스템
 
