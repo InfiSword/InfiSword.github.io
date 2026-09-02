@@ -612,44 +612,44 @@ private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int cente
 
 ### 3.4 플래그 기반 확장 가능한 검색 시스템
 
-그리드를 검색할 때 '비어 있는 곳', '장애물이 없는 곳', '이미 아군이 배치된 곳' 등 다양한 복합 조건을 비트 플래그 형태로 손쉽게 검색할 수 있도록 가변 플래그 검색 시스템을 설계했습니다.
+그리드를 검색할 때 '비어 있는 곳', '장애물이 없는 곳', '이미 아군이 배치된 곳' 등 다양한 복합 조건을 가변 인자(`params`) 형태로 손쉽게 검색할 수 있도록 **SearchGridFlag 가변 필터링 시스템**을 설계했습니다.
 
-<div class="pf-visual-frame" style="padding: 28px 24px; background: #f8fbff; border: 1px solid #dce8f6; border-radius: 16px;">
+<div class="pf-visual-frame" style="padding: 24px 20px; background: #f8fbff; border: 1px solid #dce8f6; border-radius: 16px; margin-bottom: 20px;">
 
-  <!-- 플래그 카드 그리드 -->
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 20px;">
+  <!-- 플래그 상태 카드 그리드 -->
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
 
     <!-- Card 1: Occupied -->
     <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bfdbfe;">Occupied</span>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bfdbfe;">Occupied</span>
         <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">점유 셀</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">파일 유닛이 배치되어 있는 셀 한정 탐색 (타워 추적 및 아군 시너지 계산)</p>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">파일 유닛이 배치되어 있는 셀(<code>GetFileUnit() != null</code>)만을 탐색 대상으로 한정</p>
     </div>
 
     <!-- Card 2: NotOccupied -->
     <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #059669; background: #ecfdf5; padding: 2px 7px; border-radius: 5px; border: 1px solid #a7f3d0;">NotOccupied</span>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #059669; background: #ecfdf5; padding: 2px 7px; border-radius: 5px; border: 1px solid #a7f3d0;">NotOccupied</span>
         <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">빈 셀</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">유닛이 없는 빈 그리드 필터링 (신규 유닛 설치 유효성 검증)</p>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">유닛이 배치되지 않은 빈 셀만을 필터링 (신규 유닛 설치 가능 공간 검증)</p>
     </div>
 
     <!-- Card 3: Obstacle -->
     <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 2px 7px; border-radius: 5px; border: 1px solid #fecaca;">Obstacle</span>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 2px 7px; border-radius: 5px; border: 1px solid #fecaca;">Obstacle</span>
         <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">장애물</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">시스템 장애물(땅굴 등)이 위치한 셀 검색 (공격 회피 및 배치 제한 영역)</p>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">시스템 장애물(<code>obstacleObject != null</code>)이 위치한 셀을 식별</p>
     </div>
 
     <!-- Card 4: NotObstacle -->
     <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #0284c7; background: #f0f9ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bae6fd;">NotObstacle</span>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #0284c7; background: #f0f9ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bae6fd;">NotObstacle</span>
         <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">통과 가능</span>
       </div>
       <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">장애물이 없어 객체 배치 및 투사체 궤적 형성이 가능한 클린 셀</p>
@@ -658,31 +658,98 @@ private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int cente
     <!-- Card 5: None -->
     <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.84rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 7px; border-radius: 5px; border: 1px solid #cbd5e1;">None</span>
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 7px; border-radius: 5px; border: 1px solid #cbd5e1;">None</span>
         <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">전체 필터</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">필터 조건 없이 레이아웃 내 전체 셀 탐색 (초기화 및 일괄 갱신)</p>
+      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">조건 필터링 없이 레이아웃 내 모든 셀을 탐색 범위로 처리</p>
     </div>
 
-  </div>
-
-  <!-- 복합 쿼리 카드 (Terminal Box) -->
-  <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 6px 18px rgba(37,99,235,0.04);">
-    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-      <span style="font-size: 1rem;">💡</span>
-      <span style="font-family: 'Fira Code', monospace; font-size: 0.9rem; font-weight: 800; color: #1e293b;">복합 쿼리 조합 (High-Density Logic)</span>
-    </div>
-    <div style="background: #0f172a; padding: 14px 18px; border-radius: 10px; font-family: 'Fira Code', monospace; font-size: 0.86rem; color: #f8fafc; overflow-x: auto; margin-bottom: 12px; border: 1px solid #1e293b;">
-      <span style="color: #38bdf8;">FileGrid</span> target = FindFlagGridWorld(mousePos, <span style="color: #4ade80;">GridFlag.NotOccupied</span> | <span style="color: #4ade80;">GridFlag.NotObstacle</span>);
-    </div>
-    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.82rem; color: #475569;">
-      <span style="background: #eff6ff; color: #2563eb; font-weight: 700; padding: 3px 8px; border-radius: 5px; border: 1px solid #bfdbfe;">비트 AND 연산</span>
-      <span>➔</span>
-      <span><strong>&quot;유닛이 없고 + 동시에 장애물도 없는&quot;</strong> 가장 인접한 유효 그리드를 즉시 검색</span>
-    </div>
   </div>
 
 </div>
+
+```csharp
+public enum SearchGridFlag
+{
+    Occupied,       // 점유
+    NotOccupied,    // 비점유
+    Obstacle,       // 장애물이 존재하는 그리드만
+    NotObstacle,    // 장애물이 존재하지 않는 그리드만
+    None,
+}
+```
+
+<!-- 가변 인자(params) 기반 복합 쿼리 호출 예시 -->
+<div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 6px 18px rgba(37,99,235,0.04); margin-top: 20px; margin-bottom: 20px;">
+  <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+    <span style="font-size: 1rem;">💡</span>
+    <span style="font-family: 'Fira Code', monospace; font-size: 0.9rem; font-weight: 800; color: #1e293b;">가변 인자(params) 기반 복합 쿼리 호출 예시</span>
+  </div>
+  <div style="background: #0f172a; padding: 14px 18px; border-radius: 10px; font-family: 'Fira Code', monospace; font-size: 0.84rem; color: #f8fafc; overflow-x: auto; margin-bottom: 12px; border: 1px solid #1e293b;">
+    <span style="color: #38bdf8;">FileGrid</span> target = FindFlagGridWorld(mousePos, <span style="color: #4ade80;">SearchGridFlag.NotOccupied</span>, <span style="color: #4ade80;">SearchGridFlag.NotObstacle</span>);
+  </div>
+  <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.82rem; color: #475569;">
+    <span style="background: #eff6ff; color: #2563eb; font-weight: 700; padding: 3px 8px; border-radius: 5px; border: 1px solid #bfdbfe;">params 다중 플래그</span>
+    <span>➔</span>
+    <span><strong>&quot;유닛이 없고 + 동시에 장애물도 없는&quot;</strong> 유효 그리드만 순회 루프 내에서 인라인 판정하여 최단 거리 그리드를 반환</span>
+  </div>
+</div>
+
+<details class="pf-details">
+<summary>코드 보기: FindFlagGridWorld</summary>
+
+```csharp
+public FileGrid FindFlagGridWorld(Vector2 worldPos, params SearchGridFlag[] flags)
+{
+    if (gridArray == null || flags == null || flags.Length == 0)
+        return null;
+
+    float bestDistSqr = float.MaxValue;
+    FileGrid bestGrid = null;
+
+    foreach (FileGrid grid in gridArray)
+    {
+        if (grid == null) continue;
+
+        // 플래그 조건 체크
+        bool isOccupied = grid.GetFileUnit() != null;
+        bool hasObstacle = grid.obstacleObject != null;
+        bool isMatch = true;
+
+        foreach (SearchGridFlag flag in flags)
+        {
+            switch (flag)
+            {
+                case SearchGridFlag.Occupied:
+                    if (!isOccupied) isMatch = false;
+                    break;
+                case SearchGridFlag.NotOccupied:
+                    if (isOccupied) isMatch = false;
+                    break;
+                case SearchGridFlag.Obstacle:
+                    if (!hasObstacle) isMatch = false;
+                    break;
+                case SearchGridFlag.NotObstacle:
+                    if (hasObstacle) isMatch = false;
+                    break;
+                case SearchGridFlag.None:
+                    break;
+            }
+
+            if (!isMatch) break;
+        }
+
+        if (!isMatch) continue;
+
+        SearchClosestBetter(grid, worldPos, ref bestDistSqr, ref bestGrid);
+    }
+
+    return bestGrid;
+}
+```
+
+</details>
+
 ---
 
 ## 4. 다형성 기반 동적 버프 시스템
