@@ -278,154 +278,135 @@ mermaid: true
 
 `InputManager`가 렌즈 왜곡 보정 및 레이캐스트 판정을 거쳐 마우스 상태 머신(`InputState`)을 기반으로 클릭, 드래그, 다중 선택(Ctrl+드래그)을 판정하면, 중재자인 `InteractionHandler`가 단일/다중 선택 객체 목록(`SelectedObjects`)과 드래그 대상군(`DragObjects`)을 제어하고 배치 실패 시 위치 복원(`RestoreOriginalPositions`)까지 책임지며 대상 `IInteractable` 객체들에게 이벤트를 일괄 전파합니다.
 
-<div class="pf-visual-frame pf-tree-frame" style="padding: 28px 16px; background: #f8fbff; border: 1px solid #dce8f6; border-radius: 16px; margin: 28px 0; overflow-x: auto;">
-  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 480" width="100%" height="auto" class="pf-diagram-svg" style="min-width: 780px; max-width: 960px; display: block; margin: 0 auto; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;">
-    <defs>
-      <!-- Arrow Markers -->
-      <marker id="pf-arrow-default" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
-      </marker>
-      <marker id="pf-arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-        <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#2563eb" />
-      </marker>
-      <!-- Subtle Card Drop Shadow -->
-      <filter id="pf-card-shadow" x="-8%" y="-12%" width="120%" height="135%" filterUnits="userSpaceOnUse">
-        <feDropShadow dx="0" dy="4" stdDeviation="5" flood-color="#0f172a" flood-opacity="0.06" />
-      </filter>
-    </defs>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
 
-    <style>
-      .pf-node-box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; rx: 8; filter: url(#pf-card-shadow); }
-      .pf-node-root { fill: #2563eb; stroke: #1d4ed8; stroke-width: 1.5; rx: 8; filter: url(#pf-card-shadow); }
-      .pf-node-green { fill: #10b981; stroke: #059669; stroke-width: 1.5; rx: 8; filter: url(#pf-card-shadow); }
-      .pf-node-cyan { fill: #0284c7; stroke: #0369a1; stroke-width: 1.5; rx: 8; filter: url(#pf-card-shadow); }
-      .pf-node-diamond { fill: #ffffff; stroke: #64748b; stroke-width: 2; filter: url(#pf-card-shadow); }
-      
-      .pf-txt-title { font-size: 13px; font-weight: 700; text-anchor: middle; dominant-baseline: central; fill: #1e293b; }
-      .pf-txt-white { font-size: 13.5px; font-weight: 800; text-anchor: middle; dominant-baseline: central; fill: #ffffff; letter-spacing: 0.3px; }
-      .pf-txt-label { font-size: 11px; font-weight: 700; fill: #475569; text-anchor: middle; dominant-baseline: central; font-family: 'Fira Code', monospace; }
-      
-      .pf-tree-edge { stroke: #64748b; stroke-width: 1.5; fill: none; marker-end: url(#pf-arrow-default); }
-      .pf-badge-bg { fill: #f8fafc; stroke: #dce5f0; stroke-width: 1; rx: 4; }
+    <!-- 0. START -->
+    <div class="pf-fc-pill-start">
+      <span>🖱️</span>
+      <span>START // 마우스 및 터치 입력 발생</span>
+    </div>
 
-      @media (prefers-color-scheme: dark) {
-        .pf-node-box { fill: #1e293b; stroke: #334155; }
-        .pf-node-diamond { fill: #1e293b; stroke: #64748b; }
-        .pf-txt-title { fill: #f1f5f9; }
-        .pf-tree-edge { stroke: #94a3b8; marker-end: url(#pf-arrow-blue); }
-        .pf-badge-bg { fill: #0f172a; stroke: #334155; }
-        .pf-txt-label { fill: #cbd5e1; }
-      }
-    </style>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-    <!-- ================= TOP: Mouse / Touch Input ================= -->
-    <rect x="450" y="16" width="160" height="36" class="pf-node-box" />
-    <text x="530" y="34" class="pf-txt-title">Mouse / Touch Input</text>
+    <!-- STEP 01: InputManager -->
+    <div class="pf-fc-card">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">STEP 01. InputManager: 중앙 집중식 입력 수신 &amp; 좌표 보정</h4>
+        <span class="pf-fc-badge">CONTROLLER</span>
+      </div>
+      <p class="pf-fc-desc"><code>LensDistortionCorrector</code>로 렌즈 왜곡을 보정하고, 스크린 좌표를 오르토그래픽 월드 좌표(<code>ScreenToWorldPoint</code>)로 변환하여 프레임 단위 통합 관리</p>
+    </div>
 
-    <!-- Edge: Input -> InputManager -->
-    <path d="M 530 52 L 530 78" class="pf-tree-edge" />
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-    <!-- ================= InputManager ================= -->
-    <rect x="440" y="78" width="180" height="42" class="pf-node-root" />
-    <text x="530" y="99" class="pf-txt-white">InputManager</text>
+    <!-- STEP 02: 조건 판단 1 (UI 판정 & Raycast) -->
+    <div class="pf-fc-decision">
+      <div class="pf-fc-decision-header">
+        <span class="pf-fc-decision-badge">판단 01</span>
+        <h4 class="pf-fc-decision-title">마우스 포인터가 UI 위에 위치하는가? (IsPointerOverUI)</h4>
+      </div>
+      <div class="pf-fc-branch-grid">
+        <!-- YES 분기: 조기 종료 -->
+        <div class="pf-fc-branch-item" style="border-color: #fecaca; background: #fffdfd;">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span class="pf-fc-tag-yes">[YES] UI 감지</span>
+            <span style="font-size: 0.68rem; color: #dc2626; font-weight: 700;">(종료 경로)</span>
+          </div>
+          <div class="pf-fc-branch-title">UI 상호작용 우선 처리</div>
+          <p class="pf-fc-branch-desc">인게임 월드 입력 차단 및 UI 이벤트 위임 후 <code>return</code> (단일 프레임 처리 조기 종료)</p>
+        </div>
+        <!-- NO 분기: 월드 타깃팅 -->
+        <div class="pf-fc-branch-item" style="border-color: #bbf7d0; background: #fdfffe;">
+          <div style="display: flex; gap: 4px; align-items: center;">
+            <span class="pf-fc-tag-no">[NO] 게임 월드</span>
+            <span style="font-size: 0.68rem; color: #059669; font-weight: 700;">(진행 경로)</span>
+          </div>
+          <div class="pf-fc-branch-title">Physics2D.RaycastNonAlloc</div>
+          <p class="pf-fc-branch-desc"><code>Sorting Order</code> 순 정렬로 최상단 <code>IInteractable</code> 타깃 식별 후 STEP 03으로 전개</p>
+        </div>
+      </div>
+    </div>
 
-    <!-- ================= EDGES FROM InputManager TO 3 BRANCHES ================= -->
-    <!-- Edge Left: InputManager -> Is Pointer Over UI? -->
-    <path d="M 470 120 L 215 178" class="pf-tree-edge" />
-    <rect x="250" y="133" width="140" height="20" class="pf-badge-bg" />
-    <text x="320" y="143" class="pf-txt-label">1. Raycast &amp; UI Check</text>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-    <!-- Edge Middle: InputManager -> InputState -->
-    <path d="M 530 120 L 530 180" class="pf-tree-edge" />
-    <rect x="465" y="140" width="130" height="20" class="pf-badge-bg" />
-    <text x="530" y="150" class="pf-txt-label">3. Update InputState</text>
+    <!-- STEP 03: 조건 판단 2 (InputState FSM - 클릭, 드래그, 다중 선택) -->
+    <div class="pf-fc-decision">
+      <div class="pf-fc-decision-header">
+        <span class="pf-fc-decision-badge">판단 02</span>
+        <h4 class="pf-fc-decision-title">조작 행위 상태 머신 판정 (InputState FSM)</h4>
+      </div>
+      <div class="pf-fc-branch-grid">
+        <!-- 1. 클릭 -->
+        <div class="pf-fc-branch-item">
+          <span class="pf-fc-tag-state">Pressing</span>
+          <div class="pf-fc-branch-title">① 클릭 (Click / Hover)</div>
+          <p class="pf-fc-branch-desc">드래그 임계값(<code>Threshold</code>) 이내 마우스 릴리즈 시 단순 클릭 판정 및 <code>OnClick</code> 트리거</p>
+        </div>
+        <!-- 2. 드래그 -->
+        <div class="pf-fc-branch-item">
+          <span class="pf-fc-tag-state">DraggingObject</span>
+          <div class="pf-fc-branch-title">② 드래그 (Drag &amp; Drop)</div>
+          <p class="pf-fc-branch-desc">임계값 초과 이동 시 1€ 필터 스무딩으로 떨림을 제거하고 유닛 실시간 위치 동기화 및 그리드 배치</p>
+        </div>
+        <!-- 3. 다중 선택 -->
+        <div class="pf-fc-branch-item">
+          <span class="pf-fc-tag-state">DraggingBox</span>
+          <div class="pf-fc-branch-title">③ 다중 선택 (Ctrl+드래그)</div>
+          <p class="pf-fc-branch-desc">빈 공간 드래그 또는 Ctrl+드래그 시 사각형 영역(<code>OverlapAreaAll</code>) 내 유닛 군집 일괄 선택</p>
+        </div>
+      </div>
+    </div>
 
-    <!-- Edge Right: InputManager -> InteractionHandler -->
-    <path d="M 590 120 Q 750 140 825 192" class="pf-tree-edge" />
-    <rect x="720" y="140" width="120" height="20" class="pf-badge-bg" />
-    <text x="780" y="150" class="pf-txt-label">4. Dispatch Events</text>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
+    <!-- STEP 04: InteractionHandler -->
+    <div class="pf-fc-card">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">STEP 04. InteractionHandler: Mediator 이벤트 일괄 디스패치</h4>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">MEDIATOR</span>
+      </div>
+      <p class="pf-fc-desc">중재자(Mediator) 패턴을 기반으로 판정된 조작 행위(클릭/드래그/다중 선택)를 대상 객체에게 일괄 전파 (<code>Trigger Interface Methods</code>)</p>
+    </div>
 
-    <!-- ================= LEFT BRANCH: 1. Raycast & UI Check ================= -->
-    <!-- Diamond: Is Pointer Over UI? -->
-    <polygon points="210,180 280,225 210,270 140,225" class="pf-node-diamond" />
-    <text x="210" y="225" class="pf-txt-title" style="font-size: 11.5px;">Is Pointer Over UI?</text>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-    <!-- Edge: Diamond -> Yes (Ignore) -->
-    <path d="M 175 245 L 120 328" class="pf-tree-edge" />
-    <rect x="130" y="275" width="34" height="18" class="pf-badge-bg" />
-    <text x="147" y="284" class="pf-txt-label" style="fill: #2563eb;">Yes</text>
+    <!-- STEP 05: IInteractable Objects -->
+    <div class="pf-fc-card" style="border-color: #bfdbfe; background: #f8fbff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">STEP 05. IInteractable: 인게임 객체 메서드 실행</h4>
+        <span class="pf-fc-badge">EXECUTION</span>
+      </div>
+      <p class="pf-fc-desc">유닛 파일, 바이러스, 폴더 객체가 <code>OnClick()</code>, <code>OnDrag()</code>, <code>OnSelected()</code>를 실행하여 자체 동작 완수</p>
+    </div>
 
-    <!-- Box: Ignore World Interaction / Handle UI -->
-    <rect x="15" y="328" width="205" height="40" class="pf-node-box" />
-    <text x="117" y="348" class="pf-txt-title" style="font-size: 11px;">Ignore World Interaction / Handle UI</text>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
 
-    <!-- Edge: Diamond -> No (GetInteractableUnderMouse) -->
-    <path d="M 245 245 L 300 328" class="pf-tree-edge" />
-    <rect x="268" y="275" width="30" height="18" class="pf-badge-bg" />
-    <text x="283" y="284" class="pf-txt-label" style="fill: #10b981;">No</text>
+    <!-- 6. END / RESULT -->
+    <div class="pf-fc-pill-end">
+      <span>⚡</span>
+      <span>성능 최적화 완료: 개별 객체 Update() 폴링 연산 0% &amp; 60+ FPS 무결점 방어</span>
+    </div>
 
-    <!-- Box: GetInteractableUnderMouse -->
-    <rect x="235" y="328" width="175" height="40" class="pf-node-box" />
-    <text x="322" y="348" class="pf-txt-title" style="font-size: 11.5px;">GetInteractableUnderMouse</text>
-
-    <!-- Edge: GetInteractableUnderMouse -> Identify Target IInteractable -->
-    <path d="M 322 368 L 322 416" class="pf-tree-edge" />
-    <rect x="250" y="380" width="145" height="20" class="pf-badge-bg" />
-    <text x="322" y="390" class="pf-txt-label">2. Sort by Layer/Order</text>
-
-    <!-- Box: Identify Target IInteractable -->
-    <rect x="235" y="416" width="175" height="40" class="pf-node-box" />
-    <text x="322" y="436" class="pf-txt-title" style="font-size: 11.5px;">Identify Target IInteractable</text>
-
-
-    <!-- ================= MIDDLE BRANCH: 3. Update InputState ================= -->
-    <!-- Diamond: InputState -->
-    <polygon points="530,185 580,225 530,265 480,225" class="pf-node-diamond" />
-    <text x="530" y="225" class="pf-txt-title" style="font-size: 12.5px;">InputState</text>
-
-    <!-- Edge: InputState -> Pressing -->
-    <path d="M 505 245 L 450 328" class="pf-tree-edge" />
-    <rect x="445" y="275" width="60" height="18" class="pf-badge-bg" />
-    <text x="475" y="284" class="pf-txt-label" style="fill: #7c3aed;">Pressing</text>
-
-    <!-- Box: Check Drag Threshold -->
-    <rect x="385" y="328" width="135" height="40" class="pf-node-box" />
-    <text x="452" y="348" class="pf-txt-title" style="font-size: 11px;">Check Drag Threshold</text>
-
-    <!-- Edge: InputState -> DraggingObject -->
-    <path d="M 530 265 L 530 328" class="pf-tree-edge" />
-    <rect x="485" y="285" width="90" height="18" class="pf-badge-bg" />
-    <text x="530" y="294" class="pf-txt-label" style="fill: #7c3aed;">DraggingObject</text>
-
-    <!-- Box: OnDragHandler -->
-    <rect x="530" y="328" width="110" height="40" class="pf-node-box" />
-    <text x="585" y="348" class="pf-txt-title" style="font-size: 11.5px;">OnDragHandler</text>
-
-    <!-- Edge: InputState -> DraggingBox -->
-    <path d="M 555 245 L 685 328" class="pf-tree-edge" />
-    <rect x="620" y="275" width="76" height="18" class="pf-badge-bg" />
-    <text x="658" y="284" class="pf-txt-label" style="fill: #7c3aed;">DraggingBox</text>
-
-    <!-- Box: Multi-Select Drag Box -->
-    <rect x="650" y="328" width="140" height="40" class="pf-node-box" />
-    <text x="720" y="348" class="pf-txt-title" style="font-size: 11px;">Multi-Select Drag Box</text>
-
-
-    <!-- ================= RIGHT BRANCH: 4. Dispatch Events ================= -->
-    <!-- Box: InteractionHandler -->
-    <rect x="810" y="195" width="135" height="42" class="pf-node-green" />
-    <text x="877" y="216" class="pf-txt-white" style="font-size: 12px;">InteractionHandler</text>
-
-    <!-- Edge: InteractionHandler -> IInteractable Objects -->
-    <path d="M 877 237 L 877 328" class="pf-tree-edge" />
-    <rect x="795" y="275" width="160" height="20" class="pf-badge-bg" />
-    <text x="875" y="285" class="pf-txt-label" style="font-size: 9.5px;">Trigger Interface Methods</text>
-
-    <!-- Box: IInteractable Objects -->
-    <rect x="805" y="328" width="145" height="40" class="pf-node-cyan" />
-    <text x="877" y="348" class="pf-txt-white" style="font-size: 11px;">IInteractable Objects</text>
-  </svg>
+  </div>
 </div>
 
 <div class="pf-visual-frame">
