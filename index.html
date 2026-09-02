@@ -608,7 +608,7 @@
     /* 03. Other Projects Grid */
     #pf-custom-portfolio .pf-other-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 18px;
         margin-bottom: 30px;
         position: relative;
@@ -632,6 +632,12 @@
     }
     #pf-custom-portfolio .pf-other-card .pf-project-desc {
         flex-grow: 1;
+    }
+
+    @media (max-width: 860px) {
+        #pf-custom-portfolio .pf-other-grid {
+            grid-template-columns: 1fr;
+        }
     }
 
     /* Responsive Queries */
