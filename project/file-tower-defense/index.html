@@ -590,11 +590,11 @@
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">FileGrid</span>.cs: Observer 패턴 기반 버프 소스 관리 및 유닛 자동 전파</span>
 <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">FileGrid</span></span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
 {
-    <span class="hljs-comment">// 해당 그리드에 영향을 주는 버프 제공자 목록 (중복 제거 <span class="hljs-title function_">O</span>(1))</span>
+    <span class="hljs-comment">// 해당 그리드에 영향을 주는 버프 제공자 목록 </span>
     <span class="hljs-keyword">private</span> <span class="hljs-title class_">HashSet</span>&lt;<span class="hljs-title class_">File_Base</span>&gt; _activeBuffSources = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashSet</span>&lt;<span class="hljs-title class_">File_Base</span>&gt;();
     <span class="hljs-keyword">private</span> <span class="hljs-title class_">File_Base</span> _currentUnit;
 
-    <span class="hljs-comment">// 1. 버프 유닛(Provider) 배치 시 오라 영역 그리드에 소스 등록</span>
+    <span class="hljs-comment">// 버프 유닛(Provider) 배치 시 오라 영역 그리드에 소스 등록</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">AddBuffSource</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> buffSource</span>)</span>
     {
         <span class="hljs-keyword hljs-control-flow">if</span> (buffSource == <span class="hljs-literal">null</span> || _activeBuffSources.<span class="hljs-title function_">Contains</span>(buffSource)) <span class="hljs-keyword hljs-control-flow">return</span>;
@@ -603,32 +603,26 @@
 
         <span class="hljs-comment">// 이미 셀에 점유 중인 유닛이 있다면 즉시 버프 전파</span>
         <span class="hljs-keyword hljs-control-flow">if</span> (_currentUnit != <span class="hljs-literal">null</span>)
-        {
-            <span class="hljs-title function_">ApplyBuffFromSource</span>(_currentUnit, buffSource);
-        }
+            <span class="hljs-title function_">ApplyBuffFromSource</span>(_currentUnit, buffSource);        
     }
 
-    <span class="hljs-comment">// 2. 신규 유닛(Consumer) 셀 진입 시 누적된 모든 버프 일괄 적용</span>
+    <span class="hljs-comment">// 신규 유닛(Consumer) 셀 진입 시 누적된 모든 버프 일괄 적용</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ApplyGridBuffs</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> unit</span>)</span>
     {
         <span class="hljs-keyword hljs-control-flow">if</span> (unit == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
         _currentUnit = unit;
 
         <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> source <span class="hljs-keyword">in</span> _activeBuffSources)
-        {
-            <span class="hljs-title function_">ApplyBuffFromSource</span>(unit, source);
-        }
+            <span class="hljs-title function_">ApplyBuffFromSource</span>(unit, source);        
     }
 
-    <span class="hljs-comment">// 3. 버프 소스 유닛 이탈/사망 시 버프 제거 및 스탯 원복</span>
+    <span class="hljs-comment">// 버프 소스 유닛 이탈/사망 시 버프 제거 및 스탯 원상 복구</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RemoveBuffSource</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> buffSource</span>)</span>
     {
         <span class="hljs-keyword hljs-control-flow">if</span> (!_activeBuffSources.<span class="hljs-title function_">Remove</span>(buffSource)) <span class="hljs-keyword hljs-control-flow">return</span>;
 
-        <span class="hljs-keyword hljs-control-flow">if</span> (_currentUnit != <span class="hljs-literal">null</span>)
-        {
-            _currentUnit.<span class="hljs-title function_">RemoveBuffFromSource</span>(buffSource);
-        }
+        <span class="hljs-keyword hljs-control-flow">if</span> (_currentUnit != <span class="hljs-literal">null</span>)        
+            _currentUnit.<span class="hljs-title function_">RemoveBuffFromSource</span>(buffSource);        
     }
 
     <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ApplyBuffFromSource</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> targetUnit, <span class="hljs-title class_">File_Base</span> source</span>)</span>
@@ -686,18 +680,18 @@
 
     <span class="hljs-built_in">float</span> deltaTime = <span class="hljs-title class_">Time</span>.deltaTime;
 
-    <span class="hljs-comment">// 1. 틱(Tick) 주기 연산 (단일 코루틴 남발 방지)</span>
+    <span class="hljs-comment">// 틱(Tick) 주기 연산</span>
     <span class="hljs-keyword hljs-control-flow">if</span> (WaitTickTime &gt; <span class="hljs-number">0</span>)
     {
         _tickTimer += deltaTime;
         <span class="hljs-keyword hljs-control-flow">if</span> (_tickTimer &gt;= WaitTickTime)
         {
             _tickTimer -= WaitTickTime;
-            <span class="hljs-title function_">OnTick</span>(); <span class="hljs-comment">// 상속받은 구체 클래스의 고유 로직(힐링/도트 피해 등) 다형적 실행</span>
+            <span class="hljs-title function_">OnTick</span>(); <span class="hljs-comment"></span>
         }
     }
 
-    <span class="hljs-comment">// 2. 버프 지속 시간(Duration) 관리</span>
+    <span class="hljs-comment">// 버프 지속 시간(Duration) 관리</span>
     <span class="hljs-keyword hljs-control-flow">if</span> (Duration &gt; <span class="hljs-number">0</span>)
     {
         _durationTimer -= deltaTime;
