@@ -272,10 +272,6 @@
 <h3 id="42-일반-몬스터-ai-확장-사례">4.2 일반 몬스터 AI 확장 사례</h3>
 <p>일반 몬스터들은 공통의 <code>Enemy_State</code>를 상속받아 고유한 행동 패턴을 가집니다.</p>
 <ul><li><strong>Bear (돌진형):</strong> <code>DashState</code>를 통한 강력한 물리 충격 기반 공격.</li><li><strong>Spider (매복형):</strong> <code>JumpState</code>를 활용한 공중 도약 및 플레이어 타겟팅 낙하 공격.</li><li><strong>Ant (기본형):</strong> 정형화된 순찰 및 근접 공격 루틴 수행.</li></ul>
-<hr>
-<h2 id="5-기술적-성과-요약" class="chapter-title">5. 기술적 성과 요약</h2>
-<ul><li><strong>FSM 아키텍처:</strong> Enter/Exit 라이프사이클 관리를 통해 복잡한 상태 전이 시 발생할 수 있는 버그를 근본적으로 차단.</li><li><strong>컴포지션 기반 확장성:</strong> 플레이어 기능을 모듈화하여 새로운 변신 형태나 능력을 추가할 때 기존 코드 수정을 최소화.</li><li><strong>델리게이트 기반 AI:</strong> 보스의 스킬 패턴을 인덱스 기반으로 관리하여 패턴 추가 및 확률 조정의 유연성 확보.</li><li><strong>물리/애니메이션 동기화:</strong> LogicUpdate와 PhysicsUpdate를 분리하여 프레임 드랍 환경에서도 일관된 충돌 판정 및 움직임 보장.</li></ul>
-<p class="notice--success"><strong>Conclusion:</strong> Slime Project는 디자인 패턴을 실무에 어떻게 적용하여 대규모 게임 로직을 관리할 수 있는지에 대한 깊은 고민이 담긴 프로젝트입니다. FSM과 컴포지션을 통해 복잡한 액션 퍼즐의 메커니즘을 견고하게 구현해냈습니다.</p>
         </section>
 <aside class="toc-panel" aria-label="목차">
 <div class="toc-panel__inner">
@@ -291,7 +287,6 @@
 <li class="toc-list__item toc-list__item--h2"><a href="#4-보스-및-일반-몬스터-ai-시스템">4. 보스 및 일반 몬스터 AI 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#41-보스-ai-의사결정-및-스킬-시스템">4.1 보스 AI 의사결정 및 스킬 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#42-일반-몬스터-ai-확장-사례">4.2 일반 몬스터 AI 확장 사례</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#5-기술적-성과-요약">5. 기술적 성과 요약</a></li>
 </ol>
 </div>
 </aside>

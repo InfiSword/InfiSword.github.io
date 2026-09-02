@@ -326,43 +326,6 @@
 <h3 id="53-메뉴에-맞는-조리-도구-예약">5.3 메뉴에 맞는 조리 도구 예약</h3>
 <p>음식 종류에 따라 절구(<code>Mortar</code>) 또는 장독대(<code>Jangdokdae</code>)를 선택합니다. 사용 가능한 도구를 발견하면 먼저 점유 처리한 후 A* 경로를 계산하고, 조리와 서빙이 끝났을 때 다시 반환합니다.</p>
 <p>이 구조는 직원의 상태 전이, 주문 순서, 설비 점유가 서로 어긋나지 않도록 하나의 작업 파이프라인으로 묶어 줍니다.</p>
-<hr>
-<h2 id="6-시스템-통합과-기술적-성과" class="chapter-title">6. 시스템 통합과 기술적 성과</h2>
-<h3 id="61-하나의-공간-모델을-공유하는-npc">6.1 하나의 공간 모델을 공유하는 NPC</h3>
-<p>직원과 손님은 행동 목적은 다르지만 다음 기반 시스템을 공유합니다.</p>
-<div class="pf-arch-diagram">
-    <div class="pf-arch-layer">
-        <div class="pf-arch-layer-title">Behavior Layer</div>
-        <div class="pf-arch-layer-items">
-            <span class="pf-arch-item">Customer State Machine</span>
-            <span class="pf-arch-item">Staff State Machine</span>
-            <span class="pf-arch-item">Order Queue</span>
-        </div>
-    </div>
-    <div class="flow-arrow">↓</div>
-    <div class="pf-arch-layer">
-        <div class="pf-arch-layer-title">Navigation Layer</div>
-        <div class="pf-arch-layer-items">
-            <span class="pf-arch-item">A* Search</span>
-            <span class="pf-arch-item">Path Retrace</span>
-            <span class="pf-arch-item">NPC Movement</span>
-        </div>
-    </div>
-    <div class="flow-arrow">↓</div>
-    <div class="pf-arch-layer">
-        <div class="pf-arch-layer-title">Spatial Data Layer</div>
-        <div class="pf-arch-layer-items">
-            <span class="pf-arch-item">Unity Tilemap</span>
-            <span class="pf-arch-item">Grid Nodes</span>
-            <span class="pf-arch-item">Furniture Occupancy</span>
-        </div>
-    </div>
-</div>
-<h3 id="62-포트폴리오-핵심-요약">6.2 포트폴리오 핵심 요약</h3>
-<ul><li><strong>커스텀 타일 데이터:</strong> 테이블·의자의 사용 가능 상태와 수용 정보를 셀 좌표별 데이터로 관리했습니다.</li><li>*<em>A</em> 직접 구현:** Open/Closed Set, G/H/F 비용, Manhattan 휴리스틱, 부모 노드 역추적으로 4방향 경로를 계산했습니다.</li><li><strong>공통 이동 계층:</strong> 직원과 손님이 동일한 길찾기 결과를 각자의 이동 컴포넌트에서 재사용하도록 분리했습니다.</li><li><strong>상태 머신 기반 NPC:</strong> 긴 행동 흐름을 명시적인 상태와 완료 조건으로 나눠 읽기 쉽고 확장 가능한 구조로 구성했습니다.</li><li><strong>자원 예약과 주문 처리:</strong> 좌석·조리 도구 점유 플래그와 FIFO 주문 큐를 연결해 타이쿤의 서비스 순환을 구현했습니다.</li></ul>
-<div class="highlight-box">
-    <strong>Conclusion:</strong> 보름달 방앗간은 A* 알고리즘을 독립 기능으로 구현하는 데서 끝나지 않고, 커스텀 타일의 점유 정보와 직원·손님의 상태 전이를 결합해 실제 타이쿤 플레이를 움직이는 시스템으로 확장한 프로젝트입니다.
-</div>
         </section>
 <aside class="toc-panel" aria-label="목차">
 <div class="toc-panel__inner">
@@ -385,9 +348,6 @@
 <li class="toc-list__item toc-list__item--h3"><a href="#51-직원-상태-머신">5.1 직원 상태 머신</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#52-음식손님을-연결하는-주문-큐">5.2 음식·손님을 연결하는 주문 큐</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#53-메뉴에-맞는-조리-도구-예약">5.3 메뉴에 맞는 조리 도구 예약</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#6-시스템-통합과-기술적-성과">6. 시스템 통합과 기술적 성과</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#61-하나의-공간-모델을-공유하는-npc">6.1 하나의 공간 모델을 공유하는 NPC</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#62-포트폴리오-핵심-요약">6.2 포트폴리오 핵심 요약</a></li>
 </ol>
 </div>
 </aside>
