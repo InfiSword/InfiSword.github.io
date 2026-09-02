@@ -174,22 +174,61 @@ mermaid: true
 *   **연산 오버헤드 (Canvas Rebuilding):** 유닛의 움직임, 호버 효과, 드래그 등의 UI 요소가 갱신될 때마다 Unity 내부에서 Canvas Rebuild가 강제로 유발되어 CPU 프레임 드랍 발생.
 *   **물리 엔진의 부재:** 월드 좌표 기반의 바이러스(적)와 UI 유닛 간 물리 충돌 판정을 위해 매 프레임 `Camera.WorldToScreenPoint` 등의 물리-화면 좌표 변환 함수 호출 비용 발생.
 
-<div class="pf-visual-frame">
+<div class="pf-visual-frame pf-comp-frame">
   <div class="pf-comp-container">
     <div class="pf-comp-box old">
       <div class="pf-comp-header">
-        <span class="pf-comp-badge old">⚠️ 기존 방식 (AS-IS)</span>
-        <div class="pf-comp-title">RectTransform (UI 시스템)</div>
-        <div class="pf-comp-subtitle">초기 윈도우 UI 기반 프로토타입 설계</div>
+        <span class="pf-comp-badge old">AS-IS</span>
+        <h4 class="pf-comp-title">RectTransform (UI)</h4>
       </div>
-      <div class="pf-comp-body">
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">❌</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">좌표계 종속성</div>
-            <div class="pf-comp-item-desc">캔버스 앵커 및 해상도 변화 시 월드 좌표 왜곡, 정밀 사거리 판정 난항</div>
-          </div>
-        </div>
+      <ul class="pf-comp-list">
+        <li>
+          <span class="pf-comp-icon old">✕</span>
+          <span class="pf-comp-text">Anchor/Pivot Dependent</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon old">✕</span>
+          <span class="pf-comp-text">Frequent Canvas Rebuilds</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon old">✕</span>
+          <span class="pf-comp-text">Heavy Screen-to-World conversions</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="pf-comp-bridge">
+      <span class="pf-bridge-pill">REFACTORING</span>
+      <div class="pf-bridge-arrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+    </div>
+
+    <div class="pf-comp-box new">
+      <div class="pf-comp-header">
+        <span class="pf-comp-badge new">TO-BE</span>
+        <h4 class="pf-comp-title">Transform (World)</h4>
+      </div>
+      <ul class="pf-comp-list">
+        <li>
+          <span class="pf-comp-icon new">✓</span>
+          <span class="pf-comp-text">Absolute 2D Coordinates</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon new">✓</span>
+          <span class="pf-comp-text">Zero Canvas Overhead</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon new">✓</span>
+          <span class="pf-comp-text">Native Physics 2D & Colliders</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
         <div class="pf-comp-item">
           <div class="pf-comp-item-icon">❌</div>
           <div class="pf-comp-item-content">

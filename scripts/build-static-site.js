@@ -215,7 +215,7 @@ function processInline(value) {
 }
 
 function isHtmlLine(line) {
-  return /^<\/?(style|script|div|span|p|table|thead|tbody|tr|th|td|details|summary|img|br|hr|strong|em|code|section|article|figure|figcaption|ul|ol|li)\b/i.test(
+  return /^<\/?(style|script|div|span|p|h1|h2|h3|h4|h5|h6|table|thead|tbody|tr|th|td|details|summary|img|br|hr|strong|em|code|section|article|figure|figcaption|ul|ol|li|svg|line|polyline|circle|rect|path|g|polygon|a|button)\b/i.test(
     line.trim()
   );
 }
