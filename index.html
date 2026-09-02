@@ -2716,6 +2716,7 @@
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
         }
+    }
 
 
     // ==========================================
@@ -2846,8 +2847,14 @@
         }
     });
 
-
-    }
+    // Expose functions globally to window
+    window.pfOpenModal = pfOpenModal;
+    window.pfCloseModal = pfCloseModal;
+    window.pfOpenAwardGallery = pfOpenAwardGallery;
+    window.pfCloseAwardGallery = pfCloseAwardGallery;
+    window.pfAwardGallerySetTab = pfAwardGallerySetTab;
+    window.pfAwardGalleryGo = pfAwardGalleryGo;
+    window.pfAwardGallerySelect = pfAwardGallerySelect;
 
     // Close on ESC key press
     document.addEventListener('keydown', function(event) {
