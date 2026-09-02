@@ -150,35 +150,69 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 
 트랙의 스플라인 곡선을 분석하여 체크포인트를 자동 생성하고, 에이전트의 진행 상태를 관리하는 계층적 구조를 설계했습니다. `SplineToCheckpointGenerator`를 통해 수작업 없이 일정한 간격으로 체크포인트와 스타팅 그리드를 구성할 수 있습니다.
 
-<div class="pf-visual-frame">
-<div class="pf-arch-diagram">
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">SplineToCheckpointGenerator</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">스플라인 경로 자동 분석</span>
-<span class="pf-arch-item">Trigger Collider 일괄 배치</span>
-<span class="pf-arch-item">태그 자동 할당</span>
-</div>
-</div>
-<div class="flow-arrow" style="text-align: center;">↓</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">SpawnPointManager / TrackData</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">체크포인트 인덱스 배열 관리</span>
-<span class="pf-arch-item">다중 스폰 포인트 제어</span>
-<span class="pf-arch-item">Finish 라인 및 랩(Lap) 정보 관리</span>
-</div>
-</div>
-<div class="flow-arrow" style="text-align: center;">↓</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">SimcadeCarAgent_Auto</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">체크포인트 도달 감지 및 보상</span>
-<span class="pf-arch-item">목표 위치 실시간 계산</span>
-<span class="pf-arch-item">에피소드 종료 및 리셋 제어</span>
-</div>
-</div>
-</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <!-- 0. START -->
+    <div class="pf-fc-pill-start">
+      <span>🏁</span>
+      <span>Track Spline Curve (입력 곡선)</span>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 01: SplineToCheckpointGenerator -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">SplineToCheckpointGenerator (오프라인 베이킹)</h4>
+        <span class="pf-fc-badge">EDITOR TOOL</span>
+      </div>
+      <p class="pf-fc-desc">트랙 스플라인의 접선(Tangent)·곡률을 샘플링하여 등간격 Trigger Collider 일괄 생성 및 태그 자동 부여</p>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 02: SpawnPointManager / TrackData -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">SpawnPointManager / TrackData (런타임 트랙 관리)</h4>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">TRACK MANAGER</span>
+      </div>
+      <p class="pf-fc-desc">체크포인트 인덱스 순서 배열 바인딩, 동적 스폰 그리드 위치 지정, 결승선(Finish) 통과 및 랩(Lap) 타임 기록</p>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 03: SimcadeCarAgent_Auto -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">SimcadeCarAgent_Auto (RL 에이전트 연동)</h4>
+        <span class="pf-fc-badge">RL AGENT</span>
+      </div>
+      <p class="pf-fc-desc">순차적 체크포인트 통과 감지 및 단계별 보상 지급, 역주행 방지 유도, 에피소드 종료 및 차량 리셋 제어</p>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- 4. END -->
+    <div class="pf-fc-pill-end">
+      <span>⚡</span>
+      <span>실시간 보상 최적화 &amp; 완벽한 주행 경로 학습</span>
+    </div>
+
+  </div>
 </div>
 
 **스플라인 기반 체크포인트 자동 생성 로직**

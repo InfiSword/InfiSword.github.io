@@ -45,13 +45,71 @@
 <p>게임 시작 시 <code>ServerCSV_ConvertData</code> 클래스가 메타 시트를 우선 다운로드하여 서버의 데이터 버전 정보를 확인합니다. 이후 로컬에 저장된 <code>data_versions.json</code> 파일과 대조하여 <strong>변경된 파일만 선택적으로 다운로드</strong>함으로써 네트워크 비용과 로딩 시간을 최소화했습니다.</p>
 <h3 id="12-csv-파싱-프로세스-플로우">1.2 CSV 파싱 프로세스 플로우</h3>
 <p>다운로드 된 데이터 파싱은 다음과 같은 4단계로 진행됩니다:</p>
-<div class="pf-visual-frame">
-    <div style="font-weight: 700; margin-bottom: 20px; color: #007bff; font-family: 'Fira Code', monospace;">CSV Parsing Process</div>
-    <div class="pf-arch-diagram">
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">1단계: 타입 정보 수집</div>
-            <div style="font-size: 0.85rem; color: #666;">리플렉션으로 제네릭 타입 T의 모든 필드 정보(FieldInfo) 추출</div>
-        </div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+    <!-- START -->
+    <div class="pf-fc-pill-start">
+      <span>📄</span>
+      <span>CSV Raw Text Input (원시 텍스트 스트림)</span>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- STEP 01 -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1단계: 타입 메타데이터 수집 (Type Info)</h4>
+        <span class="pf-fc-badge">REFLECTION</span>
+      </div>
+      <p class="pf-fc-desc">제네릭 타입 `T`의 모든 필드 정보(`FieldInfo[]`)를 리플렉션으로 추출 및 캐싱</p>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- STEP 02 -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2단계: 헤더 추출 및 딕셔너리 매핑 (Header Map)</h4>
+        <span class="pf-fc-badge">INDEXING</span>
+      </div>
+      <p class="pf-fc-desc">CSV 1행 헤더명을 분리하여 클래스 필드명과 1:1 대응되는 열 인덱스 사전 구축</p>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- STEP 03 -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3단계: 정규식 스마트 분할 및 인스턴스화 (SmartSplit)</h4>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">PARSER</span>
+      </div>
+      <p class="pf-fc-desc">따옴표 및 쉼표 예외 정규식 파싱 후 `Activator.CreateInstance&lt;T&gt;()`로 DTO 객체 생성</p>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- STEP 04 -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">4단계: 동적 타입 변환 및 필드 바인딩 (Binding)</h4>
+        <span class="pf-fc-badge">BIND</span>
+      </div>
+      <p class="pf-fc-desc">`Convert.ChangeType`으로 string 데이터를 실제 필드 타입(int, float 등)으로 자동 변환 후 값 할당</p>
+    </div>
+    <!-- END -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <div class="pf-fc-pill-end">
+      <span>⚡</span>
+      <span>타입 안전한 DTO 데이터 컬렉션 생성 완료</span>
+    </div>
+  </div>
+</div>
         <div class="flow-arrow" style="text-align: center;">↓</div>
         <div class="pf-arch-layer">
             <div class="pf-arch-layer-title">2단계: 헤더 추출 및 매핑</div>
@@ -256,20 +314,53 @@ m_rewardExp = <span class="hljs-title class_">Mathf</span>.<span class="hljs-tit
 <p><code>System.Random</code> 객체를 하나만 사용하면, 퀘스트 생성 시 난수를 소모한 횟수에 따라 맵 생성 결과가 뒤틀리게 됩니다. 이를 방지하기 위해 <code>GameSeed</code>는 <code>Domain</code>(Map, Quest, Field, Reward 등)을 분리하여 각각 독립된 Random 객체 스트림을 보유합니다.</p>
 <h3 id="52-고정-폭-인코딩-기반-토큰-다이어그램">5.2 고정 폭 인코딩 기반 토큰 다이어그램</h3>
 <p>모든 도메인의 난수 사용 횟수(Usage Count)를 하나의 암호화된 토큰(Token)으로 병합합니다. 파싱 시 데이터가 꼬이지 않도록 <strong>고정 폭(Fixed-Width) 인코딩</strong>을 사용했습니다.</p>
-<div class="pf-visual-frame">
-    <div style="font-weight: 700; margin-bottom: 20px; color: #007bff; font-family: 'Fira Code', monospace;">Seed Token 구조 (Fixed-Width)</div>
-    <div class="pf-token-container">
-        <div class="pf-token-row">
-            <div class="pf-token-box">
-                <div class="pf-token-box-title">BaseSeed</div>
-                <div style="font-size: 0.85rem;">20자리 고정 (ulong 패딩)</div>
-            </div>
-            <div class="flow-arrow" style="text-align: center;">+</div>
-            <div class="pf-token-box">
-                <div class="pf-token-box-title">Domain 개수</div>
-                <div style="font-size: 0.85rem;">3자리 고정 (예: 008)</div>
-            </div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+    <!-- Token Structure Title -->
+    <div class="pf-fc-pill-start" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
+      <span>🔑</span>
+      <span>Seed Token 고정 폭(Fixed-Width) 인코딩 구조</span>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- Header Fields Grid -->
+    <div class="pf-fc-branch-grid" style="grid-template-columns: 2fr 1fr; width: 100%;">
+      <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #93c5fd; background: #f8fbff;">
+        <span class="pf-fc-badge">HEADER 01</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">BaseSeed (루트 시드)</div>
+        <div class="pf-fc-branch-desc"><strong>20자리 고정</strong> (ulong 최대 자릿수 0-패딩)</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #93c5fd; background: #f8fbff;">
+        <span class="pf-fc-badge">HEADER 02</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">Domain 개수</div>
+        <div class="pf-fc-branch-desc"><strong>3자리 고정</strong> (예: `008`)</div>
+      </div>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- Domain Payload Card -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #15803d;">Domain 레코드 블록 (도메인 개수만큼 반복 병합)</h4>
+        <span class="pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">PAYLOAD</span>
+      </div>
+      <div class="pf-fc-branch-grid" style="grid-template-columns: 1fr 2fr; margin-top: 10px;">
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="background: #fff;">
+          <strong style="color: #16a34a;">Domain ID</strong>
+          <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #64748b;">3자리 고정 패딩 (도메인 식별자)</p>
         </div>
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="background: #fff;">
+          <strong style="color: #16a34a;">Usage Count</strong>
+          <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #64748b;">12자리 고정 패딩 (RNG 난수 소비 횟수)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
         <div class="pf-domain-info">
             <div style="color: #28a745; font-weight: 700; margin-bottom: 10px; font-family: 'Fira Code', monospace;">Domain 정보 블록 (등록된 도메인 개수만큼 반복 병합)</div>
             <div class="pf-domain-grid">

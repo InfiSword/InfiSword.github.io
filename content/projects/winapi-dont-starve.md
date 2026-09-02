@@ -113,35 +113,49 @@ tags: [C++, WinAPI, Optimization, Game Logic]
 
 단일 상속의 복잡성을 피하고 객체 지향적인 유연성을 극대화하기 위해 **컴포넌트 기반 구조**를 채택했습니다. 모든 게임 객체(`GameObject`)는 기능 단위의 컴포넌트를 소유하며, 실행 시점에 필요한 기능을 동적으로 탈부착할 수 있습니다.
 
-<div class="pf-visual-frame">
-    <div class="pf-arch-diagram">
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">GameObject (Entity Container)</div>
-            <div class="pf-arch-layer-items">
-                <span class="pf-arch-item">ID / Type Management</span>
-                <span class="pf-arch-item">std::vector&lt;Component*&gt;</span>
-            </div>
-        </div>
-        <div class="flow-arrow" style="text-align: center;">↓ Has Components</div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">Transform</div>
-                <div style="font-size: 0.8rem; color: #666;">Position, Scale, Direction</div>
-            </div>
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">SpriteRenderer</div>
-                <div style="font-size: 0.8rem; color: #666;">GDI+ Sprite, Layer Info</div>
-            </div>
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">Collider</div>
-                <div style="font-size: 0.8rem; color: #666;">AABB Interaction Logic</div>
-            </div>
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">Animator</div>
-                <div style="font-size: 0.8rem; color: #666;">Clip Control, Frame Events</div>
-            </div>
-        </div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <!-- Container Header -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">GameObject (엔티티 컨테이너)</h4>
+        <span class="pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">ENTITY CONTAINER</span>
+      </div>
+      <p class="pf-fc-desc">고유 식별자(ID) 및 타입 관리, `std::vector&lt;std::unique_ptr&lt;Component&gt;&gt;` 소유 및 컴포넌트 생명주기 관리</p>
     </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- 4 Components Grid -->
+    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">CORE</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">Transform</div>
+        <div class="pf-fc-branch-desc">2D 위치(Position), 스케일, 바라보는 방향 연산</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">RENDER</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SpriteRenderer</div>
+        <div class="pf-fc-branch-desc">GDI+ 비트맵 렌더링 및 Y-Sorting 피벗 좌표 관리</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">PHYSICS</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">Collider</div>
+        <div class="pf-fc-branch-desc">AABB 충돌 박스 및 상호작용 트리거 검사</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">ANIM</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">Animator</div>
+        <div class="pf-fc-branch-desc">스프라이트시트 클립 재생 및 프레임 이벤트 콜백</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 </div>
 
 이러한 구조를 통해 새로운 객체를 생성할 때 상속 계층에 얽매이지 않고 유연하게 기능을 조립할 수 있습니다.
@@ -219,14 +233,51 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
 
 렌더링 프로세스는 크게 **제출(Submission) -> 정렬(Sorting) -> 실행(Execution)**의 3단계로 구성됩니다.
 
-<div class="pf-visual-frame">
-    <div class="pf-transaction-flow">
-        <div class="pf-flow-step"><strong>1. Submission</strong><br>GameObject::Render()<br>DrawCommand 생성</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>2. Sorting</strong><br>RenderManager::Flush()<br>Layer & Y-Sorting</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>3. Execution</strong><br>ExecuteDrawCommand()<br>GDI+ DrawImage 호출</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <div class="pf-fc-pill-start">
+      <span>🎨</span>
+      <span>Render Loop Trigger (매 프레임 렌더링 시작)</span>
     </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. Submission (명령 제출)</h4>
+        <span class="pf-fc-badge">COLLECT</span>
+      </div>
+      <p class="pf-fc-desc">`GameObject::Render()` 호출 ➔ `DrawCommand` 생성 후 `RenderManager` 큐에 예약</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2. Sorting (정렬 단계)</h4>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">Y-SORTING</span>
+      </div>
+      <p class="pf-fc-desc">`RenderManager::Flush()` ➔ 배경/오브젝트/UI 레이어 우선순위 분류 후 발밑(Pivot Y) 기준 오름차순 정렬</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #16a34a;">3. Execution (일괄 출력)</h4>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">GDI+ FLUSH</span>
+      </div>
+      <p class="pf-fc-desc">정렬된 명령 버퍼를 순회하며 백버퍼 DC에 `Graphics::DrawImage()` 최종 출력</p>
+    </div>
+
+  </div>
 </div>
 
 Top-down 뷰의 입체감을 위해 객체의 발밑(Pivot) 위치의 Y 좌표를 기준으로 정렬하여 출력함으로써 오브젝트 간의 앞뒤 관계를 정확히 표현합니다.
@@ -472,16 +523,54 @@ void ObjectManager::RemoveFromGrid(GameObject* pObj)
 
 하나의 `SpriteSheet`에서 특정 프레임들을 잘라내어 `AnimationClip` 객체를 생성합니다. `Animator`는 현재 재생 중인 클립의 경과 시간(`m_elapsed`)을 바탕으로 현재 출력해야 할 프레임 인덱스를 계산합니다.
 
-<div class="pf-visual-frame">
-    <div class="pf-transaction-flow">
-        <div class="pf-flow-step"><strong>Update()</strong><br>m_elapsed += deltaTime</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>Frame Sync</strong><br>GetCurrentFrameIndex()</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>Event Trigger</strong><br>지나친 프레임의 이벤트 검사</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>Logic Sync</strong><br>Attack / Sound / Effect 콜백 실행</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. Update(deltaTime)</h4>
+        <span class="pf-fc-badge">TIMER</span>
+      </div>
+      <p class="pf-fc-desc">경과 시간 누적 (`m_elapsed += deltaTime`) 및 클립 총 길이 대비 루프 판정</p>
     </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2. Frame Index 동기화</h4>
+        <span class="pf-fc-badge">SYNC</span>
+      </div>
+      <p class="pf-fc-desc">FPS 기준 현재 출력 대상 프레임 인덱스(`currentFrameIndex`) 도출</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3. Frame Skip 방지 검사</h4>
+        <span class="pf-fc-badge" style="background: #fef2f2; color: #dc2626; border-color: #fecaca;">SAFETY</span>
+      </div>
+      <p class="pf-fc-desc">`m_lastTriggeredFrame`부터 현재 프레임까지 누락된 이벤트 루프 전수 검사</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">4. Logic Event Callback 실행</h4>
+        <span class="pf-fc-badge">DISPATCH</span>
+      </div>
+      <p class="pf-fc-desc">타격 판정, 효과음, 파티클 이펙트 등 등록된 람다/함수 포인터 일괄 발동</p>
+    </div>
+
+  </div>
 </div>
 
 ### 4.2 프레임 이벤트 검사 및 콜백 실행
@@ -560,16 +649,54 @@ if (clip) {
 
 자체 제작한 맵 에디터에서 출력되는 `.dsm` (Don't Starve Map) 포맷을 파싱하여 게임 씬을 초기화합니다. 이 파일에는 맵의 메타데이터, 타일 정보, 이동 가능 구역(Walkable Area), 그리고 오브젝트의 배치 좌표가 포함됩니다.
 
-<div class="pf-visual-frame">
-    <div class="pf-transaction-flow">
-        <div class="pf-flow-step"><strong>1. File I/O</strong><br>std::wifstream<br>BOM 제거 및 라인 단위 리드</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>2. Section Parsing</strong><br># METADATA, # TILES<br># OBJECTS 분류</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>3. Object Mapping</strong><br>문자열 ID ↔ Enum 변환<br>DataManager 리소스 조회</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>4. MapData 생성</strong><br>SceneManager를 통한<br>최종 씬 초기화 적용</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. File I/O &amp; BOM 제거</h4>
+        <span class="pf-fc-badge">INPUT</span>
+      </div>
+      <p class="pf-fc-desc">`std::wifstream`으로 `.dsm` 파일 로드, UTF-8 BOM 식별 제거 및 라인 단위 스트림 분리</p>
     </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2. Section Parsing</h4>
+        <span class="pf-fc-badge">PARSE</span>
+      </div>
+      <p class="pf-fc-desc">`# METADATA`, `# TILES`, `# OBJECTS` 헤더 기반 3대 영역 분할 및 토큰화</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3. Object Mapping</h4>
+        <span class="pf-fc-badge">BIND</span>
+      </div>
+      <p class="pf-fc-desc">문자열 ID를 열거형(Enum)으로 변환하고 `DataManager`로부터 스프라이트/콜라이더 리소스 매핑</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #16a34a;">4. MapData 씬 초기화 적용</h4>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">APPLY</span>
+      </div>
+      <p class="pf-fc-desc">`MapData` 엔티티 및 충돌 타일맵을 `SceneManager`에 전달하여 인게임 월드 스폰 완료</p>
+    </div>
+
+  </div>
 </div>
 
 <details class="pf-details">

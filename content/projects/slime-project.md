@@ -155,53 +155,92 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
 
 FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 상태의 Exit와 새 상태의 Enter를 자동으로 호출하여 물리 및 애니메이션 상태의 정합성을 보장합니다.
 
-<div class="pf-visual-frame" style="overflow-x: auto;">
-    <div style="display: flex; align-items: center; justify-content: flex-start; min-width: 800px; padding: 20px 0;">
-        <!-- Init -->
-        <div style="background: rgba(40, 167, 69, 0.05); border: 2px solid #28a745; border-radius: 8px; padding: 12px 20px; text-align: center; flex: 0 0 160px;">
-            <div style="color: #28a745; font-weight: 700; font-size: 0.85rem; font-family: 'Fira Code';">State::Enter</div>
-            <div style="color: #888; font-size: 0.7rem; margin-top: 4px;">상태 초기화</div>
-        </div>
-        
-        <div style="color: #007bff; font-weight: bold; margin: 0 15px; font-size: 1.2rem;">→</div>
-        
-        <!-- Update Loop -->
-        <div style="background: rgba(0, 123, 255, 0.05); border: 2px solid #007bff; border-radius: 8px; padding: 12px; text-align: center; flex: 0 0 240px; position: relative;">
-            <div style="color: #007bff; font-weight: 700; font-size: 0.85rem; font-family: 'Fira Code'; margin-bottom: 8px;">Execution Loop</div>
-            <div style="display: flex; gap: 8px;">
-                <div style="background: #fff; border: 1px solid #e1e4e8; padding: 6px; border-radius: 4px; font-size: 0.7rem; flex: 1;">
-                    <strong>LogicUpdate</strong>
-                </div>
-                <div style="background: #fff; border: 1px solid #e1e4e8; padding: 6px; border-radius: 4px; font-size: 0.7rem; flex: 1;">
-                    <strong>PhysicsUpdate</strong>
-                </div>
-            </div>
-            <!-- Loop Arrow -->
-            <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); width: 40px; height: 10px; border: 2px solid #007bff; border-bottom: none; border-radius: 10px 10px 0 0;"></div>
-        </div>
-        
-        <div style="color: #007bff; font-weight: bold; margin: 0 15px; font-size: 1.2rem;">→</div>
-        
-        <!-- Decision -->
-        <div style="background: rgba(255, 123, 114, 0.05); border: 2px solid #ff7b72; border-radius: 50%; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; text-align: center; flex: 0 0 120px; font-size: 0.75rem; font-weight: 700; color: #ff7b72; font-family: 'Fira Code';">
-            Trigger<br>Transition?
-        </div>
-        
-        <div style="color: #007bff; font-weight: bold; margin: 0 15px; font-size: 1.2rem; position: relative;">
-            <span style="position: absolute; top: -20px; left: 0; font-size: 0.7rem; color: #007bff;">[YES]</span>
-            →
-        </div>
-        
-        <!-- Exit & Transition -->
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-            <div style="background: rgba(0, 123, 255, 0.05); border: 1px solid #007bff; border-radius: 6px; padding: 8px 15px; text-align: center; font-size: 0.75rem; color: #333; font-family: 'Fira Code';">
-                State::Exit
-            </div>
-            <div style="background: #007bff; color: #fff; border-radius: 6px; padding: 8px 15px; text-align: center; font-size: 0.75rem; font-weight: 700; font-family: 'Fira Code';">
-                NewState::Enter
-            </div>
-        </div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <!-- START -->
+    <div class="pf-fc-pill-start">
+      <span>🔄</span>
+      <span>State Transition Request (상태 전환 요청)</span>
     </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 01: State::Enter -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. State::Enter (상태 진입 및 초기화)</h4>
+        <span class="pf-fc-badge">INIT</span>
+      </div>
+      <p class="pf-fc-desc">상태 진입 시 애니메이션 트리거, 물리 속도 초기화, 타이머 리셋</p>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 02: Execution Loop -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2. Execution Loop (프레임 업데이트)</h4>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">LOOP</span>
+      </div>
+      <p class="pf-fc-desc"><strong>LogicUpdate():</strong> 입력·AI 로직 연산 &nbsp;|&nbsp; <strong>PhysicsUpdate():</strong> 물리 이동 및 충돌 판정</p>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 03: Decision -->
+    <div class="pf-fc-decision pf-fc-compact">
+      <div class="pf-fc-decision-header">
+        <span class="pf-fc-decision-badge">판단</span>
+        <h4 class="pf-fc-decision-title">Trigger Transition? (전환 조건 충족 여부)</h4>
+      </div>
+      <div class="pf-fc-branch-grid">
+        <div class="pf-fc-branch-item pf-fc-item-compact">
+          <span class="pf-fc-tag-no">No</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">현재 상태 유지 (Execution Loop 지속)</div>
+        </div>
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+          <span class="pf-fc-tag-yes">Yes</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">ChangeState() 호출 ➔ 상태 전환 착수</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 04: Exit & Enter -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">3. State::Exit &amp; NewState::Enter (원자적 교체)</h4>
+        <span class="pf-fc-badge">TRANSACTION</span>
+      </div>
+      <p class="pf-fc-desc">이전 상태 정리(`Exit`) 완료 후 즉시 다음 상태(`Enter`) 활성화로 물리·애니메이션 상태 결함 방지</p>
+    </div>
+
+    <!-- END -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-pill-end">
+      <span>✨</span>
+      <span>예외 없는 안정적 FSM 상태 라이프사이클 완성</span>
+    </div>
+
+  </div>
+</div>
 </div>
 
 **상태머신 핵심 로직**
@@ -290,35 +329,49 @@ public class State
 
 `Player_Slime`은 모든 컴포넌트의 허브 역할을 수행하며, 각 기능 모듈은 자신의 도메인 로직에 집중합니다.
 
-<div class="pf-visual-frame">
-    <div class="pf-arch-diagram">
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">Player_Slime (Main Controller)</div>
-            <div class="pf-arch-layer-items">
-                <span class="pf-arch-item">Player_Entity Inherited</span>
-                <span class="pf-arch-item">Component Hub</span>
-            </div>
-        </div>
-        <div class="pf-flow-arrow" style="text-align: center;">↓ Dispatch</div>
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">SlimeMovement</div>
-                <div style="font-size: 0.8rem; color: #666;">이동, 점프, 입력 관리</div>
-            </div>
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">SlimeAttack</div>
-                <div style="font-size: 0.8rem; color: #666;">근접 공격, 데미지 트리거</div>
-            </div>
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">SlimeDash</div>
-                <div style="font-size: 0.8rem; color: #666;">대시 이동, 무적 프레임</div>
-            </div>
-            <div class="pf-arch-layer">
-                <div class="pf-arch-layer-title">SlimeDead</div>
-                <div style="font-size: 0.8rem; color: #666;">사망 처리, 게임오버 연동</div>
-            </div>
-        </div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <!-- Central Hub -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
+        <span class="pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
+      </div>
+      <p class="pf-fc-desc">엔티티 생명주기 관리, 상태머신(FSM) 소유, 4대 도메인 컴포넌트 일괄 초기화 및 이벤트 디스패치</p>
     </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- 4 Modules Grid -->
+    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">MOVEMENT</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeMovement</div>
+        <div class="pf-fc-branch-desc">좌우 이동, 점프, 지면 감지 물리 로직</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">ATTACK</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeAttack</div>
+        <div class="pf-fc-branch-desc">포물선 원거리 투사체, 근접 타격 판정</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">DASH</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDash</div>
+        <div class="pf-fc-branch-desc">순간 가속 대시 및 무적 프레임 제어</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">LIFECYCLE</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDead</div>
+        <div class="pf-fc-branch-desc">사망 연출, 콜라이더 비활성화, UI 연동</div>
+      </div>
+    </div>
+
+  </div>
+</div>
 </div>
 
 ### 3.2 변신 능력 시스템

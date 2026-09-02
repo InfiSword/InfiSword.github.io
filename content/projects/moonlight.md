@@ -130,16 +130,63 @@ public class TableTileData
 
 손님이 좌석을 선택하면 테이블의 잔여 수용 수와 의자의 `isUseAble` 값을 갱신하고, 식사를 마치고 퇴장할 때 다시 반환합니다. 직원이 조리 도구를 선택하는 과정도 동일하게 사용 가능 상태를 선점하고, 서빙 단계에서 반납합니다.
 
-<div class="pf-visual-frame">
-    <div class="pf-transaction-flow">
-        <div class="pf-flow-step"><strong>탐색</strong><br>좌표별 자원 조회</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>선점</strong><br>isUseAble = false</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>사용</strong><br>착석 또는 조리</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>반납</strong><br>isUseAble = true</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <div class="pf-fc-pill-start">
+      <span>🪑</span>
+      <span>Resource Request (좌석/조리도구 요청)</span>
     </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. 자원 탐색 (Search)</h4>
+        <span class="pf-fc-badge">QUERY</span>
+      </div>
+      <p class="pf-fc-desc">좌표별 타일맵 노드 조회 및 테이블 수용 가능 잔여석(`tableUseAbleIndex`) 탐색</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2. 선점 잠금 (Acquire)</h4>
+        <span class="pf-fc-badge" style="background: #fef2f2; color: #dc2626; border-color: #fecaca;">LOCK</span>
+      </div>
+      <p class="pf-fc-desc">`isUseAble = false` 즉시 플래그 갱신 및 타 NPC 동시 점유 Race Condition 차단</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3. 자원 점유 (Use)</h4>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">IN USE</span>
+      </div>
+      <p class="pf-fc-desc">손님 착석/식사 진행 또는 직원 조리 도구 점유 및 요리 애니메이션 수행</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #16a34a;">4. 자원 반납 (Release)</h4>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">UNLOCKED</span>
+      </div>
+      <p class="pf-fc-desc">식사 종료/서빙 완료 시 `isUseAble = true` 원복 및 다음 NPC 진입 허용</p>
+    </div>
+
+  </div>
 </div>
 
 이 점유 플래그는 여러 NPC가 같은 의자나 조리 도구를 동시에 목표로 선택하는 상황을 줄이고, 타이쿤 게임의 한정된 설비를 명시적인 자원으로 다루게 합니다.
@@ -264,18 +311,60 @@ List<Grid> RetracePath(Grid startNode, Grid endNode)
 
 </details>
 
-<div class="pf-visual-frame">
-    <div class="pf-transaction-flow">
-        <div class="pf-flow-step">World Position</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step">WorldToCell</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step">A* Node Search</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step">Parent Retrace</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step">NPC Movement</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <div class="pf-fc-pill-start">
+      <span>📍</span>
+      <span>World Position (출발지 및 목적지)</span>
     </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. 좌표 변환 (WorldToCell)</h4>
+        <span class="pf-fc-badge">CONVERSION</span>
+      </div>
+      <p class="pf-fc-desc">유니티 월드 연속 좌표계를 Tilemap 정수형 격자 좌표(`Vector3Int`)로 투영</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2. A* 노드 탐색 (A* Node Search)</h4>
+        <span class="pf-fc-badge">ALGORITHM</span>
+      </div>
+      <p class="pf-fc-desc">4방향 인접 타일 순회, 맨해튼 휴리스틱(`hCost`)과 이동 비용(`gCost`) 기반 최소 `fCost` 우선순위 큐 탐색</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3. 부모 노드 역추적 (Parent Retrace)</h4>
+        <span class="pf-fc-badge">PATH RESOLVE</span>
+      </div>
+      <p class="pf-fc-desc">목적지 노드에서 시작 노드까지 `parent` 체인을 거슬러 올라간 뒤 역순(`Reverse`) 정렬하여 최단 웨이포인트 목록 완성</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-pill-end">
+      <span>🚶</span>
+      <span>NPC Movement (코루틴 기반 부드러운 셀 이동)</span>
+    </div>
+
+  </div>
 </div>
 
 길찾기와 실제 이동을 분리했기 때문에, 직원과 손님은 서로 다른 행동 상태를 가지면서도 같은 경로 계산 계층을 재사용합니다.
@@ -289,10 +378,79 @@ List<Grid> RetracePath(Grid startNode, Grid endNode)
 
 손님의 전체 행동은 다음 상태로 구성했습니다.
 
-```text
-Enter → FindingTable → MovingToChair → Sitting
-      → EatFood → OutStore → None
-```
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">Enter (입장)</h4>
+        <span class="pf-fc-badge">STEP 01</span>
+      </div>
+      <p class="pf-fc-desc">매장 출입구 도착 및 입장 확인</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">FindingTable (테이블 탐색)</h4>
+        <span class="pf-fc-badge">STEP 02</span>
+      </div>
+      <p class="pf-fc-desc">가용 테이블 및 인접 빈 의자 조회</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">MovingToChair (의자 이동)</h4>
+        <span class="pf-fc-badge">STEP 03</span>
+      </div>
+      <p class="pf-fc-desc">A* 경로 계산 후 의자 위치로 이동</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">Sitting (착석 &amp; 주문)</h4>
+        <span class="pf-fc-badge">STEP 04</span>
+      </div>
+      <p class="pf-fc-desc">주문 UI 활성화 및 직원 주문 큐 등록</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">EatFood (식사 진행)</h4>
+        <span class="pf-fc-badge">STEP 05</span>
+      </div>
+      <p class="pf-fc-desc">음식 수령 후 식사 타이머/애니메이션 동작</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #16a34a;">OutStore (퇴장 &amp; 자원 반납)</h4>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">COMPLETE</span>
+      </div>
+      <p class="pf-fc-desc">매출 반영, 좌석 `isUseAble=true` 반납, 출구 이동</p>
+    </div>
+
+  </div>
+</div>
 
 | 상태 | 주요 행동 |
 | --- | --- |
@@ -328,11 +486,55 @@ Enter → FindingTable → MovingToChair → Sitting
 
 직원은 네 가지 핵심 상태로 동작합니다.
 
-```text
-Roaming → MovingToCook → Cooking → ServingDish
-   ↑                                      │
-   └──────── 주문 처리 완료 ───────────────┘
-```
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. Roaming (대기 &amp; 순찰)</h4>
+        <span class="pf-fc-badge">IDLE</span>
+      </div>
+      <p class="pf-fc-desc">신규 주문 수신 전까지 가구 없는 빈 셀을 자유 배회</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">2. MovingToCook (조리대 이동)</h4>
+        <span class="pf-fc-badge">DISPATCH</span>
+      </div>
+      <p class="pf-fc-desc">주문 요리에 맞는 조리 도구 선점(`isUseAble=false`) 후 이동</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3. Cooking (조리 수행)</h4>
+        <span class="pf-fc-badge">ACTION</span>
+      </div>
+      <p class="pf-fc-desc">도구별 조리 스프라이트 및 타이머 진행 후 완성 요리 생성</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">4. ServingDish (서빙 및 조리도구 반납)</h4>
+        <span class="pf-fc-badge">RESOLVE</span>
+      </div>
+      <p class="pf-fc-desc">손님 테이블로 음식 배달 완료 후 조리 도구 반납(`isUseAble=true`) ➔ Roaming 상태로 자동 순환</p>
+    </div>
+
+  </div>
+</div>
 
 - `Roaming`: 가구가 없는 셀 중 하나를 선택해 매장을 배회합니다.
 - `MovingToCook`: 주문 음식에 맞는 조리 도구를 예약하고 이동합니다.
