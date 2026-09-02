@@ -320,6 +320,11 @@
     }
 
     /* Project Cards */
+
+    #pf-custom-portfolio .pf-other-card {
+        background: linear-gradient(145deg, #ffffff, #f8fbff);
+    }
+
     #pf-custom-portfolio .pf-project-card {
         padding: 32px;
         margin-bottom: 22px;
@@ -569,6 +574,36 @@
         color: #e2e8f0;
     }
 
+
+    /* 03. Other Projects Grid */
+    #pf-custom-portfolio .pf-other-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+        gap: 18px;
+        margin-bottom: 30px;
+        position: relative;
+        z-index: 1;
+    }
+    #pf-custom-portfolio .pf-other-card {
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        overflow: hidden;
+    }
+    #pf-custom-portfolio .pf-other-card .pf-project-name {
+        font-size: 1.25rem;
+    }
+    #pf-custom-portfolio .pf-other-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    #pf-custom-portfolio .pf-other-card .pf-project-desc {
+        flex-grow: 1;
+    }
+
     /* Responsive Queries */
     @media (max-width: 768px) {
         #pf-custom-portfolio {
@@ -723,8 +758,8 @@
             이민혁 (Minhyuk Lee)
         </h1>
         <p class="pf-hero-desc">
-            안녕하세요! 탄탄한 <strong>Computer Science 기초</strong>를 바탕으로 복잡한 게임 시스템 아키텍처를 설계하고, 
-            <strong>컴퓨터 그래픽스(Rendering / DirectX 11 / HLSL)</strong> 및 <strong>강화학습(ML-Agents)</strong>을 깊이 있게 탐구하는 게임 클라이언트 프로그래머입니다.
+            안녕하세요! <strong>Computer Science</strong> 를 공부하고, 게임 클라이언트 프로그래머가 되기 위해 열심히 공부하고 있는 학생입니다! 
+            최근에는 <strong>컴퓨터 그래픽스(Rendering / DirectX 11 / HLSL)</strong> 및 <strong>강화학습(ML-Agents)</strong>을 흥미롭게 공부하고 있습니다.
         </p>
         <div class="pf-profile-links" aria-label="외부 프로필 링크">
             <a class="pf-profile-link pf-profile-link--primary" href="https://github.com/InfiSword" target="_blank" rel="noopener noreferrer">
@@ -888,12 +923,11 @@
     <article class="pf-glass-card pf-project-card" data-project="01">
         <div class="pf-card-top">
             <span class="pf-project-tag pf-mono">● Systems Engineering & Optimization</span>
-            <h3 class="pf-project-name"><a href="/project/file-tower-defense/">File Tower Defense (지스타 수상작)</a></h3>
+            <h3 class="pf-project-name"><a href="/project/file-tower-defense/">File Tower Defense</a></h3>
         </div>
         <p class="pf-project-desc">
-            유니티의 좌표계 특성을 분석하여 <strong>RectTransform(UI)에서 Transform(GameObject) 기반</strong>으로 아키텍처를 전면 재설계. 
-            <strong>공간 분할 최적화(3x3 Local Search)</strong>와 <strong>트랜잭션 기반 배치 시스템</strong>을 구축하여 대규모 유닛 환경에서도 안정적인 60FPS를 유지. 
-            화면 왜곡 노이즈를 억제하는 <strong>1€ 필터(One Euro Filter)</strong>와 <strong>중앙 집중식 입력 파이프라인</strong>을 구현했습니다.
+            윈도우 파일 시스템을 모티브로 한 <strong>로그라이크 타워 디펜스 게임</strong>입니다. 
+            바탕화면의 파일 아이콘들을 유닛으로 배치하고, <strong>폴더 압축(ZIP) 및 시너지 조합</strong>을 활용하여 끊임없이 침입하는 컴퓨터 바이러스들을 격퇴하는 독창적인 게임 플레이를 구현했습니다.
         </p>
         <div class="pf-keyword-row">
             <span class="pf-keyword-badge">#Transform Architecture</span>
@@ -918,8 +952,8 @@
             <h3 class="pf-project-name"><a href="/project/winapi-dont-starve/">WinAPI Don't Starve Clone</a></h3>
         </div>
         <p class="pf-project-desc">
-            <strong>C++, WinAPI GDI/GDI+</strong> 환경에서 Don't Starve의 탑다운 생존 메커니즘을 순수 엔진 프리로 구현. 
-            <strong>그리드 기반 공간 분할(Grid Partitioning)</strong>과 <strong>뷰포트 가시 영역 컬링(Viewport Culling)</strong>을 자체 설계하여 수천 개의 필드 오브젝트가 존재하는 환경에서 렌더링 부하를 <strong>84% 이상 절감</strong>하고 더블 버퍼링 파이프라인을 완성했습니다.
+            상용 엔진 없이 순수 C++와 WinAPI로 구현한 <strong>2D 탑다운 서바이벌 모작 게임</strong>입니다. 
+            원작 'Don't Starve'의 핵심인 <strong>자원 채집, 도구 제작(Crafting), 인벤토리 관리 및 낮과 밤의 생존 메커니즘</strong>을 직접 설계하여 엔진 프리 환경에서 생존 어드벤처의 재미를 재현했습니다.
         </p>
         <div class="pf-keyword-row">
             <span class="pf-keyword-badge">#Grid Spatial Partitioning</span>
@@ -944,8 +978,8 @@
             <h3 class="pf-project-name"><a href="/project/worldfirstkill/">WorldFirstKill</a></h3>
         </div>
         <p class="pf-project-desc">
-            <strong>C# 리플렉션(Reflection) 기반 CSV 자동 파싱 시스템</strong>과 <strong>구글 시트 버전 비교 기반 비동기 데이터 동기화 파이프라인</strong> 구축. 
-            독립적 난수 스트림과 <strong>Seed/Token 상태 보존 시스템</strong>을 설계하여 복잡한 전투 및 드랍 롤백 상황에서도 100% 결정적(Deterministic) 재현이 가능한 세이브/로드 엔진을 완성했습니다.
+            시드(Seed) 기반의 무작위 월드 생성과 보스 레이드를 결합한 <strong>쿼터뷰 액션 RPG 게임</strong>입니다. 
+            다양한 <strong>퀘스트 수락 및 필드·던전 탐험, 몬스터 토벌</strong>의 RPG 본연의 재미를 담았으며, 서버 시트 데이터 실시간 동기화 및 정밀한 세이브/로드 시스템으로 안정적인 플레이를 지원합니다.
         </p>
         <div class="pf-keyword-row">
             <span class="pf-keyword-badge">#Reflection CSV Parser</span>
@@ -970,8 +1004,8 @@
             <h3 class="pf-project-name"><a href="/project/autonomous-racing-agent/">Autonomous Racing Agent</a></h3>
         </div>
         <p class="pf-project-desc">
-            <strong>Unity ML-Agents (PPO)</strong> 기반의 자율 주행 경주차 강화학습 에이전트. 
-            <strong>다방향 레이캐스트 센서(12 Rays)</strong>와 <strong>스플라인 기반 동적 체크포인트 생성기</strong>를 구축하여 미지의 트랙에서도 역주행 없이 코너링을 극대화하는 보상 함수(Reward Function)를 최적화했습니다.
+            인공지능 에이전트가 트랙을 스스로 학습하여 주행하는 <strong>자율 주행 레이싱 시뮬레이션 프로젝트</strong>입니다. 
+            <strong>다방향 레이캐스트 센서</strong>로 노면과 벽면을 감지하고, <strong>PPO 강화학습 알고리즘과 정밀 보상 설계</strong>를 통해 미지의 서킷에서도 역주행 없이 한계 속도로 코너링을 돌파하는 주행 AI를 완성했습니다.
         </p>
         <div class="pf-keyword-row">
             <span class="pf-keyword-badge">#ML-Agents PPO</span>
@@ -996,8 +1030,8 @@
             <h3 class="pf-project-name"><a href="/project/slime-project/">Slime Project (하드코어 액션 플랫포머)</a></h3>
         </div>
         <p class="pf-project-desc">
-            <strong>Finite State Machine (FSM)</strong> 기반으로 플레이어와 몬스터의 복합 행동 패턴을 모듈화. 
-            <strong>컴포지션 패턴(Composition)</strong>을 적용하여 변신 폼별 고유 스킬을 유연하게 탈부착하고, 보스 몬스터의 HP 단계별 동적 스킬 트리거 델리게이트 시스템을 설계했습니다.
+            슬라임의 특수 능력을 활용하여 장애물을 극복하는 <strong>2D 하드코어 액션 퍼즐 플랫포머 게임</strong>입니다. 
+            상황에 따라 <strong>다양한 슬라임 폼으로 변신하여 퍼즐 기믹을 돌파</strong>하고, HP 페이즈에 따라 다채로운 패턴으로 위협하는 <strong>보스 몬스터와의 박진감 넘치는 전투</strong>를 경험할 수 있습니다.
         </p>
         <div class="pf-keyword-row">
             <span class="pf-keyword-badge">#Finite State Machine</span>
@@ -1022,10 +1056,8 @@
             <h3 class="pf-project-name"><a href="/project/moonlight/">보름달 방앗간 (MoonLight)</a></h3>
         </div>
         <p class="pf-project-desc">
-            Unity Tilemap의 셀 좌표와 월드 좌표를 연결한 <strong>커스텀 그리드·타일 데이터 시스템</strong>을 설계하고,
-            <strong>A* 길찾기</strong>를 직원과 손님의 공통 이동 기반으로 구현했습니다.
-            테이블·의자·조리 도구의 점유 상태를 관리하며 <strong>손님의 입장–착석–주문–식사–퇴장</strong>과
-            <strong>직원의 배회–조리–서빙</strong>을 상태 머신과 주문 큐로 연결해 타이쿤의 서비스 루프를 완성했습니다.
+            매장을 방문한 손님을 맞이하고 음식을 조리·서빙하며 운영하는 <strong>2D 힐링 매장 타이쿤 게임</strong>입니다. 
+            주문 큐와 조리 도구 예약에 맞춰 움직이는 <strong>직원 AI</strong>와 자리를 찾아 식사를 즐기는 <strong>손님 AI</strong>가 유기적으로 상호작용하며 생동감 넘치는 타이쿤의 매장 운영 루프를 선사합니다.
         </p>
         <div class="pf-keyword-row">
             <span class="pf-keyword-badge">#A* Pathfinding</span>
@@ -1042,6 +1074,126 @@
             </a>
         </div>
     </article>
+
+
+    <!-- 03. OTHER GAME PROJECTS -->
+    <div id="other-projects" class="pf-section-heading">03. OTHER GAME PROJECTS</div>
+
+    <div class="pf-other-grid">
+
+        <!-- OTHER 1: LUCKY WWE -->
+        <article class="pf-glass-card pf-other-card">
+            <div class="pf-card-top">
+                <span class="pf-project-tag pf-mono" style="color: #c084fc;">● Global Game Jam 2026 // Unity & TCG</span>
+                <h3 class="pf-project-name">럭키 WWE</h3>
+            </div>
+            <div class="pf-other-meta pf-mono">
+                <span class="pf-keyword-badge">PC (Windows)</span>
+                <span class="pf-keyword-badge">Unity / C#</span>
+                <span class="pf-keyword-badge">4인 팀 (3일)</span>
+            </div>
+            <p class="pf-project-desc">
+                Yacht Dice 룰과 WWE 프로레슬링을 결합한 <strong>독창적인 턴제 카드 배틀(TCG) 게임</strong>입니다. 
+                주사위 족보 콤보와 프로레슬링 기술 카드를 연계하여 <strong>관중 호응 점수와 보너스 데미지</strong>를 획득하는 배틀 시스템을 구현했습니다.
+            </p>
+            <div class="pf-keyword-row">
+                <span class="pf-keyword-badge">#Turn-based TCG</span>
+                <span class="pf-keyword-badge">#Yacht Dice System</span>
+                <span class="pf-keyword-badge">#Relic Buff</span>
+                <span class="pf-keyword-badge">#GameJam</span>
+            </div>
+            <div class="pf-card-actions">
+                <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="luckyWwe" onclick="pfOpenModal('luckyWwe');">
+                    <span>⚡</span> 핵심 아키텍처 요약
+                </button>
+            </div>
+        </article>
+
+        <!-- OTHER 2: HEY HONEYBEE -->
+        <article class="pf-glass-card pf-other-card">
+            <div class="pf-card-top">
+                <span class="pf-project-tag pf-mono" style="color: #d97706;">● Game Jam // HTML & Verse8</span>
+                <h3 class="pf-project-name">Hey! HoneyBee!</h3>
+            </div>
+            <div class="pf-other-meta pf-mono">
+                <span class="pf-keyword-badge">PC (Web)</span>
+                <span class="pf-keyword-badge">HTML / Verse8</span>
+                <span class="pf-keyword-badge">3인 팀 (3일)</span>
+            </div>
+            <p class="pf-project-desc">
+                꿀 블록들을 슬라이딩하여 타일 숫자의 합이 10이 되도록 맞추는 <strong>캐주얼 숫자 퍼즐 게임</strong>입니다. 
+                스테이지가 진행될수록 <strong>잠금 노드와 꿀단지 방해 요소</strong>가 등장하여 전략적인 수 읽기와 두뇌 회전의 재미를 선사합니다.
+            </p>
+            <div class="pf-keyword-row">
+                <span class="pf-keyword-badge">#Sliding Puzzle</span>
+                <span class="pf-keyword-badge">#Wave System</span>
+                <span class="pf-keyword-badge">#Obstacle Mechanic</span>
+                <span class="pf-keyword-badge">#GameJam</span>
+            </div>
+            <div class="pf-card-actions">
+                <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="honeybee" onclick="pfOpenModal('honeybee');">
+                    <span>⚡</span> 핵심 아키텍처 요약
+                </button>
+            </div>
+        </article>
+
+        <!-- OTHER 3: WINAPI SHOOTING GAME -->
+        <article class="pf-glass-card pf-other-card">
+            <div class="pf-card-top">
+                <span class="pf-project-tag pf-mono" style="color: #818cf8;">● Windows API C++ // 2D Arcade</span>
+                <h3 class="pf-project-name">WinAPI Shooting Game</h3>
+            </div>
+            <div class="pf-other-meta pf-mono">
+                <span class="pf-keyword-badge">PC (Windows)</span>
+                <span class="pf-keyword-badge">C++ / WinAPI</span>
+                <span class="pf-keyword-badge">2인 팀 (2주)</span>
+            </div>
+            <p class="pf-project-desc">
+                상용 엔진 없이 순수 C++와 WinAPI로 제작된 <strong>정통 2D 종스크롤 탄막 슈팅 게임</strong>입니다. 
+                쏟아지는 적기의 탄환을 회피하며 <strong>다단계 방사형·유도형 탄막 패턴을 구사하는 보스 비행선</strong>을 격추하는 아케이드 액션을 구현했습니다.
+            </p>
+            <div class="pf-keyword-row">
+                <span class="pf-keyword-badge">#WinAPI C++</span>
+                <span class="pf-keyword-badge">#Bullet Hell Patterns</span>
+                <span class="pf-keyword-badge">#AABB Collider</span>
+                <span class="pf-keyword-badge">#Boss Phase AI</span>
+            </div>
+            <div class="pf-card-actions">
+                <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="shooting" onclick="pfOpenModal('shooting');">
+                    <span>⚡</span> 핵심 아키텍처 요약
+                </button>
+            </div>
+        </article>
+
+        <!-- OTHER 4: PIPEGAME -->
+        <article class="pf-glass-card pf-other-card">
+            <div class="pf-card-top">
+                <span class="pf-project-tag pf-mono" style="color: #34d399;">● Solo Project // Mobile Puzzle</span>
+                <h3 class="pf-project-name">PipeGame</h3>
+            </div>
+            <div class="pf-other-meta pf-mono">
+                <span class="pf-keyword-badge">모바일 (Android)</span>
+                <span class="pf-keyword-badge">Unity / C#</span>
+                <span class="pf-keyword-badge">1인 개발 (1주)</span>
+            </div>
+            <p class="pf-project-desc">
+                시작점부터 종점까지 파이프 타일을 회전시키고 연결하여 경로를 완성하는 <strong>모바일 연결 퍼즐 게임</strong>입니다. 
+                단 1주일간 1인 개발로 <strong>DFS/BFS 기반 경로 연결 판정 알고리즘과 레벨 사이클</strong>을 신속하게 프로토타이핑했습니다.
+            </p>
+            <div class="pf-keyword-row">
+                <span class="pf-keyword-badge">#Grid Puzzle</span>
+                <span class="pf-keyword-badge">#Path Finding DFS</span>
+                <span class="pf-keyword-badge">#Solo 1-Week Project</span>
+                <span class="pf-keyword-badge">#Mobile UI</span>
+            </div>
+            <div class="pf-card-actions">
+                <button class="pf-btn pf-btn-modal" type="button" aria-haspopup="dialog" aria-controls="pipegame" onclick="pfOpenModal('pipegame');">
+                    <span>⚡</span> 핵심 아키텍처 요약
+                </button>
+            </div>
+        </article>
+
+    </div>
 
 </div> <!-- pf-custom-portfolio END -->
 
@@ -1235,6 +1387,131 @@
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🍽️</span> 4. 주문 큐와 자원 예약</div>
                 <p class="pf-modal-item-desc">음식과 손님을 대응되는 Queue로 관리하고 조리 도구·좌석의 점유 플래그를 선점/반납하여 여러 NPC가 동시에 같은 자원을 선택하는 충돌을 줄였습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 7. LUCKY WWE MODAL -->
+<div id="luckyWwe" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="럭키 WWE 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('luckyWwe')">
+    <div class="pf-modal-container" onclick="event.stopPropagation()">
+        <div class="pf-modal-header">
+            <div>
+                <div class="pf-modal-tag" style="color: #c084fc;">ARCHITECTURE REPORT // LUCKY_WWE</div>
+                <h2 class="pf-modal-title">럭키 WWE: Yacht Dice & 프로레슬링 TCG</h2>
+            </div>
+            <button class="pf-modal-close" onclick="pfCloseModal('luckyWwe')">✕ CLOSE</button>
+        </div>
+        <div class="pf-modal-grid">
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #c084fc;"><span>🎲</span> 1. Yacht Dice 결합 배틀 루프</div>
+                <p class="pf-modal-item-desc">주사위 족보 콤보와 WWE 레슬링 기술 카드를 매칭하여, 콤보 완성도에 따라 관중 호응도와 추가 타격 데미지를 산출하는 턴제 전투 엔진을 설계했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #c084fc;"><span>🃏</span> 2. 카드 드로우 & 셋업 시스템</div>
+                <p class="pf-modal-item-desc">덱 빌딩, 턴당 카드 드로우 및 필드 셋업 라이프사이클을 모듈화하여 턴 종료 및 상태 전환 시의 정합성을 보장했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #c084fc;"><span>🏺</span> 3. 유물(Relic) & 동적 버프 데이터</div>
+                <p class="pf-modal-item-desc">카드 스탯을 영구 강화하거나 특수 룰을 부여하는 유물 시스템을 데이터 주도(Data-Driven) 방식으로 분리해 유연한 확장을 구현했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #c084fc;"><span>⏱️</span> 4. 48시간 게임잼 완결 파이프라인</div>
+                <p class="pf-modal-item-desc">Global Game Jam 2026에서 4인 팀의 유일한 프로그래머로 참여하여 기획/아트 리소스를 신속히 통합하고 안정적인 인게임 루프를 완성했습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 8. HEY HONEYBEE MODAL -->
+<div id="honeybee" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="Hey! HoneyBee! 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('honeybee')">
+    <div class="pf-modal-container" onclick="event.stopPropagation()">
+        <div class="pf-modal-header">
+            <div>
+                <div class="pf-modal-tag" style="color: #f59e0b;">ARCHITECTURE REPORT // HEY_HONEYBEE</div>
+                <h2 class="pf-modal-title">Hey! HoneyBee!: 합 10 숫자 퍼즐</h2>
+            </div>
+            <button class="pf-modal-close" onclick="pfCloseModal('honeybee')">✕ CLOSE</button>
+        </div>
+        <div class="pf-modal-grid">
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🍯</span> 1. 그리드 슬라이딩 & 합 연산</div>
+                <p class="pf-modal-item-desc">타일 슬라이딩 이동과 인접 블록 숫자 합산(Sum = 10) 판정 알고리즘을 구축해 직관적인 매칭과 연속 점수 획득 로직을 처리했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🌊</span> 2. 웨이브 기반 난이도 스케일링</div>
+                <p class="pf-modal-item-desc">진행 단계에 맞춰 보드 크기를 확장하고 방해 노드의 출현 빈도를 제어하는 동적 웨이브 스포너 시스템을 개발했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>🔒</span> 3. 잠금 & 꿀단지 장애물 기믹</div>
+                <p class="pf-modal-item-desc">이동 경로를 차단하는 잠금 노드와 주변 타일 매칭으로만 해제 가능한 꿀단지 오브젝트 상태 로직을 설계했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>⚡</span> 4. 초단기 웹 게임잼 개발</div>
+                <p class="pf-modal-item-desc">3일간 진행된 마하 게임잼 환경에서 빠른 반복 검증(Iterative Testing)을 거쳐 직관적인 퍼즐 완성도를 달성했습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 9. WINAPI SHOOTING GAME MODAL -->
+<div id="shooting" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="WinAPI Shooting Game 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('shooting')">
+    <div class="pf-modal-container" onclick="event.stopPropagation()">
+        <div class="pf-modal-header">
+            <div>
+                <div class="pf-modal-tag" style="color: #818cf8;">ARCHITECTURE REPORT // WINAPI_SHOOTING</div>
+                <h2 class="pf-modal-title">WinAPI Shooting Game: C++ 정통 아케이드 탄막</h2>
+            </div>
+            <button class="pf-modal-close" onclick="pfCloseModal('shooting')">✕ CLOSE</button>
+        </div>
+        <div class="pf-modal-grid">
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span>🚀</span> 1. 순수 C++ / WinAPI 아키텍처</div>
+                <p class="pf-modal-item-desc">상용 엔진 없이 Windows API 메시지 루프와 메모리 DC 더블 버퍼링만으로 렌더링 및 물리 루프를 밑바닥부터 구축했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span>💥</span> 2. 다단계 보스 탄막 패턴 AI</div>
+                <p class="pf-modal-item-desc">삼각함수(Sin/Cos) 기반의 방사형·원형·유도형 탄환 궤적 알고리즘을 설계하고, 보스 체력 단계별 행동 전이 루틴을 구현했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span>🎯</span> 3. AABB & Circle 충돌 검출기</div>
+                <p class="pf-modal-item-desc">수백 개 탄환과 비행선 간의 충돌 검사를 위해 AABB 및 원형 거리 기반 간이 콜라이더 시스템을 자체 구현해 연산 부하를 최소화했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span>🕹️</span> 4. 플레이어 입력 스무딩</div>
+                <p class="pf-modal-item-desc">GetAsyncKeyState 기반의 비동기 키보드 입력에 가속도 및 감속 스무딩을 적용해 키보드 조작 시 매끄러운 기체 이동감을 구현했습니다.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 10. PIPEGAME MODAL -->
+<div id="pipegame" class="pf-modal-overlay" role="dialog" aria-modal="true" aria-label="PipeGame 핵심 아키텍처 요약" aria-hidden="true" onclick="pfCloseModal('pipegame')">
+    <div class="pf-modal-container" onclick="event.stopPropagation()">
+        <div class="pf-modal-header">
+            <div>
+                <div class="pf-modal-tag" style="color: #34d399;">ARCHITECTURE REPORT // PIPEGAME</div>
+                <h2 class="pf-modal-title">PipeGame: 모바일 파이프 경로 연결 퍼즐</h2>
+            </div>
+            <button class="pf-modal-close" onclick="pfCloseModal('pipegame')">✕ CLOSE</button>
+        </div>
+        <div class="pf-modal-grid">
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #34d399;"><span>🔧</span> 1. 타일 회전 & 입출구 포트 매핑</div>
+                <p class="pf-modal-item-desc">각 파이프 타일의 상하좌우 개방 상태를 비트 플래그로 관리하고, 90도 터치 회전 시 인접 타일과의 연결 상태를 즉시 갱신하도록 설계했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #34d399;"><span>🔍</span> 2. DFS 기반 회로 완결성 검증</div>
+                <p class="pf-modal-item-desc">시작 노드에서 종점 노드까지 유효 유로가 형성되었는지를 판별하는 그래프 탐색 알고리즘을 구현하여 실시간 클리어 조건을 체크했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #34d399;"><span>📱</span> 3. 1인 1주일 모바일 프로토타이핑</div>
+                <p class="pf-modal-item-desc">모바일 안드로이드 터치 조작감과 스테이지 전환 라이프사이클을 단 1주일 동안 1인 풀스택으로 기획부터 빌드까지 완성했습니다.</p>
+            </div>
+            <div class="pf-modal-item">
+                <div class="pf-modal-item-title" style="color: #34d399;"><span>🧩</span> 4. 모듈식 레벨 데이터 구조</div>
+                <p class="pf-modal-item-desc">그리드 크기와 초기 타일 배치 데이터를 직렬화 가능한 구조로 분리해 신규 스테이지 확장이 용이하도록 설계했습니다.</p>
             </div>
         </div>
     </div>
