@@ -517,37 +517,158 @@ video {
   font-family: "Fira Code", monospace;
 }
 
+/* ========================================================== */
+/* TABLE OF CONTENTS (TOC) - 단원별 컬러 및 계층 구분 시스템  */
+/* ========================================================== */
+
 .toc-list {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   max-height: calc(100vh - 145px);
   margin: 0;
-  padding: 10px;
+  padding: 12px 10px;
   overflow: auto;
   list-style: none;
-  font-size: 0.82rem;
 }
 
+/* 공통 링크 기본 */
 .toc-list__item a {
-  display: block;
-  padding: 8px 9px;
-  border-radius: 7px;
-  color: #93a4ba;
-  line-height: 1.45;
+  display: flex;
+  align-items: baseline;
   text-decoration: none;
-  transition: background 160ms ease, color 160ms ease, transform 160ms ease;
+  border-radius: 6px;
+  line-height: 1.45;
+  transition: all 180ms ease;
 }
 
-.toc-list__item a:hover,
-.toc-list__item a.is-active {
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.2), rgba(37, 99, 235, 0.05));
-  color: #dbeafe;
+/* -------------------------------------------------- */
+/* [1] 대단원 (h2) - 굵고 선명한 프라이머리 블루 테마  */
+/* -------------------------------------------------- */
+.toc-list__item--h2 {
+  margin-top: 10px;
+}
+.toc-list__item--h2:first-child {
+  margin-top: 0;
+}
+
+.toc-list__item--h2 a {
+  padding: 7px 10px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #1e3a8a; /* Deep Navy Blue */
+  background: #f0f7ff; /* Soft Blue Tint */
+  border-left: 3.5px solid #2563eb; /* Primary Accent Bar */
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.04);
+}
+
+.toc-list__item--h2 a:hover {
+  color: #1d4ed8;
+  background: #e0edff;
+  border-left-color: #1d4ed8;
   transform: translateX(2px);
 }
 
-.toc-list__item--h3 { padding-left: 10px; }
-.toc-list__item--h4 { padding-left: 20px; }
+.toc-list__item--h2 a.is-active {
+  color: #ffffff !important;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  border-left: 3.5px solid #1e40af !important;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
+  transform: translateX(3px);
+}
+
+/* -------------------------------------------------- */
+/* [2] 하위 단원 (h3) - 세련된 틸/슬레이트 서브 테마   */
+/* -------------------------------------------------- */
+.toc-list__item--h3 {
+  padding-left: 10px;
+  margin-top: 1px;
+}
+
+.toc-list__item--h3 a {
+  padding: 5px 10px;
+  font-size: 0.79rem;
+  font-weight: 500;
+  color: #475569; /* Slate Gray */
+  background: transparent;
+  border-left: 2px solid #cbd5e1; /* Subtle Guide Line */
+}
+
+.toc-list__item--h3 a::before {
+  content: "↳";
+  display: inline-block;
+  font-size: 0.74rem;
+  color: #94a3b8;
+  margin-right: 6px;
+  transition: color 180ms ease, transform 180ms ease;
+}
+
+.toc-list__item--h3 a:hover {
+  color: #0284c7; /* Cyan / Sky Blue */
+  background: #f0f9ff;
+  border-left-color: #38bdf8;
+  transform: translateX(2px);
+}
+.toc-list__item--h3 a:hover::before {
+  color: #0284c7;
+  transform: translateX(1px);
+}
+
+.toc-list__item--h3 a.is-active {
+  color: #0369a1 !important; /* Deep Sky Blue */
+  font-weight: 700 !important;
+  background: #e0f2fe !important; /* Sky Tint */
+  border-left: 2px solid #0284c7 !important;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.12) !important;
+  transform: translateX(2px);
+}
+.toc-list__item--h3 a.is-active::before {
+  color: #0284c7 !important;
+  font-weight: bold;
+}
+
+/* -------------------------------------------------- */
+/* [3] 세부 단원 (h4) - 섬세한 인디고/뮤트 테마       */
+/* -------------------------------------------------- */
+.toc-list__item--h4 {
+  padding-left: 22px;
+  margin-top: 1px;
+}
+
+.toc-list__item--h4 a {
+  padding: 4px 8px;
+  font-size: 0.74rem;
+  font-weight: 450;
+  color: #64748b;
+  background: transparent;
+  border-left: 1.5px dashed #e2e8f0;
+}
+
+.toc-list__item--h4 a::before {
+  content: "•";
+  display: inline-block;
+  font-size: 0.8rem;
+  color: #cbd5e1;
+  margin-right: 5px;
+}
+
+.toc-list__item--h4 a:hover {
+  color: #4f46e5; /* Indigo */
+  background: #f5f3ff;
+  border-left-color: #818cf8;
+  transform: translateX(2px);
+}
+
+.toc-list__item--h4 a.is-active {
+  color: #4338ca !important;
+  font-weight: 700 !important;
+  background: #ede9fe !important;
+  border-left: 1.5px solid #6366f1 !important;
+  transform: translateX(2px);
+}
+.toc-list__item--h4 a.is-active::before {
+  color: #6366f1 !important;
+}
 
 .site-footer {
   border-top: 1px solid rgba(148, 163, 184, 0.12);
@@ -842,13 +963,7 @@ body::before {
   color: #172033;
 }
 
-.toc-list__item a { color: #64748b; }
-
-.toc-list__item a:hover,
-.toc-list__item a.is-active {
-  background: linear-gradient(90deg, #dbeafe, #eff6ff);
-  color: #1d4ed8;
-}
+/* TOC color differentiation handled by .toc-list__item--h2 / --h3 / --h4 rules */
 
 .site-footer {
   border-top-color: #dce5f0;
