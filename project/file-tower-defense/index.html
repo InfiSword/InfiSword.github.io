@@ -127,54 +127,48 @@
 <h2 id="2-파일바이러스ui-입력-및-상호작용-시스템" class="chapter-title">2. 파일/바이러스/UI 입력 및 상호작용 시스템</h2>
 <p>수많은 유닛이 각자 <code>Update()</code>에서 마우스 충돌을 검사하는 것은 비효율적이고 관리하기 어렵다고 판단했습니다. 이를 개선하기 위해 <strong>Mediator 패턴</strong>을 도입하여 <strong>InputManager</strong>가 모든 마우스 입력을 중앙 집중식으로 수집·판정하고, 상호작용 중재자인 <strong>InteractionHandler</strong>가 유닛의 선택 및 드래그 상태를 통합 관리하며, <strong>IInteractable</strong> 인터페이스를 구현한 대상 객체에게만 이벤트를 안전하게 전파하도록 설계했습니다.</p>
 <h3 id="21-중앙-집중식-입력-아키텍처">2.1 중앙 집중식 입력 아키텍처</h3>
-<p><code>InputManager</code>가 렌즈 왜곡 보정 및 레이캐스트 판정을 거쳐 마우스 상태 머신(<code>InputState</code>)을 기반으로 클릭, 드래그, 다중 선택(Ctrl+드래그)을 판정하면, 중재자인 <code>InteractionHandler</code>가 단일/다중 선택 객체 목록(<code>SelectedObjects</code>)과 드래그 대상군(<code>DragObjects</code>)을 제어하고 배치 실패 시 위치 복원(<code>RestoreOriginalPositions</code>)까지 책임지며 대상 <code>IInteractable</code> 객체들에게 이벤트를 일괄 전파합니다.</p>
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
     <!-- 0. START -->
     <div class="pf-fc-pill-start">
       <span>🖱️</span>
-      <span>START // 마우스 및 터치 입력 발생</span>
+      <span>Mouse &amp; Touch Input</span>
     </div>
     <!-- Arrow -->
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 01: InputManager -->
-    <div class="pf-fc-card">
+    <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">STEP 01. InputManager: 중앙 집중식 입력 수신 &amp; 좌표 보정</h4>
+        <h4 class="pf-fc-title">InputManager (입력 수신 &amp; 좌표 보정)</h4>
         <span class="pf-fc-badge">CONTROLLER</span>
       </div>
-      <p class="pf-fc-desc"><code>LensDistortionCorrector</code>로 렌즈 왜곡을 보정하고, 스크린 좌표를 오르토그래픽 월드 좌표(<code>ScreenToWorldPoint</code>)로 변환하여 프레임 단위 통합 관리</p>
     </div>
     <!-- Arrow -->
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 02: 조건 판단 1 (UI 판정 & Raycast) -->
-    <div class="pf-fc-decision">
+    <div class="pf-fc-decision pf-fc-compact">
       <div class="pf-fc-decision-header">
         <span class="pf-fc-decision-badge">판단 01</span>
-        <h4 class="pf-fc-decision-title">마우스 포인터가 UI 위에 위치하는가? (IsPointerOverUI)</h4>
+        <h4 class="pf-fc-decision-title">Is Pointer Over UI? (UI 포인터 검사)</h4>
       </div>
       <div class="pf-fc-branch-grid">
-        <!-- YES 분기: 조기 종료 -->
-        <div class="pf-fc-branch-item" style="border-color: #fecaca; background: #fffdfd;">
-          <div style="display: flex; gap: 4px; align-items: center;">
-            <span class="pf-fc-tag-yes">[YES] UI 감지</span>
-            <span style="font-size: 0.68rem; color: #dc2626; font-weight: 700;">(종료 경로)</span>
+        <!-- YES 분기 -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #fecaca; background: #fffdfd;">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="pf-fc-tag-yes">Yes</span>
+            <span class="pf-fc-branch-title">UI 우선 처리 (월드 입력 차단)</span>
           </div>
-          <div class="pf-fc-branch-title">UI 상호작용 우선 처리</div>
-          <p class="pf-fc-branch-desc">인게임 월드 입력 차단 및 UI 이벤트 위임 후 <code>return</code> (단일 프레임 처리 조기 종료)</p>
         </div>
-        <!-- NO 분기: 월드 타깃팅 -->
-        <div class="pf-fc-branch-item" style="border-color: #bbf7d0; background: #fdfffe;">
-          <div style="display: flex; gap: 4px; align-items: center;">
-            <span class="pf-fc-tag-no">[NO] 게임 월드</span>
-            <span style="font-size: 0.68rem; color: #059669; font-weight: 700;">(진행 경로)</span>
+        <!-- NO 분기 -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="pf-fc-tag-no">No</span>
+            <span class="pf-fc-branch-title">Raycast &amp; Sorting Order 정렬 ➔ Target 식별</span>
           </div>
-          <div class="pf-fc-branch-title">Physics2D.RaycastNonAlloc</div>
-          <p class="pf-fc-branch-desc"><code>Sorting Order</code> 순 정렬로 최상단 <code>IInteractable</code> 타깃 식별 후 STEP 03으로 전개</p>
         </div>
       </div>
     </div>
@@ -182,30 +176,33 @@
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
-    <!-- STEP 03: 조건 판단 2 (InputState FSM - 클릭, 드래그, 다중 선택) -->
-    <div class="pf-fc-decision">
+    <!-- STEP 03: 조건 판단 2 (InputState FSM) -->
+    <div class="pf-fc-decision pf-fc-compact">
       <div class="pf-fc-decision-header">
         <span class="pf-fc-decision-badge">판단 02</span>
-        <h4 class="pf-fc-decision-title">조작 행위 상태 머신 판정 (InputState FSM)</h4>
+        <h4 class="pf-fc-decision-title">InputState 머신 판정</h4>
       </div>
       <div class="pf-fc-branch-grid">
         <!-- 1. 클릭 -->
-        <div class="pf-fc-branch-item">
-          <span class="pf-fc-tag-state">Pressing</span>
-          <div class="pf-fc-branch-title">① 클릭 (Click / Hover)</div>
-          <p class="pf-fc-branch-desc">드래그 임계값(<code>Threshold</code>) 이내 마우스 릴리즈 시 단순 클릭 판정 및 <code>OnClick</code> 트리거</p>
+        <div class="pf-fc-branch-item pf-fc-item-compact">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="pf-fc-tag-state">Pressing</span>
+            <span class="pf-fc-branch-title">클릭 / 호버 (Threshold 검사)</span>
+          </div>
         </div>
         <!-- 2. 드래그 -->
-        <div class="pf-fc-branch-item">
-          <span class="pf-fc-tag-state">DraggingObject</span>
-          <div class="pf-fc-branch-title">② 드래그 (Drag &amp; Drop)</div>
-          <p class="pf-fc-branch-desc">임계값 초과 이동 시 1€ 필터 스무딩으로 떨림을 제거하고 유닛 실시간 위치 동기화 및 그리드 배치</p>
+        <div class="pf-fc-branch-item pf-fc-item-compact">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="pf-fc-tag-state">DraggingObject</span>
+            <span class="pf-fc-branch-title">단일 유닛 드래그 (OnDrag)</span>
+          </div>
         </div>
         <!-- 3. 다중 선택 -->
-        <div class="pf-fc-branch-item">
-          <span class="pf-fc-tag-state">DraggingBox</span>
-          <div class="pf-fc-branch-title">③ 다중 선택 (Ctrl+드래그)</div>
-          <p class="pf-fc-branch-desc">빈 공간 드래그 또는 Ctrl+드래그 시 사각형 영역(<code>OverlapAreaAll</code>) 내 유닛 군집 일괄 선택</p>
+        <div class="pf-fc-branch-item pf-fc-item-compact">
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="pf-fc-tag-state">DraggingBox</span>
+            <span class="pf-fc-branch-title">다중 선택 박스 (Ctrl+드래그)</span>
+          </div>
         </div>
       </div>
     </div>
@@ -214,24 +211,22 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 04: InteractionHandler -->
-    <div class="pf-fc-card">
+    <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">STEP 04. InteractionHandler: Mediator 이벤트 일괄 디스패치</h4>
+        <h4 class="pf-fc-title">InteractionHandler (이벤트 일괄 디스패치)</h4>
         <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">MEDIATOR</span>
       </div>
-      <p class="pf-fc-desc">중재자(Mediator) 패턴을 기반으로 판정된 조작 행위(클릭/드래그/다중 선택)를 대상 객체에게 일괄 전파 (<code>Trigger Interface Methods</code>)</p>
     </div>
     <!-- Arrow -->
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 05: IInteractable Objects -->
-    <div class="pf-fc-card" style="border-color: #bfdbfe; background: #f8fbff;">
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">STEP 05. IInteractable: 인게임 객체 메서드 실행</h4>
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">IInteractable Objects (OnClick / OnDrag / OnSelected 실행)</h4>
         <span class="pf-fc-badge">EXECUTION</span>
       </div>
-      <p class="pf-fc-desc">유닛 파일, 바이러스, 폴더 객체가 <code>OnClick()</code>, <code>OnDrag()</code>, <code>OnSelected()</code>를 실행하여 자체 동작 완수</p>
     </div>
     <!-- Arrow -->
     <div class="pf-fc-arrow">
@@ -240,7 +235,7 @@
     <!-- 6. END / RESULT -->
     <div class="pf-fc-pill-end">
       <span>⚡</span>
-      <span>성능 최적화 완료: 개별 객체 Update() 폴링 연산 0% &amp; 60+ FPS 무결점 방어</span>
+      <span>개별 객체 Update() 0% &amp; 60+ FPS 방어</span>
     </div>
   </div>
 </div>
