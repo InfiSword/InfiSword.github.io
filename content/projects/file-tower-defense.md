@@ -759,30 +759,73 @@ public FileGrid FindFlagGridWorld(Vector2 worldPos, params SearchGridFlag[] flag
 
 파일 유닛이 그리드 상에 배치되거나 이동할 때, 버프 영역을 동적으로 계산하고 전파하기 위해 **Observer 패턴** 구조를 활용했습니다.
 
-```mermaid
-graph TD
-    A[Place Unit on Grid] --> B{Is Unit a Buff Source?}
-    
-    B -->|Yes| C[ApplyBuffActive]
-    C -->|Register Aura Area| D[Skill_BuffMain.ApplyBuffArea]
-    D -->|For each grid in range| E[Grid.AddBuffSource]
-    E -->|If grid has occupant| F[ApplyBuffFromSource]
-    F -->|Apply BuffStat| G[Target Unit.ApplyBuff]
-    
-    B -->|No| H[ApplyGridBuffs]
-    H -->|For each source in Grid._activeBuffSources| I[ApplyBuffFromSource]
-    I -->|Apply BuffStat| J[Placed Unit.ApplyBuff]
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
 
-    style C fill:#007bff,stroke:#0056b3,color:#fff
-    style H fill:#28a745,stroke:#1e7e34,color:#fff
-    style G fill:#17a2b8,stroke:#117a8b,color:#fff
-    style J fill:#17a2b8,stroke:#117a8b,color:#fff
-```
+    <!-- 0. START -->
+    <div class="pf-fc-pill-start">
+      <span>📦</span>
+      <span>유닛 그리드 배치 (Unit Placed on Grid)</span>
+    </div>
 
-*   **버프 전파 흐름:**
-    1.  버프 특성을 가진 파일 유닛(예: `.mp3` 힐링 버프)이 그리드에 배치되면, 자신의 사거리(Aura Area) 내에 존재하는 모든 주변 `FileGrid` 셀들을 찾아 자신을 버프 소스로 등록(`AddBuffSource(this)`)합니다.
-    2.  이후 새로운 유닛이 해당 버프 영향권 내부의 빈 그리드로 들어올 경우, **FileGrid**가 즉각 감지하여 보관하고 있던 버프 데이터 목록(`_activeBuffSources`)을 진입한 유닛에게 자동으로 갱신/적용(`ApplyBuffFromSource`)합니다.
-    3.  버프 유닛이 죽거나 이동하면, 영향권 내의 모든 그리드에서 버프 소스를 제거(`RemoveBuffSource`)하고 즉시 피적용 유닛의 스탯을 원복시킵니다.
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 01: 조건 분기 (버프 제공 유닛 vs 일반 유닛) -->
+    <div class="pf-fc-decision pf-fc-compact">
+      <div class="pf-fc-decision-header">
+        <span class="pf-fc-decision-badge">유닛 역할 판정</span>
+        <h4 class="pf-fc-decision-title">배치된 유닛이 버프 제공체인가? (Is Buff Source?)</h4>
+      </div>
+      <div class="pf-fc-branch-grid">
+        <!-- YES: 버프 제공 유닛 (오라 전파) -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bfdbfe; background: #f8fbff;">
+          <span class="pf-fc-tag-no" style="background: #2563eb; color: #fff;">YES (버프 제공 유닛)</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">Aura Provider (오라 영역 등록)</div>
+          <p class="pf-fc-branch-desc">
+            • 사거리 내 모든 인접 <code>FileGrid</code> 탐색<br>
+            • 그리드에 버프 소스 등록 (<code>Grid.AddBuffSource</code>)<br>
+            • 이미 배치된 유닛에 즉각 버프 전파 (<code>ApplyBuff</code>)
+          </p>
+        </div>
+        <!-- NO: 일반 수혜 유닛 (버프 수혜) -->
+        <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bbf7d0; background: #fdfffe;">
+          <span class="pf-fc-tag-yes" style="background: #16a34a; color: #fff;">NO (일반 수혜 유닛)</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">Buff Consumer (그리드 버프 수혜)</div>
+          <p class="pf-fc-branch-desc">
+            • 진입한 <code>FileGrid</code>의 활성 버프 풀 조회<br>
+            • 축적된 <code>_activeBuffSources</code> 목록 확인<br>
+            • 진입한 유닛에게 모든 버프 일괄 적용 (<code>ApplyBuff</code>)
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- STEP 02: 동기화 완료 및 라이프사이클 보장 -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #cbd5e1; background: #ffffff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #0f172a;">✨ Observer 기반 결합도 분리 (Decoupled Sync)</h4>
+        <span class="pf-fc-badge" style="background: #e2e8f0; color: #334155;">LIFECYCLE</span>
+      </div>
+      <p class="pf-fc-desc" style="color: #475569; margin: 0; font-size: 0.82rem; line-height: 1.5;">
+        유닛 간 직접 참조 대신 <strong>FileGrid가 중계자(Subject)</strong> 역할을 수행하여, 유닛의 배치·진입·이탈·사망 시 버프 스탯이 누락 없이 자동 갱신 및 원복됩니다.
+      </p>
+    </div>
+
+  </div>
+</div>
+
+*   **버프 전파 및 라이프사이클 핵심:**
+    1.  **오라 영역 등록 (Provider):** 버프 특성을 가진 유닛이 배치되면 사거리 내 `FileGrid` 셀들에 자신을 소스로 등록하고, 기배치된 유닛에 즉시 버프를 전파합니다.
+    2.  **진입 시 자동 적용 (Consumer):** 일반 유닛이 버프 영역의 그리드로 진입하면, `FileGrid`에 누적되어 있던 버프 데이터(`_activeBuffSources`)를 즉각 전달받아 적용합니다.
+    3.  **이탈 및 사망 시 자동 원복 (Cleanup):** 버프 유닛이 이동하거나 사망하면 해당 그리드에서 소스가 제거(`RemoveBuffSource`)되며, 영향받던 유닛의 스탯이 즉시 원복됩니다.
 
 ### 4.2 다형성을 활용한 틱(Tick) 기반 버프 아키텍처
 
