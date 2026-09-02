@@ -312,17 +312,13 @@ mermaid: true
       <div class="pf-fc-branch-grid">
         <!-- YES 분기 -->
         <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #fecaca; background: #fffdfd;">
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <span class="pf-fc-tag-yes">Yes</span>
-            <span class="pf-fc-branch-title">UI 우선 처리 (월드 입력 차단)</span>
-          </div>
+          <span class="pf-fc-tag-yes">Yes</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">UI 우선 처리 (월드 입력 차단)</div>
         </div>
         <!-- NO 분기 -->
         <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bbf7d0; background: #fdfffe;">
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <span class="pf-fc-tag-no">No</span>
-            <span class="pf-fc-branch-title">Raycast &amp; Sorting Order 정렬 ➔ Target 식별</span>
-          </div>
+          <span class="pf-fc-tag-no">No</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">Raycast &amp; Sorting Order 정렬 ➔ Target 식별</div>
         </div>
       </div>
     </div>
@@ -341,24 +337,18 @@ mermaid: true
       <div class="pf-fc-branch-grid">
         <!-- 1. 클릭 -->
         <div class="pf-fc-branch-item pf-fc-item-compact">
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <span class="pf-fc-tag-state">Pressing</span>
-            <span class="pf-fc-branch-title">클릭 / 호버 (Threshold 검사)</span>
-          </div>
+          <span class="pf-fc-tag-state">Pressing</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">클릭 / 호버 (Threshold 검사)</div>
         </div>
         <!-- 2. 드래그 -->
         <div class="pf-fc-branch-item pf-fc-item-compact">
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <span class="pf-fc-tag-state">DraggingObject</span>
-            <span class="pf-fc-branch-title">단일 유닛 드래그 (OnDrag)</span>
-          </div>
+          <span class="pf-fc-tag-state">DraggingObject</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">단일 유닛 드래그 (OnDrag)</div>
         </div>
         <!-- 3. 다중 선택 -->
         <div class="pf-fc-branch-item pf-fc-item-compact">
-          <div style="display: flex; gap: 6px; align-items: center;">
-            <span class="pf-fc-tag-state">DraggingBox</span>
-            <span class="pf-fc-branch-title">다중 선택 박스 (Ctrl+드래그)</span>
-          </div>
+          <span class="pf-fc-tag-state">DraggingBox</span>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">다중 선택 박스 (Ctrl+드래그)</div>
         </div>
       </div>
     </div>
