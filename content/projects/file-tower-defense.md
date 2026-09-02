@@ -831,55 +831,39 @@ public FileGrid FindFlagGridWorld(Vector2 worldPos, params SearchGridFlag[] flag
 <summary>코드 보기: FileGrid 옵저버 기반 버프 전파 및 수혜 파이프라인</summary>
 
 ```csharp
-// FileGrid.cs: Observer 패턴 기반 버프 소스 관리 및 유닛 자동 전파
+// FileGrid.cs: Observer 패턴 기반 핵심 버프 전파 및 수혜 로직
 public class FileGrid : MonoBehaviour
 {
-    // 해당 그리드에 영향을 주는 버프 제공자 목록 (중복 제거 O(1))
-    private HashSet<File_Base> _activeBuffSources = new HashSet<File_Base>();
-    private File_Base _currentUnit;
+    private File_Base fileUnit;
 
-    // 1. 버프 유닛(Provider) 배치 시 오라 영역 그리드에 소스 등록
-    public void AddBuffSource(File_Base buffSource)
+    // 해당 그리드에 영향을 미치는 버프 제공자 목록 (중복 제거 O(1))
+    private readonly HashSet<File_Base> _activeBuffSources = new HashSet<File_Base>();
+
+    #region Core Buff Logic
+    // 버프 유닛(오라) 배치 시 그리드에 소스 등록 및 기존 유닛 버프 전파
+    public void AddBuffSource(File_Base source)
     {
-        if (buffSource == null || _activeBuffSources.Contains(buffSource)) return;
-
-        _activeBuffSources.Add(buffSource);
-
-        // 이미 셀에 점유 중인 유닛이 있다면 즉시 버프 전파
-        if (_currentUnit != null)
-        {
-            ApplyBuffFromSource(_currentUnit, buffSource);
-        }
+        // ...
     }
 
-    // 2. 신규 유닛(Consumer) 셀 진입 시 누적된 모든 버프 일괄 적용
-    public void ApplyGridBuffs(File_Base unit)
+    // 버프 유닛 이탈/사망 시 소스 제거 및 버프 원복
+    public void RemoveBuffSource(File_Base source)
     {
-        if (unit == null) return;
-        _currentUnit = unit;
-
-        foreach (var source in _activeBuffSources)
-        {
-            ApplyBuffFromSource(unit, source);
-        }
+        // ...
     }
 
-    // 3. 버프 소스 유닛 이탈/사망 시 버프 제거 및 스탯 원복
-    public void RemoveBuffSource(File_Base buffSource)
+    // 단일 버프 소스로부터 대상 유닛에 버프 스탯 부여 또는 해제
+    private void ApplyBuffFromSource(File_Base target, File_Base source, bool apply)
     {
-        if (!_activeBuffSources.Remove(buffSource)) return;
-
-        if (_currentUnit != null)
-        {
-            _currentUnit.RemoveBuffFromSource(buffSource);
-        }
+        // ...
     }
 
-    private void ApplyBuffFromSource(File_Base targetUnit, File_Base source)
+    // 신규 유닛 진입/이탈 시 그리드에 축적된 모든 버프 일괄 적용/원복
+    private void ApplyGridBuffs(bool apply)
     {
-        BuffStat stat = source.GetBuffStat();
-        targetUnit.ApplyBuff(stat); // 대상 유닛에 버프 컴포넌트 부착 및 Init 실행
+        // ...
     }
+    #endregion
 }
 ```
 
