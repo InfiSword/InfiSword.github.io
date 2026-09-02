@@ -827,15 +827,73 @@ public FileGrid FindFlagGridWorld(Vector2 worldPos, params SearchGridFlag[] flag
     2.  **진입 시 자동 적용 (Consumer):** 일반 유닛이 버프 영역의 그리드로 진입하면, `FileGrid`에 누적되어 있던 버프 데이터(`_activeBuffSources`)를 즉각 전달받아 적용합니다.
     3.  **이탈 및 사망 시 자동 원복 (Cleanup):** 버프 유닛이 이동하거나 사망하면 해당 그리드에서 소스가 제거(`RemoveBuffSource`)되며, 영향받던 유닛의 스탯이 즉시 원복됩니다.
 
-### 4.2 다형성을 활용한 틱(Tick) 기반 버프 아키텍처
-
-단순 스탯 증가 버프 외에도 주기적인 리젠(HP 회복), 지속 피해(도트 데미지) 등을 단일 코루틴 남발 없이 처리하기 위해 `MyBuff` 추상 클래스와 `BuffData` 구조를 결합한 중앙 업데이트 방식을 채택했습니다.
-
 <details class="pf-details">
-<summary>코드 보기: 다형적 버프 실행 루프</summary>
+<summary>코드 보기: FileGrid 옵저버 기반 버프 전파 및 수혜 파이프라인</summary>
 
 ```csharp
-// BuffData_Base.cs: 컴포넌트 기반 버프 틱 및 파티클 라이프사이클 관리
+// FileGrid.cs: Observer 패턴 기반 버프 소스 관리 및 유닛 자동 전파
+public class FileGrid : MonoBehaviour
+{
+    // 해당 그리드에 영향을 주는 버프 제공자 목록 (중복 제거 O(1))
+    private HashSet<File_Base> _activeBuffSources = new HashSet<File_Base>();
+    private File_Base _currentUnit;
+
+    // 1. 버프 유닛(Provider) 배치 시 오라 영역 그리드에 소스 등록
+    public void AddBuffSource(File_Base buffSource)
+    {
+        if (buffSource == null || _activeBuffSources.Contains(buffSource)) return;
+
+        _activeBuffSources.Add(buffSource);
+
+        // 이미 셀에 점유 중인 유닛이 있다면 즉시 버프 전파
+        if (_currentUnit != null)
+        {
+            ApplyBuffFromSource(_currentUnit, buffSource);
+        }
+    }
+
+    // 2. 신규 유닛(Consumer) 셀 진입 시 누적된 모든 버프 일괄 적용
+    public void ApplyGridBuffs(File_Base unit)
+    {
+        if (unit == null) return;
+        _currentUnit = unit;
+
+        foreach (var source in _activeBuffSources)
+        {
+            ApplyBuffFromSource(unit, source);
+        }
+    }
+
+    // 3. 버프 소스 유닛 이탈/사망 시 버프 제거 및 스탯 원복
+    public void RemoveBuffSource(File_Base buffSource)
+    {
+        if (!_activeBuffSources.Remove(buffSource)) return;
+
+        if (_currentUnit != null)
+        {
+            _currentUnit.RemoveBuffFromSource(buffSource);
+        }
+    }
+
+    private void ApplyBuffFromSource(File_Base targetUnit, File_Base source)
+    {
+        BuffStat stat = source.GetBuffStat();
+        targetUnit.ApplyBuff(stat); // 대상 유닛에 버프 컴포넌트 부착 및 Init 실행
+    }
+}
+```
+
+</details>
+
+### 4.2 컴포넌트 기반 버프 기본 형태 (Buff_Base)
+
+다양한 종류의 버프(스탯 강화, 슬로우, 힐링 도트 등)를 객체지향적으로 확장할 수 있도록, 유니티의 컴포넌트(`MonoBehaviour`) 기반 추상 클래스 **Buff_Base**를 설계했습니다. 유닛에 버프가 부착될 때 필요한 기본 데이터 모델 바인딩과 중복 파티클 방지 메커니즘을 캡슐화했습니다.
+
+<details class="pf-details">
+<summary>코드 보기: 버프 기본 형태 및 컴포넌트 초기화 (Buff_Base.cs)</summary>
+
+```csharp
+// Buff_Base.cs: 컴포넌트 기반 버프 기본 추상화 및 파티클 라이프사이클 관리
 public abstract class Buff_Base : MonoBehaviour
 {
     public Define.BuffType BuffType { get; private set; }
@@ -844,11 +902,12 @@ public abstract class Buff_Base : MonoBehaviour
     public float WaitTickTime { get; private set; }
     public bool IsRemoving { get; private set; } = false;
 
-    private float _durationTimer;
-    private float _tickTimer;
+    protected float _durationTimer;
+    protected float _tickTimer;
     protected File_Base owner;
     private GameObject myParticle;
 
+    // 버프 컴포넌트 부착 시 스탯 초기화 및 이벤트 트리거
     public void Init(BuffStat stat)
     {
         owner = GetComponent<File_Base>();
@@ -863,38 +922,9 @@ public abstract class Buff_Base : MonoBehaviour
         OnAdded();
     }
 
-    protected virtual void Update()
-    {
-        if (IsRemoving) return;
-
-        float deltaTime = Time.deltaTime;
-
-        // 1. 틱(Tick) 주기 연산 (단일 코루틴 남발 방지)
-        if (WaitTickTime > 0)
-        {
-            _tickTimer += deltaTime;
-            if (_tickTimer >= WaitTickTime)
-            {
-                _tickTimer -= WaitTickTime;
-                OnTick(); // 상속받은 구체 클래스의 고유 로직(힐링/도트 피해 등) 실행
-            }
-        }
-
-        // 2. 버프 지속 시간(Duration) 관리
-        if (Duration > 0)
-        {
-            _durationTimer -= deltaTime;
-            if (_durationTimer <= 0)
-            {
-                Remove();
-            }
-        }
-    }
-
     protected virtual void OnAdded() => ShowParticle();
-    protected virtual void OnTick() { }
 
-    // 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지
+    // 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지 (중복 파티클 억제)
     protected void ShowParticle()
     {
         Buff_Base[] sameBuffs = GetComponents<Buff_Base>()
@@ -911,6 +941,51 @@ public abstract class Buff_Base : MonoBehaviour
             }
         }
     }
+
+    public abstract void Remove();
 }
 ```
+
+</details>
+
+### 4.3 다형성을 활용한 틱(Tick) 기반 업데이트 엔진
+
+단순 스탯 증가 버프 외에도 주기적인 리젠(HP 회복), 지속 피해(도트 데미지) 등을 개별 코루틴 남발 없이 고성능으로 처리하기 위해, 중앙 `Update()` 루프에서 델타타임을 누적하고 다형적 가상 함수 `OnTick()`을 호출하는 방식을 채택했습니다.
+
+<details class="pf-details">
+<summary>코드 보기: 다형적 틱(Tick) 주기 연산 및 Duration 타이머 루프</summary>
+
+```csharp
+// Buff_Base.cs: 중앙 집중식 틱(Tick) 연산 및 지속시간 관리 루프
+protected virtual void Update()
+{
+    if (IsRemoving) return;
+
+    float deltaTime = Time.deltaTime;
+
+    // 1. 틱(Tick) 주기 연산 (단일 코루틴 남발 방지)
+    if (WaitTickTime > 0)
+    {
+        _tickTimer += deltaTime;
+        if (_tickTimer >= WaitTickTime)
+        {
+            _tickTimer -= WaitTickTime;
+            OnTick(); // 상속받은 구체 클래스의 고유 로직(힐링/도트 피해 등) 다형적 실행
+        }
+    }
+
+    // 2. 버프 지속 시간(Duration) 관리
+    if (Duration > 0)
+    {
+        _durationTimer -= deltaTime;
+        if (_durationTimer <= 0)
+        {
+            Remove();
+        }
+    }
+}
+
+protected virtual void OnTick() { }
+```
+
 </details>

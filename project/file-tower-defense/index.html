@@ -585,11 +585,64 @@
 </div>
 <ul><li><strong>버프 전파 및 라이프사이클 핵심:</strong></li></ul>
 <ol><li><strong>오라 영역 등록 (Provider):</strong> 버프 특성을 가진 유닛이 배치되면 사거리 내 <code>FileGrid</code> 셀들에 자신을 소스로 등록하고, 기배치된 유닛에 즉시 버프를 전파합니다.</li><li><strong>진입 시 자동 적용 (Consumer):</strong> 일반 유닛이 버프 영역의 그리드로 진입하면, <code>FileGrid</code>에 누적되어 있던 버프 데이터(<code>_activeBuffSources</code>)를 즉각 전달받아 적용합니다.</li><li><strong>이탈 및 사망 시 자동 원복 (Cleanup):</strong> 버프 유닛이 이동하거나 사망하면 해당 그리드에서 소스가 제거(<code>RemoveBuffSource</code>)되며, 영향받던 유닛의 스탯이 즉시 원복됩니다.</li></ol>
-<h3 id="42-다형성을-활용한-틱tick-기반-버프-아키텍처">4.2 다형성을 활용한 틱(Tick) 기반 버프 아키텍처</h3>
-<p>단순 스탯 증가 버프 외에도 주기적인 리젠(HP 회복), 지속 피해(도트 데미지) 등을 단일 코루틴 남발 없이 처리하기 위해 <code>MyBuff</code> 추상 클래스와 <code>BuffData</code> 구조를 결합한 중앙 업데이트 방식을 채택했습니다.</p>
 <details class="pf-details">
-<summary>코드 보기: 다형적 버프 실행 루프</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// BuffData_Base.cs: 컴포넌트 기반 버프 틱 및 파티클 라이프사이클 관리</span>
+<summary>코드 보기: FileGrid 옵저버 기반 버프 전파 및 수혜 파이프라인</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">FileGrid</span>.cs: Observer 패턴 기반 버프 소스 관리 및 유닛 자동 전파</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">FileGrid</span></span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
+{
+    <span class="hljs-comment">// 해당 그리드에 영향을 주는 버프 제공자 목록 (중복 제거 <span class="hljs-title function_">O</span>(1))</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-title class_">HashSet</span>&lt;<span class="hljs-title class_">File_Base</span>&gt; _activeBuffSources = <span class="hljs-keyword">new</span> <span class="hljs-title class_">HashSet</span>&lt;<span class="hljs-title class_">File_Base</span>&gt;();
+    <span class="hljs-keyword">private</span> <span class="hljs-title class_">File_Base</span> _currentUnit;
+
+    <span class="hljs-comment">// 1. 버프 유닛(Provider) 배치 시 오라 영역 그리드에 소스 등록</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">AddBuffSource</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> buffSource</span>)</span>
+    {
+        <span class="hljs-keyword hljs-control-flow">if</span> (buffSource == <span class="hljs-literal">null</span> || _activeBuffSources.<span class="hljs-title function_">Contains</span>(buffSource)) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+        _activeBuffSources.<span class="hljs-title function_">Add</span>(buffSource);
+
+        <span class="hljs-comment">// 이미 셀에 점유 중인 유닛이 있다면 즉시 버프 전파</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (_currentUnit != <span class="hljs-literal">null</span>)
+        {
+            <span class="hljs-title function_">ApplyBuffFromSource</span>(_currentUnit, buffSource);
+        }
+    }
+
+    <span class="hljs-comment">// 2. 신규 유닛(Consumer) 셀 진입 시 누적된 모든 버프 일괄 적용</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ApplyGridBuffs</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> unit</span>)</span>
+    {
+        <span class="hljs-keyword hljs-control-flow">if</span> (unit == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
+        _currentUnit = unit;
+
+        <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> source <span class="hljs-keyword">in</span> _activeBuffSources)
+        {
+            <span class="hljs-title function_">ApplyBuffFromSource</span>(unit, source);
+        }
+    }
+
+    <span class="hljs-comment">// 3. 버프 소스 유닛 이탈/사망 시 버프 제거 및 스탯 원복</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RemoveBuffSource</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> buffSource</span>)</span>
+    {
+        <span class="hljs-keyword hljs-control-flow">if</span> (!_activeBuffSources.<span class="hljs-title function_">Remove</span>(buffSource)) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+        <span class="hljs-keyword hljs-control-flow">if</span> (_currentUnit != <span class="hljs-literal">null</span>)
+        {
+            _currentUnit.<span class="hljs-title function_">RemoveBuffFromSource</span>(buffSource);
+        }
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ApplyBuffFromSource</span>(<span class="hljs-params"><span class="hljs-title class_">File_Base</span> targetUnit, <span class="hljs-title class_">File_Base</span> source</span>)</span>
+    {
+        <span class="hljs-title class_">BuffStat</span> stat = source.<span class="hljs-title function_">GetBuffStat</span>();
+        targetUnit.<span class="hljs-title function_">ApplyBuff</span>(stat); <span class="hljs-comment">// 대상 유닛에 버프 컴포넌트 부착 및 Init 실행</span>
+    }
+}</code></pre>
+</details>
+<h3 id="42-컴포넌트-기반-버프-기본-형태-buff_base">4.2 컴포넌트 기반 버프 기본 형태 (Buff_Base)</h3>
+<p>다양한 종류의 버프(스탯 강화, 슬로우, 힐링 도트 등)를 객체지향적으로 확장할 수 있도록, 유니티의 컴포넌트(<code>MonoBehaviour</code>) 기반 추상 클래스 <strong>Buff_Base</strong>를 설계했습니다. 유닛에 버프가 부착될 때 필요한 기본 데이터 모델 바인딩과 중복 파티클 방지 메커니즘을 캡슐화했습니다.</p>
+<details class="pf-details">
+<summary>코드 보기: 버프 기본 형태 및 컴포넌트 초기화 (Buff_Base.cs)</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Buff_Base</span>.cs: 컴포넌트 기반 버프 기본 추상화 및 파티클 라이프사이클 관리</span>
 <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">Buff_Base</span></span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
 {
     <span class="hljs-keyword">public</span> <span class="hljs-title class_">Define</span>.BuffType BuffType { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
@@ -598,11 +651,12 @@
     <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> WaitTickTime { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
     <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> IsRemoving { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-literal">false</span>;
 
-    <span class="hljs-keyword">private</span> <span class="hljs-built_in">float</span> _durationTimer;
-    <span class="hljs-keyword">private</span> <span class="hljs-built_in">float</span> _tickTimer;
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> _durationTimer;
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> _tickTimer;
     <span class="hljs-keyword">protected</span> <span class="hljs-title class_">File_Base</span> owner;
     <span class="hljs-keyword">private</span> <span class="hljs-title class_">GameObject</span> myParticle;
 
+    <span class="hljs-comment">// 버프 컴포넌트 부착 시 스탯 초기화 및 이벤트 트리거</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Init</span>(<span class="hljs-params"><span class="hljs-title class_">BuffStat</span> stat</span>)</span>
     {
         owner = GetComponent&lt;<span class="hljs-title class_">File_Base</span>&gt;();
@@ -617,38 +671,9 @@
         <span class="hljs-title function_">OnAdded</span>();
     }
 
-    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Update</span>()</span>
-    {
-        <span class="hljs-keyword hljs-control-flow">if</span> (IsRemoving) <span class="hljs-keyword hljs-control-flow">return</span>;
-
-        <span class="hljs-built_in">float</span> deltaTime = <span class="hljs-title class_">Time</span>.deltaTime;
-
-        <span class="hljs-comment">// 1. 틱(Tick) 주기 연산 (단일 코루틴 남발 방지)</span>
-        <span class="hljs-keyword hljs-control-flow">if</span> (WaitTickTime &gt; <span class="hljs-number">0</span>)
-        {
-            _tickTimer += deltaTime;
-            <span class="hljs-keyword hljs-control-flow">if</span> (_tickTimer &gt;= WaitTickTime)
-            {
-                _tickTimer -= WaitTickTime;
-                <span class="hljs-title function_">OnTick</span>(); <span class="hljs-comment">// 상속받은 구체 클래스의 고유 로직(힐링/도트 피해 등) 실행</span>
-            }
-        }
-
-        <span class="hljs-comment">// 2. 버프 지속 시간(Duration) 관리</span>
-        <span class="hljs-keyword hljs-control-flow">if</span> (Duration &gt; <span class="hljs-number">0</span>)
-        {
-            _durationTimer -= deltaTime;
-            <span class="hljs-keyword hljs-control-flow">if</span> (_durationTimer &lt;= <span class="hljs-number">0</span>)
-            {
-                <span class="hljs-title function_">Remove</span>();
-            }
-        }
-    }
-
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnAdded</span>()</span> =&gt; <span class="hljs-title function_">ShowParticle</span>();
-    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnTick</span>()</span> { }
 
-    <span class="hljs-comment">// 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지</span>
+    <span class="hljs-comment">// 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지 (중복 파티클 억제)</span>
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ShowParticle</span>()</span>
     {
         <span class="hljs-title class_">Buff_Base</span>[] sameBuffs = GetComponents&lt;<span class="hljs-title class_">Buff_Base</span>&gt;()
@@ -665,7 +690,44 @@
             }
         }
     }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Remove</span>()</span>;
 }</code></pre>
+</details>
+<h3 id="43-다형성을-활용한-틱tick-기반-업데이트-엔진">4.3 다형성을 활용한 틱(Tick) 기반 업데이트 엔진</h3>
+<p>단순 스탯 증가 버프 외에도 주기적인 리젠(HP 회복), 지속 피해(도트 데미지) 등을 개별 코루틴 남발 없이 고성능으로 처리하기 위해, 중앙 <code>Update()</code> 루프에서 델타타임을 누적하고 다형적 가상 함수 <code>OnTick()</code>을 호출하는 방식을 채택했습니다.</p>
+<details class="pf-details">
+<summary>코드 보기: 다형적 틱(Tick) 주기 연산 및 Duration 타이머 루프</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Buff_Base</span>.cs: 중앙 집중식 틱(Tick) 연산 및 지속시간 관리 루프</span>
+<span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Update</span>()</span>
+{
+    <span class="hljs-keyword hljs-control-flow">if</span> (IsRemoving) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+    <span class="hljs-built_in">float</span> deltaTime = <span class="hljs-title class_">Time</span>.deltaTime;
+
+    <span class="hljs-comment">// 1. 틱(Tick) 주기 연산 (단일 코루틴 남발 방지)</span>
+    <span class="hljs-keyword hljs-control-flow">if</span> (WaitTickTime &gt; <span class="hljs-number">0</span>)
+    {
+        _tickTimer += deltaTime;
+        <span class="hljs-keyword hljs-control-flow">if</span> (_tickTimer &gt;= WaitTickTime)
+        {
+            _tickTimer -= WaitTickTime;
+            <span class="hljs-title function_">OnTick</span>(); <span class="hljs-comment">// 상속받은 구체 클래스의 고유 로직(힐링/도트 피해 등) 다형적 실행</span>
+        }
+    }
+
+    <span class="hljs-comment">// 2. 버프 지속 시간(Duration) 관리</span>
+    <span class="hljs-keyword hljs-control-flow">if</span> (Duration &gt; <span class="hljs-number">0</span>)
+    {
+        _durationTimer -= deltaTime;
+        <span class="hljs-keyword hljs-control-flow">if</span> (_durationTimer &lt;= <span class="hljs-number">0</span>)
+        {
+            <span class="hljs-title function_">Remove</span>();
+        }
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnTick</span>()</span> { }</code></pre>
 </details>
         </section>
 <aside class="toc-panel" aria-label="목차">
@@ -686,7 +748,8 @@
 <li class="toc-list__item toc-list__item--h3"><a href="#34-플래그-기반-확장-가능한-검색-시스템">3.4 플래그 기반 확장 가능한 검색 시스템</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#4-다형성-기반-동적-버프-시스템">4. 다형성 기반 동적 버프 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#41-observer-패턴-기반-버프-자동-전파">4.1 Observer 패턴 기반 버프 자동 전파</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#42-다형성을-활용한-틱tick-기반-버프-아키텍처">4.2 다형성을 활용한 틱(Tick) 기반 버프 아키텍처</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#42-컴포넌트-기반-버프-기본-형태-buff_base">4.2 컴포넌트 기반 버프 기본 형태 (Buff_Base)</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#43-다형성을-활용한-틱tick-기반-업데이트-엔진">4.3 다형성을 활용한 틱(Tick) 기반 업데이트 엔진</a></li>
 </ol>
 </div>
 </aside>
