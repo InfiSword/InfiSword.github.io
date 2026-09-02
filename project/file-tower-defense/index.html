@@ -96,119 +96,30 @@
     </div>
   </div>
 </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">❌</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">Canvas Rebuild 부하</div>
-            <div class="pf-comp-item-desc">유닛 드래그/호버 시마다 캔버스 강제 재빌드로 심각한 CPU 프레임 드랍</div>
-          </div>
-        </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">❌</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">충돌 판정 연산 낭비</div>
-            <div class="pf-comp-item-desc">적 바이러스와의 물리 연산을 위해 Camera.WorldToScreenPoint 매 프레임 호출</div>
-          </div>
-        </div>
-      </div>
-      <div class="pf-comp-footer old">
-<p>⚠️ 성능 한계: 드로우콜 폭증 & Canvas Rebuilding 오버헤드</p>
+<p>이를 해결하기 위해 모든 유닛을 <strong>GameObject(Transform) 기반</strong>으로 전면 교체하여 월드 좌표계로 통일하였으며, Physics2D와의 직접적인 호환성을 확보하여 불필요한 연산을 제거하고 성능을 극적으로 최적화했습니다.</p>
+<h3 id="12-gameobjectgridlayout-커스텀-레이아웃-엔진">1.2 GameObjectGridLayout: 커스텀 레이아웃 엔진</h3>
+<p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하는 레이아웃 엔진을 구축했습니다. 유니티의 기본 <code>GridLayoutGroup</code>은 UI(Canvas) 전용 컴포넌트이므로, 일반 월드 공간 GameObject를 위해 카메라 크기에 맞게 자동으로 셀 크기를 스케일링하고 하단 작업표시줄 영역을 확보하는 커스텀 컴포넌트 <code>GameObjectGridLayout</code>을 직접 개발했습니다.</p>
+<div class="pf-visual-frame">
+  <div class="pf-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start;">
+    <!-- 컴포넌트 인스펙터 설정 -->
+    <div style="text-align: center;">
+      <img src="../../assets/images/File%20Tower%20Defences/grid_layout_inspector.png" alt="GameObjectGridLayout Inspector Component" style="width: 100%; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25); box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+      <div style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
+        <strong>[컴포넌트]</strong> GameObjectGridLayout 인스펙터 설정<br>
+        <span style="font-size: 0.8rem; color: #94a3b8;">(Columns: 14, Rows: 8, Fit To Screen: On, Bottom Offset Ratio: 0.1)</span>
       </div>
     </div>
-    <div class="pf-comp-bridge">
-      <span class="pf-bridge-pill">MIGRATION</span>
-      <div class="pf-bridge-circle">➔</div>
-    </div>
-    <div class="pf-comp-box new">
-      <div class="pf-comp-header">
-        <span class="pf-comp-badge new">✨ 개선 방식 (TO-BE)</span>
-        <div class="pf-comp-title">Transform (월드 GameObject)</div>
-        <div class="pf-comp-subtitle">고성능 2D 물리 엔진 직결 아키텍처</div>
-      </div>
-      <div class="pf-comp-body">
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">✅</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">절대 2D 좌표계 확립</div>
-            <div class="pf-comp-item-desc">오르토그래픽 카메라 기준 절대 직교 좌표 및 O(1) 수학적 인덱싱</div>
-          </div>
-        </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">✅</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">캔버스 재빌드 부하 0%</div>
-            <div class="pf-comp-item-desc">UI Rebuilding 루프에서 완전히 분리되어 일정한 60+ FPS 방어</div>
-          </div>
-        </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">✅</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">Physics2D 네이티브 호환</div>
-            <div class="pf-comp-item-desc">Collider2D 및 RaycastNonAlloc 직접 활용으로 쓰레기 메모리(GC) 차단</div>
-          </div>
-        </div>
-      </div>
-      <div class="pf-comp-footer new">
-<p>✨ 최적화 성과: 60 FPS 무결점 방어 & 물리 엔진 직결</p>
+    <!-- 실제 인게임 월드 그리드 시각화 -->
+    <div style="text-align: center;">
+      <img src="../../assets/images/File%20Tower%20Defences/grid_layout_scene.png" alt="In-Game World Grid Visualization in Scene View" style="width: 100%; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25); box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+      <div style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
+        <strong>[실제 그리드]</strong> 초록색 격자선 = 인게임 실제 월드 그리드<br>
+        <span style="font-size: 0.8rem; color: #2563eb; font-weight: 600;">(하단 UI 여백 10% 제외 후 가용 영역 14×8 셀 자동 피팅)</span>
       </div>
     </div>
   </div>
 </div>
-<p>이를 해결하기 위해 모든 유닛을 <strong>GameObject(Transform) 기반</strong>으로 전면 교체하여 월드 좌표계로 통일하였으며, Physics2D와의 직접적인 호환성을 확보하여 불필요한 연산을 제거하고 성능을 극적으로 최적화했습니다.</p>
-<h3 id="12-gameobjectgridlayout-커스텀-레이아웃-엔진">1.2 GameObjectGridLayout: 커스텀 레이아웃 엔진</h3>
-<p>화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하는 레이아웃 엔진을 구축했습니다. 유니티의 <code>GridLayoutGroup</code>은 UI 전용이므로, 일반 월드 공간 오브젝트를 위해 화면 크기에 맞게 자동으로 셀 크기를 스케일링하는 컴포넌트를 직접 개발했습니다.</p>
-<div class="pf-visual-frame">
-  <strong>해상도 기반 자동 조절 공식:</strong><br>
-  <code>cellSize = (screenSize - padding*2 - spacing*(n-1)) / n</code>
-</div>
-<details class="pf-details">
-<summary>코드 보기: FitToScreen 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameObjectGridLayout</span>.cs: 해상도 및 UI 오프셋 대응 동적 셀 크기 계산</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">FitToScreen</span>()</span>
-{
-    <span class="hljs-keyword hljs-control-flow">if</span> (transform == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
-
-    <span class="hljs-title class_">Camera</span> mainCamera = <span class="hljs-title class_">Camera</span>.main;
-    <span class="hljs-keyword hljs-control-flow">if</span> (mainCamera == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
-
-    <span class="hljs-comment">// 카메라 기준 전체 화면 크기 계산 (오르토그래픽 월드 좌표계)</span>
-    <span class="hljs-built_in">float</span> screenHeight = mainCamera.orthographicSize * <span class="hljs-number">2f</span>;
-    <span class="hljs-built_in">float</span> screenWidth = screenHeight * mainCamera.aspect;
-
-    <span class="hljs-comment">// 하단 UI 영역(10%)을 월드 단위 오프셋으로 확보</span>
-    <span class="hljs-built_in">float</span> yOffset = screenHeight * bottomOffsetRatio;
-    <span class="hljs-built_in">float</span> availableGridHeight = screenHeight - yOffset;
-
-    <span class="hljs-comment">// 패딩을 제외한 가용 영역 및 간격(Spacing) 제외한 순수 셀 영역 계산</span>
-    <span class="hljs-title class_">Vector2</span> availableSize = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(screenWidth, availableGridHeight) - padding * <span class="hljs-number">2</span>;
-    <span class="hljs-title class_">Vector2</span> totalSpacing = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(
-        (columns - <span class="hljs-number">1</span>) * spacing.x,
-        (rows - <span class="hljs-number">1</span>) * spacing.y
-    );
-    <span class="hljs-title class_">Vector2</span> cellArea = availableSize - totalSpacing;
-
-    <span class="hljs-comment">// 최종 셀 크기 도출</span>
-    cellSize = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(
-        cellArea.x / columns,
-        cellArea.y / rows
-    );
-
-    <span class="hljs-comment">// 그리드 전체의 실제 월드 크기 및 중심 위치 보정</span>
-    _gridWorldSize = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(
-        columns * cellSize.x + (columns - <span class="hljs-number">1</span>) * spacing.x,
-        rows * cellSize.y + (rows - <span class="hljs-number">1</span>) * spacing.y
-    );
-
-    <span class="hljs-title class_">Vector3</span> newPosition = transform.position;
-    newPosition.y = yOffset / <span class="hljs-number">2f</span>;
-    transform.position = newPosition; <span class="hljs-comment">// 하단 UI 공간만큼 중심점을 상단으로 이동</span>
-
-    <span class="hljs-comment">// 좌측 하단 시작 월드 모서리 좌표 확정</span>
-    _bottomLeftCorner = (<span class="hljs-title class_">Vector2</span>)transform.position - _gridWorldSize / <span class="hljs-number">2f</span>;
-
-    <span class="hljs-title class_">Debug</span>.<span class="hljs-title function_">Log</span>(<span class="hljs-string">$&quot;GridLayout 자동 조정 완료: <span class="hljs-subst">{columns}</span>x<span class="hljs-subst">{rows}</span>, 셀 크기: <span class="hljs-subst">{cellSize}</span>&quot;</span>);
-}</code></pre>
-</details>
+<ul><li><strong>컴포넌트 중심의 유연한 제어:</strong> 에디터 인스펙터에서 행과 열(<code>Columns: 14</code>, <code>Rows: 8</code>), 패딩 및 스페이싱을 설정하면 오르토그래픽 카메라의 가로·세로 월드 크기를 실시간 계산하여 최적의 셀 크기(<code>Cell Size</code>)를 자동으로 도출합니다.</li><li><strong>실제 초록색 그리드(World Grid) 영역:</strong> 씬 뷰 화면에 초록색 라인으로 표시되는 격자가 <strong>실제 인게임 파일 유닛과 바이러스가 배치·이동하는 물리적 그리드</strong>입니다. <code>Bottom Offset Ratio(0.1)</code> 설정을 통해 하단 작업표시줄 UI 영역(약 10%)을 비워두고, 상단 가용 영역에만 정확히 14×8 격자가 피팅되도록 중심점을 자동 보정합니다.</li></ul>
 <hr>
 <h2 id="2-파일바이러스ui-입력-및-상호작용-시스템" class="chapter-title">2. 파일/바이러스/UI 입력 및 상호작용 시스템</h2>
 <p>수많은 유닛이 각자 <code>Update()</code>에서 마우스 충돌을 검사하면 연산량이 기하급수적으로 늘어납니다. 이를 방지하기 위해 <strong>Mediator 패턴</strong>을 활용하여 <strong>InputManager</strong>가 모든 마우스 입력을 통합 관리하고, <strong>IInteractable</strong> 인터페이스를 구현한 대상 객체에게만 이벤트를 전송하도록 설계했습니다.</p>
@@ -231,7 +142,7 @@
     style K fill:#28a745,stroke:#1e7e34,color:#fff
     style L fill:#17a2b8,stroke:#117a8b,color:#fff</pre>
 <div class="pf-visual-frame">
-    <img src="/assets/Gifs/file-tower-defense-interaction.gif" alt="File Tower Defense Input Interaction Demo" style="width: 100%; border-radius: 8px;">
+    <img src="../../assets/Gifs/file-tower-defense-interaction.gif" alt="File Tower Defense Input Interaction Demo" style="width: 100%; border-radius: 8px;">
     <p style="color: #666; font-size: 0.85rem; margin-top: 10px; font-family: 'Fira Code', monospace;">[DEMO] InputManager 기반 마우스 호버 및 클릭 감지</p>
 </div>
 <h4 id="객체-중첩-판정-알고리즘">객체 중첩 판정 알고리즘</h4>
@@ -240,7 +151,7 @@
 <h3 id="22-iinteractable-인터페이스-기반-확장성">2.2 IInteractable 인터페이스 기반 확장성</h3>
 <p>클릭 및 드래그 상호작용이 필요한 모든 인게임 오브젝트(유닛 파일, 바이러스 등)는 <a href="/codeReference/file_tower_defence/IInteractable.cs">IInteractable</a> 인터페이스를 상속받아 유연하게 확장할 수 있습니다.</p>
 <div class="pf-visual-frame">
-    <img src="/assets/Gifs/file-tower-defense-drag.gif" alt="File Tower Defense Mouse Drag Event Demo" style="width: 100%; border-radius: 8px;">
+    <img src="../../assets/Gifs/file-tower-defense-drag.gif" alt="File Tower Defense Mouse Drag Event Demo" style="width: 100%; border-radius: 8px;">
     <p style="color: #666; font-size: 0.85rem; margin-top: 10px; font-family: 'Fira Code', monospace;">[DEMO] IInteractable 상속 객체의 실시간 마우스 드래그 & 배치 흐름</p>
 </div>
 <details class="pf-details">

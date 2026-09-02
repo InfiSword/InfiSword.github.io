@@ -215,7 +215,7 @@ function processInline(value) {
 }
 
 function isHtmlLine(line) {
-  return /^<\/?(style|script|div|span|p|h1|h2|h3|h4|h5|h6|table|thead|tbody|tr|th|td|details|summary|img|br|hr|strong|em|code|section|article|figure|figcaption|ul|ol|li|svg|line|polyline|circle|rect|path|g|polygon|a|button)\b/i.test(
+  return /^<!--|^<\/?(style|script|div|span|p|h1|h2|h3|h4|h5|h6|table|thead|tbody|tr|th|td|details|summary|img|br|hr|strong|em|code|section|article|figure|figcaption|ul|ol|li|svg|line|polyline|circle|rect|path|g|polygon|a|button)\b/i.test(
     line.trim()
   );
 }
@@ -615,7 +615,9 @@ function outputPathForPost(data, sourceFile) {
 
 function renderProject(sourceFile) {
   const parsed = stripFrontMatter(readText(sourceFile));
-  const articleSource = parsed.body.replace(/<style\b[^>]*>[\s\S]*?<\/style>\s*/gi, "");
+  let articleSource = parsed.body.replace(/<style\b[^>]*>[\s\S]*?<\/style>\s*/gi, "");
+  // Rewrite root-relative asset URLs to relative path so file:// and web servers both work
+  articleSource = articleSource.replace(/(src|href)=["']\/(assets\/[^"']+)["']/gi, '$1="../../$2"');
   const article = renderMarkdown(articleSource);
   const tags = Array.isArray(parsed.data.tags) ? parsed.data.tags : [];
   const title = parsed.data.title || path.basename(sourceFile, ".md");

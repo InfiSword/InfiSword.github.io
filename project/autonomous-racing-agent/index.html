@@ -42,11 +42,11 @@
 <h2 id="1-프로젝트-개요" class="chapter-title">1. 프로젝트 개요</h2>
 <p>본 프로젝트는 강화학습(Reinforcement Learning)을 통해 복잡한 트랙 환경에서 자율 주행이 가능한 경주차 에이전트를 개발하는 것을 목표로 합니다. <strong>체크포인트 기반 네비게이션 시스템</strong>과 <strong>다층적 보상 설계</strong>를 통해 에이전트가 트랙을 순차적으로 완주하도록 유도하며, <strong>레이캐스트 기반 환경 감지</strong>와 <strong>입력 스무딩</strong>을 통해 물리적으로 안정적인 주행 성능을 확보했습니다.</p>
 <div class="pf-visual-frame">
-    <img src="/assets/Gifs/autonomous-racing.gif" alt="Unity ML-Agents Training Visualization" style="width: 100%; border-radius: 8px;">
+    <img src="../../assets/Gifs/autonomous-racing.gif" alt="Unity ML-Agents Training Visualization" style="width: 100%; border-radius: 8px;">
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">Unity ML-Agents를 통한 자율 주행 학습 과정</p>
 </div>
 <div class="pf-visual-frame">
-    <img src="/assets/images/Car%20Simulation/mlagent_4.png" alt="ML-Agents Track Environment" style="width: 100%; border-radius: 8px;">
+    <img src="../../assets/images/Car%20Simulation/mlagent_4.png" alt="ML-Agents Track Environment" style="width: 100%; border-radius: 8px;">
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">구불구불한 도로와 바위 지형으로 구성된 학습 트랙 환경</p>
 </div>
 <hr>
@@ -237,7 +237,7 @@
 <h3 id="41-레이캐스트-기반-환경-센싱">4.1 레이캐스트 기반 환경 센싱</h3>
 <p>에이전트가 도로의 폭, 곡률, 장애물과의 거리를 정확히 파악하도록 다방향 레이캐스트 시스템을 구축했습니다.</p>
 <div class="pf-visual-frame">
-    <a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" aria-label="Autonomous Racing Agent 유튜브 영상 보기"><img src="/assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Raycast Sensor Visualization" style="width: 100%; border-radius: 8px;"></a>
+    <a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" aria-label="Autonomous Racing Agent 유튜브 영상 보기"><img src="../../assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Raycast Sensor Visualization" style="width: 100%; border-radius: 8px;"></a>
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">차량의 레이캐스트 센서 시스템 시각화 (빨간색: 감지된 대상, 초록색: 일반 센서 범위, 체크포인트 및 경로 스플라인 표시)</p>
 </div>
 <div class="pf-visual-frame">
@@ -265,7 +265,7 @@
 <h3 id="42-인지-행동-지연-없는-직접-제어-direct-action-control">4.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)</h3>
 <p>초기 학습 단계에서는 급격한 조향 지터링(Jittering)을 방지하기 위해 프레임 간 조향값의 변화량을 제한하는 <strong>입력 보정(Action Smoothing)</strong> 알고리즘을 테스트했습니다. 그러나 차량의 반응성을 떨어뜨려 코너링에서 에이전트의 의도가 지연되는 현상이 확인되었습니다.</p>
 <div class="pf-visual-frame">
-    <img src="/assets/images/Car%20Simulation/mlagent_3.png" alt="Direct Control Visualization" style="width: 100%; border-radius: 8px;">
+    <img src="../../assets/images/Car%20Simulation/mlagent_3.png" alt="Direct Control Visualization" style="width: 100%; border-radius: 8px;">
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">신경망 출력을 물리 차량 컨트롤러에 직접 매핑하여 반응성을 극대화</p>
 </div>
 <div class="highlight-box">

@@ -229,127 +229,40 @@ mermaid: true
     </div>
   </div>
 </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">❌</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">Canvas Rebuild 부하</div>
-            <div class="pf-comp-item-desc">유닛 드래그/호버 시마다 캔버스 강제 재빌드로 심각한 CPU 프레임 드랍</div>
-          </div>
-        </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">❌</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">충돌 판정 연산 낭비</div>
-            <div class="pf-comp-item-desc">적 바이러스와의 물리 연산을 위해 Camera.WorldToScreenPoint 매 프레임 호출</div>
-          </div>
-        </div>
-      </div>
-      <div class="pf-comp-footer old">
-        ⚠️ 성능 한계: 드로우콜 폭증 & Canvas Rebuilding 오버헤드
-      </div>
-    </div>
-    <div class="pf-comp-bridge">
-      <span class="pf-bridge-pill">MIGRATION</span>
-      <div class="pf-bridge-circle">➔</div>
-    </div>
-    <div class="pf-comp-box new">
-      <div class="pf-comp-header">
-        <span class="pf-comp-badge new">✨ 개선 방식 (TO-BE)</span>
-        <div class="pf-comp-title">Transform (월드 GameObject)</div>
-        <div class="pf-comp-subtitle">고성능 2D 물리 엔진 직결 아키텍처</div>
-      </div>
-      <div class="pf-comp-body">
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">✅</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">절대 2D 좌표계 확립</div>
-            <div class="pf-comp-item-desc">오르토그래픽 카메라 기준 절대 직교 좌표 및 O(1) 수학적 인덱싱</div>
-          </div>
-        </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">✅</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">캔버스 재빌드 부하 0%</div>
-            <div class="pf-comp-item-desc">UI Rebuilding 루프에서 완전히 분리되어 일정한 60+ FPS 방어</div>
-          </div>
-        </div>
-        <div class="pf-comp-item">
-          <div class="pf-comp-item-icon">✅</div>
-          <div class="pf-comp-item-content">
-            <div class="pf-comp-item-title">Physics2D 네이티브 호환</div>
-            <div class="pf-comp-item-desc">Collider2D 및 RaycastNonAlloc 직접 활용으로 쓰레기 메모리(GC) 차단</div>
-          </div>
-        </div>
-      </div>
-      <div class="pf-comp-footer new">
-        ✨ 최적화 성과: 60 FPS 무결점 방어 & 물리 엔진 직결
-      </div>
-    </div>
-  </div>
-</div>
+        
+
+
 
 이를 해결하기 위해 모든 유닛을 **GameObject(Transform) 기반**으로 전면 교체하여 월드 좌표계로 통일하였으며, Physics2D와의 직접적인 호환성을 확보하여 불필요한 연산을 제거하고 성능을 극적으로 최적화했습니다.
 
 ### 1.2 GameObjectGridLayout: 커스텀 레이아웃 엔진
 
-화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하는 레이아웃 엔진을 구축했습니다. 유니티의 `GridLayoutGroup`은 UI 전용이므로, 일반 월드 공간 오브젝트를 위해 화면 크기에 맞게 자동으로 셀 크기를 스케일링하는 컴포넌트를 직접 개발했습니다.
+화면 해상도에 맞춰 그리드의 간격과 셀 크기를 동적으로 계산하는 레이아웃 엔진을 구축했습니다. 유니티의 기본 `GridLayoutGroup`은 UI(Canvas) 전용 컴포넌트이므로, 일반 월드 공간 GameObject를 위해 카메라 크기에 맞게 자동으로 셀 크기를 스케일링하고 하단 작업표시줄 영역을 확보하는 커스텀 컴포넌트 `GameObjectGridLayout`을 직접 개발했습니다.
 
 <div class="pf-visual-frame">
-  <strong>해상도 기반 자동 조절 공식:</strong><br>
-  <code>cellSize = (screenSize - padding*2 - spacing*(n-1)) / n</code>
+  <div class="pf-grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; align-items: start;">
+    <!-- 컴포넌트 인스펙터 설정 -->
+    <div style="text-align: center;">
+      <img src="/assets/images/File%20Tower%20Defences/grid_layout_inspector.png" alt="GameObjectGridLayout Inspector Component" style="width: 100%; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25); box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+      <div style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
+        <strong>[컴포넌트]</strong> GameObjectGridLayout 인스펙터 설정<br>
+        <span style="font-size: 0.8rem; color: #94a3b8;">(Columns: 14, Rows: 8, Fit To Screen: On, Bottom Offset Ratio: 0.1)</span>
+      </div>
+    </div>
+
+    <!-- 실제 인게임 월드 그리드 시각화 -->
+    <div style="text-align: center;">
+      <img src="/assets/images/File%20Tower%20Defences/grid_layout_scene.png" alt="In-Game World Grid Visualization in Scene View" style="width: 100%; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25); box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
+      <div style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
+        <strong>[실제 그리드]</strong> 초록색 격자선 = 인게임 실제 월드 그리드<br>
+        <span style="font-size: 0.8rem; color: #2563eb; font-weight: 600;">(하단 UI 여백 10% 제외 후 가용 영역 14×8 셀 자동 피팅)</span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<details class="pf-details">
-<summary>코드 보기: FitToScreen 로직</summary>
-
-```csharp
-// GameObjectGridLayout.cs: 해상도 및 UI 오프셋 대응 동적 셀 크기 계산
-public void FitToScreen()
-{
-    if (transform == null) return;
-
-    Camera mainCamera = Camera.main;
-    if (mainCamera == null) return;
-
-    // 카메라 기준 전체 화면 크기 계산 (오르토그래픽 월드 좌표계)
-    float screenHeight = mainCamera.orthographicSize * 2f;
-    float screenWidth = screenHeight * mainCamera.aspect;
-
-    // 하단 UI 영역(10%)을 월드 단위 오프셋으로 확보
-    float yOffset = screenHeight * bottomOffsetRatio;
-    float availableGridHeight = screenHeight - yOffset;
-
-    // 패딩을 제외한 가용 영역 및 간격(Spacing) 제외한 순수 셀 영역 계산
-    Vector2 availableSize = new Vector2(screenWidth, availableGridHeight) - padding * 2;
-    Vector2 totalSpacing = new Vector2(
-        (columns - 1) * spacing.x,
-        (rows - 1) * spacing.y
-    );
-    Vector2 cellArea = availableSize - totalSpacing;
-
-    // 최종 셀 크기 도출
-    cellSize = new Vector2(
-        cellArea.x / columns,
-        cellArea.y / rows
-    );
-
-    // 그리드 전체의 실제 월드 크기 및 중심 위치 보정
-    _gridWorldSize = new Vector2(
-        columns * cellSize.x + (columns - 1) * spacing.x,
-        rows * cellSize.y + (rows - 1) * spacing.y
-    );
-
-    Vector3 newPosition = transform.position;
-    newPosition.y = yOffset / 2f;
-    transform.position = newPosition; // 하단 UI 공간만큼 중심점을 상단으로 이동
-
-    // 좌측 하단 시작 월드 모서리 좌표 확정
-    _bottomLeftCorner = (Vector2)transform.position - _gridWorldSize / 2f;
-
-    Debug.Log($"GridLayout 자동 조정 완료: {columns}x{rows}, 셀 크기: {cellSize}");
-}
-```
-</details>
+*   **컴포넌트 중심의 유연한 제어:** 에디터 인스펙터에서 행과 열(`Columns: 14`, `Rows: 8`), 패딩 및 스페이싱을 설정하면 오르토그래픽 카메라의 가로·세로 월드 크기를 실시간 계산하여 최적의 셀 크기(`Cell Size`)를 자동으로 도출합니다.
+*   **실제 초록색 그리드(World Grid) 영역:** 씬 뷰 화면에 초록색 라인으로 표시되는 격자가 **실제 인게임 파일 유닛과 바이러스가 배치·이동하는 물리적 그리드**입니다. `Bottom Offset Ratio(0.1)` 설정을 통해 하단 작업표시줄 UI 영역(약 10%)을 비워두고, 상단 가용 영역에만 정확히 14×8 격자가 피팅되도록 중심점을 자동 보정합니다.
 
 ---
 
