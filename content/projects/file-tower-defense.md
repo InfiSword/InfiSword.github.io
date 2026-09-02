@@ -176,27 +176,29 @@ mermaid: true
 
 <div class="pf-visual-frame pf-comp-frame">
   <div class="pf-comp-container">
+    <!-- 기존 방식 (AS-IS) -->
     <div class="pf-comp-box old">
       <div class="pf-comp-header">
-        <span class="pf-comp-badge old">AS-IS</span>
+        <span class="pf-comp-badge old">기존 방식 (AS-IS)</span>
         <h4 class="pf-comp-title">RectTransform (UI)</h4>
       </div>
       <ul class="pf-comp-list">
         <li>
           <span class="pf-comp-icon old">✕</span>
-          <span class="pf-comp-text">Anchor/Pivot Dependent</span>
+          <span class="pf-comp-text">앵커·피벗 기반 좌표 종속성</span>
         </li>
         <li>
           <span class="pf-comp-icon old">✕</span>
-          <span class="pf-comp-text">Frequent Canvas Rebuilds</span>
+          <span class="pf-comp-text">빈번한 Canvas Rebuild 연산 부하</span>
         </li>
         <li>
           <span class="pf-comp-icon old">✕</span>
-          <span class="pf-comp-text">Heavy Screen-to-World conversions</span>
+          <span class="pf-comp-text">과도한 화면-월드 좌표 변환 비용</span>
         </li>
       </ul>
     </div>
 
+    <!-- 전환 브릿지 (REFACTORING) -->
     <div class="pf-comp-bridge">
       <span class="pf-bridge-pill">REFACTORING</span>
       <div class="pf-bridge-arrow">
@@ -207,23 +209,24 @@ mermaid: true
       </div>
     </div>
 
+    <!-- 개선 방식 (TO-BE) -->
     <div class="pf-comp-box new">
       <div class="pf-comp-header">
-        <span class="pf-comp-badge new">TO-BE</span>
+        <span class="pf-comp-badge new">개선 방식 (TO-BE)</span>
         <h4 class="pf-comp-title">Transform (World)</h4>
       </div>
       <ul class="pf-comp-list">
         <li>
           <span class="pf-comp-icon new">✓</span>
-          <span class="pf-comp-text">Absolute 2D Coordinates</span>
+          <span class="pf-comp-text">독립적인 절대 2D 직교 좌표계</span>
         </li>
         <li>
           <span class="pf-comp-icon new">✓</span>
-          <span class="pf-comp-text">Zero Canvas Overhead</span>
+          <span class="pf-comp-text">Canvas Rebuild 오버헤드 0% (완전 배제)</span>
         </li>
         <li>
           <span class="pf-comp-icon new">✓</span>
-          <span class="pf-comp-text">Native Physics 2D & Colliders</span>
+          <span class="pf-comp-text">Physics 2D 물리 엔진 및 콜라이더 직결</span>
         </li>
       </ul>
     </div>

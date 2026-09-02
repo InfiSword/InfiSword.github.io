@@ -45,26 +45,28 @@
 <ul><li><strong>좌표계 종속성:</strong> 캔버스의 앵커/피벗 설정 및 해상도에 따라 월드 좌표가 상대적으로 변하여 게임 월드 내 정밀한 위치 계산과 사거리 판정이 매우 까다로움.</li><li><strong>연산 오버헤드 (Canvas Rebuilding):</strong> 유닛의 움직임, 호버 효과, 드래그 등의 UI 요소가 갱신될 때마다 Unity 내부에서 Canvas Rebuild가 강제로 유발되어 CPU 프레임 드랍 발생.</li><li><strong>물리 엔진의 부재:</strong> 월드 좌표 기반의 바이러스(적)와 UI 유닛 간 물리 충돌 판정을 위해 매 프레임 <code>Camera.WorldToScreenPoint</code> 등의 물리-화면 좌표 변환 함수 호출 비용 발생.</li></ul>
 <div class="pf-visual-frame pf-comp-frame">
   <div class="pf-comp-container">
+    <!-- 기존 방식 (AS-IS) -->
     <div class="pf-comp-box old">
       <div class="pf-comp-header">
-        <span class="pf-comp-badge old">AS-IS</span>
+        <span class="pf-comp-badge old">기존 방식 (AS-IS)</span>
         <h4 class="pf-comp-title">RectTransform (UI)</h4>
       </div>
       <ul class="pf-comp-list">
         <li>
           <span class="pf-comp-icon old">✕</span>
-          <span class="pf-comp-text">Anchor/Pivot Dependent</span>
+          <span class="pf-comp-text">앵커·피벗 기반 좌표 종속성</span>
         </li>
         <li>
           <span class="pf-comp-icon old">✕</span>
-          <span class="pf-comp-text">Frequent Canvas Rebuilds</span>
+          <span class="pf-comp-text">빈번한 Canvas Rebuild 연산 부하</span>
         </li>
         <li>
           <span class="pf-comp-icon old">✕</span>
-          <span class="pf-comp-text">Heavy Screen-to-World conversions</span>
+          <span class="pf-comp-text">과도한 화면-월드 좌표 변환 비용</span>
         </li>
       </ul>
     </div>
+    <!-- 전환 브릿지 (REFACTORING) -->
     <div class="pf-comp-bridge">
       <span class="pf-bridge-pill">REFACTORING</span>
       <div class="pf-bridge-arrow">
@@ -74,23 +76,24 @@
         </svg>
       </div>
     </div>
+    <!-- 개선 방식 (TO-BE) -->
     <div class="pf-comp-box new">
       <div class="pf-comp-header">
-        <span class="pf-comp-badge new">TO-BE</span>
+        <span class="pf-comp-badge new">개선 방식 (TO-BE)</span>
         <h4 class="pf-comp-title">Transform (World)</h4>
       </div>
       <ul class="pf-comp-list">
         <li>
           <span class="pf-comp-icon new">✓</span>
-          <span class="pf-comp-text">Absolute 2D Coordinates</span>
+          <span class="pf-comp-text">독립적인 절대 2D 직교 좌표계</span>
         </li>
         <li>
           <span class="pf-comp-icon new">✓</span>
-          <span class="pf-comp-text">Zero Canvas Overhead</span>
+          <span class="pf-comp-text">Canvas Rebuild 오버헤드 0% (완전 배제)</span>
         </li>
         <li>
           <span class="pf-comp-icon new">✓</span>
-          <span class="pf-comp-text">Native Physics 2D & Colliders</span>
+          <span class="pf-comp-text">Physics 2D 물리 엔진 및 콜라이더 직결</span>
         </li>
       </ul>
     </div>
