@@ -1603,6 +1603,10 @@ code.hljs {
   text-align: left !important;
 }
 
+.pf-fc-card.pf-fc-compact {
+  padding: 12px 18px !important;
+}
+
 .pf-fc-card:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08) !important;
@@ -1612,7 +1616,7 @@ code.hljs {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  margin-bottom: 6px !important;
+  margin-bottom: 0 !important;
 }
 
 .pf-fc-badge {
@@ -1637,7 +1641,7 @@ code.hljs {
 .pf-fc-desc {
   font-size: 0.84rem !important;
   color: #64748b !important;
-  margin: 0 !important;
+  margin: 6px 0 0 0 !important;
   line-height: 1.45 !important;
 }
 
@@ -1647,9 +1651,22 @@ code.hljs {
   background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%) !important;
   border: 2px solid #bfdbfe !important;
   border-radius: 14px !important;
-  padding: 18px 20px !important;
+  padding: 16px 20px !important;
   box-shadow: 0 8px 24px rgba(37, 99, 235, 0.06) !important;
   text-align: left !important;
+}
+
+.pf-fc-decision.pf-fc-compact {
+  padding: 14px 18px !important;
+}
+
+.pf-fc-decision.pf-fc-compact .pf-fc-decision-header {
+  margin-bottom: 10px !important;
+  padding-bottom: 8px !important;
+}
+
+.pf-fc-item-compact {
+  padding: 9px 12px !important;
 }
 
 .pf-fc-decision-header {
