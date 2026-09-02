@@ -130,7 +130,7 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 </div>
 
 <div class="pf-visual-frame">
-    <img src="/assets/images/mlagent_4.png" alt="ML-Agents Track Environment" style="width: 100%; border-radius: 8px;">
+    <img src="/assets/images/Car%20Simulation/mlagent_4.png" alt="ML-Agents Track Environment" style="width: 100%; border-radius: 8px;">
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">구불구불한 도로와 바위 지형으로 구성된 학습 트랙 환경</p>
 </div>
 
@@ -375,7 +375,7 @@ private void ApplyProximityPenalty(Vector3[] directions, LayerMask layer, float 
 에이전트가 도로의 폭, 곡률, 장애물과의 거리를 정확히 파악하도록 다방향 레이캐스트 시스템을 구축했습니다.
 
 <div class="pf-visual-frame">
-    <img src="/assets/images/mlagent_1.png" alt="Raycast Sensor Visualization" style="width: 100%; border-radius: 8px;">
+    <img src="/assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Raycast Sensor Visualization" style="width: 100%; border-radius: 8px;">
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">차량의 레이캐스트 센서 시스템 시각화 (빨간색: 감지된 대상, 초록색: 일반 센서 범위, 체크포인트 및 경로 스플라인 표시)</p>
 </div>
 
@@ -407,7 +407,7 @@ private void ApplyProximityPenalty(Vector3[] directions, LayerMask layer, float 
 초기 학습 단계에서는 급격한 조향 지터링(Jittering)을 방지하기 위해 프레임 간 조향값의 변화량을 제한하는 **입력 보정(Action Smoothing)** 알고리즘을 테스트했습니다. 그러나 차량의 반응성을 떨어뜨려 코너링에서 에이전트의 의도가 지연되는 현상이 확인되었습니다.
 
 <div class="pf-visual-frame">
-    <img src="/assets/images/mlagent_3.png" alt="Direct Control Visualization" style="width: 100%; border-radius: 8px;">
+    <img src="/assets/images/Car%20Simulation/mlagent_3.png" alt="Direct Control Visualization" style="width: 100%; border-radius: 8px;">
     <p style="text-align: center; color: #8b949e; font-size: 0.9rem; margin-top: 10px;">신경망 출력을 물리 차량 컨트롤러에 직접 매핑하여 반응성을 극대화</p>
 </div>
 

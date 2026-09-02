@@ -1,5 +1,22 @@
 const fs = require("fs");
 const path = require("path");
+const vm = require("vm");
+
+let hljs = null;
+try {
+  const hljsPath = path.join(__dirname, "highlight.min.js");
+  if (fs.existsSync(hljsPath)) {
+    const hljsCode = fs.readFileSync(hljsPath, "utf8");
+    const hljsModule = { exports: {} };
+    const hljsCtx = { module: hljsModule, exports: hljsModule.exports, window: {}, globalThis: {}, console };
+    hljsCtx.global = hljsCtx;
+    hljsCtx.self = hljsCtx;
+    vm.runInNewContext(hljsCode, hljsCtx);
+    hljs = hljsModule.exports.highlight ? hljsModule.exports : hljsCtx.window.hljs || hljsCtx.hljs;
+  }
+} catch (e) {
+  console.warn("Could not load highlight.js:", e.message);
+}
 
 const root = path.resolve(__dirname, "..");
 const contentDir = path.join(root, "content");
@@ -332,10 +349,49 @@ function renderMarkdown(source) {
       if (language === "mermaid") {
         html.push(`<pre class="mermaid">${escapeHtml(body.join("\n"))}</pre>`);
       } else {
+        const rawCode = body.join("\n");
+        let highlighted = "";
+        const langMap = {
+          csharp: "csharp",
+          cs: "csharp",
+          "c#": "csharp",
+          cpp: "cpp",
+          "c++": "cpp",
+          c: "c",
+          hlsl: "cpp",
+          glsl: "cpp",
+          shader: "cpp",
+          json: "json",
+          javascript: "javascript",
+          js: "javascript",
+          typescript: "typescript",
+          ts: "typescript",
+          python: "python",
+          py: "python",
+          html: "xml",
+          xml: "xml",
+          bash: "bash",
+          sh: "bash"
+        };
+        const targetLang = langMap[language?.toLowerCase()] || (hljs && hljs.getLanguage(language) ? language : null);
+
+        if (hljs && targetLang && hljs.getLanguage(targetLang)) {
+          try {
+            highlighted = hljs.highlight(rawCode, { language: targetLang, ignoreIllegals: true }).value;
+            // VS Code Dark+ specific: control flow keywords (return, if, for, etc.) in purple
+            highlighted = highlighted.replace(
+              /<span class="hljs-keyword">\s*(return|if|else|switch|case|break|continue|default|for|foreach|while|do|try|catch|finally|throw|yield|await|async)\s*<\/span>/g,
+              '<span class="hljs-keyword hljs-control-flow">$1</span>'
+            );
+          } catch (err) {
+            highlighted = escapeHtml(rawCode);
+          }
+        } else {
+          highlighted = escapeHtml(rawCode);
+        }
+
         html.push(
-          `<pre><code${language ? ` class="language-${escapeHtml(language)}"` : ""}>${escapeHtml(
-            body.join("\n")
-          )}</code></pre>`
+          `<pre class="hljs-pre"><code class="hljs${targetLang ? ` language-${escapeHtml(targetLang)}` : ""}">${highlighted}</code></pre>`
         );
       }
       continue;

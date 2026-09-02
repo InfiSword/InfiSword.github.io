@@ -65,19 +65,19 @@
 </div>
 <details class="pf-details">
 <summary>코드 보기: FitToScreen 로직</summary>
-<pre><code class="language-csharp">// GameObjectGridLayout.cs: 해상도 대응 셀 크기 계산
-public void FitToScreen() {
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// GameObjectGridLayout.cs: 해상도 대응 셀 크기 계산</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">FitToScreen</span>()</span> {
     Camera cam = Camera.main;
-    float height = cam.orthographicSize * 2f; // 오르토그래픽 카메라 높이
-    float width = height * cam.aspect;         // 카메라 종횡비 기반 너비
+    <span class="hljs-built_in">float</span> height = cam.orthographicSize * <span class="hljs-number">2f</span>; <span class="hljs-comment">// 오르토그래픽 카메라 높이</span>
+    <span class="hljs-built_in">float</span> width = height * cam.aspect;         <span class="hljs-comment">// 카메라 종횡비 기반 너비</span>
 
-    // 가용 영역에서 패딩과 스페이싱을 제외한 실제 셀 크기 도출
-    cellSize.x = (width - (padding.x * 2) - (spacing.x * (columns - 1))) / columns;
-    cellSize.y = (height - (padding.y * 2) - (spacing.y * (rows - 1))) / rows;
+    <span class="hljs-comment">// 가용 영역에서 패딩과 스페이싱을 제외한 실제 셀 크기 도출</span>
+    cellSize.x = (width - (padding.x * <span class="hljs-number">2</span>) - (spacing.x * (columns - <span class="hljs-number">1</span>))) / columns;
+    cellSize.y = (height - (padding.y * <span class="hljs-number">2</span>) - (spacing.y * (rows - <span class="hljs-number">1</span>))) / rows;
 
-    // 그리드의 좌상단 시작 월드 좌표 계산
-    StartPos = new Vector2(-(width / 2) + padding.x + (cellSize.x / 2), 
-                            (height / 2) - padding.y - (cellSize.y / 2));
+    <span class="hljs-comment">// 그리드의 좌상단 시작 월드 좌표 계산</span>
+    StartPos = <span class="hljs-keyword">new</span> Vector2(-(width / <span class="hljs-number">2</span>) + padding.x + (cellSize.x / <span class="hljs-number">2</span>), 
+                            (height / <span class="hljs-number">2</span>) - padding.y - (cellSize.y / <span class="hljs-number">2</span>));
 }</code></pre>
 </details>
 <hr>
@@ -116,18 +116,18 @@ public void FitToScreen() {
 </div>
 <details class="pf-details">
 <summary>코드 보기: IInteractable 인터페이스</summary>
-<pre><code class="language-csharp">public interface IInteractable {
-    GameObject targetObj { get; }
-    bool IsSelectable { get; }
-    bool IsDraggable { get; }
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title">IInteractable</span> {
+    GameObject targetObj { <span class="hljs-keyword">get</span>; }
+    <span class="hljs-built_in">bool</span> IsSelectable { <span class="hljs-keyword">get</span>; }
+    <span class="hljs-built_in">bool</span> IsDraggable { <span class="hljs-keyword">get</span>; }
     
-    void OnHoverEnter();
-    void OnHoverExit();
-    void OnClick();
-    void OnBeginDrag();
-    void OnDrag(Vector2 mouseDelta);
-    void OnEndDrag();
-    void OnSelected(bool isSelected);
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverEnter</span>()</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverExit</span>()</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClick</span>()</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnBeginDrag</span>()</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDrag</span>(<span class="hljs-params">Vector2 mouseDelta</span>)</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnEndDrag</span>()</span>;
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnSelected</span>(<span class="hljs-params"><span class="hljs-built_in">bool</span> isSelected</span>)</span>;
 }</code></pre>
 </details>
 <hr>
@@ -203,42 +203,42 @@ public void FitToScreen() {
 <div class="details-desc">
 <p>월드 좌표를 인덱스로 즉시 변환한 뒤, 해당 인덱스를 중심으로 3x3 영역 내의 그리드만 제곱 거리(<code>sqrMagnitude</code>)로 비교하여 최적의 그리드를 탐색합니다.</p>
 </div>
-<pre><code class="language-csharp">// FileGridManager.cs: 공간 분할 기반 탐색 최적화 로직
-public FileGrid GetGrid(Vector2 worldPos) {
-    // 1. 월드 좌표를 그리드 인덱스로 수학적 변환 (O(1))
-    if (!WorldToGridIndex(worldPos, out int xCenter, out int yCenter)) return null;
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// FileGridManager.cs: 공간 분할 기반 탐색 최적화 로직</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> FileGrid <span class="hljs-title">GetGrid</span>(<span class="hljs-params">Vector2 worldPos</span>)</span> {
+    <span class="hljs-comment">// 1. 월드 좌표를 그리드 인덱스로 수학적 변환 (O(1))</span>
+    <span class="hljs-keyword hljs-control-flow">if</span> (!WorldToGridIndex(worldPos, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> xCenter, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> yCenter)) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
 
-    // 2. 인덱스가 유효하면 주변 3x3 영역만 빠르게 검사 (O(1))
-    if (IsValidGridIndex(xCenter, yCenter)) {
-        return FindClosestGridInRange(worldPos, xCenter, yCenter);
+    <span class="hljs-comment">// 2. 인덱스가 유효하면 주변 3x3 영역만 빠르게 검사 (O(1))</span>
+    <span class="hljs-keyword hljs-control-flow">if</span> (IsValidGridIndex(xCenter, yCenter)) {
+        <span class="hljs-keyword hljs-control-flow">return</span> FindClosestGridInRange(worldPos, xCenter, yCenter);
     }
 
-    // 화면 영역 밖의 비정상 예외 상황에서만 전체 탐색 수행 (Safety Net)
-    return FindGlobalClosestGrid(worldPos);
+    <span class="hljs-comment">// 화면 영역 밖의 비정상 예외 상황에서만 전체 탐색 수행 (Safety Net)</span>
+    <span class="hljs-keyword hljs-control-flow">return</span> FindGlobalClosestGrid(worldPos);
 }
 
-private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int centerY) {
-    float minDistSqr = float.MaxValue;
-    FileGrid closestGrid = null;
+<span class="hljs-function"><span class="hljs-keyword">private</span> FileGrid <span class="hljs-title">FindClosestGridInRange</span>(<span class="hljs-params">Vector2 worldPos, <span class="hljs-built_in">int</span> centerX, <span class="hljs-built_in">int</span> centerY</span>)</span> {
+    <span class="hljs-built_in">float</span> minDistSqr = <span class="hljs-built_in">float</span>.MaxValue;
+    FileGrid closestGrid = <span class="hljs-literal">null</span>;
 
-    // 중심 기준 3x3 루프
-    for (int dx = -1; dx &lt;= 1; dx++) {
-        for (int dy = -1; dy &lt;= 1; dy++) {
-            int x = centerX + dx;
-            int y = centerY + dy;
+    <span class="hljs-comment">// 중심 기준 3x3 루프</span>
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> dx = <span class="hljs-number">-1</span>; dx &lt;= <span class="hljs-number">1</span>; dx++) {
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> dy = <span class="hljs-number">-1</span>; dy &lt;= <span class="hljs-number">1</span>; dy++) {
+            <span class="hljs-built_in">int</span> x = centerX + dx;
+            <span class="hljs-built_in">int</span> y = centerY + dy;
 
-            if (IsValidGridIndex(x, y)) {
+            <span class="hljs-keyword hljs-control-flow">if</span> (IsValidGridIndex(x, y)) {
                 FileGrid candidate = gridArray[x, y];
-                // 제곱 거리(sqrMagnitude) 사용으로 비용이 큰 제곱근(Sqrt) 연산 생략
-                float distSqr = ((Vector2)candidate.transform.position - worldPos).sqrMagnitude;
-                if (distSqr &lt; minDistSqr) {
+                <span class="hljs-comment">// 제곱 거리(sqrMagnitude) 사용으로 비용이 큰 제곱근(Sqrt) 연산 생략</span>
+                <span class="hljs-built_in">float</span> distSqr = ((Vector2)candidate.transform.position - worldPos).sqrMagnitude;
+                <span class="hljs-keyword hljs-control-flow">if</span> (distSqr &lt; minDistSqr) {
                     minDistSqr = distSqr;
                     closestGrid = candidate;
                 }
             }
         }
     }
-    return closestGrid;
+    <span class="hljs-keyword hljs-control-flow">return</span> closestGrid;
 }</code></pre>
 </details>
 <h3 id="35-플래그-기반-확장-가능한-검색-시스템">3.5 플래그 기반 확장 가능한 검색 시스템</h3>
@@ -317,28 +317,28 @@ private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int cente
 <p>단순 스탯 증가 버프 외에도 주기적인 리젠(HP 회복), 지속 피해(도트 데미지) 등을 단일 코루틴 남발 없이 처리하기 위해 <code>MyBuff</code> 추상 클래스와 <code>BuffData</code> 구조를 결합한 중앙 업데이트 방식을 채택했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 다형적 버프 실행 루프</summary>
-<pre><code class="language-csharp">// BuffData_Base.cs: 다형적 버프 업데이트 루프
-public virtual void Tick(float deltaTime) {
-    // 딕셔너리 순회 중 요소 삭제 에러 방지를 위해 복사본 리스트로 순회
-    foreach (int key in new List&lt;int&gt;(activeBuffs.Keys)) {
-        // BuffData 내부에서 누적 시간을 체크하여 틱 주기 도달 시 true 반환
-        if (activeBuffs[key].Tick(deltaTime)) {
-            OnTick(activeBuffs[key]); // 다형성에 의해 상속받은 자식 클래스의 고유 로직 실행
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// BuffData_Base.cs: 다형적 버프 업데이트 루프</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Tick</span>(<span class="hljs-params"><span class="hljs-built_in">float</span> deltaTime</span>)</span> {
+    <span class="hljs-comment">// 딕셔너리 순회 중 요소 삭제 에러 방지를 위해 복사본 리스트로 순회</span>
+    <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-function"><span class="hljs-built_in">int</span> key <span class="hljs-keyword">in</span> <span class="hljs-keyword">new</span> <span class="hljs-title">List</span>&lt;<span class="hljs-title">int</span>&gt;(<span class="hljs-params">activeBuffs.Keys</span>))</span> {
+        <span class="hljs-comment">// BuffData 내부에서 누적 시간을 체크하여 틱 주기 도달 시 true 반환</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (activeBuffs[key].Tick(deltaTime)) {
+            OnTick(activeBuffs[key]); <span class="hljs-comment">// 다형성에 의해 상속받은 자식 클래스의 고유 로직 실행</span>
         }
     }
 }
 
-// Buff_MP3.cs: 구체적인 힐링(HP 지속 회복) 버프 클래스 구현
-public class Buff_MP3 : MyBuff {
-    public override void Init(Transform _target) {
+<span class="hljs-comment">// Buff_MP3.cs: 구체적인 힐링(HP 지속 회복) 버프 클래스 구현</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Buff_MP3</span> : <span class="hljs-title">MyBuff</span> {
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Init</span>(<span class="hljs-params">Transform _target</span>)</span> {
         buffTarget = _target;
         buffParticleType = Define.ParticleType.Buff_MP3;
     }
 
-    protected override void OnTick(BuffData buffData) {
-        // 대상 오브젝트의 IHealth 인터페이스를 찾아 체력 회복
-        var health = buffTarget.GetComponent&lt;IHealth&gt;();
-        if (health != null) {
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnTick</span>(<span class="hljs-params">BuffData buffData</span>)</span> {
+        <span class="hljs-comment">// 대상 오브젝트의 IHealth 인터페이스를 찾아 체력 회복</span>
+        <span class="hljs-keyword">var</span> health = buffTarget.GetComponent&lt;IHealth&gt;();
+        <span class="hljs-keyword hljs-control-flow">if</span> (health != <span class="hljs-literal">null</span>) {
             health.Heal(buffData.Amount);
         }
     }

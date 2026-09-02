@@ -861,3 +861,130 @@ body::before {
 .site-footer__inner { color: #64748b; }
 .site-footer__inner a { color: #334155; }
 .site-footer__inner a:hover { color: #1d4ed8; }
+
+
+/* ========================================================== */
+/* VISUAL STUDIO / VS CODE DARK+ SYNTAX HIGHLIGHTING THEME   */
+/* ========================================================== */
+
+.project-content pre,
+.project-content pre.hljs-pre,
+pre:has(code.hljs) {
+  position: relative;
+  background: #1e1e1e !important;
+  border: 1px solid #333333 !important;
+  border-radius: 10px !important;
+  padding: 22px 24px !important;
+  overflow-x: auto;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  margin: 28px 0 !important;
+}
+
+.project-content pre code,
+.project-content pre code.hljs,
+code.hljs {
+  font-family: 'Fira Code', Consolas, Monaco, 'Courier New', monospace !important;
+  font-size: 0.92rem !important;
+  line-height: 1.68 !important;
+  tab-size: 4;
+  color: #d4d4d4 !important;
+  background: transparent !important;
+  padding: 0 !important;
+  border: 0 !important;
+  display: block;
+}
+
+/* VS Code / Visual Studio Dark+ Syntax Palette */
+
+/* 1. Storage & Type Keywords: public, private, class, struct, void, const, auto, static (Blue) */
+.hljs-keyword {
+  color: #569cd6 !important;
+  font-weight: 500;
+}
+
+/* 2. Control Flow Keywords: if, else, for, foreach, while, return, switch, case, try, catch (Purple / Magenta) */
+.hljs-keyword.hljs-control-flow {
+  color: #c586c0 !important;
+  font-weight: 500;
+}
+
+/* 3. Types, Classes, Structs, Interfaces, Primitives (Teal / Turquoise) */
+.hljs-title.class_,
+.hljs-title.class_.inherited__,
+.hljs-type,
+.hljs-built_in {
+  color: #4ec9b0 !important;
+  font-weight: 500;
+}
+
+/* 4. Functions & Methods: Update(), Start(), Awake(), Render() (Soft Yellow) */
+.hljs-title.function_,
+.hljs-function > .hljs-title,
+.hljs-title {
+  color: #dcdcaa !important;
+}
+
+/* Ensure class titles retain teal */
+.hljs-title.class_ {
+  color: #4ec9b0 !important;
+}
+
+/* 5. Variables, Parameters, Attributes (Sky Blue) */
+.hljs-variable,
+.hljs-params,
+.hljs-attr,
+.hljs-attribute {
+  color: #9cdcfe !important;
+}
+
+/* 6. Strings & Characters: "text", 'c' (Warm Coral / Orange) */
+.hljs-string {
+  color: #ce9178 !important;
+}
+
+/* 7. Numbers / Numeric Literals: 0, 1.0f, 100 (Light Olive Green) */
+.hljs-number {
+  color: #b5cea8 !important;
+}
+
+/* 8. Boolean & Null Literals: true, false, null, nullptr (Blue / Bold) */
+.hljs-literal {
+  color: #569cd6 !important;
+  font-weight: 600;
+}
+
+/* 9. Comments: // single-line, /* multi-line */ (Forest Green, Italic) */
+.hljs-comment,
+.hljs-quote {
+  color: #6a9955 !important;
+  font-style: italic !important;
+}
+
+/* 10. Preprocessor Directives, Attributes, Macros: #include, [SerializeField] (Muted Gray / Purple) */
+.hljs-meta {
+  color: #9b9b9b !important;
+}
+.hljs-meta .hljs-keyword {
+  color: #c586c0 !important;
+}
+.hljs-meta .hljs-string {
+  color: #ce9178 !important;
+}
+
+/* 11. Punctuation & Operators */
+.hljs-punctuation,
+.hljs-operator {
+  color: #d4d4d4 !important;
+}
+
+/* Inline Code Badge (Visual Studio Dark style) */
+.project-content :not(pre) > code {
+  font-family: 'Fira Code', Consolas, monospace;
+  font-size: 0.88em;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: #f1f5f9;
+  color: #0369a1;
+  border: 1px solid #cbd5e1;
+  font-weight: 500;
+}

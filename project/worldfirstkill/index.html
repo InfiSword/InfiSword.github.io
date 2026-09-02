@@ -74,53 +74,53 @@
 <p><strong>CSV 파싱 핵심 로직 및 SmartSplit</strong> 정규식을 활용하여 따옴표 내부의 쉼표를 안전하게 처리하고, 리플렉션을 통해 동적으로 객체에 값을 할당합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: CSV 파싱 핵심 로직 및 SmartSplit</summary>
-<pre><code class="language-csharp">// CSVParser.cs: 정규식을 이용한 안전한 CSV 행 분할
-string[] SmartSplit(string line)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// CSVParser.cs: 정규식을 이용한 안전한 CSV 행 분할</span>
+<span class="hljs-function"><span class="hljs-built_in">string</span>[] <span class="hljs-title">SmartSplit</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> line</span>)</span>
 {
-    return Regex.Matches(line, @&quot;(?:^|,)(?:&quot;&quot;(?&lt;val&gt;[^&quot;&quot;]*)&quot;&quot;|(?&lt;val&gt;[^,&quot;&quot;]*))&quot;)
+    <span class="hljs-keyword hljs-control-flow">return</span> Regex.Matches(line, <span class="hljs-string">@&quot;(?:^|,)(?:&quot;&quot;(?&lt;val&gt;[^&quot;&quot;]*)&quot;&quot;|(?&lt;val&gt;[^,&quot;&quot;]*))&quot;</span>)
                 .Cast&lt;Match&gt;()
-                .Select(m =&gt; m.Groups[&quot;val&quot;].Value)
+                .Select(m =&gt; m.Groups[<span class="hljs-string">&quot;val&quot;</span>].Value)
                 .ToArray();
 }
 
-// 리플렉션 기반 CSV 파싱 핵심 메서드
-public List&lt;T&gt; parseCSV&lt;T&gt;(string csvData, bool isCutColumn, int start, int end) where T : BaseData, new()
+<span class="hljs-comment">// 리플렉션 기반 CSV 파싱 핵심 메서드</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">List</span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-title">parseCSV</span>&lt;<span class="hljs-title">T</span>&gt;(<span class="hljs-params"><span class="hljs-built_in">string</span> csvData, <span class="hljs-built_in">bool</span> isCutColumn, <span class="hljs-built_in">int</span> start, <span class="hljs-built_in">int</span> end</span>) <span class="hljs-keyword">where</span> T : BaseData, <span class="hljs-keyword">new</span>()</span>
 {
-    // 1. 제네릭 타입 T의 구조 분석
-    Type myType = typeof(T);
+    <span class="hljs-comment">// 1. 제네릭 타입 T의 구조 분석</span>
+    Type myType = <span class="hljs-keyword">typeof</span>(T);
     FieldInfo[] myFieldInfo = myType.GetFields(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
 
-    string[] csvIndexData = csvData.Split('\n').Where(x =&gt; !string.IsNullOrWhiteSpace(x)).ToArray();
-    if (csvIndexData.Length == 0) return null;
+    <span class="hljs-built_in">string</span>[] csvIndexData = csvData.Split(<span class="hljs-string">&#x27;\n&#x27;</span>).Where(x =&gt; !<span class="hljs-built_in">string</span>.IsNullOrWhiteSpace(x)).ToArray();
+    <span class="hljs-keyword hljs-control-flow">if</span> (csvIndexData.Length == <span class="hljs-number">0</span>) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
 
-    // 2. 헤더 매핑 딕셔너리 세팅
-    string[] attributeColumnArray = csvIndexData[0].Trim().Split(',');
+    <span class="hljs-comment">// 2. 헤더 매핑 딕셔너리 세팅</span>
+    <span class="hljs-built_in">string</span>[] attributeColumnArray = csvIndexData[<span class="hljs-number">0</span>].Trim().Split(<span class="hljs-string">&#x27;,&#x27;</span>);
     SetupFieldDict(attributeColumnArray, myFieldInfo);
 
-    List&lt;T&gt; csvDataList = new List&lt;T&gt;();
-    // 3. 데이터 행 순회 및 파싱
-    for (int rowIndex = 1; rowIndex &lt; csvIndexData.Length; rowIndex++)
+    List&lt;T&gt; csvDataList = <span class="hljs-keyword">new</span> List&lt;T&gt;();
+    <span class="hljs-comment">// 3. 데이터 행 순회 및 파싱</span>
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> rowIndex = <span class="hljs-number">1</span>; rowIndex &lt; csvIndexData.Length; rowIndex++)
     {
-        string[] column = SmartSplit(csvIndexData[rowIndex].Trim());
-        if (column.Length == 0 || string.IsNullOrWhiteSpace(column[0])) continue;
+        <span class="hljs-built_in">string</span>[] column = SmartSplit(csvIndexData[rowIndex].Trim());
+        <span class="hljs-keyword hljs-control-flow">if</span> (column.Length == <span class="hljs-number">0</span> || <span class="hljs-built_in">string</span>.IsNullOrWhiteSpace(column[<span class="hljs-number">0</span>])) <span class="hljs-keyword hljs-control-flow">continue</span>;
 
         T objectData = Activator.CreateInstance&lt;T&gt;();
         
-        // 4. 타입 변환 및 할당
-        for (int i = 0; i &lt; column.Length; i++)
+        <span class="hljs-comment">// 4. 타입 변환 및 할당</span>
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; column.Length; i++)
         {
-            if (DataIndex_Dict.TryGetValue(i, out string attribute) &amp;&amp; Data_Dict.TryGetValue(attribute, out string fieldName))
+            <span class="hljs-keyword hljs-control-flow">if</span> (DataIndex_Dict.TryGetValue(i, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> attribute) &amp;&amp; Data_Dict.TryGetValue(attribute, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> fieldName))
             {
                 FieldInfo fieldInfo = myType.GetField(fieldName);
-                if (fieldInfo != null)
+                <span class="hljs-keyword hljs-control-flow">if</span> (fieldInfo != <span class="hljs-literal">null</span>)
                 {
-                    SetFieldValue(objectData, fieldInfo, column[i]); // ChangeType 수행
+                    SetFieldValue(objectData, fieldInfo, column[i]); <span class="hljs-comment">// ChangeType 수행</span>
                 }
             }
         }
         csvDataList.Add(objectData);
     }
-    return csvDataList;
+    <span class="hljs-keyword hljs-control-flow">return</span> csvDataList;
 }</code></pre>
 </details>
 <hr>
@@ -131,26 +131,26 @@ public List&lt;T&gt; parseCSV&lt;T&gt;(string csvData, bool isCutColumn, int sta
 <p><strong>비동기 데이터 로딩 흐름</strong> 서버 데이터 다운로드부터 파싱 적재까지 하나의 비동기 파이프라인으로 관리합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 비동기 데이터 로딩 흐름</summary>
-<pre><code class="language-csharp">// LoadingManager.cs: 비동기 데이터 로딩 흐름
-public async Task&lt;bool&gt; StartLoadingDataAsync(CancellationToken cancellationToken = default)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// LoadingManager.cs: 비동기 데이터 로딩 흐름</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword hljs-control-flow">async</span> Task&lt;<span class="hljs-built_in">bool</span>&gt; <span class="hljs-title">StartLoadingDataAsync</span>(<span class="hljs-params">CancellationToken cancellationToken = <span class="hljs-literal">default</span></span>)</span>
 {
-    UpdateProgress(0.01f, &quot;서버 목록 확인 중...&quot;);
+    UpdateProgress(<span class="hljs-number">0.01f</span>, <span class="hljs-string">&quot;서버 목록 확인 중...&quot;</span>);
 
-    // 1. 메타 시트 비동기 다운로드
-    bool metaSuccess = await ServerCSV_ConvertData.DownloadMetaSheetAsync();
+    <span class="hljs-comment">// 1. 메타 시트 비동기 다운로드</span>
+    <span class="hljs-built_in">bool</span> metaSuccess = <span class="hljs-keyword hljs-control-flow">await</span> ServerCSV_ConvertData.DownloadMetaSheetAsync();
     
-    // 2. 조건부 CSV 다운로드 (진행률 가중치 적용 5% ~ 80%)
-    bool csvSuccess = await ServerCSV_ConvertData.DownloadAllCSVAsync((progress, fileName) =&gt;
+    <span class="hljs-comment">// 2. 조건부 CSV 다운로드 (진행률 가중치 적용 5% ~ 80%)</span>
+    <span class="hljs-built_in">bool</span> csvSuccess = <span class="hljs-keyword hljs-control-flow">await</span> ServerCSV_ConvertData.DownloadAllCSVAsync((progress, fileName) =&gt;
     {
-        UpdateProgress(0.05f + (progress * 0.75f), $&quot;데이터 수신 중: {fileName}&quot;);
+        UpdateProgress(<span class="hljs-number">0.05f</span> + (progress * <span class="hljs-number">0.75f</span>), <span class="hljs-string">$&quot;데이터 수신 중: <span class="hljs-subst">{fileName}</span>&quot;</span>);
     });
 
-    // 3. 서버 데이터 로드 (DataManager 비동기 파싱)
-    UpdateProgress(0.80f, &quot;데이터 로드 중...&quot;);
-    await Managers.Data.ServerDataLoadAsync();
+    <span class="hljs-comment">// 3. 서버 데이터 로드 (DataManager 비동기 파싱)</span>
+    UpdateProgress(<span class="hljs-number">0.80f</span>, <span class="hljs-string">&quot;데이터 로드 중...&quot;</span>);
+    <span class="hljs-keyword hljs-control-flow">await</span> Managers.Data.ServerDataLoadAsync();
 
-    UpdateProgress(1.0f, &quot;데이터 로딩 완료!&quot;);
-    return true;
+    UpdateProgress(<span class="hljs-number">1.0f</span>, <span class="hljs-string">&quot;데이터 로딩 완료!&quot;</span>);
+    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
 }</code></pre>
 </details>
 <hr>
@@ -163,36 +163,36 @@ public async Task&lt;bool&gt; StartLoadingDataAsync(CancellationToken cancellati
 <p><strong>퀘스트 이벤트 및 보상 계산 로직</strong> 몬스터 처치 이벤트 구독과 시드 기반 보상 변동 로직입니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 퀘스트 이벤트 및 보상 계산 로직</summary>
-<pre><code class="language-csharp">// QuestManager.cs: 몬스터 처치 이벤트 핸들링 및 진행도 체크
-private void HandleMonsterKilled(int monsterId)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// QuestManager.cs: 몬스터 처치 이벤트 핸들링 및 진행도 체크</span>
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">HandleMonsterKilled</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> monsterId</span>)</span>
 {
-    var key = (typeof(Unit_Monster), monsterId);
-    List&lt;int&gt; completedQuestIndices = new List&lt;int&gt;();
+    <span class="hljs-keyword">var</span> key = (<span class="hljs-keyword">typeof</span>(Unit_Monster), monsterId);
+    List&lt;<span class="hljs-built_in">int</span>&gt; completedQuestIndices = <span class="hljs-keyword">new</span> List&lt;<span class="hljs-built_in">int</span>&gt;();
 
-    foreach (Quest quest in ActiveQuestList)
+    <span class="hljs-keyword hljs-control-flow">foreach</span> (Quest quest <span class="hljs-keyword">in</span> ActiveQuestList)
     {
-        if (IsTargetQuest(quest, key))
+        <span class="hljs-keyword hljs-control-flow">if</span> (IsTargetQuest(quest, key))
         {
-            // 진행도 증가 및 UI 업데이트 이벤트 발행
+            <span class="hljs-comment">// 진행도 증가 및 UI 업데이트 이벤트 발행</span>
             UpdateQuestProgress(quest);
 
-            if (quest.IsQuestCompleted())
+            <span class="hljs-keyword hljs-control-flow">if</span> (quest.IsQuestCompleted())
                 completedQuestIndices.Add(CompleteQuest(quest));
         }
     }
 
-    if (completedQuestIndices.Count &gt; 0)
+    <span class="hljs-keyword hljs-control-flow">if</span> (completedQuestIndices.Count &gt; <span class="hljs-number">0</span>)
     {
         Managers.Event.QuestCompleted(completedQuestIndices);
     }
 }
 
-// Quest.cs: 시드 기반 동적 보상 산출 (생성자 단계)
-// GameSeed의 Reward 도메인을 사용하여 동일한 시드일 때 동일한 퀘스트 보상을 보장
-float RewardRatio = (float)GameSeed.NextInt(GameSeed.Domain.Reward, 0, 11) / 10f;
+<span class="hljs-comment">// Quest.cs: 시드 기반 동적 보상 산출 (생성자 단계)</span>
+<span class="hljs-comment">// GameSeed의 Reward 도메인을 사용하여 동일한 시드일 때 동일한 퀘스트 보상을 보장</span>
+<span class="hljs-built_in">float</span> RewardRatio = (<span class="hljs-built_in">float</span>)GameSeed.NextInt(GameSeed.Domain.Reward, <span class="hljs-number">0</span>, <span class="hljs-number">11</span>) / <span class="hljs-number">10f</span>;
 
-m_rewardGold = Mathf.RoundToInt(Managers.Data.ResourceData[m_questLevel].questGold * ((float)ctx.difficultyTag * RewardRatio));
-m_rewardExp = Mathf.RoundToInt(Managers.Data.ResourceData[m_questLevel].questExp * ((float)ctx.difficultyTag * (1f - RewardRatio)));</code></pre>
+m_rewardGold = Mathf.RoundToInt(Managers.Data.ResourceData[m_questLevel].questGold * ((<span class="hljs-built_in">float</span>)ctx.difficultyTag * RewardRatio));
+m_rewardExp = Mathf.RoundToInt(Managers.Data.ResourceData[m_questLevel].questExp * ((<span class="hljs-built_in">float</span>)ctx.difficultyTag * (<span class="hljs-number">1f</span> - RewardRatio)));</code></pre>
 </details>
 <hr>
 <h2 id="4-계층적-맵-생성-및-이동-아키텍처" class="chapter-title">4. 계층적 맵 생성 및 이동 아키텍처</h2>
@@ -204,48 +204,48 @@ m_rewardExp = Mathf.RoundToInt(Managers.Data.ResourceData[m_questLevel].questExp
 <p><strong>비동기 맵 계층 초기화 로직</strong> Map 객체 하위에 Region을 묶고, Region 내부에 퀘스트와 Field를 생성하여 인덱스로 연결합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 비동기 맵 초기화 및 계층 구조 생성 로직</summary>
-<pre><code class="language-csharp">// MapManager.cs: 비동기 맵 초기화 진입점
-public async Task&lt;bool&gt; NewGame_InitMap(Func&lt;float, string, Task&gt; onProgress)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// MapManager.cs: 비동기 맵 초기화 진입점</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword hljs-control-flow">async</span> Task&lt;<span class="hljs-built_in">bool</span>&gt; <span class="hljs-title">NewGame_InitMap</span>(<span class="hljs-params">Func&lt;<span class="hljs-built_in">float</span>, <span class="hljs-built_in">string</span>, Task&gt; onProgress</span>)</span>
 {
-    // 1. 최상위 월드 맵 생성 (레벨/개수 지정)
-    Map map1 = DataFactory.MakeMap(1, 3, m_mapParentObj.transform);
-    Map map10 = DataFactory.MakeMap(10, 3, m_mapParentObj.transform);
-    Map map20 = DataFactory.MakeMap(20, 3, m_mapParentObj.transform);
+    <span class="hljs-comment">// 1. 최상위 월드 맵 생성 (레벨/개수 지정)</span>
+    Map map1 = DataFactory.MakeMap(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, m_mapParentObj.transform);
+    Map map10 = DataFactory.MakeMap(<span class="hljs-number">10</span>, <span class="hljs-number">3</span>, m_mapParentObj.transform);
+    Map map20 = DataFactory.MakeMap(<span class="hljs-number">20</span>, <span class="hljs-number">3</span>, m_mapParentObj.transform);
 
-    // 2. 월드맵 하위에 할당된 모든 지역(Region)들에 대한 내부 필드/퀘스트 비동기 생성 
-    if (WorldRegionList != null &amp;&amp; WorldRegionList.Count != 0)
+    <span class="hljs-comment">// 2. 월드맵 하위에 할당된 모든 지역(Region)들에 대한 내부 필드/퀘스트 비동기 생성 </span>
+    <span class="hljs-keyword hljs-control-flow">if</span> (WorldRegionList != <span class="hljs-literal">null</span> &amp;&amp; WorldRegionList.Count != <span class="hljs-number">0</span>)
     {
-        foreach (Region region in WorldRegionList)
+        <span class="hljs-keyword hljs-control-flow">foreach</span> (Region region <span class="hljs-keyword">in</span> WorldRegionList)
         {
-            // Region.GenerateRegion 안에서 Field 객체들이 생성되며 진행도 보고를 전달
-            await region.GenerateRegion(onProgress);
+            <span class="hljs-comment">// Region.GenerateRegion 안에서 Field 객체들이 생성되며 진행도 보고를 전달</span>
+            <span class="hljs-keyword hljs-control-flow">await</span> region.GenerateRegion(onProgress);
         }
     }
 
-    IsLoadedData = true;
-    return true;
+    IsLoadedData = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
 }
 
-// Region.cs: 지역 내 필드 및 퀘스트 생성
-public async Task GenerateRegion(Func&lt;float, string, Task&gt; onProgress)
+<span class="hljs-comment">// Region.cs: 지역 내 필드 및 퀘스트 생성</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword hljs-control-flow">async</span> Task <span class="hljs-title">GenerateRegion</span>(<span class="hljs-params">Func&lt;<span class="hljs-built_in">float</span>, <span class="hljs-built_in">string</span>, Task&gt; onProgress</span>)</span>
 {
-    int questCount = GameSeed.NextInt(GameSeed.Domain.Region, 4, 7);
+    <span class="hljs-built_in">int</span> questCount = GameSeed.NextInt(GameSeed.Domain.Region, <span class="hljs-number">4</span>, <span class="hljs-number">7</span>);
     MonsterType monsterType = GameSeed.RandomEnum&lt;MonsterType&gt;(GameSeed.Domain.Region);
-    monsterSet = new MonsterSet(monsterType);
+    monsterSet = <span class="hljs-keyword">new</span> MonsterSet(monsterType);
     
-    // ... 생략 ...
+    <span class="hljs-comment">// ... 생략 ...</span>
 
-    for (int i = 0; i &lt; questCount; i++)
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; questCount; i++)
     {
-        Quest mainQuest = Managers.Quest.GenerateQuest(monsterSet, ref currentQuestLevel, questDataList, questDialogList);
-        int questIndex = Managers.Quest.MainQuestList.IndexOf(mainQuest);
+        Quest mainQuest = Managers.Quest.GenerateQuest(monsterSet, <span class="hljs-keyword">ref</span> currentQuestLevel, questDataList, questDialogList);
+        <span class="hljs-built_in">int</span> questIndex = Managers.Quest.MainQuestList.IndexOf(mainQuest);
 
-        // Field 객체를 생성하고, 방금 생성된 메인 퀘스트의 인덱스를 넘겨 결합시킴
-        Field field = DataFactory.MakeField(this, questIndex, transform);
+        <span class="hljs-comment">// Field 객체를 생성하고, 방금 생성된 메인 퀘스트의 인덱스를 넘겨 결합시킴</span>
+        Field field = DataFactory.MakeField(<span class="hljs-keyword">this</span>, questIndex, transform);
         
-        // ... (인덱스 저장 관리 생략)
-        if (onProgress != null)
-            await onProgress((float)(i + 1) / questCount, $&quot;지역 생성 중...&quot;);
+        <span class="hljs-comment">// ... (인덱스 저장 관리 생략)</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (onProgress != <span class="hljs-literal">null</span>)
+            <span class="hljs-keyword hljs-control-flow">await</span> onProgress((<span class="hljs-built_in">float</span>)(i + <span class="hljs-number">1</span>) / questCount, <span class="hljs-string">$&quot;지역 생성 중...&quot;</span>);
     }
 }</code></pre>
 </details>
@@ -290,38 +290,38 @@ public async Task GenerateRegion(Func&lt;float, string, Task&gt; onProgress)
 <p><strong>토큰 인코딩 및 RNG 상태 강제 복구 로직</strong> 고정 폭 문자열을 결합하여 저장하고, 로드시 추출하여 각 도메인의 스트림을 동기화합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 토큰 인코딩 및 RNG 상태 복구 로직</summary>
-<pre><code class="language-csharp">// SaveLoadManager.cs: 시드와 도메인 사용량을 하나의 고정 폭 토큰으로 결합
-private static string BuildSeedToken(long baseSeed, Dictionary&lt;GameSeed.Domain, ulong&gt; usage)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// SaveLoadManager.cs: 시드와 도메인 사용량을 하나의 고정 폭 토큰으로 결합</span>
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">string</span> <span class="hljs-title">BuildSeedToken</span>(<span class="hljs-params"><span class="hljs-built_in">long</span> baseSeed, Dictionary&lt;GameSeed.Domain, <span class="hljs-built_in">ulong</span>&gt; usage</span>)</span>
 {
-    ulong encodedSeed = unchecked((ulong)baseSeed);
-    string token = Pad(encodedSeed, 20); // 20자리 패딩
+    <span class="hljs-built_in">ulong</span> encodedSeed = <span class="hljs-keyword">unchecked</span>((<span class="hljs-built_in">ulong</span>)baseSeed);
+    <span class="hljs-built_in">string</span> token = Pad(encodedSeed, <span class="hljs-number">20</span>); <span class="hljs-comment">// 20자리 패딩</span>
 
-    List&lt;GameSeed.Domain&gt; domains = new List&lt;GameSeed.Domain&gt;((GameSeed.Domain[])Enum.GetValues(typeof(GameSeed.Domain)));
-    domains.Sort((a, b) =&gt; ((uint)a).CompareTo((uint)b));
+    List&lt;GameSeed.Domain&gt; domains = <span class="hljs-keyword">new</span> List&lt;GameSeed.Domain&gt;((GameSeed.Domain[])Enum.GetValues(<span class="hljs-keyword">typeof</span>(GameSeed.Domain)));
+    domains.Sort((a, b) =&gt; ((<span class="hljs-built_in">uint</span>)a).CompareTo((<span class="hljs-built_in">uint</span>)b));
 
-    token += Pad((uint)domains.Count, 3);
-    foreach (var d in domains)
+    token += Pad((<span class="hljs-built_in">uint</span>)domains.Count, <span class="hljs-number">3</span>);
+    <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> d <span class="hljs-keyword">in</span> domains)
     {
-        ulong count = usage != null ? usage.GetValueOrDefault(d, 0UL) : 0UL;
-        token += Pad((uint)d, 3);    // 도메인 ID 3자리
-        token += Pad(count, 12);     // 사용량 12자리
+        <span class="hljs-built_in">ulong</span> count = usage != <span class="hljs-literal">null</span> ? usage.GetValueOrDefault(d, <span class="hljs-number">0U</span>L) : <span class="hljs-number">0U</span>L;
+        token += Pad((<span class="hljs-built_in">uint</span>)d, <span class="hljs-number">3</span>);    <span class="hljs-comment">// 도메인 ID 3자리</span>
+        token += Pad(count, <span class="hljs-number">12</span>);     <span class="hljs-comment">// 사용량 12자리</span>
     }
-    return token;
+    <span class="hljs-keyword hljs-control-flow">return</span> token;
 }
 
-// GameSeed.cs: 토큰에서 추출된 정보로 RNG 엔진을 과거 상태로 복원
-public static void RestoreRNG(long baseSeed, Dictionary&lt;Domain, ulong&gt; usageCounts)
+<span class="hljs-comment">// GameSeed.cs: 토큰에서 추출된 정보로 RNG 엔진을 과거 상태로 복원</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RestoreRNG</span>(<span class="hljs-params"><span class="hljs-built_in">long</span> baseSeed, Dictionary&lt;Domain, <span class="hljs-built_in">ulong</span>&gt; usageCounts</span>)</span>
 {
-    foreach (var kv in usageCounts)
+    <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> kv <span class="hljs-keyword">in</span> usageCounts)
     {
         Domain d = kv.Key;
-        ulong count = kv.Value;     
+        <span class="hljs-built_in">ulong</span> count = kv.Value;     
         
-        // BaseSeed를 해싱(Salt)하여 도메인별 고유 서브 시드로 RNG 재생성
-        System.Random rng = new System.Random(DeriveSubSeed(baseSeed, (uint)d));
+        <span class="hljs-comment">// BaseSeed를 해싱(Salt)하여 도메인별 고유 서브 시드로 RNG 재생성</span>
+        System.Random rng = <span class="hljs-keyword">new</span> System.Random(DeriveSubSeed(baseSeed, (<span class="hljs-built_in">uint</span>)d));
         
-        // 토큰에 기록된 횟수만큼 난수를 버림(Skip) 호출하여 확률 스트림 위치를 강제 동기화
-        for (ulong i = 0; i &lt; count; i++)
+        <span class="hljs-comment">// 토큰에 기록된 횟수만큼 난수를 버림(Skip) 호출하여 확률 스트림 위치를 강제 동기화</span>
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">ulong</span> i = <span class="hljs-number">0</span>; i &lt; count; i++)
         {
             rng.Next();     
         }

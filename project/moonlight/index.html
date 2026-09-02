@@ -68,16 +68,16 @@
 <p><code>GridManager</code>는 Tilemap의 각 셀을 순회하며 셀 좌표, 월드 좌표, 이동 가능 여부를 가진 <code>Grid</code> 노드를 생성합니다. NPC는 월드 좌표를 직접 비교하지 않고 <code>WorldToCell</code>과 <code>CellToWorld</code>를 통해 동일한 그리드 좌표계를 사용합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: Tilemap을 Grid 노드로 변환</summary>
-<pre><code class="language-csharp">for (int x = 0; x &lt; gridSize.x; x++)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> x = <span class="hljs-number">0</span>; x &lt; gridSize.x; x++)
 {
-    var row = new List&lt;Grid&gt;();
-    for (int y = 0; y &lt; gridSize.y; y++)
+    <span class="hljs-keyword">var</span> row = <span class="hljs-keyword">new</span> List&lt;Grid&gt;();
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> y = <span class="hljs-number">0</span>; y &lt; gridSize.y; y++)
     {
-        Vector3Int cell = new Vector3Int(x, y, 0);
+        Vector3Int cell = <span class="hljs-keyword">new</span> Vector3Int(x, y, <span class="hljs-number">0</span>);
         Vector3 worldPosition = tilemap.CellToWorld(cell);
-        bool isWalkable = tilemap.HasTile(cell);
+        <span class="hljs-built_in">bool</span> isWalkable = tilemap.HasTile(cell);
 
-        row.Add(new Grid(isWalkable, worldPosition, x, y));
+        row.Add(<span class="hljs-keyword">new</span> Grid(isWalkable, worldPosition, x, y));
     }
     grid.Add(row);
 }</code></pre>
@@ -87,14 +87,14 @@
 <p>테이블과 의자는 단순한 이미지 타일이 아니라 게임 상태를 가진 커스텀 타일입니다. <code>CustomTableTile</code>과 <code>CustomChairTile</code>에 사용 가능 여부를 저장하고, <code>GridManager</code>가 이를 셀 좌표 기반 Dictionary로 관리합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 커스텀 타일 데이터와 좌표별 Dictionary</summary>
-<pre><code class="language-csharp">public Dictionary&lt;Vector3Int, CustomTableTile&gt; tablesDictionary;
-public Dictionary&lt;Vector3Int, CustomChairTile&gt; chairesDictionary;
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> Dictionary&lt;Vector3Int, CustomTableTile&gt; tablesDictionary;
+<span class="hljs-keyword">public</span> Dictionary&lt;Vector3Int, CustomChairTile&gt; chairesDictionary;
 
-public class TableTileData
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">TableTileData</span>
 {
-    public bool isUseAble;
-    public string tileName;
-    public int tableUseAbleIndex = 4;
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> isUseAble;
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">string</span> tileName;
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> tableUseAbleIndex = <span class="hljs-number">4</span>;
 }</code></pre>
 </details>
 <p>초기화 시 타일별 데이터를 복제해 등록했기 때문에, 같은 타일 에셋을 사용하는 좌석이라도 각 셀의 점유 상태를 독립적으로 다룰 수 있습니다.</p>
@@ -118,23 +118,23 @@ public class TableTileData
 <p>각 <code>Grid</code> 노드는 시작점부터의 실제 비용 <code>gCost</code>, 목적지까지의 휴리스틱 비용 <code>hCost</code>, 그리고 부모 노드를 보관합니다. 최종 우선순위는 두 비용의 합인 <code>FCost</code>로 결정합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: A* 노드의 F 비용 계산</summary>
-<pre><code class="language-csharp">public int FCost =&gt; gCost + hCost;</code></pre>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> FCost =&gt; gCost + hCost;</code></pre>
 </details>
 <p>매장 이동은 상·하·좌·우 4방향으로 제한했고, 이에 맞춰 Manhattan Distance를 휴리스틱으로 사용했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: Manhattan Distance 휴리스틱</summary>
-<pre><code class="language-csharp">int GetDistance(Grid nodeA, Grid nodeB)
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-function"><span class="hljs-built_in">int</span> <span class="hljs-title">GetDistance</span>(<span class="hljs-params">Grid nodeA, Grid nodeB</span>)</span>
 {
-    int distanceX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
-    int distanceY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
-    return 10 * (distanceX + distanceY);
+    <span class="hljs-built_in">int</span> distanceX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
+    <span class="hljs-built_in">int</span> distanceY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
+    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-number">10</span> * (distanceX + distanceY);
 }</code></pre>
 </details>
 <h3 id="32-open-set과-closed-set-탐색">3.2 Open Set과 Closed Set 탐색</h3>
 <p>탐색할 후보는 Open Set, 검사가 끝난 노드는 Closed Set으로 분리합니다. 현재 후보 중 <code>FCost</code>가 가장 낮은 노드를 선택하고, 비용이 같다면 목적지에 더 가까운 <code>hCost</code>가 낮은 노드를 우선합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: Open Set의 최우선 노드 선택</summary>
-<pre><code class="language-csharp">if (candidate.FCost &lt; current.FCost ||
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword hljs-control-flow">if</span> (candidate.FCost &lt; current.FCost ||
     candidate.FCost == current.FCost &amp;&amp; candidate.hCost &lt; current.hCost)
 {
     current = candidate;
@@ -161,7 +161,7 @@ public class TableTileData
 <h2 id="4-손님-ai-입장부터-퇴장까지의-서비스-루프" class="chapter-title">4. 손님 AI: 입장부터 퇴장까지의 서비스 루프</h2>
 <h3 id="41-상태-기반-행동-분리">4.1 상태 기반 행동 분리</h3>
 <p>손님의 전체 행동은 다음 상태로 구성했습니다.</p>
-<pre><code class="language-text">Enter → FindingTable → MovingToChair → Sitting
+<pre class="hljs-pre"><code class="hljs language-text">Enter → FindingTable → MovingToChair → Sitting
       → EatFood → OutStore → None</code></pre>
 <div class="pf-table-wrapper"><table class="pf-data-table"><thead><tr><th>상태</th><th>주요 행동</th></tr></thead><tbody><tr><td>Enter</td><td>매장 입구까지 이동하고 입장 완료 확인</td></tr><tr><td>FindingTable</td><td>사용 가능한 테이블과 인접 의자 탐색</td></tr><tr><td>MovingToChair</td><td>A*로 의자까지 이동</td></tr><tr><td>Sitting</td><td>주문 UI를 활성화하고 메뉴 선택</td></tr><tr><td>EatFood</td><td>음식 수령 후 식사 애니메이션 재생</td></tr><tr><td>OutStore</td><td>결제 처리, 좌석 반환, 출구 이동</td></tr></tbody></table></div>
 <p><code>ICustomerLogic</code> 코루틴이 현재 상태에 맞는 행동을 실행하며, 이동이나 식사처럼 시간이 필요한 동작은 완료 조건을 기다린 뒤 다음 상태로 전환합니다.</p>
@@ -177,7 +177,7 @@ public class TableTileData
 <h2 id="5-직원-ai-주문-큐와-조리서빙-파이프라인" class="chapter-title">5. 직원 AI: 주문 큐와 조리·서빙 파이프라인</h2>
 <h3 id="51-직원-상태-머신">5.1 직원 상태 머신</h3>
 <p>직원은 네 가지 핵심 상태로 동작합니다.</p>
-<pre><code class="language-text">Roaming → MovingToCook → Cooking → ServingDish
+<pre class="hljs-pre"><code class="hljs language-text">Roaming → MovingToCook → Cooking → ServingDish
    ↑                                      │
    └──────── 주문 처리 완료 ───────────────┘</code></pre>
 <ul><li><code>Roaming</code>: 가구가 없는 셀 중 하나를 선택해 매장을 배회합니다.</li><li><code>MovingToCook</code>: 주문 음식에 맞는 조리 도구를 예약하고 이동합니다.</li><li><code>Cooking</code>: 도구별 작업 스프라이트와 애니메이션을 재생합니다.</li><li><code>ServingDish</code>: 손님 위치까지 이동해 음식을 전달합니다.</li></ul>
@@ -185,8 +185,8 @@ public class TableTileData
 <p>직원은 <code>Queue&lt;FoodItem&gt;</code>과 <code>Queue&lt;CustomerAI&gt;</code>를 함께 사용합니다. 새로운 주문이 들어오면 음식과 손님을 같은 순서로 enqueue하고, 서빙 완료 시 각각 dequeue해 해당 손님에게 조리된 음식과 가격 정보를 전달합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 음식·손님 주문 큐 처리</summary>
-<pre><code class="language-csharp">public Queue&lt;FoodItem&gt; order_foodType = new Queue&lt;FoodItem&gt;();
-public Queue&lt;CustomerAI&gt; order_Customer = new Queue&lt;CustomerAI&gt;();
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> Queue&lt;FoodItem&gt; order_foodType = <span class="hljs-keyword">new</span> Queue&lt;FoodItem&gt;();
+<span class="hljs-keyword">public</span> Queue&lt;CustomerAI&gt; order_Customer = <span class="hljs-keyword">new</span> Queue&lt;CustomerAI&gt;();
 
 CustomerAI customer = order_Customer.Dequeue();
 FoodItem food = order_foodType.Dequeue();

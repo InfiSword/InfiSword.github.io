@@ -111,24 +111,24 @@
 <p><strong>상태머신 핵심 로직</strong> 상태머신 초기화 및 안전한 상태 전환을 보장하는 핵심 로직입니다.</p>
 <details class="pf-details">
 <summary>코드 보기: FiniteStateMachine.cs</summary>
-<pre><code class="language-csharp">// FiniteStateMachine.cs: 상태머신 핵심 로직
-public class FiniteStateMachine
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// FiniteStateMachine.cs: 상태머신 핵심 로직</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">FiniteStateMachine</span>
 {
-    public State currentState { get; private set; } 
+    <span class="hljs-keyword">public</span> State currentState { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } 
 
-    // 상태머신 초기화: 시작 상태 설정 및 Enter() 호출
-    public void Init(State startingState) 
+    <span class="hljs-comment">// 상태머신 초기화: 시작 상태 설정 및 Enter() 호출</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Init</span>(<span class="hljs-params">State startingState</span>)</span> 
     {
-        currentState = startingState;     // 현재 상태 설정
-        currentState.Enter();             // 시작 상태 진입
+        currentState = startingState;     <span class="hljs-comment">// 현재 상태 설정</span>
+        currentState.Enter();             <span class="hljs-comment">// 시작 상태 진입</span>
     }
 
-    // 상태 전환: 이전 상태 종료 후 새 상태 진입
-    public void ChangeState(State newState) 
+    <span class="hljs-comment">// 상태 전환: 이전 상태 종료 후 새 상태 진입</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ChangeState</span>(<span class="hljs-params">State newState</span>)</span> 
     {
-        currentState.Exit();                // 이전 상태 종료
-        currentState = newState;            // 새 상태로 전환
-        currentState.Enter();               // 새 상태 진입
+        currentState.Exit();                <span class="hljs-comment">// 이전 상태 종료</span>
+        currentState = newState;            <span class="hljs-comment">// 새 상태로 전환</span>
+        currentState.Enter();               <span class="hljs-comment">// 새 상태 진입</span>
     }
 }</code></pre>
 </details>
@@ -136,38 +136,38 @@ public class FiniteStateMachine
 <p>모든 상태는 <code>State</code> 베이스 클래스를 상속받아 구현됩니다. 각 상태는 애니메이션 파라미터 제어와 상태 시작 시간 기록 등을 자동으로 처리합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: State.cs</summary>
-<pre><code class="language-csharp">// State.cs: 모든 상태의 베이스 클래스
-public class State
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// State.cs: 모든 상태의 베이스 클래스</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">State</span>
 {
-    protected FiniteStateMachine stateMachine;  // 상태머신 참조
-    protected Entity entity;                    // 엔티티 참조
-    protected float startTime;                  // 상태 시작 시간
-    protected string animBoolName;              // 애니메이션 파라미터 이름
+    <span class="hljs-keyword">protected</span> FiniteStateMachine stateMachine;  <span class="hljs-comment">// 상태머신 참조</span>
+    <span class="hljs-keyword">protected</span> Entity entity;                    <span class="hljs-comment">// 엔티티 참조</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> startTime;                  <span class="hljs-comment">// 상태 시작 시간</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">string</span> animBoolName;              <span class="hljs-comment">// 애니메이션 파라미터 이름</span>
 
-    public virtual void Enter()                     // 상태 진입 시 호출
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Enter</span>()                     <span class="hljs-comment">// 상태 진입 시 호출</span></span>
     {
-        startTime = Time.time;                      // 시작 시간 기록
-        entity.anim.SetBool(animBoolName, true);    // 애니메이션 트리거
-        DoChecks();                                 // 상태 전환 조건 확인
+        startTime = Time.time;                      <span class="hljs-comment">// 시작 시간 기록</span>
+        entity.anim.SetBool(animBoolName, <span class="hljs-literal">true</span>);    <span class="hljs-comment">// 애니메이션 트리거</span>
+        DoChecks();                                 <span class="hljs-comment">// 상태 전환 조건 확인</span>
     }
     
-    public virtual void Exit()                     // 상태 종료 시 호출
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Exit</span>()                     <span class="hljs-comment">// 상태 종료 시 호출</span></span>
     {
-        entity.anim.SetBool(animBoolName, false);   // 애니메이션 종료
+        entity.anim.SetBool(animBoolName, <span class="hljs-literal">false</span>);   <span class="hljs-comment">// 애니메이션 종료</span>
     }
     
-    public virtual void LogicUpdate()         // Update()에서 호출
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">LogicUpdate</span>()         <span class="hljs-comment">// Update()에서 호출</span></span>
     {
     }
     
-    public virtual void PhysicsUpdate()      // FixedUpdate()에서 호출
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">PhysicsUpdate</span>()      <span class="hljs-comment">// FixedUpdate()에서 호출</span></span>
     {
-        DoChecks();                                 // 물리 업데이트마다 조건 확인
+        DoChecks();                                 <span class="hljs-comment">// 물리 업데이트마다 조건 확인</span>
     }
 
-    public virtual void DoChecks()          // 상태 전환 조건 확인
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">DoChecks</span>()          <span class="hljs-comment">// 상태 전환 조건 확인</span></span>
     {
-        // 플레이어 감지, 벽/절벽 감지 등
+        <span class="hljs-comment">// 플레이어 감지, 벽/절벽 감지 등</span>
     }
 }</code></pre>
 </details>
@@ -211,20 +211,20 @@ public class State
 <ul><li><strong>슬라임 (기본):</strong> 원거리 포물선 공격, 대시 무적 프레임 활용.</li><li><strong>토끼 (변신):</strong> 더블 점프 및 벽 점프 능력 획득. <code>Rabbit_ability</code>와 연동하여 벽 점프 중 조작 제한 물리 로직 적용.</li></ul>
 <details class="pf-details">
 <summary>코드 보기: Player_Slime.cs - 초기화 로직</summary>
-<pre><code class="language-csharp">// Player_Slime.cs: 플레이어 슬라임 메인 클래스
-public class Player_Slime : Player_Entity
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// Player_Slime.cs: 플레이어 슬라임 메인 클래스</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Player_Slime</span> : <span class="hljs-title">Player_Entity</span>
 {
-    public Player_SlimeMovement movement { get; private set; }
-    public Player_Attack attack { get; private set; }
-    public Player_Dash dash { get; private set; }
+    <span class="hljs-keyword">public</span> Player_SlimeMovement movement { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> Player_Attack attack { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> Player_Dash dash { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
 
-    protected override void Start()
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Start</span>()</span>
     {
-        base.Start();
-        // 각 기능 컴포넌트 초기화 (Composition)
-        movement = new Player_SlimeMovement(this, movementData, this);
-        attack = new Player_Attack(this, attackData, meleePos);
-        dash = new Player_Dash(this, dashData);
+        <span class="hljs-keyword">base</span>.Start();
+        <span class="hljs-comment">// 각 기능 컴포넌트 초기화 (Composition)</span>
+        movement = <span class="hljs-keyword">new</span> Player_SlimeMovement(<span class="hljs-keyword">this</span>, movementData, <span class="hljs-keyword">this</span>);
+        attack = <span class="hljs-keyword">new</span> Player_Attack(<span class="hljs-keyword">this</span>, attackData, meleePos);
+        dash = <span class="hljs-keyword">new</span> Player_Dash(<span class="hljs-keyword">this</span>, dashData);
     }
 }</code></pre>
 </details>
@@ -246,25 +246,25 @@ public class Player_Slime : Player_Entity
 </div>
 <details class="pf-details">
 <summary>코드 보기: MainBossBear.cs - 델리게이트 기반 스킬 관리</summary>
-<pre><code class="language-csharp">// MainBossBear.cs: 보스 스킬 시스템
-public class MainBossBear : BossBearSetting
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// MainBossBear.cs: 보스 스킬 시스템</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">MainBossBear</span> : <span class="hljs-title">BossBearSetting</span>
 {
-    private delegate void BossBear_SkillAction();
-    private BossBear_SkillAction[] BossBear_Skills;
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-built_in">delegate</span> <span class="hljs-keyword">void</span> <span class="hljs-title">BossBear_SkillAction</span>()</span>;
+    <span class="hljs-keyword">private</span> BossBear_SkillAction[] BossBear_Skills;
 
-    public bool IsSkillUpgrade; // HP 단계 플래그
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> IsSkillUpgrade; <span class="hljs-comment">// HP 단계 플래그</span>
 
-    public override void Start()
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Start</span>()</span>
     {
-        base.Start();
-        // 델리게이트 배열에 메서드 직접 할당
-        BossBear_Skills = new BossBear_SkillAction[4] { Rest, Smash, Dash, Rumbling };
+        <span class="hljs-keyword">base</span>.Start();
+        <span class="hljs-comment">// 델리게이트 배열에 메서드 직접 할당</span>
+        BossBear_Skills = <span class="hljs-keyword">new</span> BossBear_SkillAction[<span class="hljs-number">4</span>] { Rest, Smash, Dash, Rumbling };
     }
 
-    private void RandomBossBearSkillState()
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RandomBossBearSkillState</span>()</span>
     {
-        int RandomSkill_Index = Random.Range((int)BossBear_SkillEnum.Smash, (int)BossBear_SkillEnum.Skill_Max);
-        // 선택된 스킬 메서드 대리 호출
+        <span class="hljs-built_in">int</span> RandomSkill_Index = Random.Range((<span class="hljs-built_in">int</span>)BossBear_SkillEnum.Smash, (<span class="hljs-built_in">int</span>)BossBear_SkillEnum.Skill_Max);
+        <span class="hljs-comment">// 선택된 스킬 메서드 대리 호출</span>
         BossBear_Skills[RandomSkill_Index].Invoke();
     }
 }</code></pre>
