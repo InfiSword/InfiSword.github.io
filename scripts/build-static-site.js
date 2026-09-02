@@ -383,6 +383,54 @@ function renderMarkdown(source) {
               /<span class="hljs-keyword">\s*(return|if|else|switch|case|break|continue|default|for|foreach|while|do|try|catch|finally|throw|yield|await|async)\s*<\/span>/g,
               '<span class="hljs-keyword hljs-control-flow">$1</span>'
             );
+
+            // Enhance C# / C++ types & methods with VS Code Dark+ styling
+            if (['csharp', 'cpp'].includes(targetLang)) {
+              const knownTypes = new Set([
+                'Vector2', 'Vector3', 'Vector4', 'Quaternion', 'Matrix4x4', 'Color', 'Color32', 'Rect', 'Bounds',
+                'GameObject', 'Transform', 'Component', 'MonoBehaviour', 'ScriptableObject', 'Camera', 'SpriteRenderer',
+                'Collider', 'Collider2D', 'BoxCollider', 'BoxCollider2D', 'CircleCollider2D', 'Rigidbody', 'Rigidbody2D',
+                'Debug', 'Mathf', 'Time', 'Random', 'Input', 'Physics', 'Physics2D', 'EventSystem', 'PointerEventData',
+                'RaycastResult', 'RaycastHit2D', 'RaycastHit', 'Ray', 'Canvas', 'RectTransform', 'Image', 'Text', 'Button',
+                'List', 'Dictionary', 'HashSet', 'Queue', 'Stack', 'Action', 'Func', 'Predicate', 'Task', 'CancellationToken',
+                'FileGrid', 'File_Base', 'Unit_File', 'Unit_Folder', 'Unit_Virus', 'Unit_VirusBase', 'GameObjectGridLayout',
+                'IInteractable', 'IUIDropTarget', 'InteractionHandler', 'BuffStat', 'Buff_Base', 'BuffController', 'Define',
+                'Managers', 'UIParticle', 'ParticleSystem', 'Coroutine', 'WaitForSeconds', 'WaitUntil',
+                'Sprite', 'AudioClip', 'AudioSource', 'Animation', 'Animator', 'AnimationClip',
+                'HWND', 'HDC', 'PAINTSTRUCT', 'RECT', 'POINT', 'SIZE', 'wstring', 'string', 'vector', 'map', 'unordered_map',
+                'ObjectManager', 'RenderManager', 'CameraManager', 'ColliderManager', 'DataManager',
+                'SceneManager', 'BaseScene', 'GameProgressManager', 'Combatant', 'Player', 'Monster', 'Hound', 'Spider',
+                'Entity', 'Item', 'Skill', 'Inventory', 'CharacterSelectScene', 'TitleScene', 'ForestScene',
+                'CSVParser', 'SaveLoadManager', 'MapManager', 'GameSeed', 'QuestManager', 'LoadingManager',
+                'SimcadeCarAgent_Auto', 'SplineToCheckpointGenerator', 'CarProgress', 'TrackData',
+                'CustomerAI', 'Staff_AI', 'GridManager', 'Pathfinding', 'CustomTableTile', 'CustomChairTile',
+                'FiniteStateMachine', 'State', 'Player_Slime', 'MainBossBear'
+              ]);
+
+              const parts = highlighted.split(/(<[^>]+>)/);
+              for (let i = 0; i < parts.length; i += 2) {
+                let text = parts[i];
+                if (!text || text.trim() === '') continue;
+
+                // Types & Classes
+                text = text.replace(/\b([A-Z][a-zA-Z0-9_]*)\b/g, (match) => {
+                  if (knownTypes.has(match) || /^I[A-Z][a-zA-Z0-9_]*$/.test(match)) {
+                    return `<span class="hljs-title class_">${match}</span>`;
+                  }
+                  return match;
+                });
+
+                // Methods: identifier followed by '('
+                text = text.replace(/\b([a-zA-Z_][a-zA-Z0-9_]*)\s*(?=\()/g, (match) => {
+                  const noHighlight = ['if', 'for', 'foreach', 'while', 'switch', 'catch', 'sizeof', 'typeof', 'default', 'return', 'new'];
+                  if (noHighlight.includes(match)) return match;
+                  return `<span class="hljs-title function_">${match}</span>`;
+                });
+
+                parts[i] = text;
+              }
+              highlighted = parts.join('');
+            }
           } catch (err) {
             highlighted = escapeHtml(rawCode);
           }
@@ -497,7 +545,9 @@ function renderToc(headings) {
   ].join("\n");
 }
 
-function renderShell({ title, description, body, pageClass = "" }) {
+function renderShell({ title, description, body, pageClass = "", assetPrefix = "" }) {
+  const homeHref = assetPrefix ? `${assetPrefix}index.html` : "/";
+  const projectsHref = assetPrefix ? `${assetPrefix}index.html#projects` : "/#projects";
   return `<!doctype html>
 <html lang="ko">
 <head>
@@ -512,16 +562,16 @@ function renderShell({ title, description, body, pageClass = "" }) {
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="${assetPrefix}assets/css/site.css">
 </head>
 <body class="${pageClass}">
   <a class="skip-link" href="#main">본문으로 이동</a>
   <header class="site-header">
     <div class="site-header__inner">
-      <a class="site-title" href="/">${site.title}</a>
+      <a class="site-title" href="${homeHref}">${site.title}</a>
       <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="/">Home</a>
-        <a href="/#projects">Projects</a>
+        <a href="${homeHref}">Home</a>
+        <a href="${projectsHref}">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
       </nav>
     </div>
@@ -535,7 +585,7 @@ ${body}
       <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
     </div>
   </footer>
-  <script src="/assets/js/site.js"></script>
+  <script src="${assetPrefix}assets/js/site.js"></script>
 </body>
 </html>
 `;
@@ -553,6 +603,7 @@ ${readText(homeSource)}
       description: site.description,
       body,
       pageClass: "page-home",
+      assetPrefix: "",
     })
   );
 }
@@ -571,7 +622,7 @@ function renderProject(sourceFile) {
   const description = parsed.data.excerpt || site.description;
   const body = `    <article class="site-container project-page">
       <header class="project-hero">
-        <a class="back-link" href="/#projects">← 프로젝트 목록으로</a>
+        <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
         <p class="project-kicker">PROJECT REPORT</p>
         <h1>${escapeHtml(title)}</h1>
         <p>${escapeHtml(description)}</p>
@@ -598,6 +649,7 @@ ${renderToc(article.headings)}
       description,
       body,
       pageClass: "page-project",
+      assetPrefix: "../../",
     })
   );
 }

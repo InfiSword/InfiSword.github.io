@@ -12,16 +12,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
 </head>
 <body class="page-project">
   <a class="skip-link" href="#main">본문으로 이동</a>
   <header class="site-header">
     <div class="site-header__inner">
-      <a class="site-title" href="/">Minhyuk Lee | Game Developer</a>
+      <a class="site-title" href="../../index.html">Minhyuk Lee | Game Developer</a>
       <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="/">Home</a>
-        <a href="/#projects">Projects</a>
+        <a href="../../index.html">Home</a>
+        <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
       </nav>
     </div>
@@ -29,7 +29,7 @@
   <main id="main" class="site-main">
     <article class="site-container project-page">
       <header class="project-hero">
-        <a class="back-link" href="/#projects">← 프로젝트 목록으로</a>
+        <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
         <p class="project-kicker">PROJECT REPORT</p>
         <h1>PROJECT REPORT // FILE_TOWER_DEFENSE</h1>
         <p>Systems Engineering: UI-to-GameObject 리팩토링, 통합 입력 시스템 및 그리드 아키텍처</p>
@@ -65,19 +65,50 @@
 </div>
 <details class="pf-details">
 <summary>코드 보기: FitToScreen 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// GameObjectGridLayout.cs: 해상도 대응 셀 크기 계산</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">FitToScreen</span>()</span> {
-    Camera cam = Camera.main;
-    <span class="hljs-built_in">float</span> height = cam.orthographicSize * <span class="hljs-number">2f</span>; <span class="hljs-comment">// 오르토그래픽 카메라 높이</span>
-    <span class="hljs-built_in">float</span> width = height * cam.aspect;         <span class="hljs-comment">// 카메라 종횡비 기반 너비</span>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameObjectGridLayout</span>.cs: 해상도 및 UI 오프셋 대응 동적 셀 크기 계산</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">FitToScreen</span>()</span>
+{
+    <span class="hljs-keyword hljs-control-flow">if</span> (transform == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
 
-    <span class="hljs-comment">// 가용 영역에서 패딩과 스페이싱을 제외한 실제 셀 크기 도출</span>
-    cellSize.x = (width - (padding.x * <span class="hljs-number">2</span>) - (spacing.x * (columns - <span class="hljs-number">1</span>))) / columns;
-    cellSize.y = (height - (padding.y * <span class="hljs-number">2</span>) - (spacing.y * (rows - <span class="hljs-number">1</span>))) / rows;
+    <span class="hljs-title class_">Camera</span> mainCamera = <span class="hljs-title class_">Camera</span>.main;
+    <span class="hljs-keyword hljs-control-flow">if</span> (mainCamera == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
 
-    <span class="hljs-comment">// 그리드의 좌상단 시작 월드 좌표 계산</span>
-    StartPos = <span class="hljs-keyword">new</span> Vector2(-(width / <span class="hljs-number">2</span>) + padding.x + (cellSize.x / <span class="hljs-number">2</span>), 
-                            (height / <span class="hljs-number">2</span>) - padding.y - (cellSize.y / <span class="hljs-number">2</span>));
+    <span class="hljs-comment">// 카메라 기준 전체 화면 크기 계산 (오르토그래픽 월드 좌표계)</span>
+    <span class="hljs-built_in">float</span> screenHeight = mainCamera.orthographicSize * <span class="hljs-number">2f</span>;
+    <span class="hljs-built_in">float</span> screenWidth = screenHeight * mainCamera.aspect;
+
+    <span class="hljs-comment">// 하단 UI 영역(10%)을 월드 단위 오프셋으로 확보</span>
+    <span class="hljs-built_in">float</span> yOffset = screenHeight * bottomOffsetRatio;
+    <span class="hljs-built_in">float</span> availableGridHeight = screenHeight - yOffset;
+
+    <span class="hljs-comment">// 패딩을 제외한 가용 영역 및 간격(Spacing) 제외한 순수 셀 영역 계산</span>
+    <span class="hljs-title class_">Vector2</span> availableSize = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(screenWidth, availableGridHeight) - padding * <span class="hljs-number">2</span>;
+    <span class="hljs-title class_">Vector2</span> totalSpacing = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(
+        (columns - <span class="hljs-number">1</span>) * spacing.x,
+        (rows - <span class="hljs-number">1</span>) * spacing.y
+    );
+    <span class="hljs-title class_">Vector2</span> cellArea = availableSize - totalSpacing;
+
+    <span class="hljs-comment">// 최종 셀 크기 도출</span>
+    cellSize = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(
+        cellArea.x / columns,
+        cellArea.y / rows
+    );
+
+    <span class="hljs-comment">// 그리드 전체의 실제 월드 크기 및 중심 위치 보정</span>
+    _gridWorldSize = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(
+        columns * cellSize.x + (columns - <span class="hljs-number">1</span>) * spacing.x,
+        rows * cellSize.y + (rows - <span class="hljs-number">1</span>) * spacing.y
+    );
+
+    <span class="hljs-title class_">Vector3</span> newPosition = transform.position;
+    newPosition.y = yOffset / <span class="hljs-number">2f</span>;
+    transform.position = newPosition; <span class="hljs-comment">// 하단 UI 공간만큼 중심점을 상단으로 이동</span>
+
+    <span class="hljs-comment">// 좌측 하단 시작 월드 모서리 좌표 확정</span>
+    _bottomLeftCorner = (<span class="hljs-title class_">Vector2</span>)transform.position - _gridWorldSize / <span class="hljs-number">2f</span>;
+
+    <span class="hljs-title class_">Debug</span>.<span class="hljs-title function_">Log</span>(<span class="hljs-string">$&quot;GridLayout 자동 조정 완료: <span class="hljs-subst">{columns}</span>x<span class="hljs-subst">{rows}</span>, 셀 크기: <span class="hljs-subst">{cellSize}</span>&quot;</span>);
 }</code></pre>
 </details>
 <hr>
@@ -116,18 +147,72 @@
 </div>
 <details class="pf-details">
 <summary>코드 보기: IInteractable 인터페이스</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title">IInteractable</span> {
-    GameObject targetObj { <span class="hljs-keyword">get</span>; }
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">IInteractable</span>.cs: 인게임 오브젝트(파일/바이러스) 통합 입력 인터페이스</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">interface</span> <span class="hljs-title"><span class="hljs-title class_">IInteractable</span></span>
+{
+    <span class="hljs-title class_">GameObject</span> targetObj { <span class="hljs-keyword">get</span>; }
+    <span class="hljs-title class_">Transform</span> transform { <span class="hljs-keyword">get</span>; }
+    <span class="hljs-title class_">Sprite</span> TooltipImg { <span class="hljs-keyword">get</span>; }
+    <span class="hljs-built_in">string</span> ToolTipDes { <span class="hljs-keyword">get</span>; }
+
+    <span class="hljs-comment">// 선택 및 드래그 상태 플래그</span>
     <span class="hljs-built_in">bool</span> IsSelectable { <span class="hljs-keyword">get</span>; }
     <span class="hljs-built_in">bool</span> IsDraggable { <span class="hljs-keyword">get</span>; }
-    
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverEnter</span>()</span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverExit</span>()</span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClick</span>()</span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnBeginDrag</span>()</span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDrag</span>(<span class="hljs-params">Vector2 mouseDelta</span>)</span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnEndDrag</span>()</span>;
-    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnSelected</span>(<span class="hljs-params"><span class="hljs-built_in">bool</span> isSelected</span>)</span>;
+    <span class="hljs-built_in">bool</span> IsTooltipEnabled { <span class="hljs-keyword">get</span>; }
+
+    <span class="hljs-comment">// 이벤트 라이프사이클 메서드</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverEnter</span>()</span>;             <span class="hljs-comment">// 마우스 진입 (툴팁 타이머 리셋)</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnHoverExit</span>()</span>;              <span class="hljs-comment">// 마우스 이탈 (툴팁 숨김)</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClickEnter</span>()</span>;             <span class="hljs-comment">// 마우스 버튼 누름</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClickExit</span>()</span>;              <span class="hljs-comment">// 마우스 버튼 뗌</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnBeginDrag</span>()</span>;              <span class="hljs-comment">// 드래그 시작</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDrag</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> mouseDelta</span>)</span>; <span class="hljs-comment">// 드래그 중 위치 이동</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnEndDrag</span>()</span>;                <span class="hljs-comment">// 드래그 종료</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnClick</span>()</span>;                  <span class="hljs-comment">// 클릭 처리</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnDoubleClick</span>()</span>;            <span class="hljs-comment">// 더블클릭 처리</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnRightClick</span>()</span>;             <span class="hljs-comment">// 우클릭 처리</span>
+    <span class="hljs-function"><span class="hljs-keyword">void</span> <span class="hljs-title">OnSelected</span>(<span class="hljs-params"><span class="hljs-built_in">bool</span> isSelected</span>)</span>;<span class="hljs-comment">// 선택 테두리 시각화</span>
+}
+
+<span class="hljs-comment">// <span class="hljs-title class_">InteractionHandler</span>.cs: Mediator 패턴 기반 다중 드래그 &amp; 이벤트 디스패처</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">InteractionHandler</span></span>
+{
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt; SelectedObjects { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt;();
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt; DragObjects { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">IInteractable</span>&gt;();
+
+    <span class="hljs-comment">// 포인터 다운 시 단일/다중(Ctrl) 선택 및 클릭 이벤트 동기화</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnClickEnterHandler</span>(<span class="hljs-params"><span class="hljs-title class_">IInteractable</span> obj, <span class="hljs-built_in">bool</span> isMultiSelect</span>)</span>
+    {
+        <span class="hljs-keyword hljs-control-flow">if</span> (obj == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
+        obj.<span class="hljs-title function_">OnClickEnter</span>();
+
+        <span class="hljs-keyword hljs-control-flow">if</span> (obj.IsSelectable)
+        {
+            <span class="hljs-keyword hljs-control-flow">if</span> (!isMultiSelect)
+            {
+                <span class="hljs-keyword hljs-control-flow">if</span> (!SelectedObjects.<span class="hljs-title function_">Contains</span>(obj))
+                {
+                    <span class="hljs-title function_">ClearSelections</span>();
+                    <span class="hljs-title function_">SelectSingle</span>(obj);
+                }
+            }
+            <span class="hljs-keyword hljs-control-flow">else</span>
+            {
+                <span class="hljs-keyword hljs-control-flow">if</span> (!SelectedObjects.<span class="hljs-title function_">Contains</span>(obj)) <span class="hljs-title function_">AddSelection</span>(obj);
+                <span class="hljs-keyword hljs-control-flow">else</span> <span class="hljs-title function_">RemoveSelection</span>(obj);
+            }
+        }
+        obj.<span class="hljs-title function_">OnClick</span>();
+    }
+
+    <span class="hljs-comment">// 드래그 대상 전체 유닛의 델타 이동 일괄 디스패치</span>
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnDragHandler</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> mouseDelta</span>)</span>
+    {
+        <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-title class_">IInteractable</span> obj <span class="hljs-keyword">in</span> DragObjects)
+        {
+            <span class="hljs-keyword hljs-control-flow">if</span> (obj != <span class="hljs-literal">null</span>) obj.<span class="hljs-title function_">OnDrag</span>(mouseDelta);
+        }
+    }
 }</code></pre>
 </details>
 <hr>
@@ -203,38 +288,61 @@
 <div class="details-desc">
 <p>월드 좌표를 인덱스로 즉시 변환한 뒤, 해당 인덱스를 중심으로 3x3 영역 내의 그리드만 제곱 거리(<code>sqrMagnitude</code>)로 비교하여 최적의 그리드를 탐색합니다.</p>
 </div>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// FileGridManager.cs: 공간 분할 기반 탐색 최적화 로직</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> FileGrid <span class="hljs-title">GetGrid</span>(<span class="hljs-params">Vector2 worldPos</span>)</span> {
-    <span class="hljs-comment">// 1. 월드 좌표를 그리드 인덱스로 수학적 변환 (O(1))</span>
-    <span class="hljs-keyword hljs-control-flow">if</span> (!WorldToGridIndex(worldPos, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> xCenter, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> yCenter)) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// FileGridManager.cs: 공간 분할 기반 월드 좌표 인덱스 변환 및 3x3 탐색</span>
 
-    <span class="hljs-comment">// 2. 인덱스가 유효하면 주변 3x3 영역만 빠르게 검사 (O(1))</span>
-    <span class="hljs-keyword hljs-control-flow">if</span> (IsValidGridIndex(xCenter, yCenter)) {
-        <span class="hljs-keyword hljs-control-flow">return</span> FindClosestGridInRange(worldPos, xCenter, yCenter);
-    }
+<span class="hljs-comment">// 1. 월드 좌표를 <span class="hljs-title function_">O</span>(1)에 2차원 그리드 인덱스로 수학적 역산</span>
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-built_in">bool</span> <span class="hljs-title">WorldToGridIndex</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> worldPos, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> x, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> y</span>)</span>
+{
+    x = <span class="hljs-number">0</span>; y = <span class="hljs-number">0</span>;
+    <span class="hljs-keyword hljs-control-flow">if</span> (gridLayout == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">false</span>;
 
-    <span class="hljs-comment">// 화면 영역 밖의 비정상 예외 상황에서만 전체 탐색 수행 (Safety Net)</span>
-    <span class="hljs-keyword hljs-control-flow">return</span> FindGlobalClosestGrid(worldPos);
+    <span class="hljs-title class_">Vector2</span> localPos = transform.<span class="hljs-title function_">InverseTransformPoint</span>(worldPos);
+    <span class="hljs-title class_">Vector2</span> startPos = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Vector2</span>(
+        -gridLayout.CellSize.x * (GridWidth - <span class="hljs-number">1</span>) * <span class="hljs-number">0.5f</span>,
+        -gridLayout.CellSize.y * (GridHeight - <span class="hljs-number">1</span>) * <span class="hljs-number">0.5f</span>
+    ) + gridLayout.Padding;
+
+    <span class="hljs-built_in">float</span> xFloat = (localPos.x - startPos.x) / (gridLayout.CellSize.x + gridLayout.Spacing.x);
+    <span class="hljs-built_in">float</span> yFloat = (localPos.y - startPos.y) / (gridLayout.CellSize.y + gridLayout.Spacing.y);
+
+    x = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">RoundToInt</span>(xFloat);
+    y = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">RoundToInt</span>(yFloat);
+    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
 }
 
-<span class="hljs-function"><span class="hljs-keyword">private</span> FileGrid <span class="hljs-title">FindClosestGridInRange</span>(<span class="hljs-params">Vector2 worldPos, <span class="hljs-built_in">int</span> centerX, <span class="hljs-built_in">int</span> centerY</span>)</span> {
-    <span class="hljs-built_in">float</span> minDistSqr = <span class="hljs-built_in">float</span>.MaxValue;
-    FileGrid closestGrid = <span class="hljs-literal">null</span>;
+<span class="hljs-comment">// 2. 마우스 월드 위치 기준 최단 거리 그리드 탐색</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title class_">FileGrid</span> <span class="hljs-title">GetGrid</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> worldPos</span>)</span>
+{
+    <span class="hljs-keyword hljs-control-flow">if</span> (!<span class="hljs-title function_">WorldToGridIndex</span>(worldPos, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> xCenter, <span class="hljs-keyword">out</span> <span class="hljs-built_in">int</span> yCenter))
+        <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
 
-    <span class="hljs-comment">// 중심 기준 3x3 루프</span>
-    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> dx = <span class="hljs-number">-1</span>; dx &lt;= <span class="hljs-number">1</span>; dx++) {
-        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> dy = <span class="hljs-number">-1</span>; dy &lt;= <span class="hljs-number">1</span>; dy++) {
+    <span class="hljs-comment">// 인덱스 유효 범위인 경우 3x3 (총 9개 셀)만 제한 탐색</span>
+    <span class="hljs-keyword hljs-control-flow">if</span> (<span class="hljs-title function_">IsValidGridIndex</span>(xCenter, yCenter))
+    {
+        <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-title function_">FindClosestGridInRange</span>(worldPos, xCenter, yCenter);
+    }
+
+    <span class="hljs-comment">// 예외적인 바운드 외곽 드래그 시에만 전체 전수 검사 수행</span>
+    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-title function_">FindClosestGridFromAll</span>(worldPos);
+}
+
+<span class="hljs-comment">// 3. 3x3 탐색 영역 루프 (제곱 거리 sqrMagnitude 사용으로 Sqrt 연산 회피)</span>
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-title class_">FileGrid</span> <span class="hljs-title">FindClosestGridInRange</span>(<span class="hljs-params"><span class="hljs-title class_">Vector2</span> worldPos, <span class="hljs-built_in">int</span> centerX, <span class="hljs-built_in">int</span> centerY</span>)</span>
+{
+    <span class="hljs-built_in">float</span> minDistSqr = <span class="hljs-built_in">float</span>.MaxValue;
+    <span class="hljs-title class_">FileGrid</span> closestGrid = <span class="hljs-literal">null</span>;
+
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> dx = <span class="hljs-number">-1</span>; dx &lt;= <span class="hljs-number">1</span>; dx++)
+    {
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> dy = <span class="hljs-number">-1</span>; dy &lt;= <span class="hljs-number">1</span>; dy++)
+        {
             <span class="hljs-built_in">int</span> x = centerX + dx;
             <span class="hljs-built_in">int</span> y = centerY + dy;
 
-            <span class="hljs-keyword hljs-control-flow">if</span> (IsValidGridIndex(x, y)) {
-                FileGrid candidate = gridArray[x, y];
-                <span class="hljs-comment">// 제곱 거리(sqrMagnitude) 사용으로 비용이 큰 제곱근(Sqrt) 연산 생략</span>
-                <span class="hljs-built_in">float</span> distSqr = ((Vector2)candidate.transform.position - worldPos).sqrMagnitude;
-                <span class="hljs-keyword hljs-control-flow">if</span> (distSqr &lt; minDistSqr) {
-                    minDistSqr = distSqr;
-                    closestGrid = candidate;
-                }
+            <span class="hljs-keyword hljs-control-flow">if</span> (<span class="hljs-title function_">IsValidGridIndex</span>(x, y))
+            {
+                <span class="hljs-title class_">FileGrid</span> grid = gridArray[x, y];
+                <span class="hljs-title function_">SearchClosestBetter</span>(grid, worldPos, <span class="hljs-keyword">ref</span> minDistSqr, <span class="hljs-keyword">ref</span> closestGrid);
             }
         }
     }
@@ -317,29 +425,80 @@
 <p>단순 스탯 증가 버프 외에도 주기적인 리젠(HP 회복), 지속 피해(도트 데미지) 등을 단일 코루틴 남발 없이 처리하기 위해 <code>MyBuff</code> 추상 클래스와 <code>BuffData</code> 구조를 결합한 중앙 업데이트 방식을 채택했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 다형적 버프 실행 루프</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// BuffData_Base.cs: 다형적 버프 업데이트 루프</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Tick</span>(<span class="hljs-params"><span class="hljs-built_in">float</span> deltaTime</span>)</span> {
-    <span class="hljs-comment">// 딕셔너리 순회 중 요소 삭제 에러 방지를 위해 복사본 리스트로 순회</span>
-    <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-function"><span class="hljs-built_in">int</span> key <span class="hljs-keyword">in</span> <span class="hljs-keyword">new</span> <span class="hljs-title">List</span>&lt;<span class="hljs-title">int</span>&gt;(<span class="hljs-params">activeBuffs.Keys</span>))</span> {
-        <span class="hljs-comment">// BuffData 내부에서 누적 시간을 체크하여 틱 주기 도달 시 true 반환</span>
-        <span class="hljs-keyword hljs-control-flow">if</span> (activeBuffs[key].Tick(deltaTime)) {
-            OnTick(activeBuffs[key]); <span class="hljs-comment">// 다형성에 의해 상속받은 자식 클래스의 고유 로직 실행</span>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// BuffData_Base.cs: 컴포넌트 기반 버프 틱 및 파티클 라이프사이클 관리</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">Buff_Base</span></span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
+{
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">Define</span>.BuffType BuffType { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> Amount { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> Duration { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> WaitTickTime { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> IsRemoving { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-literal">false</span>;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-built_in">float</span> _durationTimer;
+    <span class="hljs-keyword">private</span> <span class="hljs-built_in">float</span> _tickTimer;
+    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">File_Base</span> owner;
+    <span class="hljs-keyword">private</span> <span class="hljs-title class_">GameObject</span> myParticle;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Init</span>(<span class="hljs-params"><span class="hljs-title class_">BuffStat</span> stat</span>)</span>
+    {
+        owner = GetComponent&lt;<span class="hljs-title class_">File_Base</span>&gt;();
+        BuffType = stat.buffType;
+        Amount = stat.amount;
+        Duration = stat.duration;
+        WaitTickTime = stat.waitTickTime;
+
+        _durationTimer = stat.duration;
+        _tickTimer = <span class="hljs-number">0f</span>;
+
+        <span class="hljs-title function_">OnAdded</span>();
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Update</span>()</span>
+    {
+        <span class="hljs-keyword hljs-control-flow">if</span> (IsRemoving) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+        <span class="hljs-built_in">float</span> deltaTime = <span class="hljs-title class_">Time</span>.deltaTime;
+
+        <span class="hljs-comment">// 1. 틱(Tick) 주기 연산 (단일 코루틴 남발 방지)</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (WaitTickTime &gt; <span class="hljs-number">0</span>)
+        {
+            _tickTimer += deltaTime;
+            <span class="hljs-keyword hljs-control-flow">if</span> (_tickTimer &gt;= WaitTickTime)
+            {
+                _tickTimer -= WaitTickTime;
+                <span class="hljs-title function_">OnTick</span>(); <span class="hljs-comment">// 상속받은 구체 클래스의 고유 로직(힐링/도트 피해 등) 실행</span>
+            }
+        }
+
+        <span class="hljs-comment">// 2. 버프 지속 시간(Duration) 관리</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (Duration &gt; <span class="hljs-number">0</span>)
+        {
+            _durationTimer -= deltaTime;
+            <span class="hljs-keyword hljs-control-flow">if</span> (_durationTimer &lt;= <span class="hljs-number">0</span>)
+            {
+                <span class="hljs-title function_">Remove</span>();
+            }
         }
     }
-}
 
-<span class="hljs-comment">// Buff_MP3.cs: 구체적인 힐링(HP 지속 회복) 버프 클래스 구현</span>
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Buff_MP3</span> : <span class="hljs-title">MyBuff</span> {
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Init</span>(<span class="hljs-params">Transform _target</span>)</span> {
-        buffTarget = _target;
-        buffParticleType = Define.ParticleType.Buff_MP3;
-    }
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnAdded</span>()</span> =&gt; <span class="hljs-title function_">ShowParticle</span>();
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnTick</span>()</span> { }
 
-    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnTick</span>(<span class="hljs-params">BuffData buffData</span>)</span> {
-        <span class="hljs-comment">// 대상 오브젝트의 IHealth 인터페이스를 찾아 체력 회복</span>
-        <span class="hljs-keyword">var</span> health = buffTarget.GetComponent&lt;IHealth&gt;();
-        <span class="hljs-keyword hljs-control-flow">if</span> (health != <span class="hljs-literal">null</span>) {
-            health.Heal(buffData.Amount);
+    <span class="hljs-comment">// 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지</span>
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ShowParticle</span>()</span>
+    {
+        <span class="hljs-title class_">Buff_Base</span>[] sameBuffs = GetComponents&lt;<span class="hljs-title class_">Buff_Base</span>&gt;()
+            .<span class="hljs-title function_">Where</span>(b =&gt; b.BuffType == <span class="hljs-keyword">this</span>.BuffType &amp;&amp; !b.IsRemoving).<span class="hljs-title function_">ToArray</span>();
+
+        <span class="hljs-keyword hljs-control-flow">if</span> (sameBuffs.Length == <span class="hljs-number">1</span> &amp;&amp; sameBuffs[<span class="hljs-number">0</span>] == <span class="hljs-keyword">this</span>)
+        {
+            <span class="hljs-title class_">Define</span>.ParticleType particleType = <span class="hljs-title function_">GetParticleType</span>(BuffType);
+            myParticle = <span class="hljs-title class_">Managers</span>.Pool.<span class="hljs-title function_">GetObjParticle</span>(particleType);
+            <span class="hljs-keyword hljs-control-flow">if</span> (myParticle != <span class="hljs-literal">null</span>)
+            {
+                myParticle.transform.position = transform.position + <span class="hljs-title class_">Vector3</span>.up * <span class="hljs-number">0.1f</span>;
+                myParticle.<span class="hljs-title function_">SetActive</span>(<span class="hljs-literal">true</span>);
+            }
         }
     }
 }</code></pre>
@@ -385,6 +544,6 @@
       <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
     </div>
   </footer>
-  <script src="/assets/js/site.js"></script>
+  <script src="../../assets/js/site.js"></script>
 </body>
 </html>

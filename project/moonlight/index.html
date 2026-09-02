@@ -12,16 +12,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
 </head>
 <body class="page-project">
   <a class="skip-link" href="#main">본문으로 이동</a>
   <header class="site-header">
     <div class="site-header__inner">
-      <a class="site-title" href="/">Minhyuk Lee | Game Developer</a>
+      <a class="site-title" href="../../index.html">Minhyuk Lee | Game Developer</a>
       <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="/">Home</a>
-        <a href="/#projects">Projects</a>
+        <a href="../../index.html">Home</a>
+        <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
       </nav>
     </div>
@@ -29,7 +29,7 @@
   <main id="main" class="site-main">
     <article class="site-container project-page">
       <header class="project-hero">
-        <a class="back-link" href="/#projects">← 프로젝트 목록으로</a>
+        <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
         <p class="project-kicker">PROJECT REPORT</p>
         <h1>PROJECT REPORT // 보름달 방앗간</h1>
         <p>A* 길찾기와 커스텀 타일 데이터를 기반으로 직원·손님의 타이쿤 서비스 루프를 구현한 Unity 프로젝트</p>
@@ -70,16 +70,16 @@
 <summary>코드 보기: Tilemap을 Grid 노드로 변환</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> x = <span class="hljs-number">0</span>; x &lt; gridSize.x; x++)
 {
-    <span class="hljs-keyword">var</span> row = <span class="hljs-keyword">new</span> List&lt;Grid&gt;();
+    <span class="hljs-keyword">var</span> row = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;Grid&gt;();
     <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> y = <span class="hljs-number">0</span>; y &lt; gridSize.y; y++)
     {
-        Vector3Int cell = <span class="hljs-keyword">new</span> Vector3Int(x, y, <span class="hljs-number">0</span>);
-        Vector3 worldPosition = tilemap.CellToWorld(cell);
-        <span class="hljs-built_in">bool</span> isWalkable = tilemap.HasTile(cell);
+        Vector3Int cell = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Vector3Int</span>(x, y, <span class="hljs-number">0</span>);
+        <span class="hljs-title class_">Vector3</span> worldPosition = tilemap.<span class="hljs-title function_">CellToWorld</span>(cell);
+        <span class="hljs-built_in">bool</span> isWalkable = tilemap.<span class="hljs-title function_">HasTile</span>(cell);
 
-        row.Add(<span class="hljs-keyword">new</span> Grid(isWalkable, worldPosition, x, y));
+        row.<span class="hljs-title function_">Add</span>(<span class="hljs-keyword">new</span> <span class="hljs-title function_">Grid</span>(isWalkable, worldPosition, x, y));
     }
-    grid.Add(row);
+    grid.<span class="hljs-title function_">Add</span>(row);
 }</code></pre>
 </details>
 <p>이 구조를 통해 클릭 지점, 좌석 위치, 조리 도구 위치처럼 서로 다른 출처의 좌표도 A*가 사용하는 노드로 일관되게 변환할 수 있습니다.</p>
@@ -87,8 +87,8 @@
 <p>테이블과 의자는 단순한 이미지 타일이 아니라 게임 상태를 가진 커스텀 타일입니다. <code>CustomTableTile</code>과 <code>CustomChairTile</code>에 사용 가능 여부를 저장하고, <code>GridManager</code>가 이를 셀 좌표 기반 Dictionary로 관리합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 커스텀 타일 데이터와 좌표별 Dictionary</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> Dictionary&lt;Vector3Int, CustomTableTile&gt; tablesDictionary;
-<span class="hljs-keyword">public</span> Dictionary&lt;Vector3Int, CustomChairTile&gt; chairesDictionary;
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomTableTile</span>&gt; tablesDictionary;
+<span class="hljs-keyword">public</span> <span class="hljs-title class_">Dictionary</span>&lt;Vector3Int, <span class="hljs-title class_">CustomChairTile</span>&gt; chairesDictionary;
 
 <span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">TableTileData</span>
 {
@@ -125,8 +125,8 @@
 <summary>코드 보기: Manhattan Distance 휴리스틱</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-function"><span class="hljs-built_in">int</span> <span class="hljs-title">GetDistance</span>(<span class="hljs-params">Grid nodeA, Grid nodeB</span>)</span>
 {
-    <span class="hljs-built_in">int</span> distanceX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
-    <span class="hljs-built_in">int</span> distanceY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
+    <span class="hljs-built_in">int</span> distanceX = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">Abs</span>(nodeA.gridX - nodeB.gridX);
+    <span class="hljs-built_in">int</span> distanceY = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">Abs</span>(nodeA.gridY - nodeB.gridY);
     <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-number">10</span> * (distanceX + distanceY);
 }</code></pre>
 </details>
@@ -185,12 +185,12 @@
 <p>직원은 <code>Queue&lt;FoodItem&gt;</code>과 <code>Queue&lt;CustomerAI&gt;</code>를 함께 사용합니다. 새로운 주문이 들어오면 음식과 손님을 같은 순서로 enqueue하고, 서빙 완료 시 각각 dequeue해 해당 손님에게 조리된 음식과 가격 정보를 전달합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 음식·손님 주문 큐 처리</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> Queue&lt;FoodItem&gt; order_foodType = <span class="hljs-keyword">new</span> Queue&lt;FoodItem&gt;();
-<span class="hljs-keyword">public</span> Queue&lt;CustomerAI&gt; order_Customer = <span class="hljs-keyword">new</span> Queue&lt;CustomerAI&gt;();
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">public</span> <span class="hljs-title class_">Queue</span>&lt;FoodItem&gt; order_foodType = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Queue</span>&lt;FoodItem&gt;();
+<span class="hljs-keyword">public</span> <span class="hljs-title class_">Queue</span>&lt;<span class="hljs-title class_">CustomerAI</span>&gt; order_Customer = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Queue</span>&lt;<span class="hljs-title class_">CustomerAI</span>&gt;();
 
-CustomerAI customer = order_Customer.Dequeue();
-FoodItem food = order_foodType.Dequeue();
-customer.TakeFoodToStaff(food.foodPrice);</code></pre>
+<span class="hljs-title class_">CustomerAI</span> customer = order_Customer.<span class="hljs-title function_">Dequeue</span>();
+FoodItem food = order_foodType.<span class="hljs-title function_">Dequeue</span>();
+customer.<span class="hljs-title function_">TakeFoodToStaff</span>(food.foodPrice);</code></pre>
 </details>
 <p>주문이 더 남아 있다면 다음 손님과 음식으로 다시 <code>MovingToCook</code> 상태에 진입하고, 큐가 비면 <code>Roaming</code>으로 복귀합니다.</p>
 <h3 id="53-메뉴에-맞는-조리-도구-예약">5.3 메뉴에 맞는 조리 도구 예약</h3>
@@ -270,6 +270,6 @@ customer.TakeFoodToStaff(food.foodPrice);</code></pre>
       <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
     </div>
   </footer>
-  <script src="/assets/js/site.js"></script>
+  <script src="../../assets/js/site.js"></script>
 </body>
 </html>

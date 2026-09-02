@@ -12,16 +12,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
 </head>
 <body class="page-project">
   <a class="skip-link" href="#main">본문으로 이동</a>
   <header class="site-header">
     <div class="site-header__inner">
-      <a class="site-title" href="/">Minhyuk Lee | Game Developer</a>
+      <a class="site-title" href="../../index.html">Minhyuk Lee | Game Developer</a>
       <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="/">Home</a>
-        <a href="/#projects">Projects</a>
+        <a href="../../index.html">Home</a>
+        <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
       </nav>
     </div>
@@ -29,7 +29,7 @@
   <main id="main" class="site-main">
     <article class="site-container project-page">
       <header class="project-hero">
-        <a class="back-link" href="/#projects">← 프로젝트 목록으로</a>
+        <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
         <p class="project-kicker">PROJECT REPORT</p>
         <h1>PROJECT REPORT // AUTONOMOUS_RACING_AGENT</h1>
         <p>Unity ML-Agents를 활용한 자율 주행 경주차 에이전트 학습 시스템 구축 및 보상 설계 최적화</p>
@@ -91,7 +91,7 @@
 <p><strong>스플라인 기반 체크포인트 자동 생성 로직</strong> Unity Spline을 기반으로 정해진 개수만큼의 체크포인트를 트랙의 곡률(탄젠트)에 맞게 회전시켜 자동 생성하고, TrackData에 연동하는 핵심 로직입니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 체크포인트 자동 생성 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// SplineToCheckpointGenerator.cs: 체크포인트 자동 생성 로직</span>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">SplineToCheckpointGenerator</span>.cs: 체크포인트 자동 생성 로직</span>
 <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">GenerateCheckpoints</span>()</span>
 {
     <span class="hljs-comment">// ... 초기화 및 검증 생략 ...</span>
@@ -99,34 +99,34 @@
     {
         <span class="hljs-comment">// 스플라인을 따라 위치 계산</span>
         <span class="hljs-built_in">float</span> progress = (<span class="hljs-built_in">float</span>)(i + <span class="hljs-number">1</span>) / totalCheckpoints;
-        spline.Spline.Evaluate(progress, <span class="hljs-keyword">out</span> float3 pos, <span class="hljs-keyword">out</span> float3 tan, <span class="hljs-keyword">out</span> float3 up);
-        <span class="hljs-keyword hljs-control-flow">if</span> (math.lengthsq(tan) == <span class="hljs-number">0</span>) tan = math.forward(); 
+        spline.Spline.<span class="hljs-title function_">Evaluate</span>(progress, <span class="hljs-keyword">out</span> float3 pos, <span class="hljs-keyword">out</span> float3 tan, <span class="hljs-keyword">out</span> float3 up);
+        <span class="hljs-keyword hljs-control-flow">if</span> (math.<span class="hljs-title function_">lengthsq</span>(tan) == <span class="hljs-number">0</span>) tan = math.<span class="hljs-title function_">forward</span>(); 
 
-        <span class="hljs-comment">// 체크포인트 GameObject 생성 및 배치</span>
-        GameObject checkpointObj = <span class="hljs-keyword">new</span> GameObject(<span class="hljs-string">$&quot;Checkpoint_<span class="hljs-subst">{i:<span class="hljs-number">00</span>}</span>&quot;</span>);
-        checkpointObj.transform.SetParent(checkpointRoot.transform);
-        checkpointObj.transform.localPosition = (Vector3)pos;
-        checkpointObj.transform.localRotation = Quaternion.LookRotation((Vector3)tan, (Vector3)up);
+        <span class="hljs-comment">// 체크포인트 <span class="hljs-title class_">GameObject</span> 생성 및 배치</span>
+        <span class="hljs-title class_">GameObject</span> checkpointObj = <span class="hljs-keyword">new</span> <span class="hljs-title class_">GameObject</span>(<span class="hljs-string">$&quot;Checkpoint_<span class="hljs-subst">{i:<span class="hljs-number">00</span>}</span>&quot;</span>);
+        checkpointObj.transform.<span class="hljs-title function_">SetParent</span>(checkpointRoot.transform);
+        checkpointObj.transform.localPosition = (<span class="hljs-title class_">Vector3</span>)pos;
+        checkpointObj.transform.localRotation = <span class="hljs-title class_">Quaternion</span>.<span class="hljs-title function_">LookRotation</span>((<span class="hljs-title class_">Vector3</span>)tan, (<span class="hljs-title class_">Vector3</span>)up);
 
-        <span class="hljs-comment">// BoxCollider(Trigger)와 Tag 자동 추가</span>
-        BoxCollider collider = checkpointObj.AddComponent&lt;BoxCollider&gt;();
+        <span class="hljs-comment">// <span class="hljs-title class_">BoxCollider</span>(Trigger)와 Tag 자동 추가</span>
+        <span class="hljs-title class_">BoxCollider</span> collider = checkpointObj.AddComponent&lt;<span class="hljs-title class_">BoxCollider</span>&gt;();
         collider.isTrigger = <span class="hljs-literal">true</span>;
         collider.size = checkpointColliderSize;
         checkpointObj.tag = checkpointTag;
 
         CheckPoint cpScript = checkpointObj.AddComponent&lt;CheckPoint&gt;();
-        cpScript.Init(i); 
+        cpScript.<span class="hljs-title function_">Init</span>(i); 
         checkPointsTemp[i] = checkpointObj.transform;
     }
     
-    <span class="hljs-comment">// TrackData에 최종 등록</span>
-    trackData.SetCheckPoints(checkPointsTemp);
+    <span class="hljs-comment">// <span class="hljs-title class_">TrackData</span>에 최종 등록</span>
+    trackData.<span class="hljs-title function_">SetCheckPoints</span>(checkPointsTemp);
 }</code></pre>
 </details>
 <p><strong>순차적 체크포인트 검증 로직</strong> 차량이 통과한 체크포인트의 인덱스가 현재 기대되는 순서(NextCheckpointIndex)와 일치하는지 확인하여 논리적 주행 경로를 보장합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 순차적 체크포인트 검증 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// CarProgress.cs: 체크포인트 충돌 처리 (내부 상태 갱신)</span>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">CarProgress</span>.cs: 체크포인트 충돌 처리 (내부 상태 갱신)</span>
 <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">CheckpointPassed</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> checkpointIndex</span>)</span>
 {
     <span class="hljs-keyword hljs-control-flow">if</span> (IsFinished || trackData == <span class="hljs-literal">null</span>) <span class="hljs-keyword hljs-control-flow">return</span>;
@@ -147,7 +147,7 @@
             {
                 IsFinished = <span class="hljs-literal">true</span>;
                 FinalRank = CurRank;
-                GameManager.Race.AddFinishedCount();
+                GameManager.Race.<span class="hljs-title function_">AddFinishedCount</span>();
             }
         }
     }
@@ -191,42 +191,42 @@
 <p><strong>통합 보상 계산 및 페널티 부여 로직</strong> 목표 지점을 향한 거리 보상, 방향 정렬(Dot Product), 그리고 전방/후방 레이캐스트 센서를 활용한 벽 근접 페널티를 종합적으로 계산하는 핵심 함수입니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 벽 근접 페널티 및 역주행 감지 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// SimcadeCarAgent_Auto.cs: 보상 계산 로직</span>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">SimcadeCarAgent_Auto</span>.cs: 보상 계산 로직</span>
 <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">CalculateRewards</span>()</span> {
     <span class="hljs-comment">// 1. 기본 시간 페널티 (빠른 완주 유도)</span>
-    AddReward(timePenalty);
+    <span class="hljs-title function_">AddReward</span>(timePenalty);
 
-    Vector3 targetPosition = GetTargetPosition();
-    <span class="hljs-built_in">float</span> distanceToTarget = Vector3.Distance(transform.position, targetPosition); 
+    <span class="hljs-title class_">Vector3</span> targetPosition = <span class="hljs-title function_">GetTargetPosition</span>();
+    <span class="hljs-built_in">float</span> distanceToTarget = <span class="hljs-title class_">Vector3</span>.<span class="hljs-title function_">Distance</span>(transform.position, targetPosition); 
 
     <span class="hljs-keyword hljs-control-flow">if</span> (targetPosition != transform.position) {
         <span class="hljs-comment">// 2. 방향 정렬 보상 (목표 방향과 현재 차량의 전방 방향 일치도)</span>
-        Vector3 targetDirection = (targetPosition - transform.position).normalized;
-        <span class="hljs-built_in">float</span> directionDot = Vector3.Dot(transform.forward, targetDirection);
-        AddReward(directionDot * directionAlignmentRewardFactor);
+        <span class="hljs-title class_">Vector3</span> targetDirection = (targetPosition - transform.position).normalized;
+        <span class="hljs-built_in">float</span> directionDot = <span class="hljs-title class_">Vector3</span>.<span class="hljs-title function_">Dot</span>(transform.forward, targetDirection);
+        <span class="hljs-title function_">AddReward</span>(directionDot * directionAlignmentRewardFactor);
 
         <span class="hljs-comment">// 3. 거리 기반 보상 (가까워질수록 보상)</span>
         <span class="hljs-built_in">float</span> distanceChange = lastDistanceToTarget - distanceToTarget;
-        <span class="hljs-built_in">float</span> weight = (Vector3.Dot(rb.linearVelocity, transform.forward) &gt; <span class="hljs-number">0.1f</span>) ? <span class="hljs-number">1.0f</span> : <span class="hljs-number">0.5f</span>;
-        AddReward(distanceChange * distanceRewardFactor * weight);
+        <span class="hljs-built_in">float</span> weight = (<span class="hljs-title class_">Vector3</span>.<span class="hljs-title function_">Dot</span>(rb.linearVelocity, transform.forward) &gt; <span class="hljs-number">0.1f</span>) ? <span class="hljs-number">1.0f</span> : <span class="hljs-number">0.5f</span>;
+        <span class="hljs-title function_">AddReward</span>(distanceChange * distanceRewardFactor * weight);
         
         lastDistanceToTarget = distanceToTarget;
     }
 
     <span class="hljs-comment">// 4. 벽 근접 페널티 (레이캐스트 활용)</span>
     <span class="hljs-keyword hljs-control-flow">if</span> (!isStuckInWall) {
-        ApplyProximityPenalty(wallRayDirections, wallLayer, wallProximityDistance, proximityPenalty);
+        <span class="hljs-title function_">ApplyProximityPenalty</span>(wallRayDirections, wallLayer, wallProximityDistance, proximityPenalty);
     }
 }
 
 <span class="hljs-comment">// 레이캐스트 기반 근접 페널티 계산</span>
-<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ApplyProximityPenalty</span>(<span class="hljs-params">Vector3[] directions, LayerMask layer, <span class="hljs-built_in">float</span> distance, <span class="hljs-built_in">float</span> penaltyCoefficient</span>)</span> {
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ApplyProximityPenalty</span>(<span class="hljs-params"><span class="hljs-title class_">Vector3</span>[] directions, LayerMask layer, <span class="hljs-built_in">float</span> distance, <span class="hljs-built_in">float</span> penaltyCoefficient</span>)</span> {
     <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; directions.Length; i++) {
-        Vector3 worldRayDir = transform.TransformDirection(directions[i]);
-        <span class="hljs-keyword hljs-control-flow">if</span> (Physics.Raycast(transform.position, worldRayDir, <span class="hljs-keyword">out</span> RaycastHit hit, distance, layer)) {
+        <span class="hljs-title class_">Vector3</span> worldRayDir = transform.<span class="hljs-title function_">TransformDirection</span>(directions[i]);
+        <span class="hljs-keyword hljs-control-flow">if</span> (<span class="hljs-title class_">Physics</span>.<span class="hljs-title function_">Raycast</span>(transform.position, worldRayDir, <span class="hljs-keyword">out</span> <span class="hljs-title class_">RaycastHit</span> hit, distance, layer)) {
             <span class="hljs-comment">// 거리가 가까울수록 더 큰 페널티를 부여하여 충돌 회피 유도</span>
             <span class="hljs-built_in">float</span> penalty = penaltyCoefficient * (<span class="hljs-number">1f</span> - (hit.distance / distance));
-            AddReward(penalty * Time.fixedDeltaTime);
+            <span class="hljs-title function_">AddReward</span>(penalty * <span class="hljs-title class_">Time</span>.fixedDeltaTime);
         }
     }
 }</code></pre>
@@ -278,18 +278,18 @@
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnActionReceived</span>(<span class="hljs-params">ActionBuffers actions</span>)</span>
 {
     <span class="hljs-comment">// 액션 스무딩 제거: AI의 의도가 즉각적으로 반영되도록 수정</span>
-    <span class="hljs-built_in">float</span> steeringInput = Mathf.Clamp(actions.ContinuousActions[<span class="hljs-number">0</span>], <span class="hljs-number">-1f</span>, <span class="hljs-number">1f</span>);
-    <span class="hljs-built_in">float</span> accelerationInput = Mathf.Clamp(actions.ContinuousActions[<span class="hljs-number">1</span>], <span class="hljs-number">-1f</span>, <span class="hljs-number">1f</span>);
+    <span class="hljs-built_in">float</span> steeringInput = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">Clamp</span>(actions.ContinuousActions[<span class="hljs-number">0</span>], <span class="hljs-number">-1f</span>, <span class="hljs-number">1f</span>);
+    <span class="hljs-built_in">float</span> accelerationInput = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">Clamp</span>(actions.ContinuousActions[<span class="hljs-number">1</span>], <span class="hljs-number">-1f</span>, <span class="hljs-number">1f</span>);
 
     lastSteeringInput = steeringInput;
     lastAccelerationInput = accelerationInput;
 
     <span class="hljs-comment">// 보정 없이 차량 컨트롤러에 원시 입력값 직접 전달</span>
-    vehicleController.ProvideInputs(accelerationInput, steeringInput, <span class="hljs-number">0f</span>);
+    vehicleController.<span class="hljs-title function_">ProvideInputs</span>(accelerationInput, steeringInput, <span class="hljs-number">0f</span>);
     
-    CalculateRewards();
-    CheckEpisodeEndConditions();
-    GetComponent&lt;CarProgress&gt;().UpdateProgress();
+    <span class="hljs-title function_">CalculateRewards</span>();
+    <span class="hljs-title function_">CheckEpisodeEndConditions</span>();
+    GetComponent&lt;<span class="hljs-title class_">CarProgress</span>&gt;().<span class="hljs-title function_">UpdateProgress</span>();
 }</code></pre>
 </details>
 <hr>
@@ -305,16 +305,16 @@
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnEpisodeBegin</span>()</span>
 {
     <span class="hljs-comment">// 1. 등록된 모든 트랙 중 하나를 랜덤 선택</span>
-    currentTrack = allTracks[Random.Range(<span class="hljs-number">0</span>, allTracks.Count)];
+    currentTrack = allTracks[<span class="hljs-title class_">Random</span>.<span class="hljs-title function_">Range</span>(<span class="hljs-number">0</span>, allTracks.Count)];
     
     <span class="hljs-comment">// 2. 해당 트랙의 스폰 포인트 리스트 중 랜덤 위치 선정</span>
-    Transform spawnTransform = currentTrack.GetStartPoint(Random.Range(<span class="hljs-number">0</span>, currentTrack.StartPointsCount));
+    <span class="hljs-title class_">Transform</span> spawnTransform = currentTrack.<span class="hljs-title function_">GetStartPoint</span>(<span class="hljs-title class_">Random</span>.<span class="hljs-title function_">Range</span>(<span class="hljs-number">0</span>, currentTrack.StartPointsCount));
     
     <span class="hljs-comment">// 3. 물리 상태 초기화 및 배치</span>
     transform.position = spawnTransform.position;
     transform.rotation = spawnTransform.rotation;
-    rb.linearVelocity = Vector3.zero;
-    carProgress.Initialize();
+    rb.linearVelocity = <span class="hljs-title class_">Vector3</span>.zero;
+    carProgress.<span class="hljs-title function_">Initialize</span>();
 }</code></pre>
 </details>
 <hr>
@@ -351,6 +351,6 @@
       <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
     </div>
   </footer>
-  <script src="/assets/js/site.js"></script>
+  <script src="../../assets/js/site.js"></script>
 </body>
 </html>

@@ -12,16 +12,16 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/css/site.css">
+  <link rel="stylesheet" href="../../assets/css/site.css">
 </head>
 <body class="page-project">
   <a class="skip-link" href="#main">본문으로 이동</a>
   <header class="site-header">
     <div class="site-header__inner">
-      <a class="site-title" href="/">Minhyuk Lee | Game Developer</a>
+      <a class="site-title" href="../../index.html">Minhyuk Lee | Game Developer</a>
       <nav class="site-nav" aria-label="주요 메뉴">
-        <a href="/">Home</a>
-        <a href="/#projects">Projects</a>
+        <a href="../../index.html">Home</a>
+        <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
       </nav>
     </div>
@@ -29,7 +29,7 @@
   <main id="main" class="site-main">
     <article class="site-container project-page">
       <header class="project-hero">
-        <a class="back-link" href="/#projects">← 프로젝트 목록으로</a>
+        <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
         <p class="project-kicker">PROJECT REPORT</p>
         <h1>PROJECT REPORT // WINAPI_DONT_STARVE</h1>
         <p>C++, WinAPI를 이용한 Don't Starve 모사 및 성능 최적화</p>
@@ -75,7 +75,7 @@
 <p>이러한 구조를 통해 새로운 객체를 생성할 때 상속 계층에 얽매이지 않고 유연하게 기능을 조립할 수 있습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: GameObject.h - 컴포넌트 추가 및 획득 핵심 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// GameObject.h - 컴포넌트 추가 및 획득 핵심 로직</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">GameObject</span>.h - 컴포넌트 추가 및 획득 핵심 로직</span>
 <span class="hljs-keyword">template</span> &lt;<span class="hljs-keyword">typename</span> T, <span class="hljs-keyword">typename</span>... Args&gt;
 <span class="hljs-function">T* <span class="hljs-title">AddComponent</span><span class="hljs-params">(Args&amp;&amp;... args)</span> </span>{
     <span class="hljs-keyword">auto</span> newComponent = std::<span class="hljs-built_in">make_unique</span>&lt;T&gt;(<span class="hljs-keyword">this</span>, std::forward&lt;Args&gt;(args)...);
@@ -145,15 +145,15 @@
 <p>Top-down 뷰의 입체감을 위해 객체의 발밑(Pivot) 위치의 Y 좌표를 기준으로 정렬하여 출력함으로써 오브젝트 간의 앞뒤 관계를 정확히 표현합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: RenderManager.cpp - Y-Sorting 및 일괄 렌더링 처리</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// RenderManager.cpp - Y-Sorting 및 일괄 렌더링 처리</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">RenderManager::Flush</span><span class="hljs-params">(Gdiplus::Graphics* pGraphics)</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">RenderManager</span>.cpp - Y-Sorting 및 일괄 렌더링 처리</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">RenderManager</span>::Flush</span><span class="hljs-params">(Gdiplus::Graphics* pGraphics)</span>
 </span>{
     <span class="hljs-keyword hljs-control-flow">if</span> (!pGraphics) <span class="hljs-keyword hljs-control-flow">return</span>;
 
     <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> i = LAYER_TILE_BACKGROUND; i &lt; LAYER_COUNT; ++i) {
         <span class="hljs-keyword hljs-control-flow">if</span> (m_layerCommands[i].<span class="hljs-built_in">empty</span>()) <span class="hljs-keyword hljs-control-flow">continue</span>;
 
-        <span class="hljs-comment">// zOrder(Y좌표)를 기준으로 오름차순 정렬하여 뒤에 있는 객체가 먼저 그려지도록 함</span>
+        <span class="hljs-comment">// <span class="hljs-title function_">zOrder</span>(Y좌표)를 기준으로 오름차순 정렬하여 뒤에 있는 객체가 먼저 그려지도록 함</span>
         <span class="hljs-keyword hljs-control-flow">if</span> (m_layerCommands[i].<span class="hljs-built_in">size</span>() &gt; <span class="hljs-number">1</span>) {
             std::<span class="hljs-built_in">stable_sort</span>(m_layerCommands[i].<span class="hljs-built_in">begin</span>(), m_layerCommands[i].<span class="hljs-built_in">end</span>(), [](<span class="hljs-type">const</span> DrawCommand&amp; a, <span class="hljs-type">const</span> DrawCommand&amp; b) {
                 <span class="hljs-keyword hljs-control-flow">if</span> (a.zOrder != b.zOrder) <span class="hljs-keyword hljs-control-flow">return</span> a.zOrder &lt; b.zOrder;
@@ -172,8 +172,8 @@
 <p>광활한 맵 전체를 그리는 부하를 막기 위해, 카메라의 뷰포트에 해당하는 타일만 선택적으로 렌더링합니다. 특히 타일 비트맵을 매번 로드하지 않고 <strong>동적 캐싱 시스템</strong>을 통해 메모리 효율을 극대화했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: CameraManager.cpp - 타일 맵 최적화 렌더링</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// CameraManager.cpp - 그리드 기반 타일 컬링 및 캐싱</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">CameraManager::RenderVisibleTiles</span><span class="hljs-params">(<span class="hljs-type">const</span> MapData* mapData)</span> </span>{
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">CameraManager</span>.cpp - 그리드 기반 타일 컬링 및 캐싱</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">CameraManager</span>::RenderVisibleTiles</span><span class="hljs-params">(<span class="hljs-type">const</span> MapData* mapData)</span> </span>{
     <span class="hljs-keyword hljs-control-flow">if</span> (!mapData) <span class="hljs-keyword hljs-control-flow">return</span>;
     Gdiplus::RectF vp = <span class="hljs-built_in">GetViewportWorldRect</span>();
 
@@ -191,9 +191,9 @@
     <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> y = sy; y &lt; ey; ++y) {
         <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> x = sx; x &lt; ex; ++x) {
             <span class="hljs-keyword">auto</span>&amp; tileData = mapData-&gt;tiles[x][y];
-            <span class="hljs-comment">// 캐시 확인 및 RenderManager에 명령 제출</span>
+            <span class="hljs-comment">// 캐시 확인 및 <span class="hljs-title class_">RenderManager</span>에 명령 제출</span>
             Gdiplus::Bitmap* bm = <span class="hljs-built_in">GetOrLoadTileBitmap</span>(tileData.id);
-            RenderManager::<span class="hljs-built_in">GetInstance</span>()-&gt;<span class="hljs-built_in">AddWorldObjectCommand</span>(bm, ...);
+            <span class="hljs-title class_">RenderManager</span>::<span class="hljs-built_in">GetInstance</span>()-&gt;<span class="hljs-built_in">AddWorldObjectCommand</span>(bm, ...);
         }
     }
 }</code></pre>
@@ -224,10 +224,10 @@
 <p>크기가 큰 오브젝트는 여러 개의 그리드 셀에 걸쳐 존재할 수 있습니다. 뷰포트 영역 내의 셀들을 순회할 때 동일한 객체가 여러 번 쿼리되는 것을 막기 위해 <strong>쿼리 스탬프(Query Stamp)</strong> 기법을 도입했습니다. 쿼리가 발생할 때마다 전역 스탬프 값을 1씩 증가시키고, 이미 검사한 객체에 스탬프를 남겨 불필요한 중복 연산을 완전히 제거했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: ObjectManager.cpp - O(1) 인덱싱 및 가시 객체 추출</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// ObjectManager.cpp - 뷰포트 기반 공간 분할 쿼리</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">ObjectManager::QueryObjectsInRectArea</span><span class="hljs-params">(<span class="hljs-type">const</span> Gdiplus::RectF&amp; rectArea, std::vector&lt;GameObject*&gt;&amp; targetOutObjects)</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">ObjectManager</span>.cpp - 뷰포트 기반 공간 분할 쿼리</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">ObjectManager</span>::QueryObjectsInRectArea</span><span class="hljs-params">(<span class="hljs-type">const</span> Gdiplus::RectF&amp; rectArea, std::vector&lt;<span class="hljs-title class_">GameObject</span>*&gt;&amp; targetOutObjects)</span>
 </span>{
-    <span class="hljs-comment">// 월드 좌표를 셀 크기로 나누어 O(1)로 배열 인덱스 획득</span>
+    <span class="hljs-comment">// 월드 좌표를 셀 크기로 나누어 <span class="hljs-title function_">O</span>(1)로 배열 인덱스 획득</span>
     <span class="hljs-type">int</span> startX = (<span class="hljs-type">int</span>)<span class="hljs-built_in">floor</span>(rectArea.X / GRID_CELL_SIZE);
     <span class="hljs-type">int</span> startY = (<span class="hljs-type">int</span>)<span class="hljs-built_in">floor</span>(rectArea.Y / GRID_CELL_SIZE);
     <span class="hljs-type">int</span> endX = (<span class="hljs-type">int</span>)<span class="hljs-built_in">ceil</span>((rectArea.X + rectArea.Width) / GRID_CELL_SIZE) - <span class="hljs-number">1</span>;
@@ -241,7 +241,7 @@
     <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> y = startY; y &lt;= endY; ++y) {
         <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> x = startX; x &lt;= endX; ++x) {
             <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-keyword">auto</span>* obj : m_spatialGrid[x][y]) {
-                <span class="hljs-comment">// 이미 이번 프레임(쿼리)에서 처리된 객체는 O(1) 스킵</span>
+                <span class="hljs-comment">// 이미 이번 프레임(쿼리)에서 처리된 객체는 <span class="hljs-title function_">O</span>(1) 스킵</span>
                 <span class="hljs-keyword hljs-control-flow">if</span> (obj-&gt;<span class="hljs-built_in">GetLastSpatialQueryStamp</span>() == m_spatialQueryStamp) <span class="hljs-keyword hljs-control-flow">continue</span>;
                 obj-&gt;<span class="hljs-built_in">SetLastSpatialQueryStamp</span>(m_spatialQueryStamp);
 
@@ -260,8 +260,8 @@
 <p>플레이어나 몬스터처럼 실시간으로 좌표가 변하는 동적 객체들은 이동할 때마다 자신이 속한 그리드 셀을 갱신해야 합니다. <code>UpdateObjectGrid</code> 메서드는 객체의 위치가 셀의 경계를 넘어갔을 때만 이전 벡터 배열에서 객체를 <code>erase</code>하고 새 배열에 <code>push_back</code>하여 갱신 비용을 최소화합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: ObjectManager.cpp - 동적 그리드 갱신</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// ObjectManager.cpp - 객체 이동 시 그리드 셀 갱신</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">ObjectManager::UpdateObjectGrid</span><span class="hljs-params">(GameObject* pObj)</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">ObjectManager</span>.cpp - 객체 이동 시 그리드 셀 갱신</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">ObjectManager</span>::UpdateObjectGrid</span><span class="hljs-params">(<span class="hljs-title class_">GameObject</span>* pObj)</span>
 </span>{
     <span class="hljs-keyword hljs-control-flow">if</span> (!pObj || pObj-&gt;<span class="hljs-built_in">GetType</span>() == GO_TYPE_UI) <span class="hljs-keyword hljs-control-flow">return</span>;
 
@@ -276,7 +276,7 @@
     <span class="hljs-keyword hljs-control-flow">if</span> (oldX == newX &amp;&amp; oldY == newY) <span class="hljs-keyword hljs-control-flow">return</span>;
 
     <span class="hljs-keyword hljs-control-flow">if</span> (oldX &gt;= <span class="hljs-number">0</span> &amp;&amp; oldX &lt; GRID_WIDTH &amp;&amp; oldY &gt;= <span class="hljs-number">0</span> &amp;&amp; oldY &lt; GRID_HEIGHT) {
-        std::vector&lt;GameObject*&gt;&amp; cell = m_spatialGrid[oldX][oldY];
+        std::vector&lt;<span class="hljs-title class_">GameObject</span>*&gt;&amp; cell = m_spatialGrid[oldX][oldY];
         cell.<span class="hljs-built_in">erase</span>(std::<span class="hljs-built_in">remove</span>(cell.<span class="hljs-built_in">begin</span>(), cell.<span class="hljs-built_in">end</span>(), pObj), cell.<span class="hljs-built_in">end</span>());
     }
 
@@ -288,12 +288,12 @@
 <p>오브젝트가 새로 생성되거나 소멸할 때, 해당 오브젝트를 그리드 시스템에 안전하게 등록하고 지워주는 과정이 필수적입니다. 또한, 월드의 크기와 타일 크기에 맞추어 그리드의 너비와 높이를 런타임 최적화를 위해 상수로 정의했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: ObjectManager.h - 공간 분할 시스템 헤더 정의</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// ObjectManager.h - 공간 분할 시스템의 선언부</span>
-<span class="hljs-keyword">class</span> <span class="hljs-title class_">ObjectManager</span> {
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">ObjectManager</span>.h - 공간 분할 시스템의 선언부</span>
+<span class="hljs-keyword">class</span> <span class="hljs-title class_"><span class="hljs-title class_">ObjectManager</span></span> {
 <span class="hljs-keyword">public</span>:
-    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">UpdateObjectGrid</span><span class="hljs-params">(GameObject* pObj)</span></span>;
-    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">AddToGrid</span><span class="hljs-params">(GameObject* pObj)</span></span>;
-    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">RemoveFromGrid</span><span class="hljs-params">(GameObject* pObj)</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">UpdateObjectGrid</span><span class="hljs-params">(<span class="hljs-title class_">GameObject</span>* pObj)</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">AddToGrid</span><span class="hljs-params">(<span class="hljs-title class_">GameObject</span>* pObj)</span></span>;
+    <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">RemoveFromGrid</span><span class="hljs-params">(<span class="hljs-title class_">GameObject</span>* pObj)</span></span>;
 
 <span class="hljs-keyword">private</span>:
     <span class="hljs-comment">// 256px 정사각형 셀 기준의 정적 그리드 크기 정의</span>
@@ -302,14 +302,14 @@
     <span class="hljs-type">static</span> <span class="hljs-keyword">constexpr</span> <span class="hljs-type">int</span> GRID_HEIGHT = (MAP_HEIGHT * TILE_SIZE / GRID_CELL_SIZE) + <span class="hljs-number">2</span>;
 
     <span class="hljs-comment">// 2D 공간 분할 그리드 (각 셀마다 속한 오브젝트 포인터 벡터 관리)</span>
-    std::vector&lt;GameObject*&gt; m_spatialGrid[GRID_WIDTH][GRID_HEIGHT];
+    std::vector&lt;<span class="hljs-title class_">GameObject</span>*&gt; m_spatialGrid[GRID_WIDTH][GRID_HEIGHT];
     <span class="hljs-type">uint32_t</span> m_spatialQueryStamp = <span class="hljs-number">1</span>;
 };</code></pre>
 </details>
 <details class="pf-details">
 <summary>코드 보기: ObjectManager.cpp - 그리드 추가 및 삭제 구현</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// ObjectManager.cpp - 객체 생성 시 그리드 등록</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">ObjectManager::AddToGrid</span><span class="hljs-params">(GameObject* pObj)</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">ObjectManager</span>.cpp - 객체 생성 시 그리드 등록</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">ObjectManager</span>::AddToGrid</span><span class="hljs-params">(<span class="hljs-title class_">GameObject</span>* pObj)</span>
 </span>{
     <span class="hljs-keyword hljs-control-flow">if</span> (!pObj || pObj-&gt;<span class="hljs-built_in">GetType</span>() == GO_TYPE_UI) <span class="hljs-keyword hljs-control-flow">return</span>;
 
@@ -324,15 +324,15 @@
     pObj-&gt;<span class="hljs-built_in">SetGridCell</span>(x, y);
 }
 
-<span class="hljs-comment">// ObjectManager.cpp - 객체 소멸 시 그리드 제거</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">ObjectManager::RemoveFromGrid</span><span class="hljs-params">(GameObject* pObj)</span>
+<span class="hljs-comment">// <span class="hljs-title class_">ObjectManager</span>.cpp - 객체 소멸 시 그리드 제거</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">ObjectManager</span>::RemoveFromGrid</span><span class="hljs-params">(<span class="hljs-title class_">GameObject</span>* pObj)</span>
 </span>{
     <span class="hljs-keyword hljs-control-flow">if</span> (!pObj) <span class="hljs-keyword hljs-control-flow">return</span>;
     <span class="hljs-type">int</span> x = pObj-&gt;<span class="hljs-built_in">GetGridCellX</span>();
     <span class="hljs-type">int</span> y = pObj-&gt;<span class="hljs-built_in">GetGridCellY</span>();
 
     <span class="hljs-keyword hljs-control-flow">if</span> (x &gt;= <span class="hljs-number">0</span> &amp;&amp; x &lt; GRID_WIDTH &amp;&amp; y &gt;= <span class="hljs-number">0</span> &amp;&amp; y &lt; GRID_HEIGHT) {
-        std::vector&lt;GameObject*&gt;&amp; cell = m_spatialGrid[x][y];
+        std::vector&lt;<span class="hljs-title class_">GameObject</span>*&gt;&amp; cell = m_spatialGrid[x][y];
         cell.<span class="hljs-built_in">erase</span>(std::<span class="hljs-built_in">remove</span>(cell.<span class="hljs-built_in">begin</span>(), cell.<span class="hljs-built_in">end</span>(), pObj), cell.<span class="hljs-built_in">end</span>());
         pObj-&gt;<span class="hljs-built_in">SetGridCell</span>(<span class="hljs-number">-1</span>, <span class="hljs-number">-1</span>);
     }
@@ -358,13 +358,13 @@
 <p>프레임 델타 타임에 의해 여러 프레임을 한 번에 건너뛰더라도(Frame Skip), 이벤트가 누락되지 않도록 <code>m_lastTriggeredFrame</code>부터 <code>currentFrameIndex</code>까지 반복문을 돌며 등록된 모든 이벤트를 순차적으로 실행합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: Animator.cpp - 누락 없는 이벤트 처리 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// Animator.cpp - 프레임 이벤트 처리 로직</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">Animator</span>.cpp - 프레임 이벤트 처리 로직</span>
 <span class="hljs-keyword hljs-control-flow">if</span> (currentFrameIndex != <span class="hljs-number">-1</span> &amp;&amp; currentFrameIndex != m_lastTriggeredFrame)
 {
     <span class="hljs-type">const</span> std::map&lt;<span class="hljs-type">int</span>, std::wstring&gt;&amp; eventFrames = m_currentClip-&gt;<span class="hljs-built_in">GetEventFrames</span>();
     <span class="hljs-type">const</span> AnimationEventCallback&amp; callback = m_currentClip-&gt;<span class="hljs-built_in">GetEventCallback</span>();
 
-    AnimationClip* pCurrentClipBeforeCallback = m_currentClip;
+    <span class="hljs-title class_">AnimationClip</span>* pCurrentClipBeforeCallback = m_currentClip;
 
     <span class="hljs-comment">// 건너뛴 프레임(startIdx)부터 현재 프레임(endIdx)까지 모두 검사하여 누락 방지</span>
     <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> fi = m_lastTriggeredFrame + <span class="hljs-number">1</span>; fi &lt;= currentFrameIndex &amp;&amp; callback; ++fi ) {
@@ -386,11 +386,11 @@
 <p>객체(Player 등) 초기화 시점에 <code>RegisterAnimation</code>을 통해 클립을 생성하고, 특정 프레임 번호에 이벤트 문자열(<code>eventName</code>)을 등록합니다. 이후 람다 함수를 통해 콜백을 바인딩하여 직관적으로 로직을 구성했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: Player.cpp - 도끼질(Chop) 애니메이션 이벤트 바인딩 예시</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// Player.cpp - 도끼질 애니메이션 설정 및 이벤트 콜백 바인딩</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">Player</span>.cpp - 도끼질 애니메이션 설정 및 이벤트 콜백 바인딩</span>
 <span class="hljs-type">const</span> <span class="hljs-type">int</span> CHOP_HIT_FRAME = <span class="hljs-number">4</span>; <span class="hljs-comment">// 도끼가 나무에 맞는 프레임</span>
 
 <span class="hljs-comment">// 클립에 이벤트 프레임 등록</span>
-AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationClip</span>((<span class="hljs-type">int</span>)PlayerState::CHOP, dir);
+<span class="hljs-title class_">AnimationClip</span>* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationClip</span>((<span class="hljs-type">int</span>)PlayerState::CHOP, dir);
 <span class="hljs-keyword hljs-control-flow">if</span> (clip) {
     clip-&gt;<span class="hljs-built_in">AddEventFrame</span>(CHOP_HIT_FRAME, <span class="hljs-string">L&quot;chop_hit&quot;</span>);
     clip-&gt;<span class="hljs-built_in">AddEventFrame</span>(CHOP_LAST_FRAME, <span class="hljs-string">L&quot;chop_end&quot;</span>);
@@ -470,8 +470,8 @@ AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationCli
 <p>맵 파싱 과정에서 생성될 오브젝트들의 크기, 콜라이더 정보, 피벗 좌표 등은 소스 코드를 수정하지 않고 텍스트 파일(<code>object_resource_overrides.txt</code>)을 수정하여 즉시 게임에 반영할 수 있습니다. <code>DataManager</code>가 게임 초기화 시점에 이 파일을 읽어 기본값을 덮어씌웁니다.</p>
 <details class="pf-details">
 <summary>코드 보기: DataManager.cpp - 오브젝트 리소스 데이터 오버라이드</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// DataManager.cpp - 오브젝트 리소스 및 콜라이더 데이터 오버라이드</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">DataManager::Init</span><span class="hljs-params">()</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">DataManager</span>.cpp - 오브젝트 리소스 및 콜라이더 데이터 오버라이드</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">DataManager</span>::Init</span><span class="hljs-params">()</span>
 </span>{
     <span class="hljs-comment">// ... 정적 테이블 초기화 생략 ...</span>
 
@@ -494,8 +494,8 @@ AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationCli
 <p>게임 플레이 도중 씬을 이동(포탈 이용 등)할 때, 플레이어의 현재 체력과 인벤토리 상태를 유지해야 합니다. <code>GameProgressManager</code>는 씬 전환 직전에 <code>PlayerStateSnapshot</code> 구조체를 이용해 플레이어의 상태를 캡처하고, 새로운 씬이 로드된 직후 <code>RestoreState</code> 함수를 통해 완벽하게 복원합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: Player.cpp - 상태 저장 및 복원</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// Player.cpp - 상태 캡처 (씬 전환용)</span>
-<span class="hljs-function">PlayerStateSnapshot <span class="hljs-title">Player::SaveState</span><span class="hljs-params">()</span> <span class="hljs-type">const</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">Player</span>.cpp - 상태 캡처 (씬 전환용)</span>
+<span class="hljs-function">PlayerStateSnapshot <span class="hljs-title"><span class="hljs-title class_">Player</span>::SaveState</span><span class="hljs-params">()</span> <span class="hljs-type">const</span>
 </span>{
     PlayerStateSnapshot snapshot;
     snapshot.hp = m_hp;
@@ -507,8 +507,8 @@ AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationCli
     <span class="hljs-keyword hljs-control-flow">return</span> snapshot;
 }
 
-<span class="hljs-comment">// Player.cpp - 상태 복원</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">Player::RestoreState</span><span class="hljs-params">(<span class="hljs-type">const</span> PlayerStateSnapshot&amp; snapshot)</span>
+<span class="hljs-comment">// <span class="hljs-title class_">Player</span>.cpp - 상태 복원</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">Player</span>::RestoreState</span><span class="hljs-params">(<span class="hljs-type">const</span> PlayerStateSnapshot&amp; snapshot)</span>
 </span>{
     m_hp = snapshot.hp;
     
@@ -529,8 +529,8 @@ AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationCli
 <p>보스를 클리어하여 캐릭터가 해금되는 등의 영구적인 게임 진행 상황은 <code>GameProgressManager</code>를 통해 파일(<code>game_progress.txt</code>) 시스템에 기록됩니다. 파일 입출력을 통해 진행도를 파싱하고 직렬화하여 데이터를 안전하게 보존합니다.</p>
 <details class="pf-details">
 <summary>코드 보기: GameProgressManager.cpp - 진행도 세이브 및 로드</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// GameProgressManager.cpp - 캐릭터 해금 정보 저장 및 로드</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">GameProgressManager::SaveToFile</span><span class="hljs-params">(<span class="hljs-type">const</span> std::wstring&amp; filePath)</span>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">GameProgressManager</span>.cpp - 캐릭터 해금 정보 저장 및 로드</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">GameProgressManager</span>::SaveToFile</span><span class="hljs-params">(<span class="hljs-type">const</span> std::wstring&amp; filePath)</span>
 </span>{
     <span class="hljs-comment">// ... 디렉토리 생성 로직 생략 ...</span>
     <span class="hljs-function">std::wofstream <span class="hljs-title">file</span><span class="hljs-params">(filePath)</span></span>;
@@ -544,7 +544,7 @@ AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationCli
     file.<span class="hljs-built_in">close</span>();
 }
 
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">GameProgressManager::LoadFromFile</span><span class="hljs-params">(<span class="hljs-type">const</span> std::wstring&amp; filePath)</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">GameProgressManager</span>::LoadFromFile</span><span class="hljs-params">(<span class="hljs-type">const</span> std::wstring&amp; filePath)</span>
 </span>{
     <span class="hljs-function">std::wifstream <span class="hljs-title">file</span><span class="hljs-params">(filePath)</span></span>;
     <span class="hljs-keyword hljs-control-flow">if</span> (!file.<span class="hljs-built_in">is_open</span>()) <span class="hljs-keyword hljs-control-flow">return</span>;
@@ -561,7 +561,7 @@ AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationCli
     file.<span class="hljs-built_in">close</span>();
 }
 
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title">GameProgressManager::ParseCharacterLine</span><span class="hljs-params">(<span class="hljs-type">const</span> std::wstring&amp; line)</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">GameProgressManager</span>::ParseCharacterLine</span><span class="hljs-params">(<span class="hljs-type">const</span> std::wstring&amp; line)</span>
 </span>{
     <span class="hljs-type">size_t</span> charPos = line.<span class="hljs-built_in">find</span>(<span class="hljs-string">L&quot;CHARACTER:&quot;</span>) + <span class="hljs-number">10</span>;
     <span class="hljs-type">size_t</span> unlockedPos = line.<span class="hljs-built_in">find</span>(<span class="hljs-string">L&quot;,UNLOCKED:&quot;</span>) + <span class="hljs-number">10</span>;
@@ -615,6 +615,6 @@ AnimationClip* clip = m_animator-&gt;<span class="hljs-built_in">GetAnimationCli
       <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
     </div>
   </footer>
-  <script src="/assets/js/site.js"></script>
+  <script src="../../assets/js/site.js"></script>
 </body>
 </html>

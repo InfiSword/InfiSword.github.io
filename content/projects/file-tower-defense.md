@@ -207,19 +207,50 @@ mermaid: true
 <summary>코드 보기: FitToScreen 로직</summary>
 
 ```csharp
-// GameObjectGridLayout.cs: 해상도 대응 셀 크기 계산
-public void FitToScreen() {
-    Camera cam = Camera.main;
-    float height = cam.orthographicSize * 2f; // 오르토그래픽 카메라 높이
-    float width = height * cam.aspect;         // 카메라 종횡비 기반 너비
+// GameObjectGridLayout.cs: 해상도 및 UI 오프셋 대응 동적 셀 크기 계산
+public void FitToScreen()
+{
+    if (transform == null) return;
 
-    // 가용 영역에서 패딩과 스페이싱을 제외한 실제 셀 크기 도출
-    cellSize.x = (width - (padding.x * 2) - (spacing.x * (columns - 1))) / columns;
-    cellSize.y = (height - (padding.y * 2) - (spacing.y * (rows - 1))) / rows;
+    Camera mainCamera = Camera.main;
+    if (mainCamera == null) return;
 
-    // 그리드의 좌상단 시작 월드 좌표 계산
-    StartPos = new Vector2(-(width / 2) + padding.x + (cellSize.x / 2), 
-                            (height / 2) - padding.y - (cellSize.y / 2));
+    // 카메라 기준 전체 화면 크기 계산 (오르토그래픽 월드 좌표계)
+    float screenHeight = mainCamera.orthographicSize * 2f;
+    float screenWidth = screenHeight * mainCamera.aspect;
+
+    // 하단 UI 영역(10%)을 월드 단위 오프셋으로 확보
+    float yOffset = screenHeight * bottomOffsetRatio;
+    float availableGridHeight = screenHeight - yOffset;
+
+    // 패딩을 제외한 가용 영역 및 간격(Spacing) 제외한 순수 셀 영역 계산
+    Vector2 availableSize = new Vector2(screenWidth, availableGridHeight) - padding * 2;
+    Vector2 totalSpacing = new Vector2(
+        (columns - 1) * spacing.x,
+        (rows - 1) * spacing.y
+    );
+    Vector2 cellArea = availableSize - totalSpacing;
+
+    // 최종 셀 크기 도출
+    cellSize = new Vector2(
+        cellArea.x / columns,
+        cellArea.y / rows
+    );
+
+    // 그리드 전체의 실제 월드 크기 및 중심 위치 보정
+    _gridWorldSize = new Vector2(
+        columns * cellSize.x + (columns - 1) * spacing.x,
+        rows * cellSize.y + (rows - 1) * spacing.y
+    );
+
+    Vector3 newPosition = transform.position;
+    newPosition.y = yOffset / 2f;
+    transform.position = newPosition; // 하단 UI 공간만큼 중심점을 상단으로 이동
+
+    // 좌측 하단 시작 월드 모서리 좌표 확정
+    _bottomLeftCorner = (Vector2)transform.position - _gridWorldSize / 2f;
+
+    Debug.Log($"GridLayout 자동 조정 완료: {columns}x{rows}, 셀 크기: {cellSize}");
 }
 ```
 </details>
@@ -278,18 +309,72 @@ graph TD
 <summary>코드 보기: IInteractable 인터페이스</summary>
 
 ```csharp
-public interface IInteractable {
+// IInteractable.cs: 인게임 오브젝트(파일/바이러스) 통합 입력 인터페이스
+public interface IInteractable
+{
     GameObject targetObj { get; }
+    Transform transform { get; }
+    Sprite TooltipImg { get; }
+    string ToolTipDes { get; }
+
+    // 선택 및 드래그 상태 플래그
     bool IsSelectable { get; }
     bool IsDraggable { get; }
-    
-    void OnHoverEnter();
-    void OnHoverExit();
-    void OnClick();
-    void OnBeginDrag();
-    void OnDrag(Vector2 mouseDelta);
-    void OnEndDrag();
-    void OnSelected(bool isSelected);
+    bool IsTooltipEnabled { get; }
+
+    // 이벤트 라이프사이클 메서드
+    void OnHoverEnter();             // 마우스 진입 (툴팁 타이머 리셋)
+    void OnHoverExit();              // 마우스 이탈 (툴팁 숨김)
+    void OnClickEnter();             // 마우스 버튼 누름
+    void OnClickExit();              // 마우스 버튼 뗌
+    void OnBeginDrag();              // 드래그 시작
+    void OnDrag(Vector2 mouseDelta); // 드래그 중 위치 이동
+    void OnEndDrag();                // 드래그 종료
+    void OnClick();                  // 클릭 처리
+    void OnDoubleClick();            // 더블클릭 처리
+    void OnRightClick();             // 우클릭 처리
+    void OnSelected(bool isSelected);// 선택 테두리 시각화
+}
+
+// InteractionHandler.cs: Mediator 패턴 기반 다중 드래그 & 이벤트 디스패처
+public class InteractionHandler
+{
+    public List<IInteractable> SelectedObjects { get; private set; } = new List<IInteractable>();
+    public List<IInteractable> DragObjects { get; private set; } = new List<IInteractable>();
+
+    // 포인터 다운 시 단일/다중(Ctrl) 선택 및 클릭 이벤트 동기화
+    public void OnClickEnterHandler(IInteractable obj, bool isMultiSelect)
+    {
+        if (obj == null) return;
+        obj.OnClickEnter();
+
+        if (obj.IsSelectable)
+        {
+            if (!isMultiSelect)
+            {
+                if (!SelectedObjects.Contains(obj))
+                {
+                    ClearSelections();
+                    SelectSingle(obj);
+                }
+            }
+            else
+            {
+                if (!SelectedObjects.Contains(obj)) AddSelection(obj);
+                else RemoveSelection(obj);
+            }
+        }
+        obj.OnClick();
+    }
+
+    // 드래그 대상 전체 유닛의 델타 이동 일괄 디스패치
+    public void OnDragHandler(Vector2 mouseDelta)
+    {
+        foreach (IInteractable obj in DragObjects)
+        {
+            if (obj != null) obj.OnDrag(mouseDelta);
+        }
+    }
 }
 ```
 </details>
@@ -397,38 +482,61 @@ sequenceDiagram
 </div>
 
 ```csharp
-// FileGridManager.cs: 공간 분할 기반 탐색 최적화 로직
-public FileGrid GetGrid(Vector2 worldPos) {
-    // 1. 월드 좌표를 그리드 인덱스로 수학적 변환 (O(1))
-    if (!WorldToGridIndex(worldPos, out int xCenter, out int yCenter)) return null;
+// FileGridManager.cs: 공간 분할 기반 월드 좌표 인덱스 변환 및 3x3 탐색
 
-    // 2. 인덱스가 유효하면 주변 3x3 영역만 빠르게 검사 (O(1))
-    if (IsValidGridIndex(xCenter, yCenter)) {
+// 1. 월드 좌표를 O(1)에 2차원 그리드 인덱스로 수학적 역산
+private bool WorldToGridIndex(Vector2 worldPos, out int x, out int y)
+{
+    x = 0; y = 0;
+    if (gridLayout == null) return false;
+
+    Vector2 localPos = transform.InverseTransformPoint(worldPos);
+    Vector2 startPos = new Vector2(
+        -gridLayout.CellSize.x * (GridWidth - 1) * 0.5f,
+        -gridLayout.CellSize.y * (GridHeight - 1) * 0.5f
+    ) + gridLayout.Padding;
+
+    float xFloat = (localPos.x - startPos.x) / (gridLayout.CellSize.x + gridLayout.Spacing.x);
+    float yFloat = (localPos.y - startPos.y) / (gridLayout.CellSize.y + gridLayout.Spacing.y);
+
+    x = Mathf.RoundToInt(xFloat);
+    y = Mathf.RoundToInt(yFloat);
+    return true;
+}
+
+// 2. 마우스 월드 위치 기준 최단 거리 그리드 탐색
+public FileGrid GetGrid(Vector2 worldPos)
+{
+    if (!WorldToGridIndex(worldPos, out int xCenter, out int yCenter))
+        return null;
+
+    // 인덱스 유효 범위인 경우 3x3 (총 9개 셀)만 제한 탐색
+    if (IsValidGridIndex(xCenter, yCenter))
+    {
         return FindClosestGridInRange(worldPos, xCenter, yCenter);
     }
 
-    // 화면 영역 밖의 비정상 예외 상황에서만 전체 탐색 수행 (Safety Net)
-    return FindGlobalClosestGrid(worldPos);
+    // 예외적인 바운드 외곽 드래그 시에만 전체 전수 검사 수행
+    return FindClosestGridFromAll(worldPos);
 }
 
-private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int centerY) {
+// 3. 3x3 탐색 영역 루프 (제곱 거리 sqrMagnitude 사용으로 Sqrt 연산 회피)
+private FileGrid FindClosestGridInRange(Vector2 worldPos, int centerX, int centerY)
+{
     float minDistSqr = float.MaxValue;
     FileGrid closestGrid = null;
 
-    // 중심 기준 3x3 루프
-    for (int dx = -1; dx <= 1; dx++) {
-        for (int dy = -1; dy <= 1; dy++) {
+    for (int dx = -1; dx <= 1; dx++)
+    {
+        for (int dy = -1; dy <= 1; dy++)
+        {
             int x = centerX + dx;
             int y = centerY + dy;
 
-            if (IsValidGridIndex(x, y)) {
-                FileGrid candidate = gridArray[x, y];
-                // 제곱 거리(sqrMagnitude) 사용으로 비용이 큰 제곱근(Sqrt) 연산 생략
-                float distSqr = ((Vector2)candidate.transform.position - worldPos).sqrMagnitude;
-                if (distSqr < minDistSqr) {
-                    minDistSqr = distSqr;
-                    closestGrid = candidate;
-                }
+            if (IsValidGridIndex(x, y))
+            {
+                FileGrid grid = gridArray[x, y];
+                SearchClosestBetter(grid, worldPos, ref minDistSqr, ref closestGrid);
             }
         }
     }
@@ -533,29 +641,80 @@ graph TD
 <summary>코드 보기: 다형적 버프 실행 루프</summary>
 
 ```csharp
-// BuffData_Base.cs: 다형적 버프 업데이트 루프
-public virtual void Tick(float deltaTime) {
-    // 딕셔너리 순회 중 요소 삭제 에러 방지를 위해 복사본 리스트로 순회
-    foreach (int key in new List<int>(activeBuffs.Keys)) {
-        // BuffData 내부에서 누적 시간을 체크하여 틱 주기 도달 시 true 반환
-        if (activeBuffs[key].Tick(deltaTime)) {
-            OnTick(activeBuffs[key]); // 다형성에 의해 상속받은 자식 클래스의 고유 로직 실행
+// BuffData_Base.cs: 컴포넌트 기반 버프 틱 및 파티클 라이프사이클 관리
+public abstract class Buff_Base : MonoBehaviour
+{
+    public Define.BuffType BuffType { get; private set; }
+    public float Amount { get; private set; }
+    public float Duration { get; private set; }
+    public float WaitTickTime { get; private set; }
+    public bool IsRemoving { get; private set; } = false;
+
+    private float _durationTimer;
+    private float _tickTimer;
+    protected File_Base owner;
+    private GameObject myParticle;
+
+    public void Init(BuffStat stat)
+    {
+        owner = GetComponent<File_Base>();
+        BuffType = stat.buffType;
+        Amount = stat.amount;
+        Duration = stat.duration;
+        WaitTickTime = stat.waitTickTime;
+
+        _durationTimer = stat.duration;
+        _tickTimer = 0f;
+
+        OnAdded();
+    }
+
+    protected virtual void Update()
+    {
+        if (IsRemoving) return;
+
+        float deltaTime = Time.deltaTime;
+
+        // 1. 틱(Tick) 주기 연산 (단일 코루틴 남발 방지)
+        if (WaitTickTime > 0)
+        {
+            _tickTimer += deltaTime;
+            if (_tickTimer >= WaitTickTime)
+            {
+                _tickTimer -= WaitTickTime;
+                OnTick(); // 상속받은 구체 클래스의 고유 로직(힐링/도트 피해 등) 실행
+            }
+        }
+
+        // 2. 버프 지속 시간(Duration) 관리
+        if (Duration > 0)
+        {
+            _durationTimer -= deltaTime;
+            if (_durationTimer <= 0)
+            {
+                Remove();
+            }
         }
     }
-}
 
-// Buff_MP3.cs: 구체적인 힐링(HP 지속 회복) 버프 클래스 구현
-public class Buff_MP3 : MyBuff {
-    public override void Init(Transform _target) {
-        buffTarget = _target;
-        buffParticleType = Define.ParticleType.Buff_MP3;
-    }
+    protected virtual void OnAdded() => ShowParticle();
+    protected virtual void OnTick() { }
 
-    protected override void OnTick(BuffData buffData) {
-        // 대상 오브젝트의 IHealth 인터페이스를 찾아 체력 회복
-        var health = buffTarget.GetComponent<IHealth>();
-        if (health != null) {
-            health.Heal(buffData.Amount);
+    // 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지
+    protected void ShowParticle()
+    {
+        Buff_Base[] sameBuffs = GetComponents<Buff_Base>()
+            .Where(b => b.BuffType == this.BuffType && !b.IsRemoving).ToArray();
+
+        if (sameBuffs.Length == 1 && sameBuffs[0] == this)
+        {
+            Define.ParticleType particleType = GetParticleType(BuffType);
+            myParticle = Managers.Pool.GetObjParticle(particleType);
+            if (myParticle != null)
+            {
+                myParticle.transform.position = transform.position + Vector3.up * 0.1f;
+                myParticle.SetActive(true);
+            }
         }
     }
 }
