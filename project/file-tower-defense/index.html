@@ -642,55 +642,36 @@
 <p>다양한 종류의 버프(스탯 강화, 슬로우, 힐링 도트 등)를 객체지향적으로 확장할 수 있도록, 유니티의 컴포넌트(<code>MonoBehaviour</code>) 기반 추상 클래스 <strong>Buff_Base</strong>를 설계했습니다. 유닛에 버프가 부착될 때 필요한 기본 데이터 모델 바인딩과 중복 파티클 방지 메커니즘을 캡슐화했습니다.</p>
 <details class="pf-details">
 <summary>코드 보기: 버프 기본 형태 및 컴포넌트 초기화 (Buff_Base.cs)</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Buff_Base</span>.cs: 컴포넌트 기반 버프 기본 추상화 및 파티클 라이프사이클 관리</span>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Buff_Base</span>.cs: 컴포넌트 기반 버프 추상 클래스</span>
 <span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">Buff_Base</span></span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
 {
-    <span class="hljs-keyword">public</span> <span class="hljs-title class_">Define</span>.BuffType BuffType { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> Amount { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> Duration { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> WaitTickTime { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> IsRemoving { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">Define</span>.BuffType BuffType { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }  <span class="hljs-comment">// 버프 고유 분류 (공격력 증가, 슬로우, 도트 힐 등)</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> Amount { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }             <span class="hljs-comment">// 버프 효과 수치 (스탯 증감량 또는 틱당 데미지/회복량)</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> Duration { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }           <span class="hljs-comment">// 버프 총 유지 시간 (초 단위, 0 이하면 오라형 영구 지속)</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> WaitTickTime { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }       <span class="hljs-comment">// 틱 발동 주기 간격 (초 단위, 주기적 OnTick 호출 간격)</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> IsRemoving { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; } = <span class="hljs-literal">false</span>; <span class="hljs-comment">// 버프 삭제/해제 절차 진행 여부 (중복 해제 방지 플래그)</span>
 
-    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> _durationTimer;
-    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> _tickTimer;
-    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">File_Base</span> owner;
-    <span class="hljs-keyword">private</span> <span class="hljs-title class_">GameObject</span> myParticle;
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> _durationTimer;  <span class="hljs-comment">// 남은 지속 시간을 측정하는 카운트다운 타이머</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> _tickTimer;      <span class="hljs-comment">// 다음 틱 도달까지 누적되는 델타타임 타이머</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">File_Base</span> owner;       <span class="hljs-comment">// 버프가 부착되어 적용되는 대상 파일 유닛</span>
+    <span class="hljs-keyword">private</span> <span class="hljs-title class_">GameObject</span> myParticle;   <span class="hljs-comment">// 유닛 상단에 출력되는 활성화된 VFX 파티클</span>
 
-    <span class="hljs-comment">// 버프 컴포넌트 부착 시 스탯 초기화 및 이벤트 트리거</span>
+    <span class="hljs-comment">// 컴포넌트 부착 시 스탯 바인딩 및 파티클 트리거</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Init</span>(<span class="hljs-params"><span class="hljs-title class_">BuffStat</span> stat</span>)</span>
     {
-        owner = GetComponent&lt;<span class="hljs-title class_">File_Base</span>&gt;();
-        BuffType = stat.buffType;
-        Amount = stat.amount;
-        Duration = stat.duration;
-        WaitTickTime = stat.waitTickTime;
-
-        _durationTimer = stat.duration;
-        _tickTimer = <span class="hljs-number">0f</span>;
-
-        <span class="hljs-title function_">OnAdded</span>();
+        ...
     }
 
+    <span class="hljs-comment">// 버프 부착 완료 시 호출 (구체 클래스에서 필요 시 오버라이드)</span>
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnAdded</span>()</span> =&gt; <span class="hljs-title function_">ShowParticle</span>();
 
-    <span class="hljs-comment">// 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지 (중복 파티클 억제)</span>
+    <span class="hljs-comment">// 동일 버프 중복 검사 후 단일 파티클만 오브젝트 풀에서 활성화</span>
     <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ShowParticle</span>()</span>
     {
-        <span class="hljs-title class_">Buff_Base</span>[] sameBuffs = GetComponents&lt;<span class="hljs-title class_">Buff_Base</span>&gt;()
-            .<span class="hljs-title function_">Where</span>(b =&gt; b.BuffType == <span class="hljs-keyword">this</span>.BuffType &amp;&amp; !b.IsRemoving).<span class="hljs-title function_">ToArray</span>();
-
-        <span class="hljs-keyword hljs-control-flow">if</span> (sameBuffs.Length == <span class="hljs-number">1</span> &amp;&amp; sameBuffs[<span class="hljs-number">0</span>] == <span class="hljs-keyword">this</span>)
-        {
-            <span class="hljs-title class_">Define</span>.ParticleType particleType = <span class="hljs-title function_">GetParticleType</span>(BuffType);
-            myParticle = <span class="hljs-title class_">Managers</span>.Pool.<span class="hljs-title function_">GetObjParticle</span>(particleType);
-            <span class="hljs-keyword hljs-control-flow">if</span> (myParticle != <span class="hljs-literal">null</span>)
-            {
-                myParticle.transform.position = transform.position + <span class="hljs-title class_">Vector3</span>.up * <span class="hljs-number">0.1f</span>;
-                myParticle.<span class="hljs-title function_">SetActive</span>(<span class="hljs-literal">true</span>);
-            }
-        }
+        ...
     }
 
+    <span class="hljs-comment">// 버프 해제 시 구체 클래스별 스탯 원복 및 풀 반환 처리</span>
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">abstract</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Remove</span>()</span>;
 }</code></pre>
 </details>

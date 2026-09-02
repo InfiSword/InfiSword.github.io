@@ -893,55 +893,58 @@ public class FileGrid : MonoBehaviour
 <summary>코드 보기: 버프 기본 형태 및 컴포넌트 초기화 (Buff_Base.cs)</summary>
 
 ```csharp
-// Buff_Base.cs: 컴포넌트 기반 버프 기본 추상화 및 파티클 라이프사이클 관리
+// Buff_Base.cs: 컴포넌트 기반 버프 추상 클래스
 public abstract class Buff_Base : MonoBehaviour
 {
-    public Define.BuffType BuffType { get; private set; }
-    public float Amount { get; private set; }
-    public float Duration { get; private set; }
-    public float WaitTickTime { get; private set; }
-    public bool IsRemoving { get; private set; } = false;
+    // ==========================================
+    // [버프 데이터 프로퍼티]
+    // ==========================================
+    public Define.BuffType BuffType { get; private set; }  // 버프 고유 분류 (공격력 증가, 슬로우, 도트 힐 등)
+    public float Amount { get; private set; }             // 버프 효과 수치 (스탯 증감량 또는 틱당 데미지/회복량)
+    public float Duration { get; private set; }           // 버프 총 유지 시간 (초 단위, 0 이하면 오라형 영구 지속)
+    public float WaitTickTime { get; private set; }       // 틱 발동 주기 간격 (초 단위, 주기적 OnTick 호출 간격)
+    public bool IsRemoving { get; private set; } = false; // 버프 삭제/해제 절차 진행 여부 (중복 해제 방지 플래그)
 
-    protected float _durationTimer;
-    protected float _tickTimer;
-    protected File_Base owner;
-    private GameObject myParticle;
+    // ==========================================
+    // [내부 타이머 및 인스턴스 필드]
+    // ==========================================
+    protected float _durationTimer;  // 남은 지속 시간을 측정하는 카운트다운 타이머
+    protected float _tickTimer;      // 다음 틱 도달까지 누적되는 델타타임 타이머
+    protected File_Base owner;       // 버프가 부착되어 적용되는 대상 파일 유닛
+    private GameObject myParticle;   // 유닛 상단에 출력되는 활성화된 VFX 파티클
 
-    // 버프 컴포넌트 부착 시 스탯 초기화 및 이벤트 트리거
+    // ==========================================
+    // [멤버 함수 (간략화)]
+    // ==========================================
+
+    // 컴포넌트 부착 시 스탯 바인딩 및 파티클 트리거
     public void Init(BuffStat stat)
     {
         owner = GetComponent<File_Base>();
         BuffType = stat.buffType;
         Amount = stat.amount;
-        Duration = stat.duration;
+        Duration = _durationTimer = stat.duration;
         WaitTickTime = stat.waitTickTime;
-
-        _durationTimer = stat.duration;
         _tickTimer = 0f;
 
         OnAdded();
     }
 
+    // 버프 부착 완료 시 호출 (구체 클래스에서 필요 시 오버라이드)
     protected virtual void OnAdded() => ShowParticle();
 
-    // 오브젝트 풀에서 버프 파티클을 획득하고 단일 활성화 유지 (중복 파티클 억제)
+    // 동일 버프 중복 검사 후 단일 파티클만 오브젝트 풀에서 활성화
     protected void ShowParticle()
     {
-        Buff_Base[] sameBuffs = GetComponents<Buff_Base>()
-            .Where(b => b.BuffType == this.BuffType && !b.IsRemoving).ToArray();
-
-        if (sameBuffs.Length == 1 && sameBuffs[0] == this)
+        bool isOnlyOne = GetComponents<Buff_Base>().Count(b => b.BuffType == BuffType && !b.IsRemoving) == 1;
+        if (isOnlyOne)
         {
-            Define.ParticleType particleType = GetParticleType(BuffType);
-            myParticle = Managers.Pool.GetObjParticle(particleType);
-            if (myParticle != null)
-            {
-                myParticle.transform.position = transform.position + Vector3.up * 0.1f;
-                myParticle.SetActive(true);
-            }
+            myParticle = Managers.Pool.GetObjParticle(GetParticleType(BuffType));
+            if (myParticle != null) myParticle.SetActive(true);
         }
     }
 
+    // 버프 해제 시 구체 클래스별 스탯 원복 및 풀 반환 처리
     public abstract void Remove();
 }
 ```
