@@ -112,4 +112,146 @@
     };
     document.head.appendChild(script);
   }
+
+  // ==========================================
+  // Windows 11 Loading Bar & Enter-to-Enter Suite
+  // ==========================================
+  const winScreen = document.getElementById("win-lock-screen");
+  if (winScreen) {
+    const lockBtn = document.getElementById("win-lock-btn");
+    const progressBar = document.getElementById("win-progress-bar");
+    const progressWrapper = document.getElementById("win-progress-wrapper");
+    const progressStatus = document.getElementById("win-progress-status");
+    const actionPrompt = document.getElementById("win-action-prompt");
+    let isLoaded = false;
+    let isTransitioning = false;
+
+    function runLoadingSequence() {
+      isLoaded = false;
+      isTransitioning = false;
+      if (progressBar) progressBar.style.width = "0%";
+      if (progressWrapper) progressWrapper.style.display = "flex";
+      if (progressStatus) progressStatus.textContent = "시스템 초기화 중...";
+      if (actionPrompt) actionPrompt.style.display = "none";
+
+      if (window.gsap && progressBar) {
+        window.gsap.to(progressBar, {
+          width: "100%",
+          duration: 1.2,
+          ease: "power1.inOut",
+          onComplete: () => {
+            onLoadingComplete();
+          },
+        });
+      } else {
+        setTimeout(onLoadingComplete, 1200);
+      }
+    }
+
+    function onLoadingComplete() {
+      isLoaded = true;
+      if (progressWrapper) progressWrapper.style.display = "none";
+      if (actionPrompt) {
+        actionPrompt.style.display = "inline-flex";
+        if (window.gsap) {
+          window.gsap.fromTo(
+            actionPrompt,
+            { scale: 0.92, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.35, ease: "back.out(1.6)" }
+          );
+        }
+      }
+    }
+
+    // Check if user already unlocked in this session
+    const isUnlocked = sessionStorage.getItem("win_unlocked") === "true";
+    if (isUnlocked) {
+      winScreen.style.display = "none";
+      document.body.classList.remove("is-locked");
+    } else {
+      document.body.classList.add("is-locked");
+      runLoadingSequence();
+    }
+
+    window.winEnterPortfolio = function () {
+      if (isTransitioning) return;
+      isTransitioning = true;
+      sessionStorage.setItem("win_unlocked", "true");
+
+      if (window.gsap) {
+        window.gsap.killTweensOf(progressBar);
+        window.gsap.to(winScreen, {
+          yPercent: -100,
+          duration: 0.75,
+          ease: "power3.inOut",
+          onComplete: () => {
+            winScreen.style.display = "none";
+            document.body.classList.remove("is-locked");
+            isTransitioning = false;
+            const hero = document.querySelector(".pf-hero");
+            if (hero) {
+              window.gsap.from(hero.children, {
+                opacity: 0,
+                y: 24,
+                duration: 0.7,
+                stagger: 0.08,
+                ease: "power3.out",
+              });
+            }
+          },
+        });
+      } else {
+        winScreen.style.display = "none";
+        document.body.classList.remove("is-locked");
+        isTransitioning = false;
+      }
+    };
+
+    window.winReLock = function () {
+      sessionStorage.removeItem("win_unlocked");
+      document.body.classList.add("is-locked");
+      winScreen.style.display = "flex";
+      if (window.gsap) {
+        window.gsap.fromTo(
+          winScreen,
+          { yPercent: -100, opacity: 1 },
+          {
+            yPercent: 0,
+            duration: 0.65,
+            ease: "power3.out",
+            onComplete: () => {
+              runLoadingSequence();
+            },
+          }
+        );
+      } else {
+        runLoadingSequence();
+      }
+    };
+
+    // Click anywhere on screen to enter
+    winScreen.addEventListener("click", function () {
+      window.winEnterPortfolio();
+    });
+
+    if (lockBtn) {
+      lockBtn.addEventListener("click", window.winReLock);
+    }
+
+    // Keyboard navigation: Enter, Space, or any key after loaded
+    document.addEventListener("keydown", function (e) {
+      if (winScreen.style.display === "none") {
+        if ((e.key === "l" || e.key === "L") && (e.altKey || e.ctrlKey)) {
+          e.preventDefault();
+          window.winReLock();
+        }
+        return;
+      }
+
+      if (e.key === "Enter" || e.key === " " || isLoaded) {
+        e.preventDefault();
+        window.winEnterPortfolio();
+      }
+    });
+  }
 })();

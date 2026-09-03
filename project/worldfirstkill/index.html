@@ -23,6 +23,10 @@
         <a href="../../index.html">Home</a>
         <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
+        <button type="button" id="win-lock-btn" class="site-nav-lock-btn" title="화면 잠금 (Win + L)" aria-label="화면 잠금">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>잠금</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -49,7 +53,7 @@
   <div class="pf-flowchart">
     <!-- START -->
     <div class="pf-fc-pill-start">
-      <span>📄</span>
+      <span class="pf-fc-mono-tag">RAW_DATA</span>
       <span>CSV Raw Text Input (원시 텍스트 스트림)</span>
     </div>
     <!-- Arrow -->
@@ -105,27 +109,10 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <div class="pf-fc-pill-end">
-      <span>⚡</span>
+      <span class="pf-fc-mono-tag">COMPLETE</span>
       <span>타입 안전한 DTO 데이터 컬렉션 생성 완료</span>
     </div>
   </div>
-</div>
-        <div class="flow-arrow" style="text-align: center;">↓</div>
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">2단계: 헤더 추출 및 매핑</div>
-            <div style="font-size: 0.85rem; color: #666;">CSV 첫 줄(헤더)을 분리하고 클래스 필드명과 자동 매핑을 위한 딕셔너 구축</div>
-        </div>
-        <div class="flow-arrow" style="text-align: center;">↓</div>
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">3단계: 데이터 행 처리 및 객체 생성</div>
-            <div style="font-size: 0.85rem; color: #666;">정규식(SmartSplit)으로 쉼표/따옴표 처리 후 빈 인스턴스(Activator) 생성</div>
-        </div>
-        <div class="flow-arrow" style="text-align: center;">↓</div>
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">4단계: 타입 변환 및 필드 할당</div>
-            <div style="font-size: 0.85rem; color: #666;">Convert.ChangeType을 통해 string 데이터를 실제 필드 타입으로 변환 후 할당</div>
-        </div>
-    </div>
 </div>
 <h3 id="13-핵심-파싱-로직-및-smartsplit">1.3 핵심 파싱 로직 및 SmartSplit</h3>
 <p>제네릭 메서드를 사용하여 타입에 독립적인 파싱을 수행합니다. 특히, CSV 내부의 쉼표(,)를 포함하는 문자열("이름, 설명")을 안전하게 처리하기 위해 정규식을 활용한 <code>SmartSplit</code> 함수를 구현했습니다.</p>
@@ -318,7 +305,7 @@ m_rewardExp = <span class="hljs-title class_">Mathf</span>.<span class="hljs-tit
   <div class="pf-flowchart">
     <!-- Token Structure Title -->
     <div class="pf-fc-pill-start" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
-      <span>🔑</span>
+      <span class="pf-fc-mono-tag">TOKEN_SPEC</span>
       <span>Seed Token 고정 폭(Fixed-Width) 인코딩 구조</span>
     </div>
     <!-- Arrow -->

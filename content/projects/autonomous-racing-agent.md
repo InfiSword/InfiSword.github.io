@@ -155,7 +155,7 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 
     <!-- 0. START -->
     <div class="pf-fc-pill-start">
-      <span>🏁</span>
+      <span class="pf-fc-mono-tag">INPUT</span>
       <span>Track Spline Curve (입력 곡선)</span>
     </div>
 
@@ -208,7 +208,7 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
 
     <!-- 4. END -->
     <div class="pf-fc-pill-end">
-      <span>⚡</span>
+      <span class="pf-fc-mono-tag">OUTPUT</span>
       <span>실시간 보상 최적화 &amp; 완벽한 주행 경로 학습</span>
     </div>
 

@@ -125,7 +125,7 @@ tags: [Data Structure, Server, C#, System Design]
 
     <!-- START -->
     <div class="pf-fc-pill-start">
-      <span>📄</span>
+      <span class="pf-fc-mono-tag">RAW_DATA</span>
       <span>CSV Raw Text Input (원시 텍스트 스트림)</span>
     </div>
 
@@ -191,28 +191,11 @@ tags: [Data Structure, Server, C#, System Design]
     </div>
 
     <div class="pf-fc-pill-end">
-      <span>⚡</span>
+      <span class="pf-fc-mono-tag">COMPLETE</span>
       <span>타입 안전한 DTO 데이터 컬렉션 생성 완료</span>
     </div>
 
   </div>
-</div>
-        <div class="flow-arrow" style="text-align: center;">↓</div>
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">2단계: 헤더 추출 및 매핑</div>
-            <div style="font-size: 0.85rem; color: #666;">CSV 첫 줄(헤더)을 분리하고 클래스 필드명과 자동 매핑을 위한 딕셔너 구축</div>
-        </div>
-        <div class="flow-arrow" style="text-align: center;">↓</div>
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">3단계: 데이터 행 처리 및 객체 생성</div>
-            <div style="font-size: 0.85rem; color: #666;">정규식(SmartSplit)으로 쉼표/따옴표 처리 후 빈 인스턴스(Activator) 생성</div>
-        </div>
-        <div class="flow-arrow" style="text-align: center;">↓</div>
-        <div class="pf-arch-layer">
-            <div class="pf-arch-layer-title">4단계: 타입 변환 및 필드 할당</div>
-            <div style="font-size: 0.85rem; color: #666;">Convert.ChangeType을 통해 string 데이터를 실제 필드 타입으로 변환 후 할당</div>
-        </div>
-    </div>
 </div>
 
 ### 1.3 핵심 파싱 로직 및 SmartSplit
@@ -461,7 +444,7 @@ public async Task GenerateRegion(Func<float, string, Task> onProgress)
 
     <!-- Token Structure Title -->
     <div class="pf-fc-pill-start" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
-      <span>🔑</span>
+      <span class="pf-fc-mono-tag">TOKEN_SPEC</span>
       <span>Seed Token 고정 폭(Fixed-Width) 인코딩 구조</span>
     </div>
 

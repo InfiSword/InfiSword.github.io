@@ -134,7 +134,7 @@ public class TableTileData
   <div class="pf-flowchart">
 
     <div class="pf-fc-pill-start">
-      <span>🪑</span>
+      <span class="pf-fc-mono-tag">RESOURCE</span>
       <span>Resource Request (좌석/조리도구 요청)</span>
     </div>
 
@@ -315,7 +315,7 @@ List<Grid> RetracePath(Grid startNode, Grid endNode)
   <div class="pf-flowchart">
 
     <div class="pf-fc-pill-start">
-      <span>📍</span>
+      <span class="pf-fc-mono-tag">ORIGIN</span>
       <span>World Position (출발지 및 목적지)</span>
     </div>
 
@@ -360,7 +360,7 @@ List<Grid> RetracePath(Grid startNode, Grid endNode)
     </div>
 
     <div class="pf-fc-pill-end">
-      <span>🚶</span>
+      <span class="pf-fc-mono-tag">PATH_END</span>
       <span>NPC Movement (코루틴 기반 부드러운 셀 이동)</span>
     </div>
 
@@ -530,7 +530,7 @@ List<Grid> RetracePath(Grid startNode, Grid endNode)
         <h4 class="pf-fc-title" style="color: #1d4ed8;">4. ServingDish (서빙 및 조리도구 반납)</h4>
         <span class="pf-fc-badge">RESOLVE</span>
       </div>
-      <p class="pf-fc-desc">손님 테이블로 음식 배달 완료 후 조리 도구 반납(`isUseAble=true`) ➔ Roaming 상태로 자동 순환</p>
+      <p class="pf-fc-desc">손님 테이블로 음식 배달 완료 후 조리 도구 반납(`isUseAble=true`) &rarr; Roaming 상태로 자동 순환</p>
     </div>
 
   </div>

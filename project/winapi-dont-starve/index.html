@@ -23,6 +23,10 @@
         <a href="../../index.html">Home</a>
         <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
+        <button type="button" id="win-lock-btn" class="site-nav-lock-btn" title="화면 잠금 (Win + L)" aria-label="화면 잠금">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>잠금</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -146,7 +150,7 @@
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
     <div class="pf-fc-pill-start">
-      <span>🎨</span>
+      <span class="pf-fc-mono-tag">TRIGGER</span>
       <span>Render Loop Trigger (매 프레임 렌더링 시작)</span>
     </div>
     <div class="pf-fc-arrow">
@@ -157,7 +161,7 @@
         <h4 class="pf-fc-title">1. Submission (명령 제출)</h4>
         <span class="pf-fc-badge">COLLECT</span>
       </div>
-      <p class="pf-fc-desc">`GameObject::Render()` 호출 ➔ `DrawCommand` 생성 후 `RenderManager` 큐에 예약</p>
+      <p class="pf-fc-desc">`GameObject::Render()` 호출 &rarr; `DrawCommand` 생성 후 `RenderManager` 큐에 예약</p>
     </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
@@ -167,7 +171,7 @@
         <h4 class="pf-fc-title">2. Sorting (정렬 단계)</h4>
         <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">Y-SORTING</span>
       </div>
-      <p class="pf-fc-desc">`RenderManager::Flush()` ➔ 배경/오브젝트/UI 레이어 우선순위 분류 후 발밑(Pivot Y) 기준 오름차순 정렬</p>
+      <p class="pf-fc-desc">`RenderManager::Flush()` &rarr; 배경/오브젝트/UI 레이어 우선순위 분류 후 발밑(Pivot Y) 기준 오름차순 정렬</p>
     </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>

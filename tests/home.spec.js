@@ -1,4 +1,4 @@
-﻿const { test, expect } = require('@playwright/test');
+const { test, expect } = require('@playwright/test');
 
 test.describe('포트폴리오 홈 페이지 테스트', () => {
   test('홈 페이지가 정상 로드되고 올바른 타이틀을 표시한다', async ({ page }) => {
@@ -23,5 +23,45 @@ test.describe('포트폴리오 홈 페이지 테스트', () => {
 
     const projectsSection = page.locator('#projects');
     await expect(projectsSection).toBeAttached();
+  });
+
+  test('로딩바 완료 후 Enter 키를 눌러 포트폴리오로 정상 진입한다', async ({ page }) => {
+    await page.goto('/');
+
+    const winScreen = page.locator('#win-lock-screen');
+    await expect(winScreen).toBeVisible();
+
+    const userName = page.locator('.win-user-name');
+    await expect(userName).toContainText('이민혁');
+
+    // 1. 로딩바 요소 확인
+    const progressBar = page.locator('#win-progress-bar');
+    await expect(progressBar).toBeVisible();
+
+    // 2. 로딩 완료 후 Enter 액션 프롬프트 노출 대기
+    const prompt = page.locator('#win-action-prompt');
+    await expect(prompt).toBeVisible({ timeout: 2500 });
+
+    // 3. Enter 키 입력으로 언락
+    await page.keyboard.press('Enter');
+
+    // 4. 화면 퇴장 및 본문 포트폴리오 노출 확인
+    await expect(winScreen).toBeHidden({ timeout: 2500 });
+    const hero = page.locator('.pf-hero-title');
+    await expect(hero).toBeVisible();
+  });
+
+  test('화면 아무 곳이나 클릭 시 즉시 언락된다', async ({ page }) => {
+    await page.goto('/');
+
+    const winScreen = page.locator('#win-lock-screen');
+    await expect(winScreen).toBeVisible();
+
+    // 화면 아무 곳이나 클릭
+    await winScreen.click();
+
+    await expect(winScreen).toBeHidden({ timeout: 2000 });
+    const hero = page.locator('.pf-hero-title');
+    await expect(hero).toBeVisible();
   });
 });

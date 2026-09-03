@@ -23,6 +23,10 @@
         <a href="../../index.html">Home</a>
         <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
+        <button type="button" id="win-lock-btn" class="site-nav-lock-btn" title="화면 잠금 (Win + L)" aria-label="화면 잠금">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          <span>잠금</span>
+        </button>
       </nav>
     </div>
   </header>
@@ -132,7 +136,7 @@
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
     <div class="pf-fc-pill-start">
-      <span>🪑</span>
+      <span class="pf-fc-mono-tag">RESOURCE</span>
       <span>Resource Request (좌석/조리도구 요청)</span>
     </div>
     <div class="pf-fc-arrow">
@@ -281,7 +285,7 @@
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
     <div class="pf-fc-pill-start">
-      <span>📍</span>
+      <span class="pf-fc-mono-tag">ORIGIN</span>
       <span>World Position (출발지 및 목적지)</span>
     </div>
     <div class="pf-fc-arrow">
@@ -318,7 +322,7 @@
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <div class="pf-fc-pill-end">
-      <span>🚶</span>
+      <span class="pf-fc-mono-tag">PATH_END</span>
       <span>NPC Movement (코루틴 기반 부드러운 셀 이동)</span>
     </div>
   </div>
@@ -440,7 +444,7 @@
         <h4 class="pf-fc-title" style="color: #1d4ed8;">4. ServingDish (서빙 및 조리도구 반납)</h4>
         <span class="pf-fc-badge">RESOLVE</span>
       </div>
-      <p class="pf-fc-desc">손님 테이블로 음식 배달 완료 후 조리 도구 반납(`isUseAble=true`) ➔ Roaming 상태로 자동 순환</p>
+      <p class="pf-fc-desc">손님 테이블로 음식 배달 완료 후 조리 도구 반납(`isUseAble=true`) &rarr; Roaming 상태로 자동 순환</p>
     </div>
   </div>
 </div>

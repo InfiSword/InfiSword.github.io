@@ -1543,6 +1543,64 @@
 
 </style>
 
+<!-- Windows 11 Fluent Lock & Login Screen Overlay -->
+<div id="win-lock-screen" class="win-screen win-screen--locked" aria-modal="true" role="dialog" aria-label="Windows Login Screen">
+  
+  <!-- Wallpaper with Acrylic Glow -->
+  <div class="win-wallpaper">
+    <div class="win-wallpaper__bloom win-wallpaper__bloom--1"></div>
+    <div class="win-wallpaper__bloom win-wallpaper__bloom--2"></div>
+    <div class="win-wallpaper__grid"></div>
+  </div>
+
+  <!-- Top System Bar -->
+  <div class="win-top-bar">
+    <div class="win-system-badge">
+      <span class="win-badge-dot"></span>
+      <span>SYSTEM READY // FILE_OS v11.0</span>
+    </div>
+  </div>
+
+  <!-- Windows 11 Loading Bar & Enter Prompt State -->
+  <div id="win-login-state" class="win-state win-state--login" tabindex="0" role="button" aria-label="Enter 또는 화면 클릭하여 시작">
+    <div class="win-login-box">
+      <div class="win-avatar">
+        <span class="win-avatar-monogram">ML</span>
+      </div>
+      <h2 class="win-user-name">이민혁 (Minhyuk Lee)</h2>
+      <p class="win-user-role">Game Client &amp; Graphics Programmer</p>
+      
+      <!-- System Loading Bar Track & Fill -->
+      <div class="win-progress-wrapper" id="win-progress-wrapper">
+        <div class="win-progress-track">
+          <div class="win-progress-bar" id="win-progress-bar"></div>
+        </div>
+        <div class="win-progress-status" id="win-progress-status">시스템 초기화 중...</div>
+      </div>
+
+      <!-- Action Prompt (Appears when 100% loaded) -->
+      <div class="win-action-prompt" id="win-action-prompt" style="display: none;">
+        <span class="win-prompt-bracket">[</span>
+        <span class="win-prompt-key">Enter</span>
+        <span class="win-prompt-text">키를 누르거나 화면을 클릭하세요</span>
+        <span class="win-prompt-bracket">]</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="win-bottom-bar">
+    <div class="win-power-group">
+      <button type="button" class="win-icon-btn" title="네트워크 연결됨">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+      </button>
+      <button type="button" class="win-icon-btn" title="접근성 옵션">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="m4.93 4.93 4.24 4.24"></path><path d="m14.83 9.17 4.24-4.24"></path><path d="m14.83 14.83 4.24 4.24"></path><path d="m9.17 14.83-4.24 4.24"></path><circle cx="12" cy="12" r="4"></circle></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="pf-custom-portfolio">
 
     <!-- HERO INTRODUCTION -->
@@ -2485,7 +2543,7 @@
                 <p class="pf-modal-item-desc">카드 스탯을 영구 강화하거나 특수 룰을 부여하는 유물 시스템을 데이터 주도(Data-Driven) 방식으로 분리해 유연한 확장을 구현했습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #c084fc;"><span>⏱</span>4. 48시간 게임잼 완결 파이프라인</div>
+                <div class="pf-modal-item-title" style="color: #c084fc;">4. 48시간 게임잼 완결 파이프라인</div>
                 <p class="pf-modal-item-desc">Global Game Jam 2026에서 4인 팀의 유일한 프로그래머로 참여하여 기획/아트 리소스를 신속히 통합하고 안정적인 인게임 루프를 완성했습니다.</p>
             </div>
         </div>

@@ -160,7 +160,7 @@ FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 �
 
     <!-- START -->
     <div class="pf-fc-pill-start">
-      <span>🔄</span>
+      <span class="pf-fc-mono-tag">TRIGGER</span>
       <span>State Transition Request (상태 전환 요청)</span>
     </div>
 
@@ -210,7 +210,7 @@ FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 �
         </div>
         <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #bbf7d0; background: #fdfffe;">
           <span class="pf-fc-tag-yes">Yes</span>
-          <div class="pf-fc-branch-title" style="margin-top: 5px;">ChangeState() 호출 ➔ 상태 전환 착수</div>
+          <div class="pf-fc-branch-title" style="margin-top: 5px;">ChangeState() 호출 &rarr; 상태 전환 착수</div>
         </div>
       </div>
     </div>
@@ -235,12 +235,11 @@ FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 �
     </div>
 
     <div class="pf-fc-pill-end">
-      <span>✨</span>
+      <span class="pf-fc-mono-tag">STABLE</span>
       <span>예외 없는 안정적 FSM 상태 라이프사이클 완성</span>
     </div>
 
   </div>
-</div>
 </div>
 
 **상태머신 핵심 로직**
@@ -371,7 +370,6 @@ public class State
     </div>
 
   </div>
-</div>
 </div>
 
 ### 3.2 변신 능력 시스템

@@ -237,7 +237,7 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
   <div class="pf-flowchart">
 
     <div class="pf-fc-pill-start">
-      <span>🎨</span>
+      <span class="pf-fc-mono-tag">TRIGGER</span>
       <span>Render Loop Trigger (매 프레임 렌더링 시작)</span>
     </div>
 
@@ -250,7 +250,7 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
         <h4 class="pf-fc-title">1. Submission (명령 제출)</h4>
         <span class="pf-fc-badge">COLLECT</span>
       </div>
-      <p class="pf-fc-desc">`GameObject::Render()` 호출 ➔ `DrawCommand` 생성 후 `RenderManager` 큐에 예약</p>
+      <p class="pf-fc-desc">`GameObject::Render()` 호출 &rarr; `DrawCommand` 생성 후 `RenderManager` 큐에 예약</p>
     </div>
 
     <div class="pf-fc-arrow">
@@ -262,7 +262,7 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
         <h4 class="pf-fc-title">2. Sorting (정렬 단계)</h4>
         <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">Y-SORTING</span>
       </div>
-      <p class="pf-fc-desc">`RenderManager::Flush()` ➔ 배경/오브젝트/UI 레이어 우선순위 분류 후 발밑(Pivot Y) 기준 오름차순 정렬</p>
+      <p class="pf-fc-desc">`RenderManager::Flush()` &rarr; 배경/오브젝트/UI 레이어 우선순위 분류 후 발밑(Pivot Y) 기준 오름차순 정렬</p>
     </div>
 
     <div class="pf-fc-arrow">
