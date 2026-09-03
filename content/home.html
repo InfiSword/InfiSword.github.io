@@ -133,25 +133,26 @@
     }
 
     #pf-custom-portfolio .pf-hero-title {
-        font-size: 2.1rem;
+        font-size: clamp(2rem, 4.2vw, 2.7rem);
         font-weight: 800;
-        line-height: 1.25;
+        line-height: 1.2;
         margin: 0 0 14px 0;
-        color: #f8fafc;
+        color: #ffffff;
         letter-spacing: -0.03em;
+        text-shadow: 0 2px 16px rgba(96, 165, 250, 0.2);
     }
 
     #pf-custom-portfolio .pf-hero-desc {
-        font-size: 1.02rem;
-        line-height: 1.75;
-        color: #94a3b8;
+        font-size: 1.05rem;
+        line-height: 1.78;
+        color: #cbd5e1;
         font-weight: 400;
         max-width: 860px;
         margin-bottom: 20px;
     }
     #pf-custom-portfolio .pf-hero-desc strong {
-        color: #e2e8f0;
-        font-weight: 600;
+        color: #60a5fa;
+        font-weight: 700;
     }
     #pf-custom-portfolio .pf-profile-links {
         display: flex;
@@ -164,34 +165,37 @@
         align-items: center;
         gap: 9px;
         min-height: 44px;
-        padding: 10px 15px;
-        border: 1px solid #bfdbfe;
+        padding: 10px 18px;
+        border: 1px solid rgba(148, 163, 184, 0.22);
         border-radius: 10px;
-        background: #ffffff;
-        color: #1d4ed8;
+        background: rgba(15, 23, 42, 0.75);
+        color: #f1f5f9;
         font-size: 0.86rem;
-        font-weight: 700;
+        font-weight: 600;
         text-decoration: none;
-        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.08);
-        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+        transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease, background 180ms ease;
     }
     #pf-custom-portfolio .pf-profile-link:hover {
         border-color: #60a5fa;
-        color: #1d4ed8;
+        color: #ffffff;
+        background: rgba(37, 99, 235, 0.2);
         text-decoration: none;
         transform: translateY(-2px);
-        box-shadow: 0 12px 28px rgba(37, 99, 235, 0.16);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
     }
     #pf-custom-portfolio .pf-profile-link--primary {
-        border-color: rgba(147, 197, 253, 0.55);
+        border-color: rgba(96, 165, 250, 0.5);
         background: #2563eb;
         color: #ffffff;
-        box-shadow: 0 10px 28px rgba(37, 99, 235, 0.22);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
     }
     #pf-custom-portfolio .pf-profile-link--primary:hover {
         color: #ffffff;
-        border-color: #bfdbfe;
-        box-shadow: 0 14px 34px rgba(37, 99, 235, 0.30);
+        background: #1d4ed8;
+        border-color: #93c5fd;
+        box-shadow: 0 12px 30px rgba(37, 99, 235, 0.45);
     }
     #pf-custom-portfolio .pf-profile-link__label {
         font-family: 'Fira Code', monospace;
@@ -970,122 +974,157 @@
         }
     }
 
-    /* Light blue portfolio theme — derived from the primary detail button */
+    /* Cohesive Dark Glassmorphism Integration conforming to DESIGN.md */
     #pf-custom-portfolio {
-        color: #1e293b;
-        background: #f8fbff;
-        border-color: #dbe5f2;
-        box-shadow: 0 28px 80px rgba(37, 99, 235, 0.10);
+        color: #e2e8f0;
+        background: #050711;
+        border-color: rgba(148, 163, 184, 0.16);
+        box-shadow: 0 28px 80px rgba(0, 0, 0, 0.6);
     }
-    #pf-custom-portfolio::before {
-        background: none;
-        display: none;
-    }
+    #pf-custom-portfolio::before,
     #pf-custom-portfolio::after {
         background: none;
         display: none;
     }
     #pf-custom-portfolio .pf-glass-card {
-        background: rgba(255, 255, 255, 0.88);
-        border-color: #dce6f3;
-        box-shadow: 0 12px 34px rgba(30, 64, 175, 0.07);
-        backdrop-filter: blur(12px);
+        background: rgba(13, 18, 34, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
     }
     #pf-custom-portfolio .pf-glass-card:hover {
-        border-color: #93c5fd;
-        box-shadow: 0 18px 42px rgba(37, 99, 235, 0.13);
+        border-color: rgba(96, 165, 250, 0.45);
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(96, 165, 250, 0.25);
     }
     #pf-custom-portfolio .pf-section-heading {
-        color: #2563eb;
+        color: #93c5fd;
+        font-family: 'Fira Code', monospace;
+        font-weight: 700;
     }
     #pf-custom-portfolio .pf-section-heading::after {
         background: rgba(96, 165, 250, 0.3);
     }
     #pf-custom-portfolio .pf-hero-title {
-        color: #f8fafc;
+        color: #ffffff;
+        text-shadow: 0 2px 16px rgba(96, 165, 250, 0.2);
     }
-    #pf-custom-portfolio .pf-hero-desc,
+    #pf-custom-portfolio .pf-hero-desc {
+        color: #cbd5e1;
+    }
+    #pf-custom-portfolio .pf-hero-desc strong {
+        color: #60a5fa;
+        font-weight: 700;
+    }
     #pf-custom-portfolio .pf-project-desc,
     #pf-custom-portfolio .pf-exp-list {
-        color: #526178;
+        color: #cbd5e1;
     }
-    #pf-custom-portfolio .pf-hero-desc strong,
     #pf-custom-portfolio .pf-project-desc strong,
     #pf-custom-portfolio .pf-highlight {
-        color: #172033;
+        color: #ffffff;
+        font-weight: 600;
     }
-    #pf-custom-portfolio .pf-exp-header,
+    #pf-custom-portfolio .pf-exp-header {
+        color: #f8fafc;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
     #pf-custom-portfolio .pf-project-name {
-        color: #172033;
+        color: #f8fafc;
     }
-    #pf-custom-portfolio .pf-exp-header,
-    #pf-custom-portfolio .pf-card-actions {
-        border-color: #e2e8f0;
-    }
-    #pf-custom-portfolio .pf-tech-chip {
-        background: #f8fbff;
-        border-color: #dbe7f5;
-        color: #334155;
-    }
-    #pf-custom-portfolio .pf-tech-chip:hover {
-        background: #eff6ff;
-        border-color: #93c5fd;
-        color: #1d4ed8;
-    }
-    #pf-custom-portfolio .pf-project-card {
-        background: #0d1222;
-    }
-    #pf-custom-portfolio .pf-project-card::after {
-        color: rgba(37, 99, 235, 0.065);
+    #pf-custom-portfolio .pf-project-name a {
+        color: inherit;
+        text-decoration: none;
     }
     #pf-custom-portfolio .pf-project-name a:hover,
     #pf-custom-portfolio .pf-project-name a:focus-visible {
-        color: #2563eb;
+        color: #60a5fa;
     }
-    #pf-custom-portfolio .pf-keyword-badge {
-        background: #eff6ff;
-        border-color: #bfdbfe;
-        color: #1d4ed8;
+    #pf-custom-portfolio .pf-card-actions {
+        border-color: rgba(255, 255, 255, 0.08);
+    }
+    #pf-custom-portfolio .pf-tech-chip {
+        background: rgba(15, 23, 42, 0.85);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        color: #cbd5e1;
+    }
+    #pf-custom-portfolio .pf-tech-chip:hover {
+        background: rgba(37, 99, 235, 0.22);
+        border-color: #60a5fa;
+        color: #ffffff;
+    }
+    #pf-custom-portfolio .pf-project-card,
+    #pf-custom-portfolio .pf-other-card {
+        background: rgba(13, 18, 34, 0.88);
+        border: 1px solid rgba(148, 163, 184, 0.18);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #pf-custom-portfolio .pf-project-card:hover,
+    #pf-custom-portfolio .pf-other-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(96, 165, 250, 0.45);
+        box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(96, 165, 250, 0.25);
+    }
+    #pf-custom-portfolio .pf-project-card::after {
+        color: rgba(96, 165, 250, 0.08);
+    }
+    #pf-custom-portfolio .pf-keyword-badge,
+    #pf-custom-portfolio .pf-meta-pill {
+        background: rgba(37, 99, 235, 0.14);
+        border: 1px solid rgba(96, 165, 250, 0.32);
+        color: #93c5fd;
+        font-family: 'Fira Code', monospace;
     }
     #pf-custom-portfolio .pf-btn-modal {
-        background: #ffffff;
-        color: #2563eb;
-        border-color: #bfdbfe;
+        background: rgba(255, 255, 255, 0.05);
+        color: #f1f5f9;
+        border: 1px solid rgba(148, 163, 184, 0.25);
     }
     #pf-custom-portfolio .pf-btn-modal:hover {
-        background: #eff6ff;
-        color: #1d4ed8;
+        background: rgba(37, 99, 235, 0.25);
+        color: #ffffff;
         border-color: #60a5fa;
     }
     .pf-modal-overlay {
-        background: rgba(30, 41, 59, 0.54);
+        background: rgba(2, 6, 23, 0.82);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
     }
     .pf-modal-container {
-        color: #1e293b;
-        background: #0d1222;
-        border-color: #dbe5f2;
-        box-shadow: 0 28px 70px rgba(15, 23, 42, 0.24);
+        color: #e2e8f0;
+        background: #090e1a;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.8);
     }
     .pf-modal-header {
-        border-color: #e2e8f0;
+        border-color: rgba(255, 255, 255, 0.1);
     }
     .pf-modal-title {
-        color: #172033;
+        color: #ffffff;
     }
     .pf-modal-close {
-        background: #f8fafc;
-        border-color: #dbe5f2;
-        color: #64748b;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: #cbd5e1;
+    }
+    .pf-modal-close:hover {
+        background: rgba(239, 68, 68, 0.25);
+        border-color: rgba(239, 68, 68, 0.5);
+        color: #fca5a5;
     }
     .pf-modal-item {
-        background: #f8fbff;
-        border-color: #dce6f3;
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .pf-modal-item-title {
+        color: #38bdf8;
     }
     .pf-modal-item-desc {
-        color: #526178;
+        color: #cbd5e1;
     }
     .pf-modal-item-desc strong {
-        color: #172033;
+        color: #ffffff;
     }
 
     /* ================================================= */
@@ -1836,7 +1875,7 @@
                     <h3 class="pf-project-name"><a href="/project/file-tower-defense/">File Tower Defense</a></h3>
                 </div>
                 <div class="pf-project-meta pf-mono">
-                    <span class="pf-meta-pill pf-period">️ 2025.05 ~ 현재 (진행중)</span>
+                    <span class="pf-meta-pill pf-period"> 2025.05 ~ 현재 (진행중)</span>
                     <span class="pf-meta-pill">4인 팀</span>
                     <span class="pf-meta-pill">PC (Windows)</span>
                 </div>
@@ -1875,7 +1914,7 @@
                     <h3 class="pf-project-name"><a href="/project/winapi-dont-starve/">WinAPI Don't Starve Clone</a></h3>
                 </div>
                 <div class="pf-project-meta pf-mono">
-                    <span class="pf-meta-pill pf-period">️ 2025.12.05 ~ 2026.02.04 (2개월)</span>
+                    <span class="pf-meta-pill pf-period"> 2025.12.05 ~ 2026.02.04 (2개월)</span>
                     <span class="pf-meta-pill">1인 개인 개발</span>
                     <span class="pf-meta-pill">PC (Windows)</span>
                 </div>
@@ -1914,7 +1953,7 @@
                     <h3 class="pf-project-name"><a href="/project/worldfirstkill/">WorldFirstKill</a></h3>
                 </div>
                 <div class="pf-project-meta pf-mono">
-                    <span class="pf-meta-pill pf-period">️ 2025.03 ~ 2025.09 (6개월)</span>
+                    <span class="pf-meta-pill pf-period"> 2025.03 ~ 2025.09 (6개월)</span>
                     <span class="pf-meta-pill">9인 팀</span>
                     <span class="pf-meta-pill">Mobile (Android)</span>
                 </div>
@@ -1953,7 +1992,7 @@
                     <h3 class="pf-project-name"><a href="/project/autonomous-racing-agent/">Autonomous Racing Agent</a></h3>
                 </div>
                 <div class="pf-project-meta pf-mono">
-                    <span class="pf-meta-pill pf-period">️ 2025.09 ~ 2025.12.05 (3개월)</span>
+                    <span class="pf-meta-pill pf-period"> 2025.09 ~ 2025.12.05 (3개월)</span>
                     <span class="pf-meta-pill">2인 팀</span>
                     <span class="pf-meta-pill">PC (Windows)</span>
                 </div>
@@ -1992,7 +2031,7 @@
                     <h3 class="pf-project-name"><a href="/project/slime-project/">Slime Project (하드코어 액션 플랫포머)</a></h3>
                 </div>
                 <div class="pf-project-meta pf-mono">
-                    <span class="pf-meta-pill pf-period">️ 2024.06 ~ 2024.11 (5개월)</span>
+                    <span class="pf-meta-pill pf-period"> 2024.06 ~ 2024.11 (5개월)</span>
                     <span class="pf-meta-pill">3인 팀</span>
                     <span class="pf-meta-pill">PC (Windows)</span>
                 </div>
@@ -2031,7 +2070,7 @@
                     <h3 class="pf-project-name"><a href="/project/moonlight/">보름달 방앗간 (MoonLight)</a></h3>
                 </div>
                 <div class="pf-project-meta pf-mono">
-                    <span class="pf-meta-pill pf-period">️ 2024.09 ~ 2024.11.14 (2.5개월)</span>
+                    <span class="pf-meta-pill pf-period"> 2024.09 ~ 2024.11.14 (2.5개월)</span>
                     <span class="pf-meta-pill">7인 팀</span>
                     <span class="pf-meta-pill">Mobile (Android)</span>
                 </div>
@@ -2078,7 +2117,7 @@
                 <h3 class="pf-project-name">럭키 WWE</h3>
             </div>
             <div class="pf-other-meta pf-mono">
-                <span class="pf-keyword-badge pf-period">️ 2026.01.30 ~ 02.01 (3일)</span>
+                <span class="pf-keyword-badge pf-period"> 2026.01.30 ~ 02.01 (3일)</span>
                 <span class="pf-keyword-badge">4인 팀</span>
                 <span class="pf-keyword-badge">Unity / C#</span>
             </div>
@@ -2110,7 +2149,7 @@
                 <h3 class="pf-project-name">Hey! HoneyBee!</h3>
             </div>
             <div class="pf-other-meta pf-mono">
-                <span class="pf-keyword-badge pf-period">️ 2026.01.10 ~ 01.12 (3일)</span>
+                <span class="pf-keyword-badge pf-period"> 2026.01.10 ~ 01.12 (3일)</span>
                 <span class="pf-keyword-badge">3인 팀</span>
                 <span class="pf-keyword-badge">HTML / Verse8</span>
             </div>
@@ -2142,7 +2181,7 @@
                 <h3 class="pf-project-name">WinAPI Shooting Game</h3>
             </div>
             <div class="pf-other-meta pf-mono">
-                <span class="pf-keyword-badge pf-period">️ 2025.05 (2주)</span>
+                <span class="pf-keyword-badge pf-period"> 2025.05 (2주)</span>
                 <span class="pf-keyword-badge">2인 팀</span>
                 <span class="pf-keyword-badge">C++ / WinAPI</span>
             </div>
@@ -2174,7 +2213,7 @@
                 <h3 class="pf-project-name">PipeGame</h3>
             </div>
             <div class="pf-other-meta pf-mono">
-                <span class="pf-keyword-badge pf-period">️ 2024.09.10 ~ 09.17 (1주)</span>
+                <span class="pf-keyword-badge pf-period"> 2024.09.10 ~ 09.17 (1주)</span>
                 <span class="pf-keyword-badge">1인 개발</span>
                 <span class="pf-keyword-badge">Unity / C#</span>
             </div>
@@ -2211,7 +2250,7 @@
                 <div class="pf-modal-tag">ARCHITECTURE REPORT // FILE_TOWER_DEFENSE</div>
                 <h2 class="pf-modal-title">File Tower Defense: 시스템 리팩토링 및 최적화</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2025.05 ~ 현재 (진행중)</span>
+                    <span> 2025.05 ~ 현재 (진행중)</span>
                     <span>4인 팀 (기획 1, 프로그래밍 2, 아트 1)</span>
                     <span>PC (Windows) / Unity</span>
                 </div>
@@ -2249,7 +2288,7 @@
                 <div class="pf-modal-tag" style="color: #818cf8;">ARCHITECTURE REPORT // WINAPI_DONT_STARVE</div>
                 <h2 class="pf-modal-title">Don't Starve 모작: 공간 분할 및 렌더링 최적화</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2025.12.05 ~ 2026.02.04 (약 2개월)</span>
+                    <span> 2025.12.05 ~ 2026.02.04 (약 2개월)</span>
                     <span>1인 개인 개발</span>
                     <span>PC (Windows) / C++, WinAPI</span>
                 </div>
@@ -2260,15 +2299,15 @@
         <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=TTdIN2U3gnQ" target="_blank" rel="noopener noreferrer" aria-label="WinAPI Don't Starve Clone 유튜브 영상 보기"><img src="assets/images/Dont%20Starve/sujung_dont_starve_intro.png" alt="WinAPI Don't Starve Clone 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #818cf8;"><span>️</span>1. 그리드 공간 분할 (Grid Partitioning)</div>
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span></span>1. 그리드 공간 분할 (Grid Partitioning)</div>
                 <p class="pf-modal-item-desc">월드 전체를 일정한 그리드 셀 단위로 분할하여 관리함으로써 오브젝트 간의 충돌 및 갱신 연산을 인접 셀 단위로 제한했습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #818cf8;"><span>️</span>2. 뷰포트 컬링 (Viewport Frustum Culling)</div>
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span></span>2. 뷰포트 컬링 (Viewport Frustum Culling)</div>
                 <p class="pf-modal-item-desc">카메라 가시 영역 내에 포함된 타일과 오브젝트만 선별하여 DrawCall을 호출, 화면 밖 80% 이상의 불필요한 비트맵 연산을 완전 배제했습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #818cf8;"><span>️</span>3. 더블 버퍼링 & 리소스 캐시 매니저</div>
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span></span>3. 더블 버퍼링 & 리소스 캐시 매니저</div>
                 <p class="pf-modal-item-desc">메모리 DC를 활용한 더블 버퍼링으로 GDI 깜빡임을 제거하고, 스프라이트 비트맵을 키 기반으로 캐싱하여 메모리 누수를 원천 차단했습니다.</p>
             </div>
             <div class="pf-modal-item">
@@ -2287,7 +2326,7 @@
                 <div class="pf-modal-tag" style="color: #c084fc;">ARCHITECTURE REPORT // WORLDFIRSTKILL</div>
                 <h2 class="pf-modal-title">WorldFirstKill: 결정적 난수 및 시트 동기화</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2025.03 ~ 2025.09 (약 6개월)</span>
+                    <span> 2025.03 ~ 2025.09 (약 6개월)</span>
                     <span>9인 팀 (기획 1, 프로그래밍 4, 아트 4)</span>
                     <span>Mobile (Android) / Unity</span>
                 </div>
@@ -2298,11 +2337,11 @@
         <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=EWD2YidSgp0" target="_blank" rel="noopener noreferrer" aria-label="WorldFirstKill 유튜브 영상 보기"><img src="assets/images/World%20First%20Kill/스크린샷%202026-06-28%20173659.png" alt="WorldFirstKill 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #c084fc;"><span>️</span>1. 리플렉션 기반 CSV 자동 파서</div>
+                <div class="pf-modal-item-title" style="color: #c084fc;"><span></span>1. 리플렉션 기반 CSV 자동 파서</div>
                 <p class="pf-modal-item-desc">런타임 타입 분석을 통해 CSV 헤더와 프로퍼티를 자동 매핑, 데이터 스키마가 변경되어도 코드 수정 없이 즉시 수용 가능한 범용 파서를 구축했습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #c084fc;"><span>️</span>2. 비동기 구글 시트 동기화 및 캐싱</div>
+                <div class="pf-modal-item-title" style="color: #c084fc;"><span></span>2. 비동기 구글 시트 동기화 및 캐싱</div>
                 <p class="pf-modal-item-desc">UnityWebRequest 비동기 통신과 버전 해시 비교를 통해 변경된 데이터만 선별 다운로드하여 네트워크 트래픽과 로딩 지연을 최소화했습니다.</p>
             </div>
             <div class="pf-modal-item">
@@ -2325,7 +2364,7 @@
                 <div class="pf-modal-tag" style="color: #38bdf8;">ARCHITECTURE REPORT // AUTONOMOUS_RACING_AGENT</div>
                 <h2 class="pf-modal-title">Autonomous Racing: 강화학습 자율 주행 시스템</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2025.09 ~ 2025.12.05 (약 3개월)</span>
+                    <span> 2025.09 ~ 2025.12.05 (약 3개월)</span>
                     <span>2인 팀 (기획 1, 프로그래밍 1)</span>
                     <span>PC (Windows) / Unity, ML-Agents</span>
                 </div>
@@ -2344,7 +2383,7 @@
                 <p class="pf-modal-item-desc">순차적 스플라인 체크포인트를 설계하여 역주행을 원천 차단하고, 전진 속도 가중치와 조향 안정성 패널티를 결합해 부드러운 코너링을 학습시켰습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #38bdf8;"><span>️</span>3. 연속적 행동 공간 & 입력 스무딩</div>
+                <div class="pf-modal-item-title" style="color: #38bdf8;"><span></span>3. 연속적 행동 공간 & 입력 스무딩</div>
                 <p class="pf-modal-item-desc">[-1.0, 1.0]의 연속 조향/가속 출력을 사용하며, 프레임 간 조향 급변을 방지하는 보간 필터를 적용해 현실적인 차량 동역학을 완성했습니다.</p>
             </div>
             <div class="pf-modal-item">
@@ -2363,7 +2402,7 @@
                 <div class="pf-modal-tag" style="color: #fb923c;">ARCHITECTURE REPORT // SLIME_PROJECT</div>
                 <h2 class="pf-modal-title">Slime Project: 계층형 FSM 및 컴포지션 시스템</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2024.06 ~ 2024.11 (약 5개월)</span>
+                    <span> 2024.06 ~ 2024.11 (약 5개월)</span>
                     <span>3인 팀 (기획 1, 프로그래밍 2)</span>
                     <span>PC (Windows) / Unity</span>
                 </div>
@@ -2401,7 +2440,7 @@
                 <div class="pf-modal-tag" style="color: #f59e0b;">ARCHITECTURE REPORT // MOONLIGHT</div>
                 <h2 class="pf-modal-title">보름달 방앗간: 타일 기반 NPC 서비스 시스템</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2024.09 ~ 2024.11.14 (약 2.5개월)</span>
+                    <span> 2024.09 ~ 2024.11.14 (약 2.5개월)</span>
                     <span>7인 팀 (기획 1, 프로그래밍 2, 아트 4)</span>
                     <span>Mobile (Android) / Unity</span>
                 </div>
@@ -2423,7 +2462,7 @@
                 <p class="pf-modal-item-desc">손님의 입장부터 퇴장까지, 직원의 배회부터 조리와 서빙까지를 독립 상태로 나누어 코루틴 기반의 비동기 행동 흐름으로 제어했습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #f59e0b;"><span>️</span>4. 주문 큐와 자원 예약</div>
+                <div class="pf-modal-item-title" style="color: #f59e0b;"><span></span>4. 주문 큐와 자원 예약</div>
                 <p class="pf-modal-item-desc">음식과 손님을 대응되는 Queue로 관리하고 조리 도구·좌석의 점유 플래그를 선점/반납하여 여러 NPC가 동시에 같은 자원을 선택하는 충돌을 줄였습니다.</p>
             </div>
         </div>
@@ -2439,7 +2478,7 @@
                 <div class="pf-modal-tag" style="color: #c084fc;">ARCHITECTURE REPORT // LUCKY_WWE</div>
                 <h2 class="pf-modal-title">럭키 WWE: Yacht Dice & 프로레슬링 TCG</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2026.01.30 ~ 2026.02.01 (GGJ 2026, 3일)</span>
+                    <span> 2026.01.30 ~ 2026.02.01 (GGJ 2026, 3일)</span>
                     <span>4인 팀 (기획 1, 프로그래밍 1, 아트 2)</span>
                     <span>PC (Windows) / Unity</span>
                 </div>
@@ -2461,7 +2500,7 @@
                 <p class="pf-modal-item-desc">카드 스탯을 영구 강화하거나 특수 룰을 부여하는 유물 시스템을 데이터 주도(Data-Driven) 방식으로 분리해 유연한 확장을 구현했습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #c084fc;"><span>⏱️</span>4. 48시간 게임잼 완결 파이프라인</div>
+                <div class="pf-modal-item-title" style="color: #c084fc;"><span>⏱</span>4. 48시간 게임잼 완결 파이프라인</div>
                 <p class="pf-modal-item-desc">Global Game Jam 2026에서 4인 팀의 유일한 프로그래머로 참여하여 기획/아트 리소스를 신속히 통합하고 안정적인 인게임 루프를 완성했습니다.</p>
             </div>
         </div>
@@ -2476,7 +2515,7 @@
                 <div class="pf-modal-tag" style="color: #f59e0b;">ARCHITECTURE REPORT // HEY_HONEYBEE</div>
                 <h2 class="pf-modal-title">Hey! HoneyBee!: 합 10 숫자 퍼즐</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2026.01.10 ~ 2026.01.12 (MACH GAME JAM, 3일)</span>
+                    <span> 2026.01.10 ~ 2026.01.12 (MACH GAME JAM, 3일)</span>
                     <span>3인 팀 (기획 1, 프로그래밍 2)</span>
                     <span>Web / HTML, Verse8</span>
                 </div>
@@ -2513,7 +2552,7 @@
                 <div class="pf-modal-tag" style="color: #818cf8;">ARCHITECTURE REPORT // WINAPI_SHOOTING</div>
                 <h2 class="pf-modal-title">WinAPI Shooting Game: C++ 정통 아케이드 탄막</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2025.05 (2주간 진행)</span>
+                    <span> 2025.05 (2주간 진행)</span>
                     <span>2인 팀 (프로그래밍 2)</span>
                     <span>PC (Windows) / C++, WinAPI</span>
                 </div>
@@ -2535,7 +2574,7 @@
                 <p class="pf-modal-item-desc">수백 개 탄환과 비행선 간의 충돌 검사를 위해 AABB 및 원형 거리 기반 간이 콜라이더 시스템을 자체 구현해 연산 부하를 최소화했습니다.</p>
             </div>
             <div class="pf-modal-item">
-                <div class="pf-modal-item-title" style="color: #818cf8;"><span>️</span>4. 플레이어 입력 스무딩</div>
+                <div class="pf-modal-item-title" style="color: #818cf8;"><span></span>4. 플레이어 입력 스무딩</div>
                 <p class="pf-modal-item-desc">GetAsyncKeyState 기반의 비동기 키보드 입력에 가속도 및 감속 스무딩을 적용해 키보드 조작 시 매끄러운 기체 이동감을 구현했습니다.</p>
             </div>
         </div>
@@ -2550,7 +2589,7 @@
                 <div class="pf-modal-tag" style="color: #34d399;">ARCHITECTURE REPORT // PIPEGAME</div>
                 <h2 class="pf-modal-title">PipeGame: 모바일 파이프 경로 연결 퍼즐</h2>
                 <div class="pf-modal-meta pf-mono">
-                    <span>️ 2024.09.10 ~ 2024.09.17 (1주)</span>
+                    <span> 2024.09.10 ~ 2024.09.17 (1주)</span>
                     <span>1인 개인 개발</span>
                     <span>Mobile (Android) / Unity</span>
                 </div>
