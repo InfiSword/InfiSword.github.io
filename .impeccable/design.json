@@ -1,4 +1,4 @@
-﻿{
+{
   "schemaVersion": 2,
   "generatedAt": "2026-09-03T11:05:00Z",
   "title": "Design System: Minhyuk Lee Portfolio (InfiSword)",
@@ -45,6 +45,8 @@
     ],
     "donts": [
       "Don't use generic flat grey shadows or solid opaque #000000 panels.",
+      "Don't use decorative color gradients on heading or body text.",
+      "Don't use emojis as interface or feature icons. Use typography or clean labels instead.",
       "Don't use overly bouncy, cartoony easing that conflicts with the serious engineering aesthetic.",
       "Don't allow horizontal scroll overflow on mobile viewports."
     ]

@@ -1,4 +1,4 @@
-﻿---
+---
 name: Minhyuk Lee Portfolio (InfiSword)
 description: High-performance game client engineer portfolio specializing in systems architecture, rendering, and reinforcement learning
 colors:
@@ -201,6 +201,8 @@ Surfaces achieve depth not through heavy black drop shadows, but through **optic
 
 ### Don't:
 - **Don't** use generic flat grey shadows or solid opaque `#000000` panels.
+- **Don't** use decorative color gradients on heading or body text (The Solid Authority Rule).
+- **Don't** use emojis as interface or feature icons (The No-Emoji-As-Icon Rule). Use developer typography (`Fira Code`), text labels, or clean SVG vectors instead.
 - **Don't** use overly bouncy, cartoony easing (e.g. elastic/bounce) that conflicts with the serious engineering aesthetic.
 - **Don't** clutter project cards with non-technical marketing fluff; highlight technical problems, rendering techniques, and performance optimizations.
 - **Don't** allow horizontal scroll overflow on mobile viewports.

@@ -23,10 +23,7 @@ html {
 body {
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at 15% -10%, rgba(37, 99, 235, 0.18), transparent 34rem),
-    radial-gradient(circle at 95% 18%, rgba(139, 92, 246, 0.13), transparent 34rem),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
   font-family: "Plus Jakarta Sans", "Noto Sans KR", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.72;
@@ -111,7 +108,7 @@ video {
   place-items: center;
   border: 1px solid rgba(147, 197, 253, 0.4);
   border-radius: 10px;
-  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  background: #2563eb;
   color: #fff;
   font-family: "Fira Code", monospace;
   font-size: 0.74rem;
@@ -160,7 +157,7 @@ video {
   padding: clamp(28px, 5vw, 58px);
   border: 1px solid rgba(148, 163, 184, 0.18);
   border-radius: 24px;
-  background: linear-gradient(120deg, rgba(14, 24, 48, 0.96), rgba(10, 13, 27, 0.9));
+  background: rgba(14, 24, 48, 0.96);
   box-shadow: var(--shadow);
 }
 
@@ -173,7 +170,7 @@ video {
   right: -6rem;
   z-index: -1;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.44), rgba(124, 58, 237, 0.08) 58%, transparent 72%);
+  background: none; display: none;
 }
 
 .project-hero::after {
@@ -181,7 +178,7 @@ video {
   position: absolute;
   inset: auto 0 0;
   height: 3px;
-  background: linear-gradient(90deg, #38bdf8, #6366f1, #a855f7, transparent 85%);
+  background: #38bdf8;
 }
 
 .back-link {
@@ -390,7 +387,7 @@ video {
   padding: clamp(20px, 4vw, 30px) !important;
   border: 1px solid rgba(147, 197, 253, 0.22) !important;
   border-radius: 16px !important;
-  background: linear-gradient(120deg, rgba(37, 99, 235, 0.94), rgba(79, 70, 229, 0.9)) !important;
+  background: #2563eb !important;
   color: #fff !important;
   box-shadow: 0 18px 44px rgba(37, 99, 235, 0.2) !important;
 }
@@ -505,7 +502,7 @@ video {
   margin: 0;
   padding: 15px 17px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.13);
-  background: linear-gradient(90deg, rgba(37, 99, 235, 0.2), rgba(124, 58, 237, 0.08));
+  background: rgba(37, 99, 235, 0.15);
   color: #f8fafc;
   font-size: 0.88rem;
   letter-spacing: 0.04em;
@@ -571,7 +568,7 @@ video {
 
 .toc-list__item--h2 a.is-active {
   color: #ffffff !important;
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+  background: #2563eb !important;
   border-left: 3.5px solid #1e40af !important;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25) !important;
   transform: translateX(3px);
@@ -799,8 +796,7 @@ video {
 
 body {
   background:
-    radial-gradient(circle at 13% -8%, rgba(59, 130, 246, 0.13), transparent 34rem),
-    radial-gradient(circle at 96% 20%, rgba(99, 102, 241, 0.08), transparent 34rem),
+
     var(--bg);
   color: var(--text);
 }
@@ -830,12 +826,11 @@ body::before {
 .project-hero {
   border-color: #d7e4f2;
   background:
-    radial-gradient(circle at 88% 0%, rgba(59, 130, 246, 0.16), transparent 28rem),
-    linear-gradient(135deg, #ffffff 0%, #f3f7ff 100%);
+    #f3f7ff;
 }
 
 .project-hero::before {
-  background: radial-gradient(circle, rgba(96, 165, 250, 0.22), rgba(99, 102, 241, 0.05) 58%, transparent 72%);
+  background: none; display: none;
 }
 
 .back-link {
@@ -959,7 +954,7 @@ body::before {
 
 .toc-panel__title {
   border-bottom-color: #dce5f0;
-  background: linear-gradient(90deg, #eff6ff, #f8faff);
+  background: #f8faff;
   color: #172033;
 }
 
@@ -1142,13 +1137,13 @@ code.hljs {
 
 .pf-comp-box.old {
   border: 1.5px solid #fecaca !important;
-  background: linear-gradient(180deg, #ffffff 0%, #fff8f8 100%) !important;
+  background: #ffffff !important;
   box-shadow: 0 10px 28px rgba(239, 68, 68, 0.07) !important;
 }
 
 .pf-comp-box.new {
   border: 1.5px solid #bfdbfe !important;
-  background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%) !important;
+  background: #ffffff !important;
   box-shadow: 0 10px 28px rgba(37, 99, 235, 0.08) !important;
 }
 
@@ -1323,12 +1318,12 @@ code.hljs {
   }
   .pf-comp-box.old {
     border-color: rgba(244, 63, 94, 0.35) !important;
-    background: linear-gradient(180deg, rgba(28, 16, 26, 0.85) 0%, rgba(20, 10, 20, 0.95) 100%) !important;
+    background: #140a14 !important;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
   }
   .pf-comp-box.new {
     border-color: rgba(59, 130, 246, 0.35) !important;
-    background: linear-gradient(180deg, rgba(15, 26, 48, 0.85) 0%, rgba(10, 18, 36, 0.95) 100%) !important;
+    background: #0f1a30 !important;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35) !important;
   }
   .pf-comp-title {
@@ -1419,7 +1414,7 @@ code.hljs {
 }
 
 .pf-arch-root-card {
-  background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%) !important;
+  background: #ffffff !important;
   border: 2px solid #2563eb !important;
   border-radius: 14px !important;
   padding: 16px 28px !important;
@@ -1613,7 +1608,7 @@ code.hljs {
     border-color: rgba(96, 165, 250, 0.18) !important;
   }
   .pf-arch-root-card {
-    background: linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%) !important;
+    background: #0f172a !important;
     border-color: #3b82f6 !important;
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.4) !important;
   }
@@ -1763,7 +1758,7 @@ code.hljs {
 /* Decision / Branch Cards */
 .pf-fc-decision {
   width: 100% !important;
-  background: linear-gradient(180deg, #ffffff 0%, #f9fbff 100%) !important;
+  background: #ffffff !important;
   border: 2px solid #bfdbfe !important;
   border-radius: 14px !important;
   padding: 16px 20px !important;
