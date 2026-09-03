@@ -1,16 +1,16 @@
 :root {
-  color-scheme: dark;
-  --bg: #050711;
-  --surface: rgba(13, 18, 34, 0.88);
-  --surface-strong: #0d1222;
-  --text: #eef4ff;
-  --muted: #94a3b8;
-  --border: rgba(148, 163, 184, 0.17);
-  --accent: #60a5fa;
-  --accent-soft: rgba(59, 130, 246, 0.13);
+  color-scheme: light;
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --surface-strong: #ffffff;
+  --text: #0f172a;
+  --muted: #475569;
+  --border: #e2e8f0;
+  --accent: #2563eb;
+  --accent-soft: rgba(37, 99, 235, 0.08);
   --container: 1320px;
   --radius: 18px;
-  --shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+  --shadow: 0 12px 36px rgba(15, 23, 42, 0.06);
 }
 
 * { box-sizing: border-box; }
@@ -35,12 +35,12 @@ body::before {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: 0.22;
+  opacity: 0.5;
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.07) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.07) 1px, transparent 1px);
+    linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.15) 1px, transparent 1px);
   background-size: 48px 48px;
-  mask-image: linear-gradient(to bottom, #000, transparent 72%);
+  mask-image: linear-gradient(to bottom, #000, transparent 85%);
 }
 
 a { color: var(--accent); }
@@ -53,8 +53,8 @@ video {
 }
 
 ::selection {
-  background: rgba(96, 165, 250, 0.35);
-  color: #fff;
+  background: rgba(37, 99, 235, 0.2);
+  color: #0f172a;
 }
 
 .skip-link {
@@ -64,8 +64,8 @@ video {
   z-index: 1000;
   padding: 0.65rem 0.9rem;
   border-radius: 8px;
-  background: #fff;
-  color: #0f172a;
+  background: #0f172a;
+  color: #ffffff;
   font-weight: 800;
 }
 
@@ -75,8 +75,8 @@ video {
   position: sticky;
   top: 0;
   z-index: 50;
-  border-bottom: 1px solid rgba(148, 163, 184, 0.13);
-  background: rgba(5, 7, 17, 0.78);
+  border-bottom: 1px solid #e2e8f0;
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(20px) saturate(140%);
 }
 
@@ -94,7 +94,7 @@ video {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  color: #f8fafc;
+  color: #0f172a;
   font-weight: 800;
   text-decoration: none;
   letter-spacing: -0.02em;
@@ -106,13 +106,13 @@ video {
   width: 34px;
   height: 34px;
   place-items: center;
-  border: 1px solid rgba(147, 197, 253, 0.4);
+  border: 1px solid #93c5fd;
   border-radius: 10px;
   background: #2563eb;
   color: #fff;
   font-family: "Fira Code", monospace;
   font-size: 0.74rem;
-  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.32);
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
 }
 
 .site-nav {
@@ -126,15 +126,15 @@ video {
 .site-nav a {
   padding: 8px 12px;
   border-radius: 8px;
-  color: #aebbd0;
+  color: #475569;
   text-decoration: none;
   transition: background 180ms ease, color 180ms ease;
 }
 
 .site-nav a:hover,
 .site-nav a:focus-visible {
-  background: rgba(96, 165, 250, 0.1);
-  color: #fff;
+  background: rgba(37, 99, 235, 0.08);
+  color: #2563eb;
 }
 
 .site-main { padding: 42px 0 80px; }
@@ -668,8 +668,8 @@ video {
 }
 
 .site-footer {
-  border-top: 1px solid rgba(148, 163, 184, 0.12);
-  background: rgba(3, 5, 12, 0.5);
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
 }
 
 .site-footer__inner {
@@ -680,7 +680,7 @@ video {
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  color: #7f8fa6;
+  color: #64748b;
   font-size: 0.85rem;
 }
 
@@ -688,17 +688,17 @@ video {
 
 .site-footer__mark {
   margin-right: 8px;
-  color: #60a5fa;
+  color: #2563eb;
   font-family: "Fira Code", monospace;
   font-weight: 800;
 }
 
 .site-footer__inner a {
-  color: #aebbd0;
+  color: #334155;
   text-decoration: none;
 }
 
-.site-footer__inner a:hover { color: #fff; }
+.site-footer__inner a:hover { color: #2563eb; }
 
 @media (min-width: 1080px) {
   .project-layout {

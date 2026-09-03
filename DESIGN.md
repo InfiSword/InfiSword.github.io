@@ -2,17 +2,18 @@
 name: Minhyuk Lee Portfolio (InfiSword)
 description: High-performance game client engineer portfolio specializing in systems architecture, rendering, and reinforcement learning
 colors:
-  primary: "#60a5fa"
-  primary-soft: "rgba(59, 130, 246, 0.13)"
-  primary-hover: "#93c5fd"
-  background-base: "#050711"
-  surface-glass: "rgba(13, 18, 34, 0.88)"
-  surface-solid: "#0d1222"
-  text-primary: "#eef4ff"
-  text-muted: "#94a3b8"
-  border-subtle: "rgba(148, 163, 184, 0.17)"
-  accent-green: "#34d399"
-  accent-violet: "#c084fc"
+  primary: "#2563eb"
+  primary-soft: "rgba(37, 99, 235, 0.08)"
+  primary-hover: "#1d4ed8"
+  background-base: "#f8fafc"
+  surface-card: "#ffffff"
+  surface-strong: "#ffffff"
+  text-primary: "#0f172a"
+  text-secondary: "#334155"
+  text-muted: "#64748b"
+  border-subtle: "#e2e8f0"
+  accent-green: "#059669"
+  accent-sky: "#0284c7"
 typography:
   display:
     fontFamily: "Plus Jakarta Sans, Noto Sans KR, system-ui, sans-serif"
@@ -56,11 +57,11 @@ spacing:
 components:
   button-primary:
     backgroundColor: "{colors.primary}"
-    textColor: "{colors.background-base}"
+    textColor: "#ffffff"
     rounded: "{rounded.sm}"
     padding: "10px 18px"
-  card-glass:
-    backgroundColor: "{colors.surface-glass}"
+  card-technical:
+    backgroundColor: "{colors.surface-card}"
     textColor: "{colors.text-primary}"
     rounded: "{rounded.lg}"
     padding: "24px"
@@ -70,34 +71,36 @@ components:
 
 ## Overview
 
-**Creative North Star: "The Deep Space Flight Deck"**
+**Creative North Star: "Swiss Technical Light Architecture"**
 
-A high-performance, dark glassmorphism design language built for an elite Game Client Programmer specializing in Systems Architecture, Graphics Pipelines, and AI Reinforcement Learning. The interface feels less like a document and more like a tactical mission control HUD—deep obsidian space, frosted glass surfaces with high-spec optical blurs, disciplined typography, and electric blue photon accents.
+A high-contrast, clean white technical design language built for an elite Game Client Programmer specializing in Systems Architecture, Graphics Pipelines, and AI Reinforcement Learning. The interface is crisp, modern, and exceptionally legible—bright white canvas, tactile paper cards with delicate hairline borders, structured developer typography, and authoritative royal blue accents.
 
-The design embodies rigorous engineering craft: dense with technical substance yet frictionless in motion. Precision grid lines and subtle ambient nebulae in the background evoke 3D viewport spatial coordinates, while code blocks and telemetry badges anchor the visitor in real production-grade code.
+The design embodies rigorous engineering precision: dense with technical substance yet effortless to read. Precision grid lines evoke blueprint schematics, while developer monospace badges anchor the visitor in real production-grade code.
 
 **Key Characteristics:**
-- **Tactical Dark Space Atmosphere**: Deep obsidian background (`#050711`) enriched by soft dual-radial nebula gradients (deep blue and amethyst violet).
-- **Aero-Grade Glassmorphism**: Frosted glass panels (`rgba(13, 18, 34, 0.88)`) with `backdrop-filter: blur(20px)` and crisp 1px hairline borders (`rgba(148, 163, 184, 0.17)`).
+- **Clean White Canvas**: Crisp off-white background (`#f8fafc` / `#ffffff`) with subtle 48px schematic grid lines (`linear-gradient(rgba(148, 163, 184, 0.15) 1px, transparent 1px)`).
+- **Tactile Paper Cards**: Crisp white surfaces (`#ffffff`) with 1px hairline borders (`#e2e8f0`), subtle elevation (`box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05)`), and solid blue indicator accents (`#2563eb`).
 - **Dual Type Stack**: Geometric modern sans (`Plus Jakarta Sans`) paired with developer-grade monospace (`Fira Code`) for metrics, dates, and architectural tags.
-- **Cinematic Micro-Motion (GSAP)**: Hardware-accelerated entrance staggers (`power3.out`) and scroll-triggered elevations (`power2.out`) that feel weighted, snappy, and responsive.
+- **Cinematic Micro-Motion (GSAP)**: Hardware-accelerated entrance staggers (`power3.out`) and scroll-triggered card reveals (`power2.out`) that feel weighted, snappy, and responsive.
 
 ---
 
 ## Colors
 
-The palette is tuned for high-contrast readability in dark environments, using a luminous electric blue as the signature accent against cosmic obsidian shades.
+The palette is tuned for maximum contrast (WCAG AAA) on light surfaces.
 
 ### Primary
-- **Electric Cyan-Blue** (`#60a5fa`): The primary visual signal. Used for interactive links, active nav states, glowing badges, and primary callouts. Represents computational precision.
-- **Electric Glow Soft** (`rgba(59, 130, 246, 0.13)`): Low-opacity aura for interactive component backdrops and hover states.
+- **Royal Blue** (`#2563eb`): The primary visual signal. Used for interactive links, active buttons, left card indicator bars, and primary callouts.
+- **Blue Soft Tint** (`#eff6ff`): Subtle background tint for tech chips and metadata pills.
 
-### Secondary & Accent
-- **Amethyst Violet** (`#c084fc`): Secondary accent used in hero title text gradients and subtle atmospheric ambient glows.
-- **Radar Green** (`#34d399`): Status indicator for live states and active portfolio availability, paired with a pulsing radar beacon.
+### Typography
+- **Deep Obsidian Charcoal** (`#0f172a`): Used for hero title, card titles, and modal headlines. 명도 대비 16.5:1.
+- **Dark Slate Body** (`#334155` / `#475569`): Used for project descriptions, bio, and secondary text. 명도 대비 7.5:1 이상.
+- **Slate Muted** (`#64748b`): For timestamps, minor metadata labels, and footer marks.
 
-### Neutral
-- **Deep Space Obsidian** (`#050711`): The infinite ground plane. Calibrated to prevent OLED eye fatigue while preserving contrast.
+### Borders & Dividers
+- **Hairline Border** (`#e2e8f0`): Structural containment.
+- **Active Border** (`#93c5fd`): Hover state illumination.
 - **Frosted Midnight Glass** (`rgba(13, 18, 34, 0.88)`): Primary surface fill for cards, headers, and modal dialogs.
 - **Solid Void Blue** (`#0d1222`): Opaque fallbacks and deep structural backgrounds.
 - **Luminous Polar White** (`#eef4ff`): High-clarity primary text color for maximum legibility.
