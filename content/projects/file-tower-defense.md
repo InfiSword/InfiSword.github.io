@@ -281,7 +281,6 @@ mermaid: true
 
     <!-- 0. START -->
     <div class="pf-fc-pill-start">
-      <span>🖱️</span>
       <span>Mouse &amp; Touch Input</span>
     </div>
 
@@ -386,7 +385,6 @@ mermaid: true
 
     <!-- 6. END / RESULT -->
     <div class="pf-fc-pill-end">
-      <span>⚡</span>
       <span>개별 객체 Update() 0% &amp; 60+ FPS 방어</span>
     </div>
 
@@ -469,7 +467,6 @@ public interface IInteractable
 
     <!-- 0. START -->
     <div class="pf-fc-pill-start">
-      <span>📦</span>
       <span>Drag &amp; Drop Release (유닛 드롭)</span>
     </div>
 
@@ -521,7 +518,6 @@ public interface IInteractable
 
     <!-- 4. END -->
     <div class="pf-fc-pill-end">
-      <span>🔒</span>
       <span>원자성(Atomicity) 확보 &amp; 데이터 무결성 100% 유지</span>
     </div>
 
@@ -551,7 +547,6 @@ public interface IInteractable
         <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, 0)
       </div>
       <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: 2px solid #1e40af; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">
-        <span style="font-size: 1.1rem; margin-bottom: 2px;">🎯</span>
         <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; font-weight: 800;">Target</span>
         <span style="font-size: 0.62rem; opacity: 0.9; font-family: 'Fira Code', monospace;">(0, 0)</span>
       </div>
@@ -682,7 +677,6 @@ public enum SearchGridFlag
 <!-- 가변 인자(params) 기반 복합 쿼리 호출 예시 -->
 <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 14px; padding: 18px 22px; box-shadow: 0 6px 18px rgba(37,99,235,0.04); margin-top: 20px; margin-bottom: 20px;">
   <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-    <span style="font-size: 1rem;">💡</span>
     <span style="font-family: 'Fira Code', monospace; font-size: 0.9rem; font-weight: 800; color: #1e293b;">가변 인자(params) 기반 복합 쿼리 호출 예시</span>
   </div>
   <div style="background: #0f172a; padding: 14px 18px; border-radius: 10px; font-family: 'Fira Code', monospace; font-size: 0.84rem; color: #f8fafc; overflow-x: auto; margin-bottom: 12px; border: 1px solid #1e293b;">
@@ -764,7 +758,6 @@ public FileGrid FindFlagGridWorld(Vector2 worldPos, params SearchGridFlag[] flag
 
     <!-- 0. START -->
     <div class="pf-fc-pill-start">
-      <span>📦</span>
       <span>유닛 그리드 배치 (Unit Placed on Grid)</span>
     </div>
 
@@ -811,7 +804,7 @@ public FileGrid FindFlagGridWorld(Vector2 worldPos, params SearchGridFlag[] flag
     <!-- STEP 02: 동기화 완료 및 라이프사이클 보장 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #cbd5e1; background: #ffffff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #0f172a;">✨ Observer 기반 결합도 분리 (Decoupled Sync)</h4>
+        <h4 class="pf-fc-title" style="color: #0f172a;">Observer 기반 결합도 분리 (Decoupled Sync)</h4>
         <span class="pf-fc-badge" style="background: #e2e8f0; color: #334155;">LIFECYCLE</span>
       </div>
       <p class="pf-fc-desc" style="color: #475569; margin: 0; font-size: 0.82rem; line-height: 1.5;">
@@ -880,55 +873,23 @@ public class FileGrid : MonoBehaviour
 // Buff_Base.cs: 컴포넌트 기반 버프 추상 클래스
 public abstract class Buff_Base : MonoBehaviour
 {
-    // ==========================================
-    // [버프 데이터 프로퍼티]
-    // ==========================================
-    public Define.BuffType BuffType { get; private set; }  // 버프 고유 분류 (공격력 증가, 슬로우, 도트 힐 등)
-    public float Amount { get; private set; }             // 버프 효과 수치 (스탯 증감량 또는 틱당 데미지/회복량)
-    public float Duration { get; private set; }           // 버프 총 유지 시간 (초 단위, 0 이하면 오라형 영구 지속)
-    public float WaitTickTime { get; private set; }       // 틱 발동 주기 간격 (초 단위, 주기적 OnTick 호출 간격)
-    public bool IsRemoving { get; private set; } = false; // 버프 삭제/해제 절차 진행 여부 (중복 해제 방지 플래그)
+    // 버프 핵심 데이터
+    public Define.BuffType BuffType { get; private set; }
+    public float Amount { get; private set; }
+    public float Duration { get; private set; }
+    public float WaitTickTime { get; private set; }
+    public bool IsRemoving { get; private set; }
 
-    // ==========================================
-    // [내부 타이머 및 인스턴스 필드]
-    // ==========================================
-    protected float _durationTimer;  // 남은 지속 시간을 측정하는 카운트다운 타이머
-    protected float _tickTimer;      // 다음 틱 도달까지 누적되는 델타타임 타이머
-    protected File_Base owner;       // 버프가 부착되어 적용되는 대상 파일 유닛
-    private GameObject myParticle;   // 유닛 상단에 출력되는 활성화된 VFX 파티클
+    // 내부 타이머 및 대상 유닛 참조
+    protected float _durationTimer;
+    protected float _tickTimer;
+    protected File_Base owner;
+    protected GameObject myParticle;
 
-    // ==========================================
-    // [멤버 함수 (간략화)]
-    // ==========================================
-
-    // 컴포넌트 부착 시 스탯 바인딩 및 파티클 트리거
-    public void Init(BuffStat stat)
-    {
-        owner = GetComponent<File_Base>();
-        BuffType = stat.buffType;
-        Amount = stat.amount;
-        Duration = _durationTimer = stat.duration;
-        WaitTickTime = stat.waitTickTime;
-        _tickTimer = 0f;
-
-        OnAdded();
-    }
-
-    // 버프 부착 완료 시 호출 (구체 클래스에서 필요 시 오버라이드)
-    protected virtual void OnAdded() => ShowParticle();
-
-    // 동일 버프 중복 검사 후 단일 파티클만 오브젝트 풀에서 활성화
-    protected void ShowParticle()
-    {
-        bool isOnlyOne = GetComponents<Buff_Base>().Count(b => b.BuffType == BuffType && !b.IsRemoving) == 1;
-        if (isOnlyOne)
-        {
-            myParticle = Managers.Pool.GetObjParticle(GetParticleType(BuffType));
-            if (myParticle != null) myParticle.SetActive(true);
-        }
-    }
-
-    // 버프 해제 시 구체 클래스별 스탯 원복 및 풀 반환 처리
+    // 생명주기 및 가상/추상 메서드
+    public virtual void Init(BuffStat stat) { }
+    protected virtual void OnAdded() { }
+    protected virtual void OnTick() { }
     public abstract void Remove();
 }
 ```
