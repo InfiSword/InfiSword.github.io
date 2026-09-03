@@ -585,6 +585,8 @@ ${body}
       <a href="mailto:seif4688@gmail.com">seif4688@gmail.com ↗</a>
     </div>
   </footer>
+  <script src="${assetPrefix}assets/js/vendor/gsap.min.js"></script>
+  <script src="${assetPrefix}assets/js/vendor/ScrollTrigger.min.js"></script>
   <script src="${assetPrefix}assets/js/site.js"></script>
 </body>
 </html>

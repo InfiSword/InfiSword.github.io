@@ -36,3 +36,9 @@ _site
 /codeReference/
 /assets/Portfoilo
 
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+

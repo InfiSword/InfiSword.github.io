@@ -1,4 +1,48 @@
 (function () {
+  // GSAP Animation Suite
+  if (typeof window.gsap !== "undefined") {
+    const gsap = window.gsap;
+    if (typeof window.ScrollTrigger !== "undefined") {
+      gsap.registerPlugin(window.ScrollTrigger);
+    }
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!prefersReducedMotion) {
+      // Hero section stagger reveal
+      const hero = document.querySelector(".pf-hero, .project-hero");
+      if (hero) {
+        gsap.from(hero.children, {
+          opacity: 0,
+          y: 20,
+          duration: 0.8,
+          stagger: 0.08,
+          ease: "power3.out",
+        });
+      }
+
+      // Scroll-triggered subtle elevation reveal for cards & sections
+      const scrollTargets = document.querySelectorAll(
+        ".pf-project-card, .pf-exp-col, .project-content > section, .project-content > h2"
+      );
+      if (scrollTargets.length && window.ScrollTrigger) {
+        scrollTargets.forEach((target) => {
+          gsap.from(target, {
+            scrollTrigger: {
+              trigger: target,
+              start: "top 88%",
+              once: true,
+            },
+            opacity: 0,
+            y: 24,
+            duration: 0.65,
+            ease: "power2.out",
+          });
+        });
+      }
+    }
+  }
+
   let modalTrigger = null;
 
   window.pfOpenModal = function (modalId) {

@@ -1,0 +1,52 @@
+﻿{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-03T11:05:00Z",
+  "title": "Design System: Minhyuk Lee Portfolio (InfiSword)",
+  "extensions": {
+    "colorMeta": {
+      "primary": { "role": "primary", "displayName": "Electric Cyan-Blue", "canonical": "#60a5fa" },
+      "background-base": { "role": "neutral", "displayName": "Deep Space Obsidian", "canonical": "#050711" },
+      "surface-glass": { "role": "neutral", "displayName": "Frosted Midnight Glass", "canonical": "rgba(13, 18, 34, 0.88)" },
+      "text-primary": { "role": "neutral", "displayName": "Luminous Polar White", "canonical": "#eef4ff" },
+      "accent-violet": { "role": "accent", "displayName": "Amethyst Violet", "canonical": "#c084fc" },
+      "accent-green": { "role": "accent", "displayName": "Radar Green", "canonical": "#34d399" }
+    },
+    "shadows": [
+      { "name": "shadow-ambient", "value": "0 24px 70px rgba(0, 0, 0, 0.3)", "purpose": "Ambient grounding for glass cards" },
+      { "name": "shadow-modal", "value": "0 25px 60px -15px rgba(0, 0, 0, 0.8)", "purpose": "Deep modal immersion" }
+    ],
+    "motion": [
+      { "name": "ease-hero-intro", "value": "power3.out", "purpose": "Hero elements stagger entrance" },
+      { "name": "ease-scroll-reveal", "value": "power2.out", "purpose": "ScrollTrigger card elevation reveal" }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "768px" },
+      { "name": "desktop", "value": "1024px" }
+    ]
+  },
+  "narrative": {
+    "northStar": "The Deep Space Flight Deck",
+    "overview": "A high-performance, dark glassmorphism design language built for an elite Game Client Programmer specializing in Systems Architecture, Graphics Pipelines, and AI Reinforcement Learning.",
+    "keyCharacteristics": [
+      "Tactical Dark Space Atmosphere (#050711 with procedural dual nebulae)",
+      "Aero-Grade Glassmorphism (20px blur, 1px hairline border)",
+      "Dual Type Stack (Plus Jakarta Sans + Fira Code)",
+      "Cinematic GSAP Micro-Motion (power3.out & power2.out)"
+    ],
+    "rules": [
+      { "name": "The 10% Luminous Rule", "body": "Saturated electric blue is strictly reserved for key interactive focal points, occupying <=10% of any screen.", "section": "colors" },
+      { "name": "The Developer Monospace Stamp Rule", "body": "All metadata, years, execution times, performance figures, and architecture labels must be rendered in Fira Code.", "section": "typography" },
+      { "name": "The Glass Horizon Rule", "body": "Floating surfaces must combine backdrop-filter: blur(20px), semi-transparent fill, and a 1px hairline border.", "section": "elevation" }
+    ],
+    "dos": [
+      "Wrap all architecture notes, algorithms, metrics, and years in Fira Code tags.",
+      "Keep cards and dialogs on frosted glass surfaces with hairline borders.",
+      "Use GSAP for performance-critical, GPU-accelerated motion with power2.out or power3.out curves."
+    ],
+    "donts": [
+      "Don't use generic flat grey shadows or solid opaque #000000 panels.",
+      "Don't use overly bouncy, cartoony easing that conflicts with the serious engineering aesthetic.",
+      "Don't allow horizontal scroll overflow on mobile viewports."
+    ]
+  }
+}
