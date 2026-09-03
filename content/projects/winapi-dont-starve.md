@@ -156,7 +156,6 @@ tags: [C++, WinAPI, Optimization, Game Logic]
 
   </div>
 </div>
-</div>
 
 이러한 구조를 통해 새로운 객체를 생성할 때 상속 계층에 얽매이지 않고 유연하게 기능을 조립할 수 있습니다.
 

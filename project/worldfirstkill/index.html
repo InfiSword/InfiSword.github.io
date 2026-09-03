@@ -348,21 +348,6 @@ m_rewardExp = <span class="hljs-title class_">Mathf</span>.<span class="hljs-tit
     </div>
   </div>
 </div>
-        <div class="pf-domain-info">
-            <div style="color: #28a745; font-weight: 700; margin-bottom: 10px; font-family: 'Fira Code', monospace;">Domain 정보 블록 (등록된 도메인 개수만큼 반복 병합)</div>
-            <div class="pf-domain-grid">
-                <div class="pf-domain-item">
-                    <strong style="color: #28a745;">Domain ID</strong><br>
-                    <span style="font-size: 0.85rem; color: #666;">(3자리 패딩)</span>
-                </div>
-                <div class="pf-domain-item">
-                    <strong style="color: #28a745;">Usage Count</strong><br>
-                    <span style="font-size: 0.85rem; color: #666;">(12자리 패딩)</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 <h3 id="53-토큰-빌드-및-상태-복원-흐름">5.3 토큰 빌드 및 상태 복원 흐름</h3>
 <p>저장 시 위 규칙대로 텍스트 토큰을 빌드하여 저장하고, 로드할 때는 이 문자열을 길이 단위로 잘라낸 뒤 각 도메인의 Random 객체를 생성하고 사용 횟수만큼 <code>Next()</code>를 더미 호출(Skip) 시켜 게임의 미래 확률 상태를 정확히 세이브 시점과 동일하게 동기화합니다.</p>
 <p><strong>토큰 인코딩 및 RNG 상태 강제 복구 로직</strong> 고정 폭 문자열을 결합하여 저장하고, 로드시 추출하여 각 도메인의 스트림을 동기화합니다.</p>

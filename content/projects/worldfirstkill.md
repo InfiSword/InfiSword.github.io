@@ -492,21 +492,6 @@ public async Task GenerateRegion(Func<float, string, Task> onProgress)
 
   </div>
 </div>
-        <div class="pf-domain-info">
-            <div style="color: #28a745; font-weight: 700; margin-bottom: 10px; font-family: 'Fira Code', monospace;">Domain 정보 블록 (등록된 도메인 개수만큼 반복 병합)</div>
-            <div class="pf-domain-grid">
-                <div class="pf-domain-item">
-                    <strong style="color: #28a745;">Domain ID</strong><br>
-                    <span style="font-size: 0.85rem; color: #666;">(3자리 패딩)</span>
-                </div>
-                <div class="pf-domain-item">
-                    <strong style="color: #28a745;">Usage Count</strong><br>
-                    <span style="font-size: 0.85rem; color: #666;">(12자리 패딩)</span>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
 
 ### 5.3 토큰 빌드 및 상태 복원 흐름
 
