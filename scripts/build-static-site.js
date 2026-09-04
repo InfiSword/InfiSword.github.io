@@ -31,6 +31,15 @@ const site = {
   url: "https://infisword.github.io",
 };
 
+const PROJECT_HERO_IMAGES = {
+  "file-tower-defense": "assets/images/File Tower Defences/file_tower_defense_title.png",
+  "winapi-dont-starve": "assets/images/Dont Starve/dont_starve_title.png",
+  "worldfirstkill": "assets/images/World First Kill/스크린샷 2026-06-28 173659.png",
+  "autonomous-racing-agent": "assets/images/Car Simulation/스크린샷 2026-04-27 105116.png",
+  "slime-project": "assets/images/Slime/slide_40_img_31.png",
+  "moonlight": "assets/images/MoonLight/slide_42_img_30.png",
+};
+
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
@@ -125,7 +134,7 @@ function migrateSources() {
 }
 
 function serializeFrontMatter(data) {
-  const keys = ["title", "excerpt", "permalink", "tags", "mermaid"];
+  const keys = ["title", "excerpt", "permalink", "tags", "hero_image", "mermaid"];
   const lines = ["---"];
 
   for (const key of keys) {
@@ -628,19 +637,38 @@ function renderProject(sourceFile) {
   const tags = Array.isArray(parsed.data.tags) ? parsed.data.tags : [];
   const title = parsed.data.title || path.basename(sourceFile, ".md");
   const description = parsed.data.excerpt || site.description;
+  const slug = path.basename(sourceFile, ".md");
+  const rawHeroImage = parsed.data.hero_image || PROJECT_HERO_IMAGES[slug] || "";
+  let heroImage = "";
+  if (rawHeroImage) {
+    heroImage = rawHeroImage.startsWith("/")
+      ? `../../${rawHeroImage.slice(1)}`
+      : `../../${rawHeroImage}`;
+  }
+
+  const heroArtHtml = heroImage
+    ? `
+        <div class="project-hero__art" aria-hidden="true">
+          <img src="${encodeURI(heroImage)}" alt="" class="project-hero__art-img" loading="eager">
+          <div class="project-hero__art-gradient"></div>
+        </div>`
+    : "";
+
   const body = `    <article class="site-container project-page">
       <header class="project-hero">
-        <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
-        <p class="project-kicker">PROJECT REPORT</p>
-        <h1>${escapeHtml(title)}</h1>
-        <p>${escapeHtml(description)}</p>
-        ${
-          tags.length
-            ? `<div class="project-tags">${tags
-                .map((tag) => `<span>${escapeHtml(tag)}</span>`)
-                .join("")}</div>`
-            : ""
-        }
+        <div class="project-hero__content">
+          <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
+          <p class="project-kicker">PROJECT REPORT</p>
+          <h1>${escapeHtml(title)}</h1>
+          <p>${escapeHtml(description)}</p>
+          ${
+            tags.length
+              ? `<div class="project-tags">${tags
+                  .map((tag) => `<span>${escapeHtml(tag)}</span>`)
+                  .join("")}</div>`
+              : ""
+          }
+        </div>${heroArtHtml}
       </header>
       <div class="project-layout">
         <section class="project-content">
