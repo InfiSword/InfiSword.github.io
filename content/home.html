@@ -2490,7 +2490,65 @@
             <button class="pf-modal-close" onclick="pfCloseModal('wfk')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=EWD2YidSgp0" target="_blank" rel="noopener noreferrer" aria-label="WorldFirstKill 유튜브 영상 보기"><img src="assets/images/World%20First%20Kill/스크린샷%202026-06-28%20173659.png" alt="WorldFirstKill 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
+        <!-- INTERACTIVE SCREENSHOT GALLERY (HORIZONTAL SCROLL & SLIDER) -->
+        <div class="pf-ftd-gallery" id="pfWfkGalleryModal">
+            <!-- Topbar Meta & Actions -->
+            <div class="pf-ftd-gallery-topbar">
+                <div class="pf-ftd-gallery-meta">
+                    <span class="pf-ftd-counter pf-mono">01 / 06</span>
+                    <span class="pf-ftd-caption">플레이어 팀 베이스캠프 및 메인 시스템 UI</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <a href="/project/worldfirstkill/#gallery" class="pf-ftd-yt-link" style="color: #60a5fa; background: rgba(37, 99, 235, 0.15); border-color: rgba(96, 165, 250, 0.35);" title="상세 포스트 전체 보기">
+                        <span>상세 포스트 보기 ↗</span>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=EWD2YidSgp0" target="_blank" rel="noopener noreferrer" class="pf-ftd-yt-link" title="YouTube 시연 영상 새 창으로 열기">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span>YouTube 시연 영상 ↗</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Viewing Stage -->
+            <div class="pf-ftd-stage">
+                <button type="button" class="pf-ftd-nav pf-ftd-prev" onclick="pfFtdGalleryGo(-1, this)" aria-label="이전 스크린샷">‹</button>
+                <img class="pf-ftd-main-img" src="assets/images/World%20First%20Kill/InGame/wfk_ingame_01.png" alt="플레이어 팀 베이스캠프 및 메인 시스템 UI" loading="eager">
+                <button type="button" class="pf-ftd-nav pf-ftd-next" onclick="pfFtdGalleryGo(1, this)" aria-label="다음 스크린샷">›</button>
+            </div>
+
+            <!-- Horizontal Scrollable Thumbnail Strip -->
+            <div class="pf-ftd-thumbs-wrapper">
+                <div class="pf-ftd-thumbs-strip" role="region" aria-label="스크린샷 썸네일 가로 스크롤 목록">
+                    <button type="button" class="pf-ftd-thumb-card is-active" data-index="0" data-title="플레이어 팀 베이스캠프 및 메인 시스템 UI" onclick="pfFtdGallerySelect(0, this)" title="1. 플레이어 팀 베이스캠프 및 메인 시스템 UI">
+                        <img src="assets/images/World%20First%20Kill/InGame/wfk_ingame_01.png" alt="1. 플레이어 팀 베이스캠프 및 메인 시스템 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">01</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="1" data-title="NPC 의뢰 및 사냥 퀘스트 수락 팝업" onclick="pfFtdGallerySelect(1, this)" title="2. NPC 의뢰 및 사냥 퀘스트 수락 팝업">
+                        <img src="assets/images/World%20First%20Kill/InGame/wfk_ingame_02.png" alt="2. NPC 의뢰 및 사냥 퀘스트 수락 팝업" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">02</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="2" data-title="월드맵 지역 탐색 및 퀘스트 필드 이동 UI" onclick="pfFtdGallerySelect(2, this)" title="3. 월드맵 지역 탐색 및 퀘스트 필드 이동 UI">
+                        <img src="assets/images/World%20First%20Kill/InGame/wfk_ingame_03.png" alt="3. 월드맵 지역 탐색 및 퀘스트 필드 이동 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">03</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="3" data-title="필드 몬스터 조우 및 파티 실시간 전투 액션" onclick="pfFtdGallerySelect(3, this)" title="4. 필드 몬스터 조우 및 파티 실시간 전투 액션">
+                        <img src="assets/images/World%20First%20Kill/InGame/wfk_ingame_04.png" alt="4. 필드 몬스터 조우 및 파티 실시간 전투 액션" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">04</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="4" data-title="인벤토리 및 무기/장비 상점 거래 UI" onclick="pfFtdGallerySelect(4, this)" title="5. 인벤토리 및 무기/장비 상점 거래 UI">
+                        <img src="assets/images/World%20First%20Kill/InGame/wfk_ingame_05.png" alt="5. 인벤토리 및 무기/장비 상점 거래 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">05</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="5" data-title="절차적 맵 생성을 위한 랜덤 시드(Random Seed) 설정 UI" onclick="pfFtdGallerySelect(5, this)" title="6. 절차적 맵 생성을 위한 랜덤 시드(Random Seed) 설정 UI">
+                        <img src="assets/images/World%20First%20Kill/InGame/wfk_ingame_06.png" alt="6. 절차적 맵 생성을 위한 랜덤 시드(Random Seed) 설정 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">06</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pf-ftd-hint">
+                <span>Tip: 좌우 화살표 버튼, 키보드 방향키(←, →), 또는 마우스 휠로 썸네일을 옆으로 스크롤하여 탐색할 수 있습니다.</span>
+            </div>
+        </div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title">1. 리플렉션 기반 CSV 자동 파서</div>
@@ -2528,7 +2586,53 @@
             <button class="pf-modal-close" onclick="pfCloseModal('racing')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" aria-label="Autonomous Racing Agent 유튜브 영상 보기"><img src="assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Autonomous Racing Agent 시뮬레이션 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
+        <!-- INTERACTIVE SCREENSHOT GALLERY (HORIZONTAL SCROLL & SLIDER) -->
+        <div class="pf-ftd-gallery" id="pfRacingGalleryModal">
+            <!-- Topbar Meta & Actions -->
+            <div class="pf-ftd-gallery-topbar">
+                <div class="pf-ftd-gallery-meta">
+                    <span class="pf-ftd-counter pf-mono">01 / 03</span>
+                    <span class="pf-ftd-caption">산악 서킷 고속 코너링 및 실시간 순위 리더보드 UI</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <a href="/project/autonomous-racing-agent/#gallery" class="pf-ftd-yt-link" style="color: #60a5fa; background: rgba(37, 99, 235, 0.15); border-color: rgba(96, 165, 250, 0.35);" title="상세 포스트 전체 보기">
+                        <span>상세 포스트 보기 ↗</span>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" class="pf-ftd-yt-link" title="YouTube 시연 영상 새 창으로 열기">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span>YouTube 시연 영상 ↗</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Viewing Stage -->
+            <div class="pf-ftd-stage">
+                <button type="button" class="pf-ftd-nav pf-ftd-prev" onclick="pfFtdGalleryGo(-1, this)" aria-label="이전 스크린샷">‹</button>
+                <img class="pf-ftd-main-img" src="assets/images/Car%20Simulation/InGame/racing_ingame_01.png" alt="산악 서킷 고속 코너링 및 실시간 순위 리더보드 UI" loading="eager">
+                <button type="button" class="pf-ftd-nav pf-ftd-next" onclick="pfFtdGalleryGo(1, this)" aria-label="다음 스크린샷">›</button>
+            </div>
+
+            <!-- Horizontal Scrollable Thumbnail Strip -->
+            <div class="pf-ftd-thumbs-wrapper">
+                <div class="pf-ftd-thumbs-strip" role="region" aria-label="스크린샷 썸네일 가로 스크롤 목록">
+                    <button type="button" class="pf-ftd-thumb-card is-active" data-index="0" data-title="산악 서킷 고속 코너링 및 실시간 순위 리더보드 UI" onclick="pfFtdGallerySelect(0, this)" title="1. 산악 서킷 고속 코너링 및 실시간 순위 리더보드 UI">
+                        <img src="assets/images/Car%20Simulation/InGame/racing_ingame_01.png" alt="1. 산악 서킷 고속 코너링 및 실시간 순위 리더보드 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">01</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="1" data-title="급경사 헤어핀 커브 구간 및 차량 물리 주행 제어" onclick="pfFtdGallerySelect(1, this)" title="2. 급경사 헤어핀 커브 구간 및 차량 물리 주행 제어">
+                        <img src="assets/images/Car%20Simulation/InGame/racing_ingame_02.png" alt="2. 급경사 헤어핀 커브 구간 및 차량 물리 주행 제어" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">02</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="2" data-title="ML-Agents 다방향 센서 레이캐스트 및 웨이포인트 경로 디버그 시각화" onclick="pfFtdGallerySelect(2, this)" title="3. ML-Agents 다방향 센서 레이캐스트 및 웨이포인트 경로 디버그 시각화">
+                        <img src="assets/images/Car%20Simulation/InGame/racing_ingame_03.png" alt="3. ML-Agents 다방향 센서 레이캐스트 및 웨이포인트 경로 디버그 시각화" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">03</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pf-ftd-hint">
+                <span>Tip: 좌우 화살표 버튼, 키보드 방향키(←, →), 또는 마우스 휠로 썸네일을 옆으로 스크롤하여 탐색할 수 있습니다.</span>
+            </div>
+        </div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title">1. 다방향 레이캐스트 환경 감지</div>
@@ -2566,7 +2670,57 @@
             <button class="pf-modal-close" onclick="pfCloseModal('slime')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=83lMfQY1Rwo" target="_blank" rel="noopener noreferrer" aria-label="Slime Project 유튜브 영상 보기"><img src="assets/images/Slime/slide_40_img_31.png" alt="Slime Project 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
+        <!-- INTERACTIVE SCREENSHOT GALLERY (HORIZONTAL SCROLL & SLIDER) -->
+        <div class="pf-ftd-gallery" id="pfSlimeGalleryModal">
+            <!-- Topbar Meta & Actions -->
+            <div class="pf-ftd-gallery-topbar">
+                <div class="pf-ftd-gallery-meta">
+                    <span class="pf-ftd-counter pf-mono">01 / 04</span>
+                    <span class="pf-ftd-caption">거대 곰 보스 몬스터와의 전투 및 패턴 공략</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <a href="/project/slime-project/#gallery" class="pf-ftd-yt-link" style="color: #60a5fa; background: rgba(37, 99, 235, 0.15); border-color: rgba(96, 165, 250, 0.35);" title="상세 포스트 전체 보기">
+                        <span>상세 포스트 보기 ↗</span>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=83lMfQY1Rwo" target="_blank" rel="noopener noreferrer" class="pf-ftd-yt-link" title="YouTube 시연 영상 새 창으로 열기">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span>YouTube 시연 영상 ↗</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Viewing Stage -->
+            <div class="pf-ftd-stage">
+                <button type="button" class="pf-ftd-nav pf-ftd-prev" onclick="pfFtdGalleryGo(-1, this)" aria-label="이전 스크린샷">‹</button>
+                <img class="pf-ftd-main-img" src="assets/images/Slime/InGame/slime_ingame_01.png" alt="거대 곰 보스 몬스터와의 전투 및 패턴 공략" loading="eager">
+                <button type="button" class="pf-ftd-nav pf-ftd-next" onclick="pfFtdGalleryGo(1, this)" aria-label="다음 스크린샷">›</button>
+            </div>
+
+            <!-- Horizontal Scrollable Thumbnail Strip -->
+            <div class="pf-ftd-thumbs-wrapper">
+                <div class="pf-ftd-thumbs-strip" role="region" aria-label="스크린샷 썸네일 가로 스크롤 목록">
+                    <button type="button" class="pf-ftd-thumb-card is-active" data-index="0" data-title="거대 곰 보스 몬스터와의 전투 및 패턴 공략" onclick="pfFtdGallerySelect(0, this)" title="1. 거대 곰 보스 몬스터와의 전투 및 패턴 공략">
+                        <img src="assets/images/Slime/InGame/slime_ingame_01.png" alt="1. 거대 곰 보스 몬스터와의 전투 및 패턴 공략" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">01</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="1" data-title="필드 탐색 및 기본 조작·몬스터 조우" onclick="pfFtdGallerySelect(1, this)" title="2. 필드 탐색 및 기본 조작·몬스터 조우">
+                        <img src="assets/images/Slime/InGame/slime_ingame_02.png" alt="2. 필드 탐색 및 기본 조작·몬스터 조우" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">02</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="2" data-title="토끼 몬스터 사냥 및 타격 액션 이펙트" onclick="pfFtdGallerySelect(2, this)" title="3. 토끼 몬스터 사냥 및 타격 액션 이펙트">
+                        <img src="assets/images/Slime/InGame/slime_ingame_03.png" alt="3. 토끼 몬스터 사냥 및 타격 액션 이펙트" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">03</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="3" data-title="플랫포머 기믹 지형 돌파 및 몬스터 전투" onclick="pfFtdGallerySelect(3, this)" title="4. 플랫포머 기믹 지형 돌파 및 몬스터 전투">
+                        <img src="assets/images/Slime/InGame/slime_ingame_04.png" alt="4. 플랫포머 기믹 지형 돌파 및 몬스터 전투" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">04</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pf-ftd-hint">
+                <span>Tip: 좌우 화살표 버튼, 키보드 방향키(←, →), 또는 마우스 휠로 썸네일을 옆으로 스크롤하여 탐색할 수 있습니다.</span>
+            </div>
+        </div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title">1. Finite State Machine (FSM)</div>
@@ -2603,7 +2757,69 @@
             </div>
             <button class="pf-modal-close" onclick="pfCloseModal('moonlight')">✕ CLOSE</button>
         </div>
-        <div class="pf-modal-banner"><a href="https://www.youtube.com/shorts/Z-IKELImAMo" target="_blank" rel="noopener noreferrer" aria-label="보름달 방앗간 유튜브 영상 보기"><img src="assets/images/MoonLight/slide_42_img_30.png" alt="보름달 방앗간 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
+        <!-- INTERACTIVE SCREENSHOT GALLERY (HORIZONTAL SCROLL & SLIDER) -->
+        <div class="pf-ftd-gallery" id="pfMlGalleryModal">
+            <!-- Topbar Meta & Actions -->
+            <div class="pf-ftd-gallery-topbar">
+                <div class="pf-ftd-gallery-meta">
+                    <span class="pf-ftd-counter pf-mono">01 / 07</span>
+                    <span class="pf-ftd-caption">매장 전경 및 손님·직원 NPC 운영 루프</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <a href="/project/moonlight/#gallery" class="pf-ftd-yt-link" style="color: #60a5fa; background: rgba(37, 99, 235, 0.15); border-color: rgba(96, 165, 250, 0.35);" title="상세 포스트 전체 보기">
+                        <span>상세 포스트 보기 ↗</span>
+                    </a>
+                    <a href="https://www.youtube.com/shorts/Z-IKELImAMo" target="_blank" rel="noopener noreferrer" class="pf-ftd-yt-link" title="YouTube 시연 영상 새 창으로 열기">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span>YouTube 시연 영상 ↗</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Viewing Stage -->
+            <div class="pf-ftd-stage">
+                <button type="button" class="pf-ftd-nav pf-ftd-prev" onclick="pfFtdGalleryGo(-1, this)" aria-label="이전 스크린샷">‹</button>
+                <img class="pf-ftd-main-img" src="assets/images/MoonLight/InGame/ml_ingame_01.png" alt="매장 전경 및 손님·직원 NPC 운영 루프" loading="eager">
+                <button type="button" class="pf-ftd-nav pf-ftd-next" onclick="pfFtdGalleryGo(1, this)" aria-label="다음 스크린샷">›</button>
+            </div>
+
+            <!-- Horizontal Scrollable Thumbnail Strip -->
+            <div class="pf-ftd-thumbs-wrapper">
+                <div class="pf-ftd-thumbs-strip" role="region" aria-label="스크린샷 썸네일 가로 스크롤 목록">
+                    <button type="button" class="pf-ftd-thumb-card is-active" data-index="0" data-title="매장 전경 및 손님·직원 NPC 운영 루프" onclick="pfFtdGallerySelect(0, this)" title="1. 매장 전경 및 손님·직원 NPC 운영 루프">
+                        <img src="assets/images/MoonLight/InGame/ml_ingame_01.png" alt="1. 매장 전경 및 손님·직원 NPC 운영 루프" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">01</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="1" data-title="떡 반죽 제작 및 자원 관리 UI" onclick="pfFtdGallerySelect(1, this)" title="2. 떡 반죽 제작 및 자원 관리 UI">
+                        <img src="assets/images/MoonLight/InGame/ml_ingame_02.png" alt="2. 떡 반죽 제작 및 자원 관리 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">02</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="2" data-title="손님 주문 수락 (송편 메뉴 주문)" onclick="pfFtdGallerySelect(2, this)" title="3. 손님 주문 수락 (송편 메뉴 주문)">
+                        <img src="assets/images/MoonLight/InGame/ml_ingame_03.png" alt="3. 손님 주문 수락 (송편 메뉴 주문)" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">03</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="3" data-title="손님 주문 수락 (무지개떡 메뉴 및 호감도)" onclick="pfFtdGallerySelect(3, this)" title="4. 손님 주문 수락 (무지개떡 메뉴 및 호감도)">
+                        <img src="assets/images/MoonLight/InGame/ml_ingame_04.png" alt="4. 손님 주문 수락 (무지개떡 메뉴 및 호감도)" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">04</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="4" data-title="액체 재료(물/시럽) 가공 및 제작 UI" onclick="pfFtdGallerySelect(4, this)" title="5. 액체 재료(물/시럽) 가공 및 제작 UI">
+                        <img src="assets/images/MoonLight/InGame/ml_ingame_05.png" alt="5. 액체 재료(물/시럽) 가공 및 제작 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">05</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="5" data-title="타일 그리드 퍼즐 미니게임 및 재료 생산" onclick="pfFtdGallerySelect(5, this)" title="6. 타일 그리드 퍼즐 미니게임 및 재료 생산">
+                        <img src="assets/images/MoonLight/InGame/ml_ingame_06.png" alt="6. 타일 그리드 퍼즐 미니게임 및 재료 생산" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">06</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="6" data-title="전통 한옥 테마 인벤토리 및 보관함 UI" onclick="pfFtdGallerySelect(6, this)" title="7. 전통 한옥 테마 인벤토리 및 보관함 UI">
+                        <img src="assets/images/MoonLight/InGame/ml_ingame_07.png" alt="7. 전통 한옥 테마 인벤토리 및 보관함 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">07</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pf-ftd-hint">
+                <span>Tip: 좌우 화살표 버튼, 키보드 방향키(←, →), 또는 마우스 휠로 썸네일을 옆으로 스크롤하여 탐색할 수 있습니다.</span>
+            </div>
+        </div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title">1. A* 기반 공통 이동 계층</div>

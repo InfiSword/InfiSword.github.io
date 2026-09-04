@@ -48,6 +48,69 @@
       <div class="project-layout">
         <section class="project-content">
 <p>보름달 방앗간은 손님을 맞이하고 음식을 조리·서빙하며 매장을 운영하는 <strong>2D 타이쿤 게임</strong>입니다. 저는 Unity Tilemap 위에서 동작하는 *<em>A</em> 길찾기<strong>, </strong>커스텀 타일 데이터<strong>, </strong>직원·손님 AI**를 구현해 매장의 공간 정보가 실제 서비스 흐름으로 이어지도록 설계했습니다.</p>
+<section id="gallery" class="pf-ftd-post-gallery-section">
+    <div class="pf-ftd-section-header">
+        <span class="pf-ftd-section-tag pf-mono">● IN-GAME SCREENSHOT GALLERY</span>
+        <h3 class="pf-ftd-section-title">인게임 핵심 시스템 & 스크린샷 미리보기</h3>
+        <p class="pf-ftd-section-desc">보름달 방앗간의 매장 전경 및 손님·직원 AI 운영 루프부터 떡 반죽 제작, 손님 주문 수락, 액체 재료 가공, 미니게임 퍼즐, 전통 인벤토리 UI까지 주요 인게임 화면을 넘겨가며 옆으로 스크롤하여 확인할 수 있습니다.</p>
+    </div>
+    <!-- INTERACTIVE SCREENSHOT GALLERY (HORIZONTAL SCROLL & SLIDER) -->
+    <div class="pf-ftd-gallery" id="pfMlGalleryPost">
+        <!-- Topbar Meta & Actions -->
+        <div class="pf-ftd-gallery-topbar">
+            <div class="pf-ftd-gallery-meta">
+                <span class="pf-ftd-counter pf-mono">01 / 07</span>
+                <span class="pf-ftd-caption">매장 전경 및 손님·직원 NPC 운영 루프</span>
+            </div>
+            <a href="https://www.youtube.com/shorts/Z-IKELImAMo" target="_blank" rel="noopener noreferrer" class="pf-ftd-yt-link" title="YouTube 시연 영상 새 창으로 열기">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                <span>YouTube 시연 영상 ↗</span>
+            </a>
+        </div>
+        <!-- Main Viewing Stage -->
+        <div class="pf-ftd-stage">
+            <button type="button" class="pf-ftd-nav pf-ftd-prev" onclick="pfFtdGalleryGo(-1, this)" aria-label="이전 스크린샷">‹</button>
+            <img class="pf-ftd-main-img" src="../../assets/images/MoonLight/InGame/ml_ingame_01.png" alt="매장 전경 및 손님·직원 NPC 운영 루프" loading="eager">
+            <button type="button" class="pf-ftd-nav pf-ftd-next" onclick="pfFtdGalleryGo(1, this)" aria-label="다음 스크린샷">›</button>
+        </div>
+        <!-- Horizontal Scrollable Thumbnail Strip -->
+        <div class="pf-ftd-thumbs-wrapper">
+            <div class="pf-ftd-thumbs-strip" role="region" aria-label="스크린샷 썸네일 가로 스크롤 목록">
+                <button type="button" class="pf-ftd-thumb-card is-active" data-index="0" data-title="매장 전경 및 손님·직원 NPC 운영 루프" onclick="pfFtdGallerySelect(0, this)" title="1. 매장 전경 및 손님·직원 NPC 운영 루프">
+                    <img src="../../assets/images/MoonLight/InGame/ml_ingame_01.png" alt="1. 매장 전경 및 손님·직원 NPC 운영 루프" loading="lazy">
+                    <span class="pf-ftd-thumb-num pf-mono">01</span>
+                </button>
+                <button type="button" class="pf-ftd-thumb-card" data-index="1" data-title="떡 반죽 제작 및 자원 관리 UI" onclick="pfFtdGallerySelect(1, this)" title="2. 떡 반죽 제작 및 자원 관리 UI">
+                    <img src="../../assets/images/MoonLight/InGame/ml_ingame_02.png" alt="2. 떡 반죽 제작 및 자원 관리 UI" loading="lazy">
+                    <span class="pf-ftd-thumb-num pf-mono">02</span>
+                </button>
+                <button type="button" class="pf-ftd-thumb-card" data-index="2" data-title="손님 주문 수락 (송편 메뉴 주문)" onclick="pfFtdGallerySelect(2, this)" title="3. 손님 주문 수락 (송편 메뉴 주문)">
+                    <img src="../../assets/images/MoonLight/InGame/ml_ingame_03.png" alt="3. 손님 주문 수락 (송편 메뉴 주문)" loading="lazy">
+                    <span class="pf-ftd-thumb-num pf-mono">03</span>
+                </button>
+                <button type="button" class="pf-ftd-thumb-card" data-index="3" data-title="손님 주문 수락 (무지개떡 메뉴 및 호감도)" onclick="pfFtdGallerySelect(3, this)" title="4. 손님 주문 수락 (무지개떡 메뉴 및 호감도)">
+                    <img src="../../assets/images/MoonLight/InGame/ml_ingame_04.png" alt="4. 손님 주문 수락 (무지개떡 메뉴 및 호감도)" loading="lazy">
+                    <span class="pf-ftd-thumb-num pf-mono">04</span>
+                </button>
+                <button type="button" class="pf-ftd-thumb-card" data-index="4" data-title="액체 재료(물/시럽) 가공 및 제작 UI" onclick="pfFtdGallerySelect(4, this)" title="5. 액체 재료(물/시럽) 가공 및 제작 UI">
+                    <img src="../../assets/images/MoonLight/InGame/ml_ingame_05.png" alt="5. 액체 재료(물/시럽) 가공 및 제작 UI" loading="lazy">
+                    <span class="pf-ftd-thumb-num pf-mono">05</span>
+                </button>
+                <button type="button" class="pf-ftd-thumb-card" data-index="5" data-title="타일 그리드 퍼즐 미니게임 및 재료 생산" onclick="pfFtdGallerySelect(5, this)" title="6. 타일 그리드 퍼즐 미니게임 및 재료 생산">
+                    <img src="../../assets/images/MoonLight/InGame/ml_ingame_06.png" alt="6. 타일 그리드 퍼즐 미니게임 및 재료 생산" loading="lazy">
+                    <span class="pf-ftd-thumb-num pf-mono">06</span>
+                </button>
+                <button type="button" class="pf-ftd-thumb-card" data-index="6" data-title="전통 한옥 테마 인벤토리 및 보관함 UI" onclick="pfFtdGallerySelect(6, this)" title="7. 전통 한옥 테마 인벤토리 및 보관함 UI">
+                    <img src="../../assets/images/MoonLight/InGame/ml_ingame_07.png" alt="7. 전통 한옥 테마 인벤토리 및 보관함 UI" loading="lazy">
+                    <span class="pf-ftd-thumb-num pf-mono">07</span>
+                </button>
+            </div>
+        </div>
+        <div class="pf-ftd-hint">
+            <span>Tip: 좌우 화살표 버튼, 키보드 방향키(←, →), 또는 마우스 휠로 썸네일을 옆으로 스크롤하여 탐색할 수 있습니다.</span>
+        </div>
+    </div>
+</section>
 <hr>
 <h2 id="1-프로젝트-개요" class="chapter-title">1. 프로젝트 개요</h2>
 <p>이 프로젝트의 핵심 과제는 “NPC를 목적지까지 이동시키는 것”에 그치지 않고, 매장 안의 좌석과 조리 도구가 계속 사용되고 반환되는 타이쿤의 운영 흐름을 안정적으로 연결하는 것이었습니다.</p>
