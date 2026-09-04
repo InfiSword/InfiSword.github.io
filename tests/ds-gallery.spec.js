@@ -26,6 +26,10 @@ test.describe('WinAPI Don\'t Starve 스크린샷 갤러리 테스트 (상세 포
     // 유튜브 뱃지 확인
     const badge = dsCardMedia.locator('.pf-media-badge');
     await expect(badge).toContainText('YouTube');
+
+    const card = page.locator('article[data-project="02"]');
+    await card.scrollIntoViewIfNeeded();
+    await card.screenshot({ path: 'C:/Users/seif4/.gemini/antigravity/brain/a3bd1d93-4e13-4a43-8570-d834d36e9c08/ds-card.png' });
   });
 
   test('상세 포스트 페이지에서 Don\'t Starve 8종 스크린샷 갤러리가 올바르게 렌더링된다', async ({ page }) => {
@@ -49,6 +53,9 @@ test.describe('WinAPI Don\'t Starve 스크린샷 갤러리 테스트 (상세 포
 
     const thumbs = postGallery.locator('.pf-ftd-thumb-card');
     await expect(thumbs).toHaveCount(8);
+
+    await gallerySection.scrollIntoViewIfNeeded();
+    await gallerySection.screenshot({ path: 'C:/Users/seif4/.gemini/antigravity/brain/a3bd1d93-4e13-4a43-8570-d834d36e9c08/ds-post-gallery.png' });
   });
 
   test('상세 포스트 페이지에서 다음(›)/이전(‹) 버튼으로 스크린샷을 넘겨볼 수 있다', async ({ page }) => {
@@ -107,6 +114,10 @@ test.describe('WinAPI Don\'t Starve 스크린샷 갤러리 테스트 (상세 포
     // 모달 내 "상세 포스트 보기 ↗" 링크 확인
     const detailLink = modalGallery.locator('a[href="/project/winapi-dont-starve/#gallery"]');
     await expect(detailLink).toBeVisible();
+
+    await modal.evaluate(el => el.scrollTop = 0);
+    await page.waitForTimeout(400);
+    await page.screenshot({ path: 'C:/Users/seif4/.gemini/antigravity/brain/a3bd1d93-4e13-4a43-8570-d834d36e9c08/ds-modal.png' });
 
     await page.keyboard.press('Escape');
     await expect(modal).toBeHidden();

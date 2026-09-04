@@ -311,6 +311,62 @@
 <h2 id="3-최적화-및-핵심-기술" class="chapter-title">3. 최적화 및 핵심 기술</h2>
 <h3 id="31-공간-분할-기법-그리드-기반-컬링-grid-based-culling">3.1 공간 분할 기법: 그리드 기반 컬링 (Grid-based Culling)</h3>
 <p>월드에 수천 개의 오브젝트가 존재할 때, 모든 객체에 대해 매 프레임 업데이트와 충돌 검사(Brute-force, <code>O(N)</code>)를 수행하면 심각한 성능 저하가 발생합니다. 이를 방지하기 위해 맵 전체를 256x256 픽셀 크기의 <strong>정적 2D 그리드 배열(Spatial Partitioning)</strong>로 분할했습니다.</p>
+<div class="pf-visual-frame pf-comp-frame">
+  <div class="pf-comp-container">
+    <!-- 기존 방식 (AS-IS) -->
+    <div class="pf-comp-box old">
+      <div class="pf-comp-header">
+        <span class="pf-comp-badge old">기존 방식 (AS-IS)</span>
+        <h4 class="pf-comp-title">전수 순회 검사 (Brute-Force)</h4>
+      </div>
+      <ul class="pf-comp-list">
+        <li>
+          <span class="pf-comp-icon old">✕</span>
+          <span class="pf-comp-text">수천 개 전체 오브젝트 매 프레임 순회 O(N)</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon old">✕</span>
+          <span class="pf-comp-text">화면 밖 비가시 객체 불필요 연산 부하</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon old">✕</span>
+          <span class="pf-comp-text">오브젝트 밀집 시 극심한 CPU 프레임 드랍</span>
+        </li>
+      </ul>
+    </div>
+    <!-- 전환 브릿지 (OPTIMIZATION) -->
+    <div class="pf-comp-bridge">
+      <span class="pf-bridge-pill">OPTIMIZATION</span>
+      <div class="pf-bridge-arrow">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+          <polyline points="12 5 19 12 12 19"></polyline>
+        </svg>
+      </div>
+    </div>
+    <!-- 개선 방식 (TO-BE) -->
+    <div class="pf-comp-box new">
+      <div class="pf-comp-header">
+        <span class="pf-comp-badge new">개선 방식 (TO-BE)</span>
+        <h4 class="pf-comp-title">2D 그리드 공간 분할 (Spatial Grid)</h4>
+      </div>
+      <ul class="pf-comp-list">
+        <li>
+          <span class="pf-comp-icon new">✓</span>
+          <span class="pf-comp-text">뷰포트 기반 O(1) 인덱싱 &amp; 가시 셀 선별</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon new">✓</span>
+          <span class="pf-comp-text">쿼리 스탬프(Query Stamp) 중복 연산 0% (완전 배제)</span>
+        </li>
+        <li>
+          <span class="pf-comp-icon new">✓</span>
+          <span class="pf-comp-text">수천 개 객체 환경에서도 60 FPS 무결점 유지</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
 <div class="pf-visual-frame">
     <div class="pf-arch-diagram">
         <div class="pf-arch-layer">

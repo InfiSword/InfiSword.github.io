@@ -1139,7 +1139,7 @@ code.hljs {
   align-items: stretch !important;
   justify-content: center !important;
   gap: 20px !important;
-  flex-wrap: wrap !important;
+  flex-wrap: nowrap !important;
   margin: 0 auto !important;
   max-width: 920px !important;
 }
@@ -1147,7 +1147,7 @@ code.hljs {
 .pf-comp-box {
   flex: 1 1 300px !important;
   min-width: 280px !important;
-  max-width: 430px !important;
+  max-width: 480px !important;
   padding: 24px !important;
   border-radius: 14px !important;
   display: flex !important;
@@ -1204,11 +1204,12 @@ code.hljs {
 
 .pf-comp-title {
   margin: 0 !important;
-  font-size: 1.18rem !important;
+  font-size: 1.15rem !important;
   font-weight: 800 !important;
   color: #1e293b !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   letter-spacing: -0.01em !important;
+  word-break: keep-all !important;
 }
 
 .pf-comp-list {
@@ -1258,6 +1259,7 @@ code.hljs {
   font-weight: 600 !important;
   color: #334155 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
+  word-break: keep-all !important;
 }
 
 .pf-comp-tag {
@@ -1325,9 +1327,22 @@ code.hljs {
   border-color: #60a5fa !important;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 880px) {
+  .pf-comp-container {
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 14px !important;
+  }
+  .pf-comp-box {
+    width: 100% !important;
+    max-width: 520px !important;
+    min-width: 0 !important;
+    flex: 0 0 auto !important;
+  }
   .pf-comp-bridge {
-    margin: 8px 0 !important;
+    margin: 4px 0 !important;
+    flex-direction: column !important;
+    align-self: center !important;
   }
   .pf-bridge-arrow {
     transform: rotate(90deg) !important;
