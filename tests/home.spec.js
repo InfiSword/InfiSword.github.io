@@ -34,13 +34,19 @@ test.describe('포트폴리오 홈 페이지 테스트', () => {
     const userName = page.locator('.win-user-name');
     await expect(userName).toContainText('이민혁');
 
+    // 상단 SYSTEM READY 배지가 제거되었는지 확인
+    await expect(page.locator('.win-system-badge')).toHaveCount(0);
+    await expect(page.locator('text=SYSTEM READY')).toHaveCount(0);
+    await expect(page.locator('text=FILE_OS')).toHaveCount(0);
+
     // 1. 로딩바 요소 확인
     const progressBar = page.locator('#win-progress-bar');
     await expect(progressBar).toBeVisible();
 
-    // 2. 로딩 완료 후 Enter 액션 프롬프트 노출 대기
     const prompt = page.locator('#win-action-prompt');
     await expect(prompt).toBeVisible({ timeout: 2500 });
+    const projectName = test.info().project.name.replace(/\s+/g, '_');
+    await page.screenshot({ path: `test-results/loading-screen-${projectName}.png` });
 
     // 3. Enter 키 입력으로 언락
     await page.keyboard.press('Enter');

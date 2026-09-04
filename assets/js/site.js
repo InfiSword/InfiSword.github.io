@@ -254,4 +254,168 @@
       }
     });
   }
+
+  // ==========================================
+  // File Tower Defense Interactive Screenshot Gallery Suite
+  // ==========================================
+  window.pfFtdGallerySelect = function (index, caller) {
+    const galleries = getGalleries(caller);
+    galleries.forEach((gallery) => {
+      renderGalleryByIndex(gallery, index);
+    });
+  };
+
+  window.pfFtdGalleryGo = function (delta, caller) {
+    const galleries = getGalleries(caller);
+    galleries.forEach((gallery) => {
+      const thumbs = gallery.querySelectorAll(".pf-ftd-thumb-card");
+      if (!thumbs.length) return;
+      const currentActive = gallery.querySelector(".pf-ftd-thumb-card.is-active");
+      let currentIndex = currentActive ? parseInt(currentActive.getAttribute("data-index") || "0", 10) : 0;
+      let nextIndex = (currentIndex + delta + thumbs.length) % thumbs.length;
+      renderGalleryByIndex(gallery, nextIndex);
+    });
+  };
+
+  function getGalleries(caller) {
+    if (caller) {
+      const container = typeof caller === "string" ? document.getElementById(caller) : caller.closest(".pf-ftd-gallery");
+      if (container) return [container];
+    }
+    const all = document.querySelectorAll(".pf-ftd-gallery");
+    return Array.from(all);
+  }
+
+  function renderGalleryByIndex(gallery, index) {
+    const thumbs = gallery.querySelectorAll(".pf-ftd-thumb-card");
+    if (!thumbs.length || index < 0 || index >= thumbs.length) return;
+
+    const targetThumb = thumbs[index];
+    const thumbImg = targetThumb.querySelector("img");
+    const newSrc = thumbImg ? thumbImg.getAttribute("src") : "";
+    const title = targetThumb.getAttribute("data-title") || (thumbImg ? thumbImg.getAttribute("alt") : "");
+
+    const mainImg = gallery.querySelector(".pf-ftd-main-img");
+    const counter = gallery.querySelector(".pf-ftd-counter");
+    const caption = gallery.querySelector(".pf-ftd-caption");
+
+    if (mainImg && newSrc) {
+      mainImg.style.opacity = "0.35";
+      mainImg.src = newSrc;
+      if (title) mainImg.alt = title;
+      mainImg.onload = function () {
+        mainImg.style.opacity = "1";
+      };
+      if (mainImg.complete) {
+        mainImg.style.opacity = "1";
+      }
+    }
+
+    if (counter) {
+      const padIndex = String(index + 1).padStart(2, "0");
+      const padTotal = String(thumbs.length).padStart(2, "0");
+      counter.textContent = `${padIndex} / ${padTotal}`;
+    }
+
+    if (caption && title) {
+      caption.textContent = title;
+    }
+
+    thumbs.forEach((thumb, idx) => {
+      if (idx === index) {
+        thumb.classList.add("is-active");
+        thumb.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+      } else {
+        thumb.classList.remove("is-active");
+      }
+    });
+  }
+
+  function initFtdGalleries() {
+    const galleries = document.querySelectorAll(".pf-ftd-gallery");
+    galleries.forEach((gallery) => {
+      const strip = gallery.querySelector(".pf-ftd-thumbs-strip");
+      if (strip && !strip.dataset.wheelBound) {
+        strip.dataset.wheelBound = "true";
+        strip.addEventListener(
+          "wheel",
+          function (e) {
+            if (e.deltaY !== 0) {
+              e.preventDefault();
+              strip.scrollLeft += e.deltaY;
+            }
+          },
+          { passive: false }
+        );
+      }
+
+      const stage = gallery.querySelector(".pf-ftd-stage");
+      if (stage && !stage.dataset.touchBound) {
+        stage.dataset.touchBound = "true";
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        stage.addEventListener(
+          "touchstart",
+          function (e) {
+            if (e.changedTouches && e.changedTouches[0]) {
+              touchStartX = e.changedTouches[0].screenX;
+            }
+          },
+          { passive: true }
+        );
+
+        stage.addEventListener(
+          "touchend",
+          function (e) {
+            if (e.changedTouches && e.changedTouches[0]) {
+              touchEndX = e.changedTouches[0].screenX;
+              const diff = touchEndX - touchStartX;
+              if (Math.abs(diff) > 40) {
+                if (diff < 0) {
+                  window.pfFtdGalleryGo(1, gallery);
+                } else {
+                  window.pfFtdGalleryGo(-1, gallery);
+                }
+              }
+            }
+          },
+          { passive: true }
+        );
+      }
+    });
+  }
+
+  // Keyboard navigation for active gallery in open modal or in viewport
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+
+    // Check active open modal first
+    const activeModal = document.querySelector(".pf-modal-overlay.is-active, .pf-modal-overlay[style*='display: flex']");
+    if (activeModal) {
+      const modalGallery = activeModal.querySelector(".pf-ftd-gallery");
+      if (modalGallery) {
+        window.pfFtdGalleryGo(e.key === "ArrowRight" ? 1 : -1, modalGallery);
+        return;
+      }
+    }
+
+    // Check visible post galleries in viewport
+    const postGalleries = document.querySelectorAll(".pf-ftd-post-gallery-section .pf-ftd-gallery");
+    for (let i = 0; i < postGalleries.length; i++) {
+      const gallery = postGalleries[i];
+      const rect = gallery.getBoundingClientRect();
+      const inView = rect.top < window.innerHeight && rect.bottom > 0;
+      if (inView) {
+        window.pfFtdGalleryGo(e.key === "ArrowRight" ? 1 : -1, gallery);
+        break;
+      }
+    }
+  });
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initFtdGalleries);
+  } else {
+    initFtdGalleries();
+  }
 })();

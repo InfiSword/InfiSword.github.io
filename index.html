@@ -1587,13 +1587,6 @@
     <div class="win-wallpaper__grid"></div>
   </div>
 
-  <!-- Top System Bar -->
-  <div class="win-top-bar">
-    <div class="win-system-badge">
-      <span class="win-badge-dot"></span>
-      <span>SYSTEM READY // FILE_OS v11.0</span>
-    </div>
-  </div>
 
   <!-- Windows 11 Loading Bar & Enter Prompt State -->
   <div id="win-login-state" class="win-state win-state--login" tabindex="0" role="button" aria-label="Enter 또는 화면 클릭하여 시작">
@@ -1976,7 +1969,7 @@
                 </div>
             </div>
             <a href="https://www.youtube.com/watch?v=LNJKQiQ8ahs" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="File Tower Defense 유튜브 영상 보기">
-                <img src="assets/images/File%20Tower%20Defences/sujung_file_tower_defense_intro.png" alt="File Tower Defense 인게임 스크린샷" loading="lazy">
+                <img src="assets/images/File%20Tower%20Defences/file_tower_defense_title.png" alt="File Tower Defense 타이틀 화면" loading="lazy">
                 <span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span>
             </a>
         </div>
@@ -2015,7 +2008,7 @@
                 </div>
             </div>
             <a href="https://www.youtube.com/watch?v=TTdIN2U3gnQ" target="_blank" rel="noopener noreferrer" class="pf-card-media" aria-label="WinAPI Don't Starve Clone 유튜브 영상 보기">
-                <img src="assets/images/Dont%20Starve/sujung_dont_starve_intro.png" alt="WinAPI Don't Starve Clone 인게임 스크린샷" loading="lazy">
+                <img src="assets/images/Dont%20Starve/dont_starve_title.png" alt="WinAPI Don't Starve Clone 타이틀 화면" loading="lazy">
                 <span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span>
             </a>
         </div>
@@ -2335,7 +2328,61 @@
             <button class="pf-modal-close" onclick="pfCloseModal('fileTowerDefense')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=LNJKQiQ8ahs" target="_blank" rel="noopener noreferrer" aria-label="File Tower Defense 유튜브 영상 보기"><img src="assets/images/File%20Tower%20Defences/sujung_file_tower_defense_intro.png" alt="File Tower Defense 게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
+        <!-- INTERACTIVE SCREENSHOT GALLERY (HORIZONTAL SCROLL & SLIDER) -->
+        <div class="pf-ftd-gallery" id="pfFtdGallery">
+            <!-- Topbar Meta & Actions -->
+            <div class="pf-ftd-gallery-topbar">
+                <div class="pf-ftd-gallery-meta">
+                    <span class="pf-ftd-counter pf-mono">01 / 05</span>
+                    <span class="pf-ftd-caption">파일 유닛 배치 및 웨이브 방어</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <a href="/project/file-tower-defense/#gallery" class="pf-ftd-yt-link" style="color: #60a5fa; background: rgba(37, 99, 235, 0.15); border-color: rgba(96, 165, 250, 0.35);" title="상세 포스트 전체 보기">
+                        <span>상세 포스트 보기 ↗</span>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=LNJKQiQ8ahs" target="_blank" rel="noopener noreferrer" class="pf-ftd-yt-link" title="YouTube 시연 영상 새 창으로 열기">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span>YouTube 시연 영상 ↗</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Viewing Stage -->
+            <div class="pf-ftd-stage">
+                <button type="button" class="pf-ftd-nav pf-ftd-prev" onclick="pfFtdGalleryGo(-1, this)" aria-label="이전 스크린샷">‹</button>
+                <img class="pf-ftd-main-img" src="assets/images/File%20Tower%20Defences/ftd_screenshot_01.png" alt="파일 유닛 배치 및 웨이브 방어" loading="eager">
+                <button type="button" class="pf-ftd-nav pf-ftd-next" onclick="pfFtdGalleryGo(1, this)" aria-label="다음 스크린샷">›</button>
+            </div>
+
+            <!-- Horizontal Scrollable Thumbnail Strip -->
+            <div class="pf-ftd-thumbs-wrapper">
+                <div class="pf-ftd-thumbs-strip" role="region" aria-label="스크린샷 썸네일 가로 스크롤 목록">
+                    <button type="button" class="pf-ftd-thumb-card is-active" data-index="0" data-title="파일 유닛 배치 및 웨이브 방어" onclick="pfFtdGallerySelect(0, this)" title="1. 파일 유닛 배치 및 웨이브 방어">
+                        <img src="assets/images/File%20Tower%20Defences/ftd_screenshot_01.png" alt="1. 파일 유닛 배치 및 웨이브 방어" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">01</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="1" data-title="상위 확장 유닛 배치 & 팝업창 바이러스 침공" onclick="pfFtdGallerySelect(1, this)" title="2. 상위 확장 유닛 배치 & 팝업창 바이러스 침공">
+                        <img src="assets/images/File%20Tower%20Defences/ftd_screenshot_02.png" alt="2. 상위 확장 유닛 배치 & 팝업창 바이러스 침공" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">02</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="2" data-title="인게임 언락 상점(UnLock Shop) 시스템" onclick="pfFtdGallerySelect(2, this)" title="3. 인게임 언락 상점(UnLock Shop) 시스템">
+                        <img src="assets/images/File%20Tower%20Defences/ftd_screenshot_03.png" alt="3. 인게임 언락 상점(UnLock Shop) 시스템" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">03</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="3" data-title="긴급 보스전 - 내 PC 소화 중..." onclick="pfFtdGallerySelect(3, this)" title="4. 긴급 보스전 - 내 PC 소화 중...">
+                        <img src="assets/images/File%20Tower%20Defences/ftd_screenshot_04.png" alt="4. 긴급 보스전 - 내 PC 소화 중..." loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">04</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="4" data-title="후반부 보스전 및 차원 웜홀 기믹" onclick="pfFtdGallerySelect(4, this)" title="5. 후반부 보스전 및 차원 웜홀 기믹">
+                        <img src="assets/images/File%20Tower%20Defences/ftd_screenshot_05.png" alt="5. 후반부 보스전 및 차원 웜홀 기믹" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">05</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pf-ftd-hint">
+                <span>Tip: 좌우 화살표 버튼, 키보드 방향키(←, →), 또는 마우스 휠로 썸네일을 옆으로 스크롤하여 탐색할 수 있습니다.</span>
+            </div>
+        </div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title">1. 아키텍처 전면 재설계 (UI → World)</div>
@@ -2373,7 +2420,73 @@
             <button class="pf-modal-close" onclick="pfCloseModal('dontStarve')">✕ CLOSE</button>
         </div>
         
-        <div class="pf-modal-banner"><a href="https://www.youtube.com/watch?v=TTdIN2U3gnQ" target="_blank" rel="noopener noreferrer" aria-label="WinAPI Don't Starve Clone 유튜브 영상 보기"><img src="assets/images/Dont%20Starve/sujung_dont_starve_intro.png" alt="WinAPI Don't Starve Clone 인게임 화면" loading="lazy"><span class="pf-media-badge"><span aria-hidden="true">▶</span>YouTube</span></a></div>
+        <!-- INTERACTIVE SCREENSHOT GALLERY (HORIZONTAL SCROLL & SLIDER) -->
+        <div class="pf-ftd-gallery" id="pfDsGalleryModal">
+            <!-- Topbar Meta & Actions -->
+            <div class="pf-ftd-gallery-topbar">
+                <div class="pf-ftd-gallery-meta">
+                    <span class="pf-ftd-counter pf-mono">01 / 08</span>
+                    <span class="pf-ftd-caption">윌슨(Wilson) 캐릭터 선택 화면</span>
+                </div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                    <a href="/project/winapi-dont-starve/#gallery" class="pf-ftd-yt-link" style="color: #60a5fa; background: rgba(37, 99, 235, 0.15); border-color: rgba(96, 165, 250, 0.35);" title="상세 포스트 전체 보기">
+                        <span>상세 포스트 보기 ↗</span>
+                    </a>
+                    <a href="https://www.youtube.com/watch?v=TTdIN2U3gnQ" target="_blank" rel="noopener noreferrer" class="pf-ftd-yt-link" title="YouTube 시연 영상 새 창으로 열기">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                        <span>YouTube 시연 영상 ↗</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main Viewing Stage -->
+            <div class="pf-ftd-stage">
+                <button type="button" class="pf-ftd-nav pf-ftd-prev" onclick="pfFtdGalleryGo(-1, this)" aria-label="이전 스크린샷">‹</button>
+                <img class="pf-ftd-main-img" src="assets/images/Dont%20Starve/InGame/ds_ingame_01.png" alt="윌슨(Wilson) 캐릭터 선택 화면" loading="eager">
+                <button type="button" class="pf-ftd-nav pf-ftd-next" onclick="pfFtdGalleryGo(1, this)" aria-label="다음 스크린샷">›</button>
+            </div>
+
+            <!-- Horizontal Scrollable Thumbnail Strip -->
+            <div class="pf-ftd-thumbs-wrapper">
+                <div class="pf-ftd-thumbs-strip" role="region" aria-label="스크린샷 썸네일 가로 스크롤 목록">
+                    <button type="button" class="pf-ftd-thumb-card is-active" data-index="0" data-title="윌슨(Wilson) 캐릭터 선택 화면" onclick="pfFtdGallerySelect(0, this)" title="1. 윌슨(Wilson) 캐릭터 선택 화면">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_01.png" alt="1. 윌슨(Wilson) 캐릭터 선택 화면" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">01</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="1" data-title="오픈월드 필드 생태계 및 오브젝트 생성" onclick="pfFtdGallerySelect(1, this)" title="2. 오픈월드 필드 생태계 및 오브젝트 생성">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_02.png" alt="2. 오픈월드 필드 생태계 및 오브젝트 생성" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">02</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="2" data-title="크래프팅(제작) 메뉴 및 인벤토리 슬롯 시스템" onclick="pfFtdGallerySelect(2, this)" title="3. 크래프팅(제작) 메뉴 및 인벤토리 슬롯 시스템">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_03.png" alt="3. 크래프팅(제작) 메뉴 및 인벤토리 슬롯 시스템" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">03</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="3" data-title="하운드(Hound) 몬스터 조우 및 실시간 전투" onclick="pfFtdGallerySelect(3, this)" title="4. 하운드(Hound) 몬스터 조우 및 실시간 전투">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_04.png" alt="4. 하운드(Hound) 몬스터 조우 및 실시간 전투" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">04</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="4" data-title="얼음 하운드 & 레드 하운드 특수 기믹 전투" onclick="pfFtdGallerySelect(4, this)" title="5. 얼음 하운드 & 레드 하운드 특수 기믹 전투">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_05.png" alt="5. 얼음 하운드 & 레드 하운드 특수 기믹 전투" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">05</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="5" data-title="거미집 군락지 및 거미 사냥과 거미줄 파밍" onclick="pfFtdGallerySelect(5, this)" title="6. 거미집 군락지 및 거미 사냥과 거미줄 파밍">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_06.png" alt="6. 거미집 군락지 및 거미 사냥과 거미줄 파밍" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">06</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="6" data-title="거대 보스 거미 여왕(Spider Queen) 레이드 전투" onclick="pfFtdGallerySelect(6, this)" title="7. 거대 보스 거미 여왕(Spider Queen) 레이드 전투">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_07.png" alt="7. 거대 보스 거미 여왕(Spider Queen) 레이드 전투" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">07</span>
+                    </button>
+                    <button type="button" class="pf-ftd-thumb-card" data-index="7" data-title="보스전 게임 오버(Game Over) 및 시스템 UI" onclick="pfFtdGallerySelect(7, this)" title="8. 보스전 게임 오버(Game Over) 및 시스템 UI">
+                        <img src="assets/images/Dont%20Starve/InGame/ds_ingame_08.png" alt="8. 보스전 게임 오버(Game Over) 및 시스템 UI" loading="lazy">
+                        <span class="pf-ftd-thumb-num pf-mono">08</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pf-ftd-hint">
+                <span>Tip: 좌우 화살표 버튼, 키보드 방향키(←, →), 또는 마우스 휠로 썸네일을 옆으로 스크롤하여 탐색할 수 있습니다.</span>
+            </div>
+        </div>
         <div class="pf-modal-grid">
             <div class="pf-modal-item">
                 <div class="pf-modal-item-title">1. 그리드 공간 분할 (Grid Partitioning)</div>
