@@ -618,123 +618,49 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
 | **`RenderManager`** | 지연 렌더 파이프라인 | 레이어별 커맨드 큐 버퍼링, 발밑 Y좌표 기준 오름차순 정렬(`std::stable_sort`), GDI+ 더블 버퍼링 일괄 Flush | `BeginFrame()`, `Flush()` |
 
 <details class="pf-details">
-<summary>코드 보기: CameraManager.cpp & ObjectManager.cpp - 시야 쿼리 및 가시 객체 렌더링 위임</summary>
+<summary>코드 보기: 렌더링 파이프라인 핵심 연계 흐름 (Camera ➔ Object ➔ Sprite ➔ RenderManager)</summary>
 
 ```cpp
-// 1. CameraManager.cpp: 뷰포트 영역을 인자로 전달하여 ObjectManager 공간 분할 쿼리 요청
+// [핵심 파이프라인 연계] 뷰포트 쿼리부터 발밑 Y-Sorting 일괄 Flush까지의 단일 흐름
+
+// 1. CameraManager: ObjectManager의 공간 분할 그리드를 쿼리하여 가시 객체 선별 및 디스패치
 void CameraManager::RenderVisibleGameObjects() {
-    ObjectManager* objectManager = ObjectManager::GetInstance();
-    if (!objectManager) return;
-
     visibleBuffer.clear();
+    objectManager->QueryObjectsInRectArea(GetViewportWorldRect(), visibleBuffer); // 뷰포트 교차 객체만 수집
 
-    // 뷰포트 월드 Rect 기반 공간 분할 그리드 쿼리 (가시 객체만 수집)
-    objectManager->QueryObjectsInRectArea(GetViewportWorldRect(), visibleBuffer);
-
-    // 수집된 가시 객체만 다형성 Render() 호출
     for (GameObject* obj : visibleBuffer) {
-        obj->Render();
-        obj->RenderDebugOverlay();
+        obj->Render(); // 다형성 렌더링 호출
     }
 }
 
-// 2. ObjectManager.cpp: 2D Spatial Grid 셀 인덱싱 및 AABB 가시성 필터링
-void ObjectManager::QueryObjectsInRectArea(const Gdiplus::RectF& rectArea, std::vector<GameObject*>& targetOutObjects) {
-    if (m_worldObjects.empty()) return;
-
-    // 뷰포트 사각형과 교차하는 그리드 인덱스 계산 (O(1))
-    int startX = (std::max)(0, (int)floor(rectArea.X / GRID_CELL_SIZE));
-    int endX   = (std::min)(GRID_WIDTH - 1, (int)ceil((rectArea.X + rectArea.Width) / GRID_CELL_SIZE) - 1);
-    int startY = (std::max)(0, (int)floor(rectArea.Y / GRID_CELL_SIZE));
-    int endY   = (std::min)(GRID_HEIGHT - 1, (int)ceil((rectArea.Y + rectArea.Height) / GRID_CELL_SIZE) - 1);
-
-    if (++m_spatialQueryStamp == 0) m_spatialQueryStamp = 1;
-
-    for (int y = startY; y <= endY; ++y) {
-        for (int x = startX; x <= endX; ++x) {
-            for (auto* obj : m_spatialGrid[x][y]) {
-                if (obj->GetLastSpatialQueryStamp() == m_spatialQueryStamp) continue;
-                obj->SetLastSpatialQueryStamp(m_spatialQueryStamp);
-                if (!obj->IsEnabled() || obj->IsDead()) continue;
-
-                // 최종 AABB 뷰포트 교차 검사
-                const Gdiplus::RectF bounds = obj->GetBounds();
-                if (rectArea.X < bounds.X + bounds.Width && rectArea.X + rectArea.Width > bounds.X &&
-                    rectArea.Y < bounds.Y + bounds.Height && rectArea.Y + rectArea.Height > bounds.Y) {
-                    targetOutObjects.push_back(obj);
-                }
-            }
-        }
-    }
-}
-```
-</details>
-
-<details class="pf-details">
-<summary>코드 보기: Entity.cpp & SpriteRenderer.cpp - 다형성 위임 및 발밑 Y-Sorting 커맨드 생성</summary>
-
-```cpp
-// 1. Entity.cpp: GameObject 다형성 호출을 받아 소유한 SpriteRenderer에 O(1) 위임
+// 2. Entity / SpriteRenderer: O(1) 컴포넌트 위임 및 발밑 Pivot Y 기준 커맨드 예약
 void Entity::Render() {
-    if (!IsEnabled() || !m_transform) return;
-
     if (m_spriteRenderer && m_spriteRenderer->IsEnabled()) {
-        m_spriteRenderer->Render();
+        m_spriteRenderer->Render(); // 소유 컴포넌트로 위임
     }
 }
 
-// 2. SpriteRenderer.cpp: 발밑 피벗 기준 sortingY 산출 및 지연 렌더링 명령 버퍼링
 void SpriteRenderer::Render() {
-    Transform* pTransform = m_owner->GetComponent<Transform>();
-    if (!pTransform || !m_sprite || !m_sprite->bitmap) return;
-
-    float worldX = pTransform->GetX();
-    float worldY = pTransform->GetY();
-    float height = m_sprite->sourceRect.Height * pTransform->GetScaleY();
-
-    // 발밑 Pivot Y 기준 정렬 깊이 계산
+    // 발밑 Pivot Y 기준 정렬 깊이 계산 (Top-down 원근감)
     float sortingY = worldY + (1.0f - m_sprite->pivot.Y) * height;
 
-    // RenderManager 커맨드 큐에 월드 오브젝트 커맨드 적재
-    RenderManager::GetInstance()->AddWorldObjectCommand(
-        m_sprite->bitmap.get(), 
-        m_sprite->sourceRect, 
-        worldX, worldY, 
-        pTransform->GetScaleX(), pTransform->GetScaleY(),
-        m_sprite->pivot.X, m_sprite->pivot.Y,
-        m_layer, sortingY, 
-        pTransform->GetDirection(), 
-        tintColor, hasTint, m_preFlipped
-    );
+    // RenderManager 큐에 월드 오브젝트 커맨드 적재
+    RenderManager::GetInstance()->AddWorldObjectCommand(m_sprite->bitmap.get(), ..., sortingY);
 }
-```
-</details>
 
-<details class="pf-details">
-<summary>코드 보기: RenderManager.cpp - Y-Sorting 및 일괄 렌더링 처리</summary>
-
-```cpp
-// RenderManager.cpp - Y-Sorting 및 일괄 렌더링 처리
-void RenderManager::Flush(Gdiplus::Graphics* pGraphics)
-{
-    if (!pGraphics) return;
-
-    for (int i = LAYER_TILE_BACKGROUND; i < LAYER_COUNT; ++i) {
-        if (m_layerCommands[i].empty()) continue;
-
-        // zOrder(Y좌표)를 기준으로 오름차순 정렬하여 뒤에 있는 객체가 먼저 그려지도록 함
-        if (m_layerCommands[i].size() > 1) {
-            std::stable_sort(m_layerCommands[i].begin(), m_layerCommands[i].end(), [](const DrawCommand& a, const DrawCommand& b) {
-                if (a.zOrder != b.zOrder) return a.zOrder < b.zOrder;
-                return a.layer < b.layer;
-            });
+// 3. RenderManager: 발밑 Y좌표 기준 stable_sort 정렬 후 백버퍼 일괄 출력 (Flush)
+void RenderManager::Flush(Gdiplus::Graphics* pGraphics) {
+    // 발밑 Pivot Y 오름차순 정렬 (뒤에 있는 객체가 먼저 그려짐)
+    std::stable_sort(m_layerCommands[LAYER_WORLD_OBJECT].begin(), m_layerCommands[LAYER_WORLD_OBJECT].end(), 
+        [](const DrawCommand& a, const DrawCommand& b) {
+            return a.zOrder < b.zOrder;
         }
+    );
 
-        for (const auto& cmd : m_layerCommands[i]) {
-            ExecuteDrawCommand(pGraphics, cmd);
-        }
-        m_layerCommands[i].clear();
+    for (const auto& cmd : m_layerCommands[LAYER_WORLD_OBJECT]) {
+        ExecuteDrawCommand(pGraphics, cmd);
     }
+    m_layerCommands[LAYER_WORLD_OBJECT].clear();
 }
 ```
 </details>

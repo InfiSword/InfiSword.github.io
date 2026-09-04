@@ -349,113 +349,47 @@
 <p>단일 책임 원칙(SRP)에 따라 각 매니저와 컴포넌트가 명확히 분업화되어 불필요한 결합도(Coupling)를 차단합니다.</p>
 <div class="pf-table-wrapper"><table class="pf-data-table"><thead><tr><th>서브시스템 / 요소</th><th>주요 역할 (Role)</th><th>렌더링 파이프라인 내 책임 (Pipeline Responsibility)</th><th>핵심 메커니즘 / API</th></tr></thead><tbody><tr><td><strong><code>CameraManager</code></strong></td><td>시야 연산 &amp; 뷰포트 제어</td><td>타깃(플레이어) 추적, 뷰포트 월드 Rect 산출, 타일맵 가시성 독립 컬링, 가시 객체 렌더 루프 구동</td><td><code>GetViewportWorldRect()</code>, <code>RenderVisibleTiles()</code>, <code>RenderVisibleGameObjects()</code></td></tr><tr><td><strong><code>ObjectManager</code></strong></td><td>객체 수명 &amp; 공간 색인</td><td>256×256 정적 2D 그리드(<code>m_spatialGrid</code>) 소유/관리, 뷰포트 영역과 교차하는 그리드 셀 1차 색인 + AABB 2차 정밀 컬링</td><td><code>QueryObjectsInRectArea()</code>, <code>UpdateObjectGrid()</code></td></tr><tr><td><strong><code>GameObject</code></strong></td><td>다형성 렌더링 진입점</td><td>매니저의 다형성 호출(<code>virtual void Render()</code>)을 수신하여 하위 컴포넌트로 O(1) 위임 (컴포넌트 선형 탐색 배제)</td><td><code>Entity::Render()</code>, <code>Item::Render()</code>, <code>Player::Render()</code></td></tr><tr><td><strong><code>SpriteRenderer</code></strong></td><td>스프라이트 변환 &amp; 커맨드화</td><td>스프라이트 비트맵 및 피벗 기준 발밑 정렬 Y값(<code>sortingY</code>) 계산 후 지연 렌더링 커맨드 생성</td><td><code>RenderManager::AddWorldObjectCommand()</code></td></tr><tr><td><strong><code>RenderManager</code></strong></td><td>지연 렌더 파이프라인</td><td>레이어별 커맨드 큐 버퍼링, 발밑 Y좌표 기준 오름차순 정렬(<code>std::stable_sort</code>), GDI+ 더블 버퍼링 일괄 Flush</td><td><code>BeginFrame()</code>, <code>Flush()</code></td></tr></tbody></table></div>
 <details class="pf-details">
-<summary>코드 보기: CameraManager.cpp & ObjectManager.cpp - 시야 쿼리 및 가시 객체 렌더링 위임</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// 1. <span class="hljs-title class_">CameraManager</span>.cpp: 뷰포트 영역을 인자로 전달하여 <span class="hljs-title class_">ObjectManager</span> 공간 분할 쿼리 요청</span>
+<summary>코드 보기: 렌더링 파이프라인 핵심 연계 흐름 (Camera ➔ Object ➔ Sprite ➔ RenderManager)</summary>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// [핵심 파이프라인 연계] 뷰포트 쿼리부터 발밑 Y-Sorting 일괄 Flush까지의 단일 흐름</span>
+
+<span class="hljs-comment">// 1. <span class="hljs-title class_">CameraManager</span>: <span class="hljs-title class_">ObjectManager</span>의 공간 분할 그리드를 쿼리하여 가시 객체 선별 및 디스패치</span>
 <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">CameraManager</span>::RenderVisibleGameObjects</span><span class="hljs-params">()</span> </span>{
-    <span class="hljs-title class_">ObjectManager</span>* objectManager = <span class="hljs-title class_">ObjectManager</span>::<span class="hljs-built_in">GetInstance</span>();
-    <span class="hljs-keyword hljs-control-flow">if</span> (!objectManager) <span class="hljs-keyword hljs-control-flow">return</span>;
-
     visibleBuffer.<span class="hljs-built_in">clear</span>();
+    objectManager-&gt;<span class="hljs-built_in">QueryObjectsInRectArea</span>(<span class="hljs-built_in">GetViewportWorldRect</span>(), visibleBuffer); <span class="hljs-comment">// 뷰포트 교차 객체만 수집</span>
 
-    <span class="hljs-comment">// 뷰포트 월드 <span class="hljs-title class_">Rect</span> 기반 공간 분할 그리드 쿼리 (가시 객체만 수집)</span>
-    objectManager-&gt;<span class="hljs-built_in">QueryObjectsInRectArea</span>(<span class="hljs-built_in">GetViewportWorldRect</span>(), visibleBuffer);
-
-    <span class="hljs-comment">// 수집된 가시 객체만 다형성 <span class="hljs-title function_">Render</span>() 호출</span>
     <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-title class_">GameObject</span>* obj : visibleBuffer) {
-        obj-&gt;<span class="hljs-built_in">Render</span>();
-        obj-&gt;<span class="hljs-built_in">RenderDebugOverlay</span>();
+        obj-&gt;<span class="hljs-built_in">Render</span>(); <span class="hljs-comment">// 다형성 렌더링 호출</span>
     }
 }
 
-<span class="hljs-comment">// 2. <span class="hljs-title class_">ObjectManager</span>.cpp: 2D Spatial Grid 셀 인덱싱 및 AABB 가시성 필터링</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">ObjectManager</span>::QueryObjectsInRectArea</span><span class="hljs-params">(<span class="hljs-type">const</span> Gdiplus::RectF&amp; rectArea, std::vector&lt;<span class="hljs-title class_">GameObject</span>*&gt;&amp; targetOutObjects)</span> </span>{
-    <span class="hljs-keyword hljs-control-flow">if</span> (m_worldObjects.<span class="hljs-built_in">empty</span>()) <span class="hljs-keyword hljs-control-flow">return</span>;
-
-    <span class="hljs-comment">// 뷰포트 사각형과 교차하는 그리드 인덱스 계산 (<span class="hljs-title function_">O</span>(1))</span>
-    <span class="hljs-type">int</span> startX = (std::max)(<span class="hljs-number">0</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">floor</span>(rectArea.X / GRID_CELL_SIZE));
-    <span class="hljs-type">int</span> endX   = (std::min)(GRID_WIDTH - <span class="hljs-number">1</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">ceil</span>((rectArea.X + rectArea.Width) / GRID_CELL_SIZE) - <span class="hljs-number">1</span>);
-    <span class="hljs-type">int</span> startY = (std::max)(<span class="hljs-number">0</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">floor</span>(rectArea.Y / GRID_CELL_SIZE));
-    <span class="hljs-type">int</span> endY   = (std::min)(GRID_HEIGHT - <span class="hljs-number">1</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">ceil</span>((rectArea.Y + rectArea.Height) / GRID_CELL_SIZE) - <span class="hljs-number">1</span>);
-
-    <span class="hljs-keyword hljs-control-flow">if</span> (++m_spatialQueryStamp == <span class="hljs-number">0</span>) m_spatialQueryStamp = <span class="hljs-number">1</span>;
-
-    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> y = startY; y &lt;= endY; ++y) {
-        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> x = startX; x &lt;= endX; ++x) {
-            <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-keyword">auto</span>* obj : m_spatialGrid[x][y]) {
-                <span class="hljs-keyword hljs-control-flow">if</span> (obj-&gt;<span class="hljs-built_in">GetLastSpatialQueryStamp</span>() == m_spatialQueryStamp) <span class="hljs-keyword hljs-control-flow">continue</span>;
-                obj-&gt;<span class="hljs-built_in">SetLastSpatialQueryStamp</span>(m_spatialQueryStamp);
-                <span class="hljs-keyword hljs-control-flow">if</span> (!obj-&gt;<span class="hljs-built_in">IsEnabled</span>() || obj-&gt;<span class="hljs-built_in">IsDead</span>()) <span class="hljs-keyword hljs-control-flow">continue</span>;
-
-                <span class="hljs-comment">// 최종 AABB 뷰포트 교차 검사</span>
-                <span class="hljs-type">const</span> Gdiplus::RectF bounds = obj-&gt;<span class="hljs-built_in">GetBounds</span>();
-                <span class="hljs-keyword hljs-control-flow">if</span> (rectArea.X &lt; bounds.X + bounds.Width &amp;&amp; rectArea.X + rectArea.Width &gt; bounds.X &amp;&amp;
-                    rectArea.Y &lt; bounds.Y + bounds.Height &amp;&amp; rectArea.Y + rectArea.Height &gt; bounds.Y) {
-                    targetOutObjects.<span class="hljs-built_in">push_back</span>(obj);
-                }
-            }
-        }
-    }
-}</code></pre>
-</details>
-<details class="pf-details">
-<summary>코드 보기: Entity.cpp & SpriteRenderer.cpp - 다형성 위임 및 발밑 Y-Sorting 커맨드 생성</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// 1. <span class="hljs-title class_">Entity</span>.cpp: <span class="hljs-title class_">GameObject</span> 다형성 호출을 받아 소유한 <span class="hljs-title class_">SpriteRenderer</span>에 <span class="hljs-title function_">O</span>(1) 위임</span>
+<span class="hljs-comment">// 2. <span class="hljs-title class_">Entity</span> / <span class="hljs-title class_">SpriteRenderer</span>: <span class="hljs-title function_">O</span>(1) 컴포넌트 위임 및 발밑 Pivot Y 기준 커맨드 예약</span>
 <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">Entity</span>::Render</span><span class="hljs-params">()</span> </span>{
-    <span class="hljs-keyword hljs-control-flow">if</span> (!<span class="hljs-built_in">IsEnabled</span>() || !m_transform) <span class="hljs-keyword hljs-control-flow">return</span>;
-
     <span class="hljs-keyword hljs-control-flow">if</span> (m_spriteRenderer &amp;&amp; m_spriteRenderer-&gt;<span class="hljs-built_in">IsEnabled</span>()) {
-        m_spriteRenderer-&gt;<span class="hljs-built_in">Render</span>();
+        m_spriteRenderer-&gt;<span class="hljs-built_in">Render</span>(); <span class="hljs-comment">// 소유 컴포넌트로 위임</span>
     }
 }
 
-<span class="hljs-comment">// 2. <span class="hljs-title class_">SpriteRenderer</span>.cpp: 발밑 피벗 기준 sortingY 산출 및 지연 렌더링 명령 버퍼링</span>
 <span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">SpriteRenderer</span>::Render</span><span class="hljs-params">()</span> </span>{
-    <span class="hljs-title class_">Transform</span>* pTransform = m_owner-&gt;<span class="hljs-built_in">GetComponent</span>&lt;<span class="hljs-title class_">Transform</span>&gt;();
-    <span class="hljs-keyword hljs-control-flow">if</span> (!pTransform || !m_sprite || !m_sprite-&gt;bitmap) <span class="hljs-keyword hljs-control-flow">return</span>;
-
-    <span class="hljs-type">float</span> worldX = pTransform-&gt;<span class="hljs-built_in">GetX</span>();
-    <span class="hljs-type">float</span> worldY = pTransform-&gt;<span class="hljs-built_in">GetY</span>();
-    <span class="hljs-type">float</span> height = m_sprite-&gt;sourceRect.Height * pTransform-&gt;<span class="hljs-built_in">GetScaleY</span>();
-
-    <span class="hljs-comment">// 발밑 Pivot Y 기준 정렬 깊이 계산</span>
+    <span class="hljs-comment">// 발밑 Pivot Y 기준 정렬 깊이 계산 (Top-down 원근감)</span>
     <span class="hljs-type">float</span> sortingY = worldY + (<span class="hljs-number">1.0f</span> - m_sprite-&gt;pivot.Y) * height;
 
-    <span class="hljs-comment">// <span class="hljs-title class_">RenderManager</span> 커맨드 큐에 월드 오브젝트 커맨드 적재</span>
-    <span class="hljs-title class_">RenderManager</span>::<span class="hljs-built_in">GetInstance</span>()-&gt;<span class="hljs-built_in">AddWorldObjectCommand</span>(
-        m_sprite-&gt;bitmap.<span class="hljs-built_in">get</span>(), 
-        m_sprite-&gt;sourceRect, 
-        worldX, worldY, 
-        pTransform-&gt;<span class="hljs-built_in">GetScaleX</span>(), pTransform-&gt;<span class="hljs-built_in">GetScaleY</span>(),
-        m_sprite-&gt;pivot.X, m_sprite-&gt;pivot.Y,
-        m_layer, sortingY, 
-        pTransform-&gt;<span class="hljs-built_in">GetDirection</span>(), 
-        tintColor, hasTint, m_preFlipped
+    <span class="hljs-comment">// <span class="hljs-title class_">RenderManager</span> 큐에 월드 오브젝트 커맨드 적재</span>
+    <span class="hljs-title class_">RenderManager</span>::<span class="hljs-built_in">GetInstance</span>()-&gt;<span class="hljs-built_in">AddWorldObjectCommand</span>(m_sprite-&gt;bitmap.<span class="hljs-built_in">get</span>(), ..., sortingY);
+}
+
+<span class="hljs-comment">// 3. <span class="hljs-title class_">RenderManager</span>: 발밑 Y좌표 기준 stable_sort 정렬 후 백버퍼 일괄 출력 (Flush)</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">RenderManager</span>::Flush</span><span class="hljs-params">(Gdiplus::Graphics* pGraphics)</span> </span>{
+    <span class="hljs-comment">// 발밑 Pivot Y 오름차순 정렬 (뒤에 있는 객체가 먼저 그려짐)</span>
+    std::<span class="hljs-built_in">stable_sort</span>(m_layerCommands[LAYER_WORLD_OBJECT].<span class="hljs-built_in">begin</span>(), m_layerCommands[LAYER_WORLD_OBJECT].<span class="hljs-built_in">end</span>(), 
+        [](<span class="hljs-type">const</span> DrawCommand&amp; a, <span class="hljs-type">const</span> DrawCommand&amp; b) {
+            <span class="hljs-keyword hljs-control-flow">return</span> a.zOrder &lt; b.zOrder;
+        }
     );
-}</code></pre>
-</details>
-<details class="pf-details">
-<summary>코드 보기: RenderManager.cpp - Y-Sorting 및 일괄 렌더링 처리</summary>
-<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">RenderManager</span>.cpp - Y-Sorting 및 일괄 렌더링 처리</span>
-<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">RenderManager</span>::Flush</span><span class="hljs-params">(Gdiplus::Graphics* pGraphics)</span>
-</span>{
-    <span class="hljs-keyword hljs-control-flow">if</span> (!pGraphics) <span class="hljs-keyword hljs-control-flow">return</span>;
 
-    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> i = LAYER_TILE_BACKGROUND; i &lt; LAYER_COUNT; ++i) {
-        <span class="hljs-keyword hljs-control-flow">if</span> (m_layerCommands[i].<span class="hljs-built_in">empty</span>()) <span class="hljs-keyword hljs-control-flow">continue</span>;
-
-        <span class="hljs-comment">// <span class="hljs-title function_">zOrder</span>(Y좌표)를 기준으로 오름차순 정렬하여 뒤에 있는 객체가 먼저 그려지도록 함</span>
-        <span class="hljs-keyword hljs-control-flow">if</span> (m_layerCommands[i].<span class="hljs-built_in">size</span>() &gt; <span class="hljs-number">1</span>) {
-            std::<span class="hljs-built_in">stable_sort</span>(m_layerCommands[i].<span class="hljs-built_in">begin</span>(), m_layerCommands[i].<span class="hljs-built_in">end</span>(), [](<span class="hljs-type">const</span> DrawCommand&amp; a, <span class="hljs-type">const</span> DrawCommand&amp; b) {
-                <span class="hljs-keyword hljs-control-flow">if</span> (a.zOrder != b.zOrder) <span class="hljs-keyword hljs-control-flow">return</span> a.zOrder &lt; b.zOrder;
-                <span class="hljs-keyword hljs-control-flow">return</span> a.layer &lt; b.layer;
-            });
-        }
-
-        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; cmd : m_layerCommands[i]) {
-            <span class="hljs-built_in">ExecuteDrawCommand</span>(pGraphics, cmd);
-        }
-        m_layerCommands[i].<span class="hljs-built_in">clear</span>();
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">const</span> <span class="hljs-keyword">auto</span>&amp; cmd : m_layerCommands[LAYER_WORLD_OBJECT]) {
+        <span class="hljs-built_in">ExecuteDrawCommand</span>(pGraphics, cmd);
     }
+    m_layerCommands[LAYER_WORLD_OBJECT].<span class="hljs-built_in">clear</span>();
 }</code></pre>
 </details>
 <h3 id="22-동적-타일-캐싱-및-가시-영역-렌더링">2.2 동적 타일 캐싱 및 가시 영역 렌더링</h3>
