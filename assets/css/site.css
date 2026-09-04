@@ -1008,6 +1008,123 @@ body::before {
   color: #334155 !important;
 }
 
+.pf-visual-frame.pf-diagram-frame {
+  background: #080d1a !important;
+  border-color: rgba(56, 189, 248, 0.25) !important;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35) !important;
+  padding: 20px !important;
+}
+
+.pf-diagram-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.pf-diagram-hud {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.pf-diagram-hud-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: #94a3b8;
+}
+
+.pf-diagram-hud-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.pf-diagram-hud-val {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f1f5f9;
+  background: rgba(15, 23, 42, 0.75);
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.pf-diagram-hud-val.is-camera {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.pf-diagram-hud-val.is-rendered {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.35);
+}
+
+.pf-diagram-hud-val.is-culled {
+  color: #fbbf24;
+  border-color: rgba(251, 191, 36, 0.35);
+}
+
+.pf-diagram-hud-val.is-ratio {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.pf-diagram-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pf-diagram-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.pf-diagram-btn:hover {
+  background: rgba(51, 65, 85, 0.9);
+  color: #f8fafc;
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.18);
+}
+
+.pf-diagram-btn.is-active {
+  background: rgba(2, 132, 199, 0.25);
+  color: #38bdf8;
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+}
+
+#ds-sim-viewport-drag {
+  cursor: grab;
+  touch-action: none;
+}
+
+#ds-sim-viewport-drag.is-dragging {
+  cursor: grabbing;
+}
+
 .pf-grid-item,
 .pf-domain-item,
 .pf-arch-item,
@@ -1848,6 +1965,8 @@ code.hljs {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
+  flex-wrap: wrap !important;
+  gap: 6px !important;
   margin-bottom: 0 !important;
 }
 
@@ -1860,6 +1979,7 @@ code.hljs {
   background: #eff6ff !important;
   color: #2563eb !important;
   border: 1px solid #bfdbfe !important;
+  flex-shrink: 0 !important;
 }
 
 .pf-fc-title {
@@ -1868,6 +1988,8 @@ code.hljs {
   color: #1e293b !important;
   margin: 0 !important;
   font-family: 'Plus Jakarta Sans', sans-serif !important;
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
 }
 
 .pf-fc-desc {
@@ -2788,6 +2910,327 @@ body.is-locked {
     height: 60px;
   }
 }
+
+/* --- WinAPI Don't Starve: Pig Sprite Slicing Compare Cards --- */
+.pf-pig-compare-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  margin: 20px 0;
+  text-align: left;
+}
+@media (max-width: 768px) {
+  .pf-pig-compare-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pf-pig-card {
+  background: #ffffff;
+  border: 1px solid #dce5f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pf-pig-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #2563eb;
+}
+.pf-pig-card.is-sheet::before {
+  background: #059669;
+}
+.pf-pig-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.pf-pig-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.pf-pig-title {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  overflow-wrap: break-word;
+  word-break: break-all;
+}
+.pf-pig-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pf-pig-card.is-sheet .pf-pig-badge {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.pf-pig-img-box {
+  background: #0b1120;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 16px;
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+}
+.pf-pig-img-box img {
+  max-height: 200px;
+  max-width: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.4));
+}
+
+.pf-pig-caption {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #334155;
+  margin: 14px 0 6px 0;
+  line-height: 1.55;
+}
+.pf-pig-meta {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.74rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+/* --- WinAPI Don't Starve: Editor Screenshot Showcase Cards --- */
+.pf-editor-shot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  margin: 20px 0;
+  text-align: left;
+}
+.pf-editor-shot-grid.is-single {
+  grid-template-columns: 1fr;
+}
+@media (max-width: 768px) {
+  .pf-editor-shot-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pf-editor-shot-card {
+  background: #ffffff;
+  border: 1px solid #dce5f0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.pf-editor-shot-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #0284c7;
+}
+.pf-editor-shot-card.is-object::before {
+  background: #d97706;
+}
+.pf-editor-shot-card.is-map::before {
+  background: #059669;
+}
+.pf-editor-shot-card.is-launcher::before {
+  background: #6366f1;
+}
+.pf-editor-shot-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.pf-editor-shot-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 8px;
+}
+.pf-editor-shot-grid:not(.is-single) .pf-editor-shot-head {
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 6px;
+}
+@media (max-width: 768px) {
+  .pf-editor-shot-head {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 6px;
+  }
+}
+.pf-editor-shot-title {
+  font-family: inherit;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+}
+.pf-editor-shot-badge {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.pf-editor-shot-card.is-object .pf-editor-shot-badge {
+  background: #fffbeb;
+  color: #b45309;
+  border-color: #fde68a;
+}
+.pf-editor-shot-card.is-map .pf-editor-shot-badge {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+.pf-editor-shot-card.is-launcher .pf-editor-shot-badge {
+  background: #eef2ff;
+  color: #4f46e5;
+  border-color: #c7d2fe;
+}
+
+.pf-editor-shot-box {
+  background: #0f172a;
+  border-radius: 8px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  min-height: 180px;
+}
+.pf-editor-shot-box img {
+  width: 100%;
+  height: auto;
+  max-height: 420px;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
+}
+
+.pf-editor-shot-caption {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #334155;
+  margin: 12px 0 6px 0;
+  line-height: 1.55;
+}
+.pf-editor-shot-meta {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.74rem;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.pf-editor-meta {
+  padding-top: 10px;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+.pf-editor-tag {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.72rem;
+  padding: 3px 7px;
+  border-radius: 4px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  .pf-pig-card,
+  .pf-editor-shot-card {
+    background: rgba(15, 23, 42, 0.75);
+    border-color: rgba(148, 163, 184, 0.18);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  }
+  .pf-pig-title,
+  .pf-editor-shot-title {
+    color: #f8fafc;
+  }
+  .pf-pig-caption,
+  .pf-editor-shot-caption {
+    color: #cbd5e1;
+  }
+  .pf-pig-meta,
+  .pf-editor-shot-meta,
+  .pf-editor-tag {
+    background: rgba(2, 6, 23, 0.6);
+    border-color: rgba(148, 163, 184, 0.2);
+    color: #94a3b8;
+  }
+  .pf-editor-meta {
+    border-color: rgba(148, 163, 184, 0.2);
+  }
+}
+
 
 
 

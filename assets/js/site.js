@@ -413,9 +413,282 @@
     }
   });
 
+  function initSpatialSimulation() {
+    const container = document.querySelector('.pf-diagram-frame');
+    if (!container) return;
+
+    const svg = container.querySelector('svg');
+    const viewportDrag = document.getElementById('ds-sim-viewport-drag');
+    const viewportRect = document.getElementById('ds-viewport-rect');
+    const viewportBadgeBg = document.getElementById('ds-viewport-badge-bg');
+    const viewportBadgeTxt = document.getElementById('ds-viewport-badge-txt');
+    const activeGridBox = document.getElementById('ds-active-grid-box');
+    const activeGridTag = document.getElementById('ds-active-grid-tag');
+    const activeGridTagTxt = document.getElementById('ds-active-grid-tag-txt');
+    const callouts = document.getElementById('ds-sim-callouts');
+
+    const hudCam = document.getElementById('ds-sim-cam');
+    const hudCells = document.getElementById('ds-sim-cells');
+    const hudRendered = document.getElementById('ds-sim-rendered');
+    const hudCulled = document.getElementById('ds-sim-culled');
+    const hudRatio = document.getElementById('ds-sim-ratio');
+    const btnReset = document.getElementById('ds-btn-reset');
+
+    if (!svg || !viewportDrag || !viewportRect || !activeGridBox) return;
+
+    // Grid column and row boundary coordinates (6 columns x 5 rows)
+    const colBounds = [30.0, 176.67, 323.33, 470.0, 616.67, 763.33, 910.0];
+    const rowBounds = [75.0, 170.0, 265.0, 360.0, 455.0, 550.0];
+
+    // Viewport dimensions in SVG coordinates (420 x 230 px)
+    const VP_WIDTH = 420;
+    const VP_HEIGHT = 230;
+    const MIN_X = 30;
+    const MAX_X = 910 - VP_WIDTH; // 490
+    const MIN_Y = 75;
+    const MAX_Y = 550 - VP_HEIGHT; // 320
+
+    const DEFAULT_X = 260;
+    const DEFAULT_Y = 195;
+    let curX = DEFAULT_X;
+    let curY = DEFAULT_Y;
+
+    // Cache dots with world coordinates and cell assignment
+    const dots = Array.from(container.querySelectorAll('.ds-sim-dot')).map((el) => {
+      const x = parseFloat(el.getAttribute('data-x'));
+      const y = parseFloat(el.getAttribute('data-y'));
+      const outer = el.querySelector('.ds-sim-outer');
+      const inner = el.querySelector('.ds-sim-inner');
+
+      let c = 0;
+      for (let i = 0; i < 6; i++) {
+        if (x >= colBounds[i] && (i === 5 ? x <= colBounds[i + 1] : x < colBounds[i + 1])) {
+          c = i;
+          break;
+        }
+      }
+      let r = 0;
+      for (let j = 0; j < 5; j++) {
+        if (y >= rowBounds[j] && (j === 4 ? y <= rowBounds[j + 1] : y < rowBounds[j + 1])) {
+          r = j;
+          break;
+        }
+      }
+
+      return { el, x, y, c, r, outer, inner };
+    });
+
+    const cellCoordTexts = Array.from(container.querySelectorAll('.ds-cell-coord'));
+
+    function updateSimulation(x, y) {
+      curX = Math.max(MIN_X, Math.min(MAX_X, x));
+      curY = Math.max(MIN_Y, Math.min(MAX_Y, y));
+
+      // 1. Move Viewport Rect & Badge
+      viewportRect.setAttribute('x', curX);
+      viewportRect.setAttribute('y', curY);
+      if (viewportBadgeBg) {
+        viewportBadgeBg.setAttribute('x', curX + 6);
+        viewportBadgeBg.setAttribute('y', curY + 6);
+      }
+      if (viewportBadgeTxt) {
+        viewportBadgeTxt.setAttribute('x', curX + 14);
+        viewportBadgeTxt.setAttribute('y', curY + 22);
+      }
+
+      // 2. Broad Phase: Calculate overlapping columns & rows
+      const xMin = curX;
+      const xMax = curX + VP_WIDTH;
+      const yMin = curY;
+      const yMax = curY + VP_HEIGHT;
+
+      let minCol = 5, maxCol = 0;
+      for (let i = 0; i < 6; i++) {
+        if (xMax > colBounds[i] + 0.5 && xMin < colBounds[i + 1] - 0.5) {
+          if (i < minCol) minCol = i;
+          if (i > maxCol) maxCol = i;
+        }
+      }
+      if (minCol > maxCol) { minCol = 0; maxCol = 5; }
+
+      let minRow = 4, maxRow = 0;
+      for (let j = 0; j < 5; j++) {
+        if (yMax > rowBounds[j] + 0.5 && yMin < rowBounds[j + 1] - 0.5) {
+          if (j < minRow) minRow = j;
+          if (j > maxRow) maxRow = j;
+        }
+      }
+      if (minRow > maxRow) { minRow = 0; maxRow = 4; }
+
+      // 3. Update Active Grid Highlight Box
+      const activeLeft = colBounds[minCol];
+      const activeTop = rowBounds[minRow];
+      const activeRight = colBounds[maxCol + 1];
+      const activeBottom = rowBounds[maxRow + 1];
+      const activeW = activeRight - activeLeft;
+      const activeH = activeBottom - activeTop;
+
+      activeGridBox.setAttribute('x', activeLeft);
+      activeGridBox.setAttribute('y', activeTop);
+      activeGridBox.setAttribute('width', activeW);
+      activeGridBox.setAttribute('height', activeH);
+
+      // 4. Update Active Grid Tag
+      const cellCount = (maxCol - minCol + 1) * (maxRow - minRow + 1);
+      if (activeGridTag) {
+        const tagX = Math.max(30, Math.min(activeLeft + 6, 650));
+        const tagY = activeTop > 105 ? activeTop - 27 : activeBottom + 6;
+        activeGridTag.setAttribute('transform', `translate(${tagX}, ${tagY})`);
+      }
+      if (activeGridTagTxt) {
+        activeGridTagTxt.textContent = `활성 그리드 ${cellCount}개 셀 (Broad Phase 산출)`;
+      }
+
+      // 5. Update Grid Cell Coordinates
+      cellCoordTexts.forEach((txt) => {
+        const c = parseInt(txt.getAttribute('data-col'), 10);
+        const r = parseInt(txt.getAttribute('data-row'), 10);
+        const isActive = c >= minCol && c <= maxCol && r >= minRow && r <= maxRow;
+        if (isActive) {
+          txt.setAttribute('fill', '#60a5fa');
+          txt.setAttribute('font-weight', '700');
+        } else {
+          txt.setAttribute('fill', 'rgba(148, 163, 184, 0.45)');
+          txt.setAttribute('font-weight', '600');
+        }
+      });
+
+      // 6. Narrow Phase: Evaluate 3-way object states
+      let renderedCount = 0;
+      let culledCount = 0;
+
+      dots.forEach((d) => {
+        const inActiveGrid = d.c >= minCol && d.c <= maxCol && d.r >= minRow && d.r <= maxRow;
+        if (!inActiveGrid) {
+          // [3] Inactive Grid (Broad Phase 원천 배제)
+          d.outer.setAttribute('r', '5');
+          d.outer.setAttribute('fill', '#1e293b');
+          d.outer.setAttribute('stroke', '#475569');
+          d.outer.setAttribute('stroke-width', '1.5');
+          d.outer.removeAttribute('filter');
+          d.outer.setAttribute('opacity', '0.55');
+          if (d.inner) d.inner.setAttribute('opacity', '0');
+          culledCount++;
+        } else {
+          // Broad phase passed. Narrow phase AABB test:
+          const inViewport = d.x >= xMin && d.x <= xMax && d.y >= yMin && d.y <= yMax;
+          if (inViewport) {
+            // [1] Rendered (Narrow Phase 통과)
+            d.outer.setAttribute('r', '9');
+            d.outer.setAttribute('fill', '#22c55e');
+            d.outer.setAttribute('stroke', '#15803d');
+            d.outer.setAttribute('stroke-width', '2.5');
+            d.outer.setAttribute('filter', 'url(#glow-green)');
+            d.outer.setAttribute('opacity', '1');
+            if (d.inner) d.inner.setAttribute('opacity', '1');
+            renderedCount++;
+          } else {
+            // [2] Culled candidate (Narrow Phase AABB 탈락)
+            d.outer.setAttribute('r', '7.5');
+            d.outer.setAttribute('fill', '#f59e0b');
+            d.outer.setAttribute('stroke', '#b45309');
+            d.outer.setAttribute('stroke-width', '2');
+            d.outer.setAttribute('filter', 'url(#glow-amber)');
+            d.outer.setAttribute('opacity', '1');
+            if (d.inner) d.inner.setAttribute('opacity', '0');
+            culledCount++;
+          }
+        }
+      });
+
+      const total = renderedCount + culledCount;
+      const ratio = total > 0 ? Math.round((culledCount / total) * 100) : 0;
+
+      // 7. Update Callout Visibility (Fade out when exploring away from default)
+      if (callouts) {
+        const isDefault = Math.abs(curX - DEFAULT_X) < 4 && Math.abs(curY - DEFAULT_Y) < 4;
+        callouts.style.transition = 'opacity 0.25s ease';
+        callouts.style.opacity = isDefault ? '1' : '0';
+        callouts.style.pointerEvents = 'none';
+      }
+
+      // 8. Update HUD metrics
+      if (hudCam) {
+        const engX = Math.round((curX - 30) * 2.8 + 600);
+        const engY = Math.round((curY - 75) * 2.8 + 390);
+        hudCam.textContent = `X: ${engX}, Y: ${engY}`;
+      }
+      if (hudCells) hudCells.textContent = `${cellCount} / 30`;
+      if (hudRendered) hudRendered.textContent = `${renderedCount}`;
+      if (hudCulled) hudCulled.textContent = `${culledCount}`;
+      if (hudRatio) hudRatio.textContent = `${ratio}%`;
+    }
+
+    // Pointer Drag Interaction
+    let isDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let initialVpX = 0;
+    let initialVpY = 0;
+
+    function getSvgPoint(e) {
+      const pt = svg.createSVGPoint();
+      pt.x = e.clientX;
+      pt.y = e.clientY;
+      return pt.matrixTransform(svg.getScreenCTM().inverse());
+    }
+
+    viewportDrag.addEventListener('pointerdown', function (e) {
+      isDragging = true;
+      viewportDrag.classList.add('is-dragging');
+      viewportDrag.setPointerCapture(e.pointerId);
+
+      const pt = getSvgPoint(e);
+      dragStartX = pt.x;
+      dragStartY = pt.y;
+      initialVpX = curX;
+      initialVpY = curY;
+    });
+
+    viewportDrag.addEventListener('pointermove', function (e) {
+      if (!isDragging) return;
+      const pt = getSvgPoint(e);
+      const dx = pt.x - dragStartX;
+      const dy = pt.y - dragStartY;
+      updateSimulation(initialVpX + dx, initialVpY + dy);
+    });
+
+    function onPointerUp(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      viewportDrag.classList.remove('is-dragging');
+      try {
+        viewportDrag.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+    }
+
+    viewportDrag.addEventListener('pointerup', onPointerUp);
+    viewportDrag.addEventListener('pointercancel', onPointerUp);
+
+    // Reset Button
+    if (btnReset) {
+      btnReset.addEventListener('click', function () {
+        updateSimulation(DEFAULT_X, DEFAULT_Y);
+      });
+    }
+
+    // Initial simulation update
+    updateSimulation(DEFAULT_X, DEFAULT_Y);
+  }
+
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", initFtdGalleries);
+    document.addEventListener("DOMContentLoaded", function () {
+      initFtdGalleries();
+      initSpatialSimulation();
+    });
   } else {
     initFtdGalleries();
+    initSpatialSimulation();
   }
 })();
+

@@ -4,9 +4,9 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PROJECT REPORT // WORLDFIRSTKILL | 이민혁 (Minhyuk Lee)</title>
-  <meta name="description" content="리플렉션 기반 동적 파싱 및 완전한 상태 복원 시스템">
+  <meta name="description" content="Google 스프레드시트 기반 동적 CSV 파이프라인과 결정론적 Seed/Token RNG 완전 복원 시스템">
   <meta property="og:title" content="PROJECT REPORT // WORLDFIRSTKILL | 이민혁 (Minhyuk Lee)">
-  <meta property="og:description" content="리플렉션 기반 동적 파싱 및 완전한 상태 복원 시스템">
+  <meta property="og:description" content="Google 스프레드시트 기반 동적 CSV 파이프라인과 결정론적 Seed/Token RNG 완전 복원 시스템">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://infisword.github.io">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -37,8 +37,8 @@
           <a class="back-link" href="../../index.html#projects">← 프로젝트 목록으로</a>
           <p class="project-kicker">PROJECT REPORT</p>
           <h1>PROJECT REPORT // WORLDFIRSTKILL</h1>
-          <p>리플렉션 기반 동적 파싱 및 완전한 상태 복원 시스템</p>
-          <div class="project-tags"><span>Data Structure</span><span>Server</span><span>C#</span><span>System Design</span></div>
+          <p>Google 스프레드시트 기반 동적 CSV 파이프라인과 결정론적 Seed/Token RNG 완전 복원 시스템</p>
+          <div class="project-tags"><span>Data Architecture</span><span>Server/Client</span><span>C#</span><span>Unity</span><span>System Design</span><span>RNG Determinism</span></div>
         </div>
         <div class="project-hero__art" aria-hidden="true">
           <img src="../../assets/images/World%20First%20Kill/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-06-28%20173659.png" alt="" class="project-hero__art-img" loading="eager">
@@ -47,7 +47,7 @@
       </header>
       <div class="project-layout">
         <section class="project-content">
-<p>서버(구글 스프레드시트) 기반 게임 데이터 관리와, Seed/Token을 활용한 완벽한 상태 복원 시스템입니다. 리플렉션을 통한 동적 파싱과 비동기 로딩 시스템을 통해 유지보수성과 유저 경험을 동시에 확보했습니다.</p>
+<p>Google 스프레드시트를 마스터 데이터베이스로 활용한 <strong>서버 연동 CSV 동적 파싱 및 증분 캐싱 파이프라인</strong>과, 로그라이크 게임의 무작위 생성 결과를 100% 보존하는 <strong>결정론적 Seed / Token 상태 복원 시스템</strong>입니다. 기획 밸런스 데이터의 무중단 라이브 패치와 세이브/로드 시 RNG 스트림의 결합 교란을 차단한 핵심 아키텍처를 상세히 소개합니다.</p>
 <section id="gallery" class="pf-ftd-post-gallery-section">
     <div class="pf-ftd-section-header">
         <span class="pf-ftd-section-tag pf-mono">● IN-GAME SCREENSHOT GALLERY</span>
@@ -108,379 +108,568 @@
     </div>
 </section>
 <hr>
-<h2 id="1-리플렉션-기반-csv-파싱-및-버전-관리-시스템" class="chapter-title">1. 리플렉션 기반 CSV 파싱 및 버전 관리 시스템</h2>
-<p>서버에서 다운로드한 CSV 파일의 헤더와 데이터 클래스의 필드를 자동으로 매핑하여 동적으로 파싱하는 시스템을 구현했습니다. <strong>리플렉션(Reflection)</strong>을 활용하여 타입 안전성을 보장하면서도 확장 가능한 파싱 로직을 설계했습니다.</p>
-<h3 id="11-서버-버전-동기화-및-선택적-다운로드">1.1 서버 버전 동기화 및 선택적 다운로드</h3>
-<p>게임 시작 시 <code>ServerCSV_ConvertData</code> 클래스가 메타 시트를 우선 다운로드하여 서버의 데이터 버전 정보를 확인합니다. 이후 로컬에 저장된 <code>data_versions.json</code> 파일과 대조하여 <strong>변경된 파일만 선택적으로 다운로드</strong>함으로써 네트워크 비용과 로딩 시간을 최소화했습니다.</p>
-<h3 id="12-csv-파싱-프로세스-플로우">1.2 CSV 파싱 프로세스 플로우</h3>
-<p>다운로드 된 데이터 파싱은 다음과 같은 4단계로 진행됩니다:</p>
+<h2 id="1-서버-csv-동기화-및-증분-캐싱-아키텍처" class="chapter-title">1. 서버 CSV 동기화 및 증분 캐싱 아키텍처</h2>
+<p>월퍼킬은 기획 밸런스 수정 시 앱 바이너리를 재빌드하거나 스토어 심사를 거칠 필요 없이, <strong>Google 스프레드시트를 마스터 서버(Single Source of Truth)로 활용하여 클라이언트와 실시간 동기화</strong>합니다. 변경된 파일만 식별해 다운로드하는 <strong>증분 캐싱(Incremental Caching)</strong> 메커니즘을 통해 네트워크 트래픽과 로딩 시간을 최소화했습니다.</p>
+<h3 id="11-마스터-메타-시트-파이프라인-master-sheet-pipeline">1.1 마스터 메타 시트 파이프라인 (Master Sheet Pipeline)</h3>
+<p>시스템의 진입점인 <code>ServerCSV_ConvertData</code>는 마스터 구글 시트의 0번 인덱스(<code>gid=0</code>) 메타 시트를 우선 다운로드하여 전체 데이터 카탈로그를 파악합니다.</p>
+<ul><li><strong>메타 시트 4단 열 규격</strong>:</li><li><code>CSVDataType</code>: 대분류 카테고리 (<code>Define.CSVDataType</code> — <code>Quest</code>, <code>Region</code>, <code>Item</code>, <code>Game</code>, <code>Skill</code>, <code>Unit</code>)</li><li><code>Attribute</code>: 소분류 속성 키 (예: <code>Weapon</code>, <code>Armor</code>, <code>Monster</code>, <code>Active</code>, <code>Passive</code>, <code>Dialog</code> 등 18종)</li><li><code>Version</code>: 해당 테이블의 버전 식별자 (문자열 — 예: <code>&quot;1&quot;</code>, <code>&quot;4&quot;</code>, <code>&quot;7&quot;</code>)</li><li><code>Link</code>: 해당 시트의 구글 드라이브 CSV Export URL</li></ul>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// ServerCSV_ConvertData.cs: 메타 시트 다운로드 및 2차원 카탈로그 구축</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword hljs-control-flow">async</span> <span class="hljs-title class_">Task</span>&lt;<span class="hljs-built_in">bool</span>&gt; <span class="hljs-title">DownloadMetaSheetAsync</span>()</span>
+{
+    <span class="hljs-built_in">string</span> csvText = <span class="hljs-keyword hljs-control-flow">await</span> <span class="hljs-title function_">DownloadFileAsync</span>(MasterSheetURL);
+    <span class="hljs-keyword hljs-control-flow">if</span> (<span class="hljs-built_in">string</span>.<span class="hljs-title function_">IsNullOrEmpty</span>(csvText)) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">false</span>;
+
+    <span class="hljs-built_in">string</span>[] lines = csvText.<span class="hljs-title function_">Split</span>(<span class="hljs-keyword">new</span>[] { <span class="hljs-string">&#x27;\n&#x27;</span>, <span class="hljs-string">&#x27;\r&#x27;</span> }, StringSplitOptions.RemoveEmptyEntries);
+    csvURLDict.<span class="hljs-title function_">Clear</span>();
+    _serverVersions.<span class="hljs-title function_">Clear</span>();
+
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">1</span>; i &lt; lines.Length; i++)
+    {
+        <span class="hljs-built_in">string</span>[] columns = lines[i].<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;,&#x27;</span>);
+        <span class="hljs-keyword hljs-control-flow">if</span> (columns.Length &lt; <span class="hljs-number">4</span>) <span class="hljs-keyword hljs-control-flow">continue</span>;
+
+        <span class="hljs-built_in">string</span> csvDataTypeStr = columns[<span class="hljs-number">0</span>].<span class="hljs-title function_">Trim</span>();
+        <span class="hljs-built_in">string</span> attribute = columns[<span class="hljs-number">1</span>].<span class="hljs-title function_">Trim</span>();
+        <span class="hljs-built_in">string</span> version = columns[<span class="hljs-number">2</span>].<span class="hljs-title function_">Trim</span>();
+        <span class="hljs-built_in">string</span> link = columns[<span class="hljs-number">3</span>].<span class="hljs-title function_">Trim</span>();
+
+        <span class="hljs-keyword hljs-control-flow">if</span> (!Enum.<span class="hljs-title function_">TryParse</span>(csvDataTypeStr, <span class="hljs-keyword">out</span> CSVDataType csvDataType)) <span class="hljs-keyword hljs-control-flow">continue</span>;
+
+        <span class="hljs-comment">// 2차원 딕셔너리에 URL 및 최신 서버 버전 등록</span>
+        csvURLDict.<span class="hljs-title function_">GetOrAdd</span>(csvDataType)[attribute] = link;
+        _serverVersions.<span class="hljs-title function_">GetOrAdd</span>(csvDataType)[attribute] = version;
+    }
+    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
+}</code></pre>
+<h3 id="12-조건부-증분-다운로드conditional-incremental-download-플로우">1.2 조건부 증분 다운로드(Conditional Incremental Download) 플로우</h3>
+<p>모든 CSV를 매번 새로 내려받지 않고, 로컬 캐시 버전과 서버 버전을 대조하여 <strong>변경된 파일만 네트워크로 전송받는 증분 파이프라인</strong>입니다:</p>
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
-    <!-- START -->
     <div class="pf-fc-pill-start">
-      <span class="pf-fc-mono-tag">RAW_DATA</span>
-      <span>CSV Raw Text Input (원시 텍스트 스트림)</span>
+      <span class="pf-fc-mono-tag">INIT</span>
+      <span>DownloadAllCSVAsync() 시작 & LoadLocalVersions() 호출</span>
     </div>
-    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">1. 버전 대조 (Local vs Server Version Check)</h4>
+        <span class="pf-fc-badge">VER_COMPARE</span>
+      </div>
+      <p class="pf-fc-desc">로컬에 파일이 존재하고 `localVersion == serverVersion` 인지 검사</p>
+    </div>
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- Branch Grid -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%;">
+      <div class="pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
+        <div class="pf-fc-card-header">
+          <h4 class="pf-fc-title" style="color: #166534;">[버전 일치] 로컬 캐시 즉시 로드</h4>
+          <span class="pf-fc-badge" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0;">CACHE_HIT</span>
+        </div>
+        <p class="pf-fc-desc">`File.ReadAllText(localFilePath)` 호출. 네트워크 전송 0건, 즉시 로드 (로딩 0ms)</p>
+      </div>
+      <div class="pf-fc-compact" style="border-color: #93c5fd; background: #f8fbff;">
+        <div class="pf-fc-card-header">
+          <h4 class="pf-fc-title" style="color: #1e40af;">[버전 불일치/파일 없음] 서버 다운로드</h4>
+          <span class="pf-fc-badge">DOWNLOAD</span>
+        </div>
+        <p class="pf-fc-desc">`UnityWebRequest`로 비동기 다운로드 후 `File.WriteAllText`로 로컬 갱신 및 버전 업데이트</p>
+      </div>
+    </div>
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <div class="pf-fc-pill-end" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
+      <span class="pf-fc-mono-tag">COMPLETE</span>
+      <span>SaveLocalVersions() 호출로 data_versions.json 저장 및 로드 완료</span>
+    </div>
+  </div>
+</div>
+<details class="pf-details">
+<summary>코드 보기: ServerCSV_ConvertData 조건부 다운로드 및 로컬 캐싱 루틴</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// ServerCSV_ConvertData.cs: 조건부 다운로드 루틴</span>
+<span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> kvp <span class="hljs-keyword">in</span> csvURLDict)
+{
+    CSVDataType dataType = kvp.Key;
+    <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> attrKvp <span class="hljs-keyword">in</span> kvp.Value)
+    {
+        <span class="hljs-built_in">string</span> attribute = attrKvp.Key;
+        <span class="hljs-built_in">string</span> url = attrKvp.Value;
+
+        <span class="hljs-built_in">string</span> serverVersion = _serverVersions[dataType][attribute];
+        <span class="hljs-built_in">string</span> localVersion = _localVersions.<span class="hljs-title function_">TryGetValue</span>(dataType, <span class="hljs-keyword">out</span> <span class="hljs-keyword">var</span> lAttr) 
+            &amp;&amp; lAttr.<span class="hljs-title function_">TryGetValue</span>(attribute, <span class="hljs-keyword">out</span> <span class="hljs-keyword">var</span> lVer) ? lVer : <span class="hljs-string">&quot;0&quot;</span>;
+
+        <span class="hljs-built_in">string</span> fileName = <span class="hljs-string">$&quot;<span class="hljs-subst">{dataType}</span>_<span class="hljs-subst">{attribute}</span>.csv&quot;</span>;
+        <span class="hljs-built_in">string</span> localFilePath = Path.<span class="hljs-title function_">Combine</span>(LocalDataPath, fileName);
+        <span class="hljs-built_in">bool</span> needsDownload = <span class="hljs-literal">true</span>;
+
+        <span class="hljs-comment">// 로컬에 파일이 있고 버전이 동일하면 다운로드 생략 (캐시 적재)</span>
+        <span class="hljs-keyword hljs-control-flow">if</span> (File.<span class="hljs-title function_">Exists</span>(localFilePath) &amp;&amp; localVersion == serverVersion)
+        {
+            <span class="hljs-keyword hljs-control-flow">try</span> {
+                fileContent = File.<span class="hljs-title function_">ReadAllText</span>(localFilePath);
+                needsDownload = <span class="hljs-literal">false</span>;
+            } <span class="hljs-keyword hljs-control-flow">catch</span> {
+                needsDownload = <span class="hljs-literal">true</span>;
+            }
+        }
+
+        <span class="hljs-keyword hljs-control-flow">if</span> (needsDownload)
+        {
+            fileContent = <span class="hljs-keyword hljs-control-flow">await</span> <span class="hljs-title function_">DownloadFileAsync</span>(url);
+            File.<span class="hljs-title function_">WriteAllText</span>(localFilePath, fileContent);
+            <span class="hljs-keyword hljs-control-flow">if</span> (!_localVersions.<span class="hljs-title function_">ContainsKey</span>(dataType)) 
+                _localVersions[dataType] = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;();
+            _localVersions[dataType][attribute] = serverVersion;
+        }
+
+        currentCount++;
+        progressCallback?.<span class="hljs-title function_">Invoke</span>((<span class="hljs-built_in">float</span>)currentCount / totalCount);
+    }
+}
+<span class="hljs-title function_">SaveLocalVersions</span>();</code></pre>
+</details>
+<hr>
+<h2 id="2-실전-예시로-보는-리플렉션-csv-파싱-전개-과정" class="chapter-title">2. 실전 예시로 보는 리플렉션 CSV 파싱 전개 과정</h2>
+<p>월퍼킬의 파싱 엔진은 복잡한 내부 코드를 몰라도 <strong>"CSV 데이터 한 줄이 C# 객체로 어떻게 변환되어 인게임 딕셔너리에 도달하는가?"</strong>라는 데이터 흐름으로 직관적으로 이해할 수 있습니다. 18종의 테이블마다 수동 파서를 작성하지 않고, 제네릭과 리플렉션이 동작하는 실제 과정을 <code>Unit_Monster.csv</code>의 첫 번째 몬스터인 <strong>'덤불 골렘'</strong> 데이터를 예시로 전개합니다.</p>
+<h3 id="21-실제-몬스터-데이터-파싱-4단계-전개-execution-walkthrough">2.1 실제 몬스터 데이터 파싱 4단계 전개 (Execution Walkthrough)</h3>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+    <!-- Raw CSV Input Stage -->
+    <div class="pf-fc-pill-start">
+      <span class="pf-fc-mono-tag">INPUT DATA</span>
+      <span>Unit_Monster.csv 원시 데이터 (1행: 덤불 골렘)</span>
+    </div>
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 10px 0; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; overflow-x: auto; color: #0f172a; line-height: 1.6;">
+      <div style="color: #64748b; margin-bottom: 4px;">// CSV 1행: Header</div>
+      <div style="color: #2563eb; font-weight: 600;">Index, Name, Description, Target_Team, Target_Enemy, WarningDis, DropItem, SkillNum1, SkillNum2, MoveSpeed, AttackSkill, AD_Damage, ...</div>
+      <div style="color: #64748b; margin: 8px 0 4px 0;">// CSV 2행: Data Row (덤불 골렘)</div>
+      <div style="color: #0f172a;">0, 덤불 골렘, "갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다.", 0, 3, 0, 1501001, -1, -1, 0.75, 0, 10, ...</div>
+    </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 01 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">1단계: 타입 메타데이터 수집 (Type Info)</h4>
+        <h4 class="pf-fc-title">STEP 1. DTO 필드 분석 및 1:1 매핑 테이블 자동 구축 (SetupFieldDict)</h4>
         <span class="pf-fc-badge">REFLECTION</span>
       </div>
-      <p class="pf-fc-desc">제네릭 타입 `T`의 모든 필드 정보(`FieldInfo[]`)를 리플렉션으로 추출 및 캐싱</p>
+      <p class="pf-fc-desc">
+        <code>typeof(Data_Monster).GetFields()</code>로 수집된 C# 필드 선언 순서와 CSV 헤더 열 순서를 1:1 결합하여 인덱싱 사전을 구축합니다.
+      </p>
+      <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-family: 'Fira Code', monospace; font-size: 0.8rem;">
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span style="color: #2563eb;">[0] Index</span> ➔ <strong>m_monsterIndex</strong>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span style="color: #2563eb;">[1] Name</span> ➔ <strong>m_monsterName</strong>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span style="color: #2563eb;">[2] Description</span> ➔ <strong>m_description</strong>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span style="color: #2563eb;">[6] DropItem</span> ➔ <strong>m_dropItem</strong>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span style="color: #2563eb;">[9] MoveSpeed</span> ➔ <strong>m_addMoveSpeed (float)</strong>
+        </div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span style="color: #2563eb;">[11] AD_Damage</span> ➔ <strong>m_ad_Damage</strong>
+        </div>
+      </div>
     </div>
-    <!-- Arrow -->
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 02 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">2단계: 헤더 추출 및 딕셔너리 매핑 (Header Map)</h4>
-        <span class="pf-fc-badge">INDEXING</span>
+        <h4 class="pf-fc-title">STEP 2. 정규식 스마트 분할로 안전한 행 데이터 분리 (SmartSplit)</h4>
+        <span class="pf-fc-badge">SMART_SPLIT</span>
       </div>
-      <p class="pf-fc-desc">CSV 1행 헤더명을 분리하여 클래스 필드명과 1:1 대응되는 열 인덱스 사전 구축</p>
+      <p class="pf-fc-desc">
+<p>설명 컬럼 내부에 쉼표(<code>"갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의..."</code>)가 포함되어 있어도 열 인덱스가 밀리지 않도록 정규식(<code>(?:^|,)(?:&quot;(?&lt;val&gt;[^&quot;]&#42;)&quot;|(?&lt;val&gt;[^,&quot;]&#42;))</code>)을 적용하여 정확히 27개의 원시 문자열 요소로 안전하게 분리합니다.</p>
+      </p>
     </div>
-    <!-- Arrow -->
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 03 -->
-    <div class="pf-fc-card pf-fc-compact">
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #93c5fd; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">3단계: 정규식 스마트 분할 및 인스턴스화 (SmartSplit)</h4>
-        <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">PARSER</span>
+        <h4 class="pf-fc-title" style="color: #1e40af;">STEP 3. DTO 인스턴스 자동 생성 및 필드 타입 주입 (Binding)</h4>
+        <span class="pf-fc-badge">INJECTION</span>
       </div>
-      <p class="pf-fc-desc">따옴표 및 쉼표 예외 정규식 파싱 후 `Activator.CreateInstance&lt;T&gt;()`로 DTO 객체 생성</p>
+      <p class="pf-fc-desc">
+        <code>Activator.CreateInstance&lt;Data_Monster&gt;()</code>로 빈 객체를 생성한 뒤, 각 필드의 타입(<code>int</code>, <code>string</code>, <code>float</code>)에 맞춰 <code>SetFieldValue</code>가 자동 파싱하여 값을 직접 주입합니다.
+      </p>
+      <div style="margin-top: 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; color: #0f172a; line-height: 1.6;">
+        <div>monster.m_monsterIndex = <strong>0</strong> <span style="color: #64748b;">(int.TryParse)</span></div>
+        <div>monster.m_monsterName = <strong>"덤불 골렘"</strong> <span style="color: #64748b;">(string)</span></div>
+        <div>monster.m_description = <strong>"갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다."</strong> <span style="color: #64748b;">(string)</span></div>
+        <div>monster.m_dropItem = <strong>1501001</strong>, monster.m_target_Enemy = <strong>3</strong> <span style="color: #64748b;">(int)</span></div>
+        <div>monster.m_addMoveSpeed = <strong>0.75f</strong> <span style="color: #64748b;">(float.TryParse)</span></div>
+        <div>monster.m_ad_Damage = <strong>10</strong>, monster.m_ground_Damage = <strong>10</strong> <span style="color: #64748b;">(int)</span></div>
+      </div>
     </div>
-    <!-- Arrow -->
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
     <!-- STEP 04 -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">4단계: 동적 타입 변환 및 필드 바인딩 (Binding)</h4>
-        <span class="pf-fc-badge">BIND</span>
-      </div>
-      <p class="pf-fc-desc">`Convert.ChangeType`으로 string 데이터를 실제 필드 타입(int, float 등)으로 자동 변환 후 값 할당</p>
-    </div>
-    <!-- END -->
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-    <div class="pf-fc-pill-end">
-      <span class="pf-fc-mono-tag">COMPLETE</span>
-      <span>타입 안전한 DTO 데이터 컬렉션 생성 완료</span>
-    </div>
-  </div>
-</div>
-<h3 id="13-핵심-파싱-로직-및-smartsplit">1.3 핵심 파싱 로직 및 SmartSplit</h3>
-<p>제네릭 메서드를 사용하여 타입에 독립적인 파싱을 수행합니다. 특히, CSV 내부의 쉼표(,)를 포함하는 문자열("이름, 설명")을 안전하게 처리하기 위해 정규식을 활용한 <code>SmartSplit</code> 함수를 구현했습니다.</p>
-<p><strong>CSV 파싱 핵심 로직 및 SmartSplit</strong> 정규식을 활용하여 따옴표 내부의 쉼표를 안전하게 처리하고, 리플렉션을 통해 동적으로 객체에 값을 할당합니다.</p>
-<details class="pf-details">
-<summary>코드 보기: CSV 파싱 핵심 로직 및 SmartSplit</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">CSVParser</span>.cs: 정규식을 이용한 안전한 CSV 행 분할</span>
-<span class="hljs-function"><span class="hljs-built_in">string</span>[] <span class="hljs-title">SmartSplit</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> line</span>)</span>
-{
-    <span class="hljs-keyword hljs-control-flow">return</span> Regex.<span class="hljs-title function_">Matches</span>(line, <span class="hljs-string">@&quot;(?:^|,)(?:&quot;&quot;(?&lt;val&gt;[^&quot;&quot;]*)&quot;&quot;|(?&lt;val&gt;[^,&quot;&quot;]*))&quot;</span>)
-                .Cast&lt;Match&gt;()
-                .<span class="hljs-title function_">Select</span>(m =&gt; m.Groups[<span class="hljs-string">&quot;val&quot;</span>].Value)
-                .<span class="hljs-title function_">ToArray</span>();
-}
-
-<span class="hljs-comment">// 리플렉션 기반 CSV 파싱 핵심 메서드</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title"><span class="hljs-title class_">List</span></span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-title">parseCSV</span>&lt;<span class="hljs-title">T</span>&gt;(<span class="hljs-params"><span class="hljs-built_in">string</span> csvData, <span class="hljs-built_in">bool</span> isCutColumn, <span class="hljs-built_in">int</span> start, <span class="hljs-built_in">int</span> end</span>) <span class="hljs-keyword">where</span> T : BaseData, <span class="hljs-keyword">new</span>()</span>
-{
-    <span class="hljs-comment">// 1. 제네릭 타입 T의 구조 분석</span>
-    Type myType = <span class="hljs-keyword">typeof</span>(T);
-    FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</span>(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
-
-    <span class="hljs-built_in">string</span>[] csvIndexData = csvData.<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;\n&#x27;</span>).<span class="hljs-title function_">Where</span>(x =&gt; !<span class="hljs-built_in">string</span>.<span class="hljs-title function_">IsNullOrWhiteSpace</span>(x)).<span class="hljs-title function_">ToArray</span>();
-    <span class="hljs-keyword hljs-control-flow">if</span> (csvIndexData.Length == <span class="hljs-number">0</span>) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
-
-    <span class="hljs-comment">// 2. 헤더 매핑 딕셔너리 세팅</span>
-    <span class="hljs-built_in">string</span>[] attributeColumnArray = csvIndexData[<span class="hljs-number">0</span>].<span class="hljs-title function_">Trim</span>().<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;,&#x27;</span>);
-    <span class="hljs-title function_">SetupFieldDict</span>(attributeColumnArray, myFieldInfo);
-
-    <span class="hljs-title class_">List</span>&lt;T&gt; csvDataList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;T&gt;();
-    <span class="hljs-comment">// 3. 데이터 행 순회 및 파싱</span>
-    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> rowIndex = <span class="hljs-number">1</span>; rowIndex &lt; csvIndexData.Length; rowIndex++)
-    {
-        <span class="hljs-built_in">string</span>[] column = <span class="hljs-title function_">SmartSplit</span>(csvIndexData[rowIndex].<span class="hljs-title function_">Trim</span>());
-        <span class="hljs-keyword hljs-control-flow">if</span> (column.Length == <span class="hljs-number">0</span> || <span class="hljs-built_in">string</span>.<span class="hljs-title function_">IsNullOrWhiteSpace</span>(column[<span class="hljs-number">0</span>])) <span class="hljs-keyword hljs-control-flow">continue</span>;
-
-        T objectData = Activator.CreateInstance&lt;T&gt;();
-        
-        <span class="hljs-comment">// 4. 타입 변환 및 할당</span>
-        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; column.Length; i++)
-        {
-            <span class="hljs-keyword hljs-control-flow">if</span> (DataIndex_Dict.<span class="hljs-title function_">TryGetValue</span>(i, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> attribute) &amp;&amp; Data_Dict.<span class="hljs-title function_">TryGetValue</span>(attribute, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> fieldName))
-            {
-                FieldInfo fieldInfo = myType.<span class="hljs-title function_">GetField</span>(fieldName);
-                <span class="hljs-keyword hljs-control-flow">if</span> (fieldInfo != <span class="hljs-literal">null</span>)
-                {
-                    <span class="hljs-title function_">SetFieldValue</span>(objectData, fieldInfo, column[i]); <span class="hljs-comment">// ChangeType 수행</span>
-                }
-            }
-        }
-        csvDataList.<span class="hljs-title function_">Add</span>(objectData);
-    }
-    <span class="hljs-keyword hljs-control-flow">return</span> csvDataList;
-}</code></pre>
-</details>
-<hr>
-<h2 id="2-비동기-로딩-및-ui-블로킹-방지" class="chapter-title">2. 비동기 로딩 및 UI 블로킹 방지</h2>
-<p>방대한 CSV 데이터와 복잡한 맵 데이터를 메인 스레드에서 동기적으로 처리하면 화면 멈춤(Freezing) 현상이 발생합니다. 이를 방지하기 위해 <code>async/await</code> 기반의 <strong>비동기 로딩 및 맵 초기화 시스템</strong>을 구축했습니다.</p>
-<h3 id="21-가중치-기반-로딩-시스템-loadingmanager">2.1 가중치 기반 로딩 시스템 (LoadingManager)</h3>
-<p>데이터 다운로드, 파싱, 그리고 맵 생성의 진행 과정을 각 파트의 비중에 따라 가중치(Weight)를 두어 세밀하게 계산합니다. <code>Task.Yield()</code>를 활용하여 연산 도중 주기적으로 메인 렌더링 루프에 제어권을 양보함으로써 로딩 UI 애니메이션이 부드럽게 유지되도록 최적화했습니다.</p>
-<p><strong>비동기 데이터 로딩 흐름</strong> 서버 데이터 다운로드부터 파싱 적재까지 하나의 비동기 파이프라인으로 관리합니다.</p>
-<details class="pf-details">
-<summary>코드 보기: 비동기 데이터 로딩 흐름</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">LoadingManager</span>.cs: 비동기 데이터 로딩 흐름</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword hljs-control-flow">async</span> <span class="hljs-title class_">Task</span>&lt;<span class="hljs-built_in">bool</span>&gt; <span class="hljs-title">StartLoadingDataAsync</span>(<span class="hljs-params"><span class="hljs-title class_">CancellationToken</span> cancellationToken = <span class="hljs-literal">default</span></span>)</span>
-{
-    <span class="hljs-title function_">UpdateProgress</span>(<span class="hljs-number">0.01f</span>, <span class="hljs-string">&quot;서버 목록 확인 중...&quot;</span>);
-
-    <span class="hljs-comment">// 1. 메타 시트 비동기 다운로드</span>
-    <span class="hljs-built_in">bool</span> metaSuccess = <span class="hljs-keyword hljs-control-flow">await</span> ServerCSV_ConvertData.<span class="hljs-title function_">DownloadMetaSheetAsync</span>();
-    
-    <span class="hljs-comment">// 2. 조건부 CSV 다운로드 (진행률 가중치 적용 5% ~ 80%)</span>
-    <span class="hljs-built_in">bool</span> csvSuccess = <span class="hljs-keyword hljs-control-flow">await</span> ServerCSV_ConvertData.<span class="hljs-title function_">DownloadAllCSVAsync</span>((progress, fileName) =&gt;
-    {
-        <span class="hljs-title function_">UpdateProgress</span>(<span class="hljs-number">0.05f</span> + (progress * <span class="hljs-number">0.75f</span>), <span class="hljs-string">$&quot;데이터 수신 중: <span class="hljs-subst">{fileName}</span>&quot;</span>);
-    });
-
-    <span class="hljs-comment">// 3. 서버 데이터 로드 (<span class="hljs-title class_">DataManager</span> 비동기 파싱)</span>
-    <span class="hljs-title function_">UpdateProgress</span>(<span class="hljs-number">0.80f</span>, <span class="hljs-string">&quot;데이터 로드 중...&quot;</span>);
-    <span class="hljs-keyword hljs-control-flow">await</span> <span class="hljs-title class_">Managers</span>.Data.<span class="hljs-title function_">ServerDataLoadAsync</span>();
-
-    <span class="hljs-title function_">UpdateProgress</span>(<span class="hljs-number">1.0f</span>, <span class="hljs-string">&quot;데이터 로딩 완료!&quot;</span>);
-    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
-}</code></pre>
-</details>
-<hr>
-<h2 id="3-퀘스트-수락-진행-및-동적-보상-시스템" class="chapter-title">3. 퀘스트 수락, 진행 및 동적 보상 시스템</h2>
-<p>구글 시트에서 파싱된 퀘스트 데이터 형식을 바탕으로, <code>QuestManager</code>가 상황에 맞는 퀘스트 객체를 팩토리 패턴(Handler)으로 생성합니다. 퀘스트 진행 상황은 이벤트 버스 시스템에 의해 완벽히 디커플링되어 처리됩니다.</p>
-<h3 id="31-이벤트-구동형-퀘스트-진행-event-driven">3.1 이벤트 구동형 퀘스트 진행 (Event-Driven)</h3>
-<p>몬스터가 처치될 때마다 발생하는 <code>OnMonsterKilled</code> 이벤트를 <code>QuestManager</code>가 구독합니다. 활성화된 퀘스트(ActiveQuestList)의 타겟 정보와 일치할 경우 진행도를 올리며, 목표 수치에 도달하면 퀘스트 완료 이벤트를 다시 발행합니다.</p>
-<h3 id="32-시드seed-기반-동적-보상">3.2 시드(Seed) 기반 동적 보상</h3>
-<p>퀘스트 레벨과 <code>Data_Resource</code> 베이스 값을 기준으로, 퀘스트 수락 시점의 난이도와 <code>GameSeed</code> 가중치를 곱하여 게임할 때마다 조금씩 달라지는 동적 보상(Gold, Exp)을 산출합니다.</p>
-<p><strong>퀘스트 이벤트 및 보상 계산 로직</strong> 몬스터 처치 이벤트 구독과 시드 기반 보상 변동 로직입니다.</p>
-<details class="pf-details">
-<summary>코드 보기: 퀘스트 이벤트 및 보상 계산 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">QuestManager</span>.cs: 몬스터 처치 이벤트 핸들링 및 진행도 체크</span>
-<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">HandleMonsterKilled</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> monsterId</span>)</span>
-{
-    <span class="hljs-keyword">var</span> key = (<span class="hljs-keyword">typeof</span>(Unit_Monster), monsterId);
-    <span class="hljs-title class_">List</span>&lt;<span class="hljs-built_in">int</span>&gt; completedQuestIndices = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-built_in">int</span>&gt;();
-
-    <span class="hljs-keyword hljs-control-flow">foreach</span> (Quest quest <span class="hljs-keyword">in</span> ActiveQuestList)
-    {
-        <span class="hljs-keyword hljs-control-flow">if</span> (<span class="hljs-title function_">IsTargetQuest</span>(quest, key))
-        {
-            <span class="hljs-comment">// 진행도 증가 및 UI 업데이트 이벤트 발행</span>
-            <span class="hljs-title function_">UpdateQuestProgress</span>(quest);
-
-            <span class="hljs-keyword hljs-control-flow">if</span> (quest.<span class="hljs-title function_">IsQuestCompleted</span>())
-                completedQuestIndices.<span class="hljs-title function_">Add</span>(<span class="hljs-title function_">CompleteQuest</span>(quest));
-        }
-    }
-
-    <span class="hljs-keyword hljs-control-flow">if</span> (completedQuestIndices.Count &gt; <span class="hljs-number">0</span>)
-    {
-        <span class="hljs-title class_">Managers</span>.Event.<span class="hljs-title function_">QuestCompleted</span>(completedQuestIndices);
-    }
-}
-
-<span class="hljs-comment">// Quest.cs: 시드 기반 동적 보상 산출 (생성자 단계)</span>
-<span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>의 Reward 도메인을 사용하여 동일한 시드일 때 동일한 퀘스트 보상을 보장</span>
-<span class="hljs-built_in">float</span> RewardRatio = (<span class="hljs-built_in">float</span>)<span class="hljs-title class_">GameSeed</span>.<span class="hljs-title function_">NextInt</span>(<span class="hljs-title class_">GameSeed</span>.Domain.Reward, <span class="hljs-number">0</span>, <span class="hljs-number">11</span>) / <span class="hljs-number">10f</span>;
-
-m_rewardGold = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">RoundToInt</span>(<span class="hljs-title class_">Managers</span>.Data.ResourceData[m_questLevel].questGold * ((<span class="hljs-built_in">float</span>)ctx.difficultyTag * RewardRatio));
-m_rewardExp = <span class="hljs-title class_">Mathf</span>.<span class="hljs-title function_">RoundToInt</span>(<span class="hljs-title class_">Managers</span>.Data.ResourceData[m_questLevel].questExp * ((<span class="hljs-built_in">float</span>)ctx.difficultyTag * (<span class="hljs-number">1f</span> - RewardRatio)));</code></pre>
-</details>
-<hr>
-<h2 id="4-계층적-맵-생성-및-이동-아키텍처" class="chapter-title">4. 계층적 맵 생성 및 이동 아키텍처</h2>
-<p>게임의 월드는 거대한 1개의 세계(Map) 안에 여러 지역(Region)이 있고, 지역 안에 수많은 전투 전장(Field)이 존재하는 <strong>Map -> Region -> Field</strong>의 계층적 구조를 가집니다.</p>
-<h3 id="41-비동기-맵-초기화-및-구성">4.1 비동기 맵 초기화 및 구성</h3>
-<p>대규모 맵 객체를 한 번에 생성하면 부하가 크기 때문에, <code>MapManager</code>의 <code>NewGame_InitMap</code> 메서드가 <code>async/await</code> 흐름을 타고 Map과 Region 내부의 퀘스트/필드를 순차적으로 생성합니다. 생성에 관여하는 모든 무작위 확률은 <code>GameSeed.Domain.Map</code>, <code>GameSeed.Domain.Region</code> 등 분리된 난수 스트림에 의해 결정론적(Deterministic)으로 구성됩니다.</p>
-<h3 id="42-이벤트-기반-맵-이동-시스템">4.2 이벤트 기반 맵 이동 시스템</h3>
-<p>유저가 UI를 통해 특정 Field를 선택하면, <code>Managers.Event.OnEnterFieldEvent</code>가 발생합니다. <code>MapManager</code>는 이를 수신하여 현재 전투 환경(Battle Manager 상태)을 업데이트하고 <code>BGRender</code> 컴포넌트를 이용해 배경 이미지를 교체하며 페이드인 효과를 발생시킵니다.</p>
-<p><strong>비동기 맵 계층 초기화 로직</strong> Map 객체 하위에 Region을 묶고, Region 내부에 퀘스트와 Field를 생성하여 인덱스로 연결합니다.</p>
-<details class="pf-details">
-<summary>코드 보기: 비동기 맵 초기화 및 계층 구조 생성 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">MapManager</span>.cs: 비동기 맵 초기화 진입점</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword hljs-control-flow">async</span> <span class="hljs-title class_">Task</span>&lt;<span class="hljs-built_in">bool</span>&gt; <span class="hljs-title">NewGame_InitMap</span>(<span class="hljs-params"><span class="hljs-title class_">Func</span>&lt;<span class="hljs-built_in">float</span>, <span class="hljs-built_in">string</span>, <span class="hljs-title class_">Task</span>&gt; onProgress</span>)</span>
-{
-    <span class="hljs-comment">// 1. 최상위 월드 맵 생성 (레벨/개수 지정)</span>
-    Map map1 = DataFactory.<span class="hljs-title function_">MakeMap</span>(<span class="hljs-number">1</span>, <span class="hljs-number">3</span>, m_mapParentObj.transform);
-    Map map10 = DataFactory.<span class="hljs-title function_">MakeMap</span>(<span class="hljs-number">10</span>, <span class="hljs-number">3</span>, m_mapParentObj.transform);
-    Map map20 = DataFactory.<span class="hljs-title function_">MakeMap</span>(<span class="hljs-number">20</span>, <span class="hljs-number">3</span>, m_mapParentObj.transform);
-
-    <span class="hljs-comment">// 2. 월드맵 하위에 할당된 모든 지역(Region)들에 대한 내부 필드/퀘스트 비동기 생성 </span>
-    <span class="hljs-keyword hljs-control-flow">if</span> (WorldRegionList != <span class="hljs-literal">null</span> &amp;&amp; WorldRegionList.Count != <span class="hljs-number">0</span>)
-    {
-        <span class="hljs-keyword hljs-control-flow">foreach</span> (Region region <span class="hljs-keyword">in</span> WorldRegionList)
-        {
-            <span class="hljs-comment">// Region.GenerateRegion 안에서 Field 객체들이 생성되며 진행도 보고를 전달</span>
-            <span class="hljs-keyword hljs-control-flow">await</span> region.<span class="hljs-title function_">GenerateRegion</span>(onProgress);
-        }
-    }
-
-    IsLoadedData = <span class="hljs-literal">true</span>;
-    <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
-}
-
-<span class="hljs-comment">// Region.cs: 지역 내 필드 및 퀘스트 생성</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword hljs-control-flow">async</span> <span class="hljs-title class_">Task</span> <span class="hljs-title">GenerateRegion</span>(<span class="hljs-params"><span class="hljs-title class_">Func</span>&lt;<span class="hljs-built_in">float</span>, <span class="hljs-built_in">string</span>, <span class="hljs-title class_">Task</span>&gt; onProgress</span>)</span>
-{
-    <span class="hljs-built_in">int</span> questCount = <span class="hljs-title class_">GameSeed</span>.<span class="hljs-title function_">NextInt</span>(<span class="hljs-title class_">GameSeed</span>.Domain.Region, <span class="hljs-number">4</span>, <span class="hljs-number">7</span>);
-    MonsterType monsterType = <span class="hljs-title class_">GameSeed</span>.RandomEnum&lt;MonsterType&gt;(<span class="hljs-title class_">GameSeed</span>.Domain.Region);
-    monsterSet = <span class="hljs-keyword">new</span> <span class="hljs-title function_">MonsterSet</span>(monsterType);
-    
-    <span class="hljs-comment">// ... 생략 ...</span>
-
-    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; questCount; i++)
-    {
-        Quest mainQuest = <span class="hljs-title class_">Managers</span>.Quest.<span class="hljs-title function_">GenerateQuest</span>(monsterSet, <span class="hljs-keyword">ref</span> currentQuestLevel, questDataList, questDialogList);
-        <span class="hljs-built_in">int</span> questIndex = <span class="hljs-title class_">Managers</span>.Quest.MainQuestList.<span class="hljs-title function_">IndexOf</span>(mainQuest);
-
-        <span class="hljs-comment">// Field 객체를 생성하고, 방금 생성된 메인 퀘스트의 인덱스를 넘겨 결합시킴</span>
-        Field field = DataFactory.<span class="hljs-title function_">MakeField</span>(<span class="hljs-keyword">this</span>, questIndex, transform);
-        
-        <span class="hljs-comment">// ... (인덱스 저장 관리 생략)</span>
-        <span class="hljs-keyword hljs-control-flow">if</span> (onProgress != <span class="hljs-literal">null</span>)
-            <span class="hljs-keyword hljs-control-flow">await</span> <span class="hljs-title function_">onProgress</span>((<span class="hljs-built_in">float</span>)(i + <span class="hljs-number">1</span>) / questCount, <span class="hljs-string">$&quot;지역 생성 중...&quot;</span>);
-    }
-}</code></pre>
-</details>
-<hr>
-<h2 id="5-seed-token-시스템-rng-완전-복원" class="chapter-title">5. Seed / Token 시스템 (RNG 완전 복원)</h2>
-<p>게임을 세이브하고 로드했을 때, 단순히 맵과 캐릭터의 상태만을 저장하는 것을 넘어 생성 규칙(시드) 자체를 완벽히 롤백해야 합니다. 초기 시드값만 저장할 경우 게임 도중 이미 소모된 난수 횟수로 인해 세이브 로드 시점에 다음 생성되는 아이템이나 맵이 달라지는 문제가 발생합니다. 이를 극복하기 위한 <strong>Seed/Token 복원 시스템</strong>입니다.</p>
-<h3 id="51-도메인-격리-구조-domain-isolation">5.1 도메인 격리 구조 (Domain Isolation)</h3>
-<p><code>System.Random</code> 객체를 하나만 사용하면, 퀘스트 생성 시 난수를 소모한 횟수에 따라 맵 생성 결과가 뒤틀리게 됩니다. 이를 방지하기 위해 <code>GameSeed</code>는 <code>Domain</code>(Map, Quest, Field, Reward 등)을 분리하여 각각 독립된 Random 객체 스트림을 보유합니다.</p>
-<h3 id="52-고정-폭-인코딩-기반-토큰-다이어그램">5.2 고정 폭 인코딩 기반 토큰 다이어그램</h3>
-<p>모든 도메인의 난수 사용 횟수(Usage Count)를 하나의 암호화된 토큰(Token)으로 병합합니다. 파싱 시 데이터가 꼬이지 않도록 <strong>고정 폭(Fixed-Width) 인코딩</strong>을 사용했습니다.</p>
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
-    <!-- Token Structure Title -->
-    <div class="pf-fc-pill-start" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
-      <span class="pf-fc-mono-tag">TOKEN_SPEC</span>
-      <span>Seed Token 고정 폭(Fixed-Width) 인코딩 구조</span>
-    </div>
-    <!-- Arrow -->
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-    <!-- Header Fields Grid -->
-    <div class="pf-fc-branch-grid" style="grid-template-columns: 2fr 1fr; width: 100%;">
-      <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #93c5fd; background: #f8fbff;">
-        <span class="pf-fc-badge">HEADER 01</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">BaseSeed (루트 시드)</div>
-        <div class="pf-fc-branch-desc"><strong>20자리 고정</strong> (ulong 최대 자릿수 0-패딩)</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact" style="border-color: #93c5fd; background: #f8fbff;">
-        <span class="pf-fc-badge">HEADER 02</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">Domain 개수</div>
-        <div class="pf-fc-branch-desc"><strong>3자리 고정</strong> (예: `008`)</div>
-      </div>
-    </div>
-    <!-- Arrow -->
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-    <!-- Domain Payload Card -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #15803d;">Domain 레코드 블록 (도메인 개수만큼 반복 병합)</h4>
-        <span class="pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">PAYLOAD</span>
+        <h4 class="pf-fc-title" style="color: #15803d;">STEP 4. DataManager 인게임 캐싱 (ServerDataLoad)</h4>
+        <span class="pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">CACHED O(1)</span>
       </div>
-      <div class="pf-fc-branch-grid" style="grid-template-columns: 1fr 2fr; margin-top: 10px;">
-        <div class="pf-fc-branch-item pf-fc-item-compact" style="background: #fff;">
-          <strong style="color: #16a34a;">Domain ID</strong>
-          <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #64748b;">3자리 고정 패딩 (도메인 식별자)</p>
-        </div>
-        <div class="pf-fc-branch-item pf-fc-item-compact" style="background: #fff;">
-          <strong style="color: #16a34a;">Usage Count</strong>
-          <p style="margin: 4px 0 0 0; font-size: 0.8rem; color: #64748b;">12자리 고정 패딩 (RNG 난수 소비 횟수)</p>
-        </div>
-      </div>
+      <p class="pf-fc-desc">
+<p>완성된 인스턴스를 몬스터 고유 키(<code>m_monsterIndex = 0</code>)와 함께 <code>Managers.Data.MonsterData[0]</code> 딕셔너리에 등록하여, 필드 스폰 및 전투 시스템에서 O(1)의 속도로 즉시 참조할 수 있도록 준비를 마칩니다.</p>
+      </p>
+    </div>
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <div class="pf-fc-pill-end" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
+      <span class="pf-fc-mono-tag">READY</span>
+      <span>인게임 시스템(필드 몬스터 스폰, 실시간 전투, 피격 및 드롭 아이템 연산)에서 즉시 사용</span>
     </div>
   </div>
 </div>
-<h3 id="53-토큰-빌드-및-상태-복원-흐름">5.3 토큰 빌드 및 상태 복원 흐름</h3>
-<p>저장 시 위 규칙대로 텍스트 토큰을 빌드하여 저장하고, 로드할 때는 이 문자열을 길이 단위로 잘라낸 뒤 각 도메인의 Random 객체를 생성하고 사용 횟수만큼 <code>Next()</code>를 더미 호출(Skip) 시켜 게임의 미래 확률 상태를 정확히 세이브 시점과 동일하게 동기화합니다.</p>
-<p><strong>토큰 인코딩 및 RNG 상태 강제 복구 로직</strong> 고정 폭 문자열을 결합하여 저장하고, 로드시 추출하여 각 도메인의 스트림을 동기화합니다.</p>
+<h4 id="컬럼-슬라이스-기능-iscutcolumn-true">컬럼 슬라이스 기능 (<code>isCutColumn = true</code>)</h4>
+<p><code>Region_Resource.csv</code>와 같이 수십 개의 컬럼 중 특정 레벨/지역에 해당하는 열만 필요한 경우, 전체를 다 읽지 않고 <code>_startIndex</code>와 <code>_endIndex</code> 지정 범위(예: 0~5번 컬럼)만 슬라이스하여 DTO를 구성하는 오버로드를 탑재하여 불필요한 메모리 할당을 방지합니다.</p>
 <details class="pf-details">
-<summary>코드 보기: 토큰 인코딩 및 RNG 상태 복구 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">SaveLoadManager</span>.cs: 시드와 도메인 사용량을 하나의 고정 폭 토큰으로 결합</span>
-<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">string</span> <span class="hljs-title">BuildSeedToken</span>(<span class="hljs-params"><span class="hljs-built_in">long</span> baseSeed, <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain, <span class="hljs-built_in">ulong</span>&gt; usage</span>)</span>
+<summary>코드 보기: CSVParser 리플렉션 파싱 엔진 C# 소스 코드</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">CSVParser</span>.cs: 리플렉션 기반 제네릭 파싱 엔진 전문</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">CSVParser</span></span>
 {
-    <span class="hljs-built_in">ulong</span> encodedSeed = <span class="hljs-keyword">unchecked</span>((<span class="hljs-built_in">ulong</span>)baseSeed);
-    <span class="hljs-built_in">string</span> token = <span class="hljs-title function_">Pad</span>(encodedSeed, <span class="hljs-number">20</span>); <span class="hljs-comment">// 20자리 패딩</span>
+    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt; Data_Dict = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;();
+    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">int</span>, <span class="hljs-built_in">string</span>&gt; DataIndex_Dict = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">int</span>, <span class="hljs-built_in">string</span>&gt;();
 
-    <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain&gt; domains = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain&gt;((<span class="hljs-title class_">GameSeed</span>.Domain[])Enum.<span class="hljs-title function_">GetValues</span>(<span class="hljs-keyword">typeof</span>(<span class="hljs-title class_">GameSeed</span>.Domain)));
-    domains.<span class="hljs-title function_">Sort</span>((a, b) =&gt; ((<span class="hljs-built_in">uint</span>)a).<span class="hljs-title function_">CompareTo</span>((<span class="hljs-built_in">uint</span>)b));
-
-    token += <span class="hljs-title function_">Pad</span>((<span class="hljs-built_in">uint</span>)domains.Count, <span class="hljs-number">3</span>);
-    <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> d <span class="hljs-keyword">in</span> domains)
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title"><span class="hljs-title class_">List</span></span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-title">parseCSV</span>&lt;<span class="hljs-title">T</span>&gt;(<span class="hljs-params"><span class="hljs-built_in">string</span> csvData, <span class="hljs-built_in">bool</span> isCutColumn, <span class="hljs-built_in">int</span> start, <span class="hljs-built_in">int</span> end</span>) <span class="hljs-keyword">where</span> T : BaseData, <span class="hljs-keyword">new</span>()</span>
     {
-        <span class="hljs-built_in">ulong</span> count = usage != <span class="hljs-literal">null</span> ? usage.<span class="hljs-title function_">GetValueOrDefault</span>(d, <span class="hljs-number">0U</span>L) : <span class="hljs-number">0U</span>L;
-        token += <span class="hljs-title function_">Pad</span>((<span class="hljs-built_in">uint</span>)d, <span class="hljs-number">3</span>);    <span class="hljs-comment">// 도메인 <span class="hljs-title class_">ID</span> 3자리</span>
-        token += <span class="hljs-title function_">Pad</span>(count, <span class="hljs-number">12</span>);     <span class="hljs-comment">// 사용량 12자리</span>
-    }
-    <span class="hljs-keyword hljs-control-flow">return</span> token;
-}
+        <span class="hljs-keyword hljs-control-flow">if</span> (isCutColumn) <span class="hljs-keyword hljs-control-flow">return</span> parseCSV&lt;T&gt;(csvData, start, end);
 
-<span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>.cs: 토큰에서 추출된 정보로 RNG 엔진을 과거 상태로 복원</span>
-<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RestoreRNG</span>(<span class="hljs-params"><span class="hljs-built_in">long</span> baseSeed, <span class="hljs-title class_">Dictionary</span>&lt;Domain, <span class="hljs-built_in">ulong</span>&gt; usageCounts</span>)</span>
+        <span class="hljs-title class_">List</span>&lt;T&gt; csvDataList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;T&gt;();
+        Type myType = <span class="hljs-keyword">typeof</span>(T);
+        FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</span>(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
+
+        <span class="hljs-built_in">string</span>[] csvIndexData = csvData.<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;\n&#x27;</span>).<span class="hljs-title function_">Where</span>(x =&gt; !<span class="hljs-built_in">string</span>.<span class="hljs-title function_">IsNullOrWhiteSpace</span>(x)).<span class="hljs-title function_">ToArray</span>();
+        <span class="hljs-keyword hljs-control-flow">if</span> (csvData.Length == <span class="hljs-number">0</span>) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
+
+        <span class="hljs-built_in">string</span>[] attributeColumnArray = csvIndexData[<span class="hljs-number">0</span>].<span class="hljs-title function_">Trim</span>().<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;,&#x27;</span>);
+        <span class="hljs-title function_">SetupFieldDict</span>(attributeColumnArray, myFieldInfo);
+
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> rowIndex = <span class="hljs-number">1</span>; rowIndex &lt; csvIndexData.Length; rowIndex++)
+        {
+            <span class="hljs-built_in">string</span>[] column = <span class="hljs-title function_">SmartSplit</span>(csvIndexData[rowIndex].<span class="hljs-title function_">Trim</span>());
+            <span class="hljs-keyword hljs-control-flow">if</span> (column.Length == <span class="hljs-number">0</span> || <span class="hljs-built_in">string</span>.<span class="hljs-title function_">IsNullOrWhiteSpace</span>(column[<span class="hljs-number">0</span>])) <span class="hljs-keyword hljs-control-flow">continue</span>;
+
+            T objectData = Activator.CreateInstance&lt;T&gt;();
+
+            <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; column.Length; i++)
+            {
+                <span class="hljs-keyword hljs-control-flow">if</span> (DataIndex_Dict.<span class="hljs-title function_">TryGetValue</span>(i, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> attribute) &amp;&amp;
+                    Data_Dict.<span class="hljs-title function_">TryGetValue</span>(attribute, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> fieldName))
+                {
+                    FieldInfo fieldInfo = myType.<span class="hljs-title function_">GetField</span>(fieldName);
+                    <span class="hljs-keyword hljs-control-flow">if</span> (fieldInfo != <span class="hljs-literal">null</span>)
+                    {
+                        <span class="hljs-title function_">SetFieldValue</span>(objectData, fieldInfo, column[i]);
+                    }
+                }
+            }
+            csvDataList.<span class="hljs-title function_">Add</span>(objectData);
+        }
+        <span class="hljs-keyword hljs-control-flow">return</span> csvDataList;
+    }
+}</code></pre>
+</details>
+<hr>
+<h2 id="3-결정론적-난수-생성-및-seed-token-상태-복원-시스템" class="chapter-title">3. 결정론적 난수 생성 및 Seed / Token 상태 복원 시스템</h2>
+<p>로그라이크와 절차적 생성(Procedural Generation) 장르에서는 게임을 저장하고 불러왔을 때 <strong>현재 월드뿐만 아니라 앞으로 생성될 모든 미래 확률 상태(RNG Stream)까지 세이브 시점과 100% 동일하게 복원</strong>되어야 합니다. 월퍼킬은 대용량 JSON 직렬화의 한계를 극복하고, 마인크래프트의 월드 시드 메커니즘에서 착안하여 <strong>도메인 격리 + 고정 폭 토큰 인코딩 + Skip 루프 복원</strong> 아키텍처를 독자적으로 구축했습니다.</p>
+<h3 id="31-마인크래프트에서-착안한-발상-대용량-json-저장의-한계와-시드-압축">3.1 마인크래프트에서 착안한 발상 — 대용량 JSON 저장의 한계와 시드 압축</h3>
+<p>로그라이크 RPG는 던전 지형, 몬스터 스폰, 퀘스트 목록, 플레이어 클래스 및 스킬 조합 등 매 판 수많은 요소가 절차적으로 생성됩니다. 초기 설계 단계에서 이 방대한 상태 데이터를 통상적인 방식으로 저장할 때 심각한 문제에 직면했습니다:</p>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%; text-align: left;">
+    <div style="background: #ffffff; border: 1px solid #fecaca; border-radius: 8px; padding: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 700; color: #dc2626;">CONVENTIONAL APPROACH</span>
+        <span class="pf-fc-badge" style="background: #fef2f2; color: #b91c1c; border-color: #fecaca;">대용량 JSON 저장</span>
+      </div>
+      <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #991b1b;">수천 개 객체 트리의 무차별 직렬화</h4>
+      <ul style="margin: 0; padding-left: 18px; font-size: 0.83rem; color: #64748b; line-height: 1.6;">
+        <li>던전 타일, 스킬 계수, 퀘스트 진행도 등을 전부 JSON에 기록</li>
+        <li>세이브 파일 크기 비대화 및 런타임 역직렬화(Parsing) 부하 증가</li>
+        <li>데이터 구조(DTO) 변경 시 세이브 데이터 호환성 마이그레이션 비용 발생</li>
+      </ul>
+    </div>
+    <div style="background: #ffffff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span style="font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 700; color: #2563eb;">WFK SEED-TOKEN APPROACH</span>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">단일 시드 & 토큰 압축</span>
+      </div>
+      <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #1e40af;">결정론적 알고리즘 기반 순수 함수화</h4>
+      <ul style="margin: 0; padding-left: 18px; font-size: 0.83rem; color: #64748b; line-height: 1.6;">
+        <li>마인크래프트처럼 "단 하나의 시드(Seed)"로 월드와 스킬 규칙 재생성</li>
+        <li>오브젝트 인스턴스를 저장하지 않고 초기 시드 + 난수 진행 상태만 저장</li>
+        <li>수십 킬로바이트의 데이터를 <strong>단 1줄의 고정 폭 문자열 토큰</strong>으로 초압축</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<h4 id="실시간-로그라이크-rpg에서의-핵심-딜레마와-해결">실시간 로그라이크 RPG에서의 핵심 딜레마와 해결</h4>
+<p>마인크래프트는 정적 지형을 사전에 일괄 생성하지만, 월퍼킬은 플레이어가 이동하고 대화하며 전투 스킬을 획득하는 과정에서 난수(RNG)가 실시간으로 계속 소비됩니다. 단순히 초기 시드값(<code>BaseSeed</code>)만 저장하면, 게임을 불러왔을 때 난수 발생기 포인터가 0으로 초기화되어 <strong>세이브 이후 생성될 미래의 스킬, 보상, 퀘스트가 세이브 이전의 원래 세계선과 영구히 어긋나는 심각한 비동기 결함</strong>이 발생합니다.</p>
+<p>월퍼킬은 이를 해결하기 위해 <strong>루트 시드(<code>BaseSeed</code>)</strong>와 각 시스템별 <strong>누적 난수 소비 횟수(<code>Usage Count</code>)</strong>를 결합하여 압축하는 <strong>고정 폭 토큰(Token) 시스템</strong>을 구축했습니다.</p>
+<hr>
+<h3 id="32-도메인-격리-구조-및-splitmix64-해싱-아키텍처">3.2 도메인 격리 구조 및 SplitMix64 해싱 아키텍처</h3>
+<p>전역 <code>System.Random</code> 인스턴스를 하나만 공유하면 치명적인 문제가 발생합니다. 예를 들어 대화(Dialog)나 퀘스트에서 난수를 1회 소비하는 순간, 이후 생성되는 맵 타일이나 보상 아이템 드롭 결과가 완전히 뒤틀리게 됩니다(<strong>결합 교란, Coupling Interference</strong>). 이를 차단하기 위해 <code>GameSeed</code>는 목적별로 완벽히 독립된 서브 난수 스트림을 운영합니다.</p>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>.cs: 목적별 서브 스트림 도메인 격리</span>
+<span class="hljs-keyword">public</span> <span class="hljs-built_in">enum</span> Domain : <span class="hljs-built_in">uint</span>
 {
+    Map = <span class="hljs-number">1</span>, Region = <span class="hljs-number">2</span>, Field = <span class="hljs-number">3</span>, Quest = <span class="hljs-number">4</span>, Dialog = <span class="hljs-number">5</span>, Reward = <span class="hljs-number">6</span>, Class = <span class="hljs-number">7</span>,
+    Class_Melee = <span class="hljs-number">100</span>, Class_Dexterity = <span class="hljs-number">101</span>, Class_Magic = <span class="hljs-number">102</span>, Class_Support = <span class="hljs-number">103</span>,
+    Skill_Melee = <span class="hljs-number">200</span>, Skill_Dexterity = <span class="hljs-number">201</span>, Skill_Magic = <span class="hljs-number">202</span>, Skill_Support = <span class="hljs-number">203</span>,
+}</code></pre>
+<h4 id="splitmix64-기반-서브-시드-파생-derivesubseed">SplitMix64 기반 서브 시드 파생 (<code>DeriveSubSeed</code>)</h4>
+<p>루트 시드(<code>baseSeed</code>)와 도메인 Salt로부터 64비트 비트 믹싱을 수행하여, 도메인 간 비트 상관관계를 완벽히 분리한 양수 32-bit 고유 서브 시드를 유도합니다:</p>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>.cs: SplitMix64 비트 믹싱 알고리즘</span>
+<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">int</span> <span class="hljs-title">DeriveSubSeed</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> baseSeed, <span class="hljs-built_in">uint</span> salt</span>)</span>
+{
+    <span class="hljs-keyword">unchecked</span>
+    {
+        <span class="hljs-built_in">ulong</span> z = (<span class="hljs-built_in">ulong</span>)((<span class="hljs-built_in">uint</span>)baseSeed) + <span class="hljs-number">0x9E3779B97F4A7C15</span>UL + (<span class="hljs-built_in">ulong</span>)((<span class="hljs-built_in">uint</span>)salt * <span class="hljs-number">0x85EBCA6B</span>);
+        z = (z ^ (z &gt;&gt; <span class="hljs-number">30</span>)) * <span class="hljs-number">0xBF58476D1CE4E5B9</span>UL;
+        z = (z ^ (z &gt;&gt; <span class="hljs-number">27</span>)) * <span class="hljs-number">0x94D049BB133111EB</span>UL;
+        z = z ^ (z &gt;&gt; <span class="hljs-number">31</span>);
+        <span class="hljs-keyword hljs-control-flow">return</span> (<span class="hljs-built_in">int</span>)(z &amp; <span class="hljs-number">0x7FFFFFFF</span>); <span class="hljs-comment">// 항상 양수 반환</span>
+    }
+}</code></pre>
+<h4 id="세이브-로드-2단계-파이프라인">세이브 / 로드 2단계 파이프라인</h4>
+<p><code>SaveLoadManager</code>와 <code>GameSeed</code> 간의 세이브 및 복원은 명확한 책임 분리로 수행됩니다:</p>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+    <!-- SAVE ROW -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1e40af;">[SAVE] SaveSeedTokenToJson()</h4>
+        <span class="pf-fc-badge">SERIALIZE</span>
+      </div>
+      <p class="pf-fc-desc">
+        <code>GameSeed.GetUsageSnapshot()</code>으로 도메인별 소비량 스냅샷 추출 ➔ <code>BuildSeedToken()</code>으로 단일 토큰 압축 생성 ➔ <code>seed_state.json</code> 로컬 저장
+      </p>
+    </div>
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+    </div>
+    <!-- LOAD ROW -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #15803d;">[LOAD] TryLoadSeedToken() &amp; RestoreFromSnapshot()</h4>
+        <span class="pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">DESERIALIZE</span>
+      </div>
+      <p class="pf-fc-desc">
+<p>JSON에서 토큰 문자열 로드 ➔ <code>RestoreSeedToken()</code>으로 <code>baseSeed</code> 및 도메인별 누적 카운트 복원 ➔ Skip 루프로 RNG 상태를 100% 동일하게 복구</p>
+      </p>
+    </div>
+  </div>
+</div>
+<hr>
+<h3 id="33-data-encoding-map-고정-폭-0-패딩-토큰-규격-및-json-구조">3.3 DATA ENCODING MAP — 고정 폭 0-패딩 토큰 규격 및 JSON 구조</h3>
+<p>각 도메인별 누적 소비 횟수를 쉼표나 콜론 같은 구분 기호(Delimiter) 없이 파싱할 수 있도록 <strong>고정 폭(Fixed-Width) 0-패딩 문자열 규격</strong>으로 직렬화합니다:</p>
+<div class="pf-visual-frame">
+  <div style="text-align: left; margin-bottom: 12px;">
+    <span class="pf-fc-mono-tag" style="background: #2563eb; color: #ffffff; font-weight: 700;">DATA ENCODING MAP</span>
+    <span style="font-size: 0.85rem; color: #64748b; margin-left: 8px;">실측 시드(1826533749) 기준 토큰 세그먼트 분할 맵</span>
+  </div>
+  <div class="pf-token-block">
+    <div class="pf-token-cell accent-blue">
+      <div class="pf-token-cell-title">[ BASE SEED ]</div>
+      <div class="pf-token-cell-spec">00000000001826533749</div>
+      <p class="pf-token-cell-desc"><strong>20자리 고정 폭</strong>: 맵과 규칙을 생성하는 64비트 고유 Seed 번호 (0-패딩)</p>
+    </div>
+    <div class="pf-token-cell accent-blue">
+      <div class="pf-token-cell-title">[ COUNT ]</div>
+      <div class="pf-token-cell-spec">014</div>
+      <p class="pf-token-cell-desc"><strong>3자리 고정 폭</strong>: 저장된 총 도메인 개수 (Map, Quest, Skill 등 총 14개)</p>
+    </div>
+    <div class="pf-token-cell accent-green">
+      <div class="pf-token-cell-title">[ DOMAIN ID ]</div>
+      <div class="pf-token-cell-spec">001</div>
+      <p class="pf-token-cell-desc"><strong>3자리 고정 폭</strong>: 대상 서브 시스템 고유 식별자 Enum 값 (Map = 1)</p>
+    </div>
+    <div class="pf-token-cell accent-green">
+      <div class="pf-token-cell-title">[ USAGE PROGRESS ]</div>
+      <div class="pf-token-cell-spec">000000000042</div>
+      <p class="pf-token-cell-desc"><strong>12자리 고정 폭</strong>: 해당 시스템의 누적 난수 소비 횟수 (최대 1조 회 지원)</p>
+    </div>
+  </div>
+  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-top: 14px; text-align: left;">
+    <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; color: #64748b; margin-bottom: 6px;">// 실제 로컬에 저장되는 seed_state.json 구조</div>
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.82rem; color: #0f172a; overflow-x: auto; line-height: 1.6;">
+      <div>{</div>
+      <div style="padding-left: 16px;">&quot;baseSeed&quot;: 1826533749,</div>
+      <div style="padding-left: 16px;">&quot;seedToken&quot;: &quot;00000000001826533749014001000000000042...&quot;,</div>
+      <div style="padding-left: 16px;">&quot;updatedAt&quot;: &quot;2026-05-19 21:20:54&quot;</div>
+      <div>}</div>
+    </div>
+  </div>
+  <p style="margin: 12px 0 0 0; font-size: 0.84rem; color: #64748b; text-align: left;">
+<p>전체 토큰 구조: <code>[BaseSeed: 20자][Count: 3자] + { [DomainID: 3자][Usage: 12자] } &#42; N</code></p>
+  </p>
+</div>
+<ul><li><strong>고정 폭 토큰 인코딩의 핵심 장점</strong>:</li></ul>
+<ol><li><strong>대용량 JSON 직렬화 오버헤드 원천 차단</strong>: 수많은 게임 객체를 저장하지 않고 단 1줄의 고정 폭 문자열 토큰으로 압축하여 저장 용량을 수백 분의 1로 경감.</li><li><strong>무할당 고속 파싱(Zero-Allocation O(1))</strong>: 쉼표나 콜론 같은 구분 기호가 없어 문자열 분할 배열 생성 없이 <code>Substring(idx, width)</code> 오프셋 계산만으로 즉시 디코딩.</li><li><strong>64비트 정수 보장</strong>: 20자리 고정 폭으로 최대 64비트 시드값을 지원하여 대규모 절차적 생성에서도 시드 충돌 및 오버플로우 방지.</li></ol>
+<hr>
+<h3 id="34-skip-루프-복원-메커니즘과-실제-인게임-스킬셋-복원-실증">3.4 Skip 루프 복원 메커니즘과 실제 인게임 스킬셋 복원 실증</h3>
+<p>세이브 파일을 불러올 때, 토큰에서 추출된 각 도메인의 누적 소비 횟수(<code>count</code>)만큼 <code>rng.Next()</code>를 고속 더미 호출(Skip)하여 난수 엔진의 내부 포인터를 세이브 시점으로 100% 동일하게 강제 이동시킵니다:</p>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>.cs: 과거 난수 소비 지점으로 스트림 강제 롤백</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RestoreFromSnapshot</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> baseSeed, <span class="hljs-title class_">Dictionary</span>&lt;Domain, <span class="hljs-built_in">ulong</span>&gt; usageCounts</span>)</span>
+{
+    <span class="hljs-title function_">Init</span>(baseSeed); <span class="hljs-comment">// 서브 시드로 전체 도메인 재초기화</span>
+
     <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> kv <span class="hljs-keyword">in</span> usageCounts)
     {
         Domain d = kv.Key;
-        <span class="hljs-built_in">ulong</span> count = kv.Value;     
-        
-        <span class="hljs-comment">// BaseSeed를 해싱(Salt)하여 도메인별 고유 서브 시드로 RNG 재생성</span>
+        <span class="hljs-built_in">ulong</span> count = kv.Value;
         System.<span class="hljs-title class_">Random</span> rng = <span class="hljs-keyword">new</span> System.<span class="hljs-title class_">Random</span>(<span class="hljs-title function_">DeriveSubSeed</span>(baseSeed, (<span class="hljs-built_in">uint</span>)d));
-        
-        <span class="hljs-comment">// 토큰에 기록된 횟수만큼 난수를 버림(Skip) 호출하여 확률 스트림 위치를 강제 동기화</span>
+
+        <span class="hljs-comment">// 저장 시점까지 소비되었던 횟수만큼 난수를 버림(Skip) 호출</span>
         <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">ulong</span> i = <span class="hljs-number">0</span>; i &lt; count; i++)
         {
-            rng.<span class="hljs-title function_">Next</span>();     
+            rng.<span class="hljs-title function_">Next</span>();
         }
-        
+
         domainRng[d] = rng;
         domainUsageCounts[d] = count;
     }
 }</code></pre>
+<h4 id="실제-인게임-실증-시드값에-따른-스킬셋-절차적-생성-결과-비교">실제 인게임 실증: 시드값에 따른 스킬셋 절차적 생성 결과 비교</h4>
+<p>월퍼킬의 플레이어 스킬은 시드와 난수 스트림에 의해 결정론적으로 판정됩니다. 따라서 <strong>개발자가 개별 스킬 객체를 세이브 데이터에 일일이 기록하지 않아도, 단 1줄의 <code>seedToken</code> 해석만으로 동일한 스킬셋이 100% 오차 없이 복원</strong>됩니다:</p>
+<div class="pf-seed-compare-grid">
+  <!-- SEED A -->
+  <div class="pf-seed-card seed-a">
+    <div class="pf-seed-card-header">
+      <h4 class="pf-seed-title">SEED A (1459589277)</h4>
+      <span class="pf-seed-tag">버프형 지원 스킬셋</span>
+    </div>
+    <div class="pf-seed-box">
+      <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">절차적 생성 스킬셋:</div>
+      <div style="color: #334155; margin-bottom: 8px;">• 아군 대상 버프 스킬 조합 자동 구성</div>
+      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; color: #0f172a;">
+        <strong>[스킬 효과]</strong> "아군에게 스킬 사용 시 아군의 치명타 확률과 치명타 데미지를 증가시킵니다."
+      </div>
+    </div>
+    <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; color: #475569;">
+      <div>"baseSeed": 1459589277,</div>
+      <div>"seedToken": "00000000001459589277014001...26"</div>
+    </div>
+  </div>
+  <!-- SEED B -->
+  <div class="pf-seed-card seed-b">
+    <div class="pf-seed-card-header">
+      <h4 class="pf-seed-title">SEED B (1459589276)</h4>
+      <span class="pf-seed-tag tag-attack">물리 공격형 액티브 스킬셋</span>
+    </div>
+    <div class="pf-seed-box">
+      <div style="font-weight: 700; color: #991b1b; margin-bottom: 4px;">절차적 생성 스킬셋:</div>
+      <div style="color: #334155; margin-bottom: 8px;">• 단일 타겟 물리 타격 스킬 조합 자동 구성</div>
+      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; color: #0f172a;">
+        <strong>[강타]</strong> "하나의 적에게 120%의 AD 데미지를 입힌다."
+      </div>
+    </div>
+    <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; color: #475569;">
+      <div>"baseSeed": 1459589276,</div>
+      <div>"seedToken": "00000000001459589276014001...27"</div>
+    </div>
+  </div>
+</div>
+<p style="font-size: 0.88rem; color: #334155; line-height: 1.6; margin-top: 10px;">
+  <strong>실증 요약:</strong> 시드 번호 단 1의 차이(<code>...77</code> vs <code>...76</code>)만으로도 완전히 다른 직업 스킬셋(치명타 버프 vs 120% AD 물리 강타)이 수학적으로 유도되며, 저장 후 재로드 시에도 과거 누적 소비 지점(<code>...26</code> vs <code>...27</code>)으로 정확히 복원되어 인게임 런타임의 결정론적 무결성을 완벽히 증명했습니다.
+</p>
+<details class="pf-details">
+<summary>코드 보기: SaveLoadManager의 시드 토큰 빌드 및 복원 소스 코드</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">SaveLoadManager</span>.cs: 시드 토큰 빌드 및 복원 구현</span>
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">int</span> BASE_SEED_WIDTH = <span class="hljs-number">10</span>;
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">int</span> COUNT_WIDTH = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">int</span> DOMAIN_ID_WIDTH = <span class="hljs-number">3</span>;
+<span class="hljs-keyword">private</span> <span class="hljs-keyword">const</span> <span class="hljs-built_in">int</span> USAGE_WIDTH = <span class="hljs-number">12</span>;
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">string</span> <span class="hljs-title">BuildSeedToken</span>()</span>
+{
+    <span class="hljs-built_in">int</span> baseSeed = <span class="hljs-title class_">GameSeed</span>.BaseSeed;
+    <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain, <span class="hljs-built_in">ulong</span>&gt; usage = <span class="hljs-title class_">GameSeed</span>.<span class="hljs-title function_">GetUsageSnapshot</span>();
+
+    <span class="hljs-built_in">string</span> token = <span class="hljs-title function_">Pad</span>(<span class="hljs-title function_">EncodeIntToUInt</span>(baseSeed), BASE_SEED_WIDTH);
+
+    <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain&gt; domains = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain&gt;((<span class="hljs-title class_">GameSeed</span>.Domain[])Enum.<span class="hljs-title function_">GetValues</span>(<span class="hljs-keyword">typeof</span>(<span class="hljs-title class_">GameSeed</span>.Domain)));
+    domains.<span class="hljs-title function_">Sort</span>((a, b) =&gt; (a).<span class="hljs-title function_">CompareTo</span>(b));
+
+    token += <span class="hljs-title function_">Pad</span>((<span class="hljs-built_in">uint</span>)domains.Count, COUNT_WIDTH);
+    <span class="hljs-keyword hljs-control-flow">foreach</span> (<span class="hljs-keyword">var</span> d <span class="hljs-keyword">in</span> domains)
+    {
+        <span class="hljs-built_in">ulong</span> count = usage.<span class="hljs-title function_">GetValueOrDefault</span>(d, <span class="hljs-number">0U</span>L);
+        token += <span class="hljs-title function_">Pad</span>((<span class="hljs-built_in">uint</span>)d, DOMAIN_ID_WIDTH);
+        token += <span class="hljs-title function_">Pad</span>(count, USAGE_WIDTH);
+    }
+    <span class="hljs-keyword hljs-control-flow">return</span> token;
+}
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">bool</span> <span class="hljs-title">RestoreSeedToken</span>(<span class="hljs-params"><span class="hljs-built_in">string</span> token</span>)</span>
+{
+    <span class="hljs-keyword hljs-control-flow">try</span>
+    {
+        <span class="hljs-built_in">int</span> idx = <span class="hljs-number">0</span>;
+        <span class="hljs-keyword hljs-control-flow">if</span> (token.Length &lt; BASE_SEED_WIDTH + COUNT_WIDTH) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">false</span>;
+
+        <span class="hljs-built_in">ulong</span> baseSeedEncoded = <span class="hljs-title function_">ReadUInt</span>(token, <span class="hljs-keyword">ref</span> idx, BASE_SEED_WIDTH);
+        <span class="hljs-built_in">int</span> baseSeed = <span class="hljs-title function_">DecodeUlongToInt</span>(baseSeedEncoded);
+
+        <span class="hljs-built_in">uint</span> count = (<span class="hljs-built_in">uint</span>)<span class="hljs-title function_">ReadUInt</span>(token, <span class="hljs-keyword">ref</span> idx, COUNT_WIDTH);
+        <span class="hljs-built_in">int</span> expectedTotal = (BASE_SEED_WIDTH + COUNT_WIDTH) + (<span class="hljs-built_in">int</span>)count * (USAGE_WIDTH + DOMAIN_ID_WIDTH);
+        <span class="hljs-keyword hljs-control-flow">if</span> (token.Length != expectedTotal) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">false</span>;
+
+        <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain, <span class="hljs-built_in">ulong</span>&gt; usage = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-title class_">GameSeed</span>.Domain, <span class="hljs-built_in">ulong</span>&gt;();
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; count; i++)
+        {
+            <span class="hljs-built_in">uint</span> domIdU = (<span class="hljs-built_in">uint</span>)<span class="hljs-title function_">ReadUInt</span>(token, <span class="hljs-keyword">ref</span> idx, DOMAIN_ID_WIDTH);
+            <span class="hljs-built_in">ulong</span> u = <span class="hljs-title function_">ReadUInt</span>(token, <span class="hljs-keyword">ref</span> idx, USAGE_WIDTH);
+            <span class="hljs-keyword hljs-control-flow">if</span> (Enum.<span class="hljs-title function_">IsDefined</span>(<span class="hljs-keyword">typeof</span>(<span class="hljs-title class_">GameSeed</span>.Domain), domIdU))
+            {
+                usage[(<span class="hljs-title class_">GameSeed</span>.Domain)domIdU] = u;
+            }
+        }
+
+        <span class="hljs-title class_">GameSeed</span>.<span class="hljs-title function_">RestoreFromSnapshot</span>(baseSeed, usage);
+        <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
+    }
+    <span class="hljs-keyword hljs-control-flow">catch</span> { <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">false</span>; }
+}</code></pre>
 </details>
-<p class="notice--success"><strong>Conclusion:</strong> <code>WorldFirstKill</code>은 비동기 파싱과 계층적 맵 생성으로 방대한 데이터 로딩 문제를 최적화했으며, Seed/Token 시스템을 통해 로그라이크 특유의 '완벽한 게임 플레이(RNG) 복원력'을 기술적으로 완성한 수준 높은 아키텍처를 자랑합니다.</p>
+<p class="notice--success"><strong>Conclusion:</strong> <code>WorldFirstKill</code>은 구글 스프레드시트 기반의 무중단 데이터 배포 및 증분 캐싱 파이프라인으로 라이브 서비스 운영 효율을 극대화하였으며, 마인크래프트에서 영감을 얻은 도메인 격리 시드/토큰 시스템과 Skip 복원 루프로 방대한 절차적 생성 RPG의 세이브/로드 오버헤드를 극적으로 압축하고 결정론적 무결성을 성공적으로 구현했습니다.</p>
         </section>
 <aside class="toc-panel" aria-label="목차">
 <div class="toc-panel__inner">
 <h2 class="toc-panel__title">목차</h2>
 <ol class="toc-list">
-<li class="toc-list__item toc-list__item--h2"><a href="#1-리플렉션-기반-csv-파싱-및-버전-관리-시스템">1. 리플렉션 기반 CSV 파싱 및 버전 관리 시스템</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#11-서버-버전-동기화-및-선택적-다운로드">1.1 서버 버전 동기화 및 선택적 다운로드</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#12-csv-파싱-프로세스-플로우">1.2 CSV 파싱 프로세스 플로우</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#13-핵심-파싱-로직-및-smartsplit">1.3 핵심 파싱 로직 및 SmartSplit</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#2-비동기-로딩-및-ui-블로킹-방지">2. 비동기 로딩 및 UI 블로킹 방지</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#21-가중치-기반-로딩-시스템-loadingmanager">2.1 가중치 기반 로딩 시스템 (LoadingManager)</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#3-퀘스트-수락-진행-및-동적-보상-시스템">3. 퀘스트 수락, 진행 및 동적 보상 시스템</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#31-이벤트-구동형-퀘스트-진행-event-driven">3.1 이벤트 구동형 퀘스트 진행 (Event-Driven)</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#32-시드seed-기반-동적-보상">3.2 시드(Seed) 기반 동적 보상</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#4-계층적-맵-생성-및-이동-아키텍처">4. 계층적 맵 생성 및 이동 아키텍처</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#41-비동기-맵-초기화-및-구성">4.1 비동기 맵 초기화 및 구성</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#42-이벤트-기반-맵-이동-시스템">4.2 이벤트 기반 맵 이동 시스템</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#5-seed-token-시스템-rng-완전-복원">5. Seed / Token 시스템 (RNG 완전 복원)</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#51-도메인-격리-구조-domain-isolation">5.1 도메인 격리 구조 (Domain Isolation)</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#52-고정-폭-인코딩-기반-토큰-다이어그램">5.2 고정 폭 인코딩 기반 토큰 다이어그램</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#53-토큰-빌드-및-상태-복원-흐름">5.3 토큰 빌드 및 상태 복원 흐름</a></li>
+<li class="toc-list__item toc-list__item--h2"><a href="#1-서버-csv-동기화-및-증분-캐싱-아키텍처">1. 서버 CSV 동기화 및 증분 캐싱 아키텍처</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#11-마스터-메타-시트-파이프라인-master-sheet-pipeline">1.1 마스터 메타 시트 파이프라인 (Master Sheet Pipeline)</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#12-조건부-증분-다운로드conditional-incremental-download-플로우">1.2 조건부 증분 다운로드(Conditional Incremental Download) 플로우</a></li>
+<li class="toc-list__item toc-list__item--h2"><a href="#2-실전-예시로-보는-리플렉션-csv-파싱-전개-과정">2. 실전 예시로 보는 리플렉션 CSV 파싱 전개 과정</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#21-실제-몬스터-데이터-파싱-4단계-전개-execution-walkthrough">2.1 실제 몬스터 데이터 파싱 4단계 전개 (Execution Walkthrough)</a></li>
+<li class="toc-list__item toc-list__item--h4"><a href="#컬럼-슬라이스-기능-iscutcolumn-true">컬럼 슬라이스 기능 (`isCutColumn = true`)</a></li>
+<li class="toc-list__item toc-list__item--h2"><a href="#3-결정론적-난수-생성-및-seed-token-상태-복원-시스템">3. 결정론적 난수 생성 및 Seed / Token 상태 복원 시스템</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#31-마인크래프트에서-착안한-발상-대용량-json-저장의-한계와-시드-압축">3.1 마인크래프트에서 착안한 발상 — 대용량 JSON 저장의 한계와 시드 압축</a></li>
+<li class="toc-list__item toc-list__item--h4"><a href="#실시간-로그라이크-rpg에서의-핵심-딜레마와-해결">실시간 로그라이크 RPG에서의 핵심 딜레마와 해결</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#32-도메인-격리-구조-및-splitmix64-해싱-아키텍처">3.2 도메인 격리 구조 및 SplitMix64 해싱 아키텍처</a></li>
+<li class="toc-list__item toc-list__item--h4"><a href="#splitmix64-기반-서브-시드-파생-derivesubseed">SplitMix64 기반 서브 시드 파생 (`DeriveSubSeed`)</a></li>
+<li class="toc-list__item toc-list__item--h4"><a href="#세이브-로드-2단계-파이프라인">세이브 / 로드 2단계 파이프라인</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#33-data-encoding-map-고정-폭-0-패딩-토큰-규격-및-json-구조">3.3 DATA ENCODING MAP — 고정 폭 0-패딩 토큰 규격 및 JSON 구조</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#34-skip-루프-복원-메커니즘과-실제-인게임-스킬셋-복원-실증">3.4 Skip 루프 복원 메커니즘과 실제 인게임 스킬셋 복원 실증</a></li>
+<li class="toc-list__item toc-list__item--h4"><a href="#실제-인게임-실증-시드값에-따른-스킬셋-절차적-생성-결과-비교">실제 인게임 실증: 시드값에 따른 스킬셋 절차적 생성 결과 비교</a></li>
 </ol>
 </div>
 </aside>

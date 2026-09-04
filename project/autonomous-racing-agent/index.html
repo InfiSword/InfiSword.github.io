@@ -373,31 +373,6 @@
     GetComponent&lt;<span class="hljs-title class_">CarProgress</span>&gt;().<span class="hljs-title function_">UpdateProgress</span>();
 }</code></pre>
 </details>
-<hr>
-<h2 id="5-학습-설정-및-일반화-성능-확보" class="chapter-title">5. 학습 설정 및 일반화 성능 확보</h2>
-<p>특정 트랙에 과적합(Overfitting)되지 않고 다양한 환경에서 안정적으로 주행할 수 있도록 학습 설정을 최적화했습니다.</p>
-<h3 id="51-하이퍼파라미터-ppo-기반">5.1 하이퍼파라미터 (PPO 기반)</h3>
-<div class="pf-table-wrapper"><table class="pf-data-table"><thead><tr><th>파라미터</th><th>값</th><th>설명</th></tr></thead><tbody><tr><td><strong>Trainer Type</strong></td><td>PPO</td><td>Proximal Policy Optimization</td></tr><tr><td><strong>Batch Size</strong></td><td>2048</td><td>대규모 에이전트 동시 업데이트 및 안정성 최적화</td></tr><tr><td><strong>Buffer Size</strong></td><td>10240</td><td>정책 업데이트 전 수집할 경험 데이터 크기</td></tr><tr><td><strong>Learning Rate</strong></td><td>0.0002</td><td>안정적인 수렴을 위한 선형 감소 학습률</td></tr><tr><td><strong>Beta (Entropy)</strong></td><td>0.002</td><td>에이전트의 탐험(Exploration)을 유도하는 가중치</td></tr><tr><td><strong>Hidden Units</strong></td><td>256</td><td>신경망의 복잡도 설정 (2개 Hidden Layer)</td></tr><tr><td><strong>Max Steps</strong></td><td>5,000,000</td><td>모델의 완전한 학습을 위한 총 스텝 수</td></tr></tbody></table></div>
-<h3 id="52-다중-트랙-랜덤-학습-시스템">5.2 다중 트랙 랜덤 학습 시스템</h3>
-<p>에이전트의 일반화 성능을 극대화하기 위해 매 에피소드 시작 시 랜덤하게 트랙과 스폰 포인트를 교체하는 시스템을 도입했습니다.</p>
-<p><strong>다중 트랙 랜덤 스폰 로직</strong> 매 에피소드 초기화 시 다양한 트랙과 위치에서 시작하도록 설정하여 에이전트의 일반화 능력을 향상시킵니다.</p>
-<details class="pf-details">
-<summary>코드 보기: 다중 트랙 랜덤 스폰 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">OnEpisodeBegin</span>()</span>
-{
-    <span class="hljs-comment">// 1. 등록된 모든 트랙 중 하나를 랜덤 선택</span>
-    currentTrack = allTracks[<span class="hljs-title class_">Random</span>.<span class="hljs-title function_">Range</span>(<span class="hljs-number">0</span>, allTracks.Count)];
-    
-    <span class="hljs-comment">// 2. 해당 트랙의 스폰 포인트 리스트 중 랜덤 위치 선정</span>
-    <span class="hljs-title class_">Transform</span> spawnTransform = currentTrack.<span class="hljs-title function_">GetStartPoint</span>(<span class="hljs-title class_">Random</span>.<span class="hljs-title function_">Range</span>(<span class="hljs-number">0</span>, currentTrack.StartPointsCount));
-    
-    <span class="hljs-comment">// 3. 물리 상태 초기화 및 배치</span>
-    transform.position = spawnTransform.position;
-    transform.rotation = spawnTransform.rotation;
-    rb.linearVelocity = <span class="hljs-title class_">Vector3</span>.zero;
-    carProgress.<span class="hljs-title function_">Initialize</span>();
-}</code></pre>
-</details>
         </section>
 <aside class="toc-panel" aria-label="목차">
 <div class="toc-panel__inner">
@@ -412,9 +387,6 @@
 <li class="toc-list__item toc-list__item--h2"><a href="#4-환경-감지-및-행동-결정-아키텍처">4. 환경 감지 및 행동 결정 아키텍처</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#41-레이캐스트-기반-환경-센싱">4.1 레이캐스트 기반 환경 센싱</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#42-인지-행동-지연-없는-직접-제어-direct-action-control">4.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#5-학습-설정-및-일반화-성능-확보">5. 학습 설정 및 일반화 성능 확보</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#51-하이퍼파라미터-ppo-기반">5.1 하이퍼파라미터 (PPO 기반)</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#52-다중-트랙-랜덤-학습-시스템">5.2 다중 트랙 랜덤 학습 시스템</a></li>
 </ol>
 </div>
 </aside>

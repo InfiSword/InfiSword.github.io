@@ -95,4 +95,31 @@ test.describe('Autonomous Racing Agent 스크린샷 갤러리 테스트 (상세 
     await page.keyboard.press('Escape');
     await expect(modal).toBeHidden();
   });
+
+  test('상세 포스트 페이지에서 5번 학습 설정 섹션이 존재하지 않고 4번 섹션으로 깔끔하게 종료된다', async ({ page, isMobile }) => {
+    await page.goto('/project/autonomous-racing-agent/');
+
+    // 5번 섹션 및 관련 텍스트가 페이지 내에 존재하지 않는지 검증
+    const section5Heading = page.locator('[id="5-학습-설정-및-일반화-성능-확보"]');
+    await expect(section5Heading).toHaveCount(0);
+
+    const section5Text = page.locator('text="5. 학습 설정 및 일반화 성능 확보"');
+    await expect(section5Text).toHaveCount(0);
+
+    const section5Toc = page.locator('.toc-list a[href="#5-학습-설정-및-일반화-성능-확보"]');
+    await expect(section5Toc).toHaveCount(0);
+
+    // 4번 섹션은 정상 노출 확인
+    const section4Heading = page.locator('[id="4-환경-감지-및-행동-결정-아키텍처"]');
+    await expect(section4Heading).toBeVisible();
+
+    // 4.2 액션 매핑 코드 토글 확인
+    const directActionSummary = page.locator('summary:has-text("코드 보기: 즉각적 행동 매핑 로직")');
+    await expect(directActionSummary).toBeVisible();
+
+    await directActionSummary.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(300);
+    const filename = isMobile ? 'racing-post-end-mobile.png' : 'racing-post-end-desktop.png';
+    await page.screenshot({ path: `C:/Users/seif4/.gemini/antigravity/brain/ad15f147-9125-4756-b8dd-ce08e39ab5fd/${filename}` });
+  });
 });
