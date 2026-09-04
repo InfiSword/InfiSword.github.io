@@ -133,26 +133,26 @@
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
-    <!-- 4 Components Grid -->
-    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
+    <!-- 4 Components Grid: 2 Columns Balanced Layout -->
+    <div class="pf-fc-branch-grid pf-fc-grid-2col">
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">CORE</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">Transform</div>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">CORE</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">Transform</div>
         <div class="pf-fc-branch-desc">2D 위치(Position), 스케일, 바라보는 방향 연산</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">RENDER</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SpriteRenderer</div>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">RENDER</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">SpriteRenderer</div>
         <div class="pf-fc-branch-desc">GDI+ 비트맵 렌더링 및 Y-Sorting 피벗 좌표 관리</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">PHYSICS</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">Collider</div>
+        <span class="pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">PHYSICS</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">Collider</div>
         <div class="pf-fc-branch-desc">AABB 충돌 박스 및 상호작용 트리거 검사</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">ANIM</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">Animator</div>
+        <span class="pf-fc-badge" style="background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe;">ANIM</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">Animator</div>
         <div class="pf-fc-branch-desc">스프라이트시트 클립 재생 및 프레임 이벤트 콜백</div>
       </div>
     </div>
@@ -182,82 +182,257 @@
 </details>
 <h3 id="12-중앙-집중식-매니저-패턴-singleton-managers">1.2 중앙 집중식 매니저 패턴 (Singleton Managers)</h3>
 <p>시스템의 전역적인 상태 관리와 자원 공유를 위해 <strong>싱글톤 기반 매니저</strong>들을 구축했습니다.</p>
-<div class="pf-visual-frame">
-<div class="pf-arch-diagram">
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">ObjectManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">객체 생명주기 관리</span>
-<span class="pf-arch-item">공간 분할 그리드 업데이트</span>
-</div>
-</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">RenderManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">커맨드 예약</span>
-<span class="pf-arch-item">레이어별 Y-Sorting 렌더링</span>
-</div>
-</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">ResourceManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">비트맵/스프라이트 캐싱</span>
-<span class="pf-arch-item">중복 로드 방지</span>
-</div>
-</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">CameraManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">가시 영역 컬링</span>
-<span class="pf-arch-item">좌표계 변환 (World ↔ Screen)</span>
-</div>
-</div>
-</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart pf-flowchart-wide">
+    <!-- Global Core Hub Header -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">Engine Subsystem Core (Singleton Services)</h4>
+        <span class="pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">GLOBAL SERVICES HUB</span>
+      </div>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- 4 Managers 2x2 Technical Cards Grid -->
+    <div class="pf-mgr-grid">
+      <!-- 1. ObjectManager -->
+      <div class="pf-mgr-card">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">ObjectManager</h4>
+          <span class="pf-mgr-badge">ENTITY</span>
+        </div>
+        <p class="pf-mgr-subtitle">월드 엔티티 생명주기 및 2D 공간 분할(Spatial Partitioning) 제어</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>모든 <code>GameObject</code> 동적 생성·소멸 및 ID 고유성 보장</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>256×256 정적 그리드 배열 인덱싱 실시간 업데이트</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>가시 범위 내 활성 객체 풀링(Pooling) 및 순회 최적화</span>
+          </li>
+        </ul>
+      </div>
+      <!-- 2. RenderManager -->
+      <div class="pf-mgr-card is-render">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">RenderManager</h4>
+          <span class="pf-mgr-badge is-render">RENDER</span>
+        </div>
+        <p class="pf-mgr-subtitle">커맨드 패턴 기반 지연 렌더링 및 발밑 Pivot Y-Sorting 정렬</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>프레임별 <code>DrawCommand</code> 생성 및 레이어 큐 버퍼링</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>깊이(Depth) 우선순위 Pivot Y 기준 <code>std::stable_sort</code> 정렬</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>배경·월드·UI 레이어 단위 GDI+ 더블 버퍼링 일괄 Flush</span>
+          </li>
+        </ul>
+      </div>
+      <!-- 3. ResourceManager -->
+      <div class="pf-mgr-card is-resource">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">ResourceManager</h4>
+          <span class="pf-mgr-badge is-resource">ASSET</span>
+        </div>
+        <p class="pf-mgr-subtitle">GDI+ 비트맵 및 스프라이트 시트 해시맵 캐싱 및 중복 로드 방지</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>파일 경로 해시 기반 비트맵 메모리 캐싱 (Zero Duplicate)</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>애니메이션 스프라이트 시트 프레임 Rect 메타데이터 관리</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>씬 전환 및 프로그램 종료 시 안전한 GDI+ 리소스 일괄 해제</span>
+          </li>
+        </ul>
+      </div>
+      <!-- 4. CameraManager -->
+      <div class="pf-mgr-card is-camera">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">CameraManager</h4>
+          <span class="pf-mgr-badge is-camera">CAMERA</span>
+        </div>
+        <p class="pf-mgr-subtitle">플레이어 시야 추적, 뷰포트 컬링 및 월드-스크린 좌표계 변환</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>플레이어 중심 선형 보간(Lerp) 부드러운 타깃 추적</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span><code>ObjectManager</code>에서 가시 범위 객체를 추적하여 렌더링</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>World Coordinates ↔ Screen DC 좌표계 선형 변환 행렬</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 <hr>
 <h2 id="2-렌더링-시스템-및-파이프라인" class="chapter-title">2. 렌더링 시스템 및 파이프라인</h2>
 <p>GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 <strong>커맨드 패턴 기반의 렌더링 파이프라인</strong>을 구축했습니다. 매 프레임 모든 객체를 즉시 그리는 대신, 렌더링 명령을 레이어별로 수집하고 정렬한 뒤 일괄 실행(Flush)하는 방식을 취합니다.</p>
-<h3 id="21-렌더링-파이프라인-흐름">2.1 렌더링 파이프라인 흐름</h3>
-<p>렌더링 프로세스는 크게 <strong>제출(Submission) -> 정렬(Sorting) -> 실행(Execution)</strong>의 3단계로 구성됩니다.</p>
+<h3 id="21-렌더링-파이프라인-흐름-및-서브시스템-협력">2.1 렌더링 파이프라인 흐름 및 서브시스템 협력</h3>
+<p>렌더링 파이프라인은 단순히 그리는 단계를 넘어, <strong>시야 컬링 쿼리(Culling Query) → 다형성 커맨드 위임(Dispatch & Buffering) → 발밑 깊이 정렬(Y-Sorting) → 일괄 출력(Flush)</strong>의 4단계 협력 프로세스로 정밀하게 구동됩니다.</p>
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
     <div class="pf-fc-pill-start">
       <span class="pf-fc-mono-tag">TRIGGER</span>
-      <span>Render Loop Trigger (매 프레임 렌더링 시작)</span>
+      <span>Render Loop Trigger (SceneManager &rarr; GameScene::Render)</span>
     </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
+    <!-- Step 1: 시야 계산 & 공간 분할 컬링 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">1. Submission (명령 제출)</h4>
-        <span class="pf-fc-badge">COLLECT</span>
+        <h4 class="pf-fc-title">1. Viewport Culling &amp; Spatial Query</h4>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">SPATIAL GRID</span>
       </div>
-      <p class="pf-fc-desc">`GameObject::Render()` 호출 &rarr; `DrawCommand` 생성 후 `RenderManager` 큐에 예약</p>
+      <p class="pf-fc-desc"><code>CameraManager</code>가 뷰포트 월드 사각형 산출 &rarr; <code>ObjectManager</code>의 2D 공간 분할 그리드(256×256) 쿼리로 화면 내 가시 객체(<code>visibleBuffer</code>)만 선별 (타일맵은 <code>CameraManager</code> 독립 컬링)</p>
     </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
+    <!-- Step 2: 다형성 디스패치 & 커맨드 제출 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">2. Sorting (정렬 단계)</h4>
+        <h4 class="pf-fc-title">2. Polymorphic Dispatch &amp; Buffering</h4>
+        <span class="pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">COMMAND DISPATCH</span>
+      </div>
+      <p class="pf-fc-desc"><code>CameraManager</code>가 가시 객체 <code>obj-&gt;Render()</code> 호출 &rarr; <code>Entity</code>/<code>Item</code>이 소유한 <code>SpriteRenderer::Render()</code>에 O(1) 위임 &rarr; 발밑 Pivot Y 기준 <code>DrawCommand</code> 생성 후 <code>RenderManager</code> 큐에 예약</p>
+    </div>
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- Step 3: Y-Sorting 정렬 -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3. Depth Sorting (발밑 기준 정렬)</h4>
         <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">Y-SORTING</span>
       </div>
-      <p class="pf-fc-desc">`RenderManager::Flush()` &rarr; 배경/오브젝트/UI 레이어 우선순위 분류 후 발밑(Pivot Y) 기준 오름차순 정렬</p>
+      <p class="pf-fc-desc"><code>RenderManager::Flush()</code> &rarr; 레이어별 분류(타일 &rarr; 월드 &rarr; UI) 후 동일 레이어 내에서 발밑(Pivot Y) 기준 <code>std::stable_sort</code> 정렬로 Top-down 2.5D 앞뒤 원근감 보장</p>
     </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
+    <!-- Step 4: GDI+ 일괄 출력 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #16a34a;">3. Execution (일괄 출력)</h4>
+        <h4 class="pf-fc-title" style="color: #16a34a;">4. Batch Execution (일괄 출력)</h4>
         <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">GDI+ FLUSH</span>
       </div>
-      <p class="pf-fc-desc">정렬된 명령 버퍼를 순회하며 백버퍼 DC에 `Graphics::DrawImage()` 최종 출력</p>
+      <p class="pf-fc-desc">정렬된 명령 버퍼를 순회하며 백버퍼 DC에 <code>Graphics::DrawImage()</code> 일괄 출력 &rarr; 프레임 완료 시 화면 DC로 고속 전송(<code>BitBlt</code>)</p>
     </div>
   </div>
 </div>
-<p>Top-down 뷰의 입체감을 위해 객체의 발밑(Pivot) 위치의 Y 좌표를 기준으로 정렬하여 출력함으로써 오브젝트 간의 앞뒤 관계를 정확히 표현합니다.</p>
+<h4 id="서브시스템-역할-분담-및-책임-매트릭스">서브시스템 역할 분담 및 책임 매트릭스</h4>
+<p>단일 책임 원칙(SRP)에 따라 각 매니저와 컴포넌트가 명확히 분업화되어 불필요한 결합도(Coupling)를 차단합니다.</p>
+<div class="pf-table-wrapper"><table class="pf-data-table"><thead><tr><th>서브시스템 / 요소</th><th>주요 역할 (Role)</th><th>렌더링 파이프라인 내 책임 (Pipeline Responsibility)</th><th>핵심 메커니즘 / API</th></tr></thead><tbody><tr><td><strong><code>CameraManager</code></strong></td><td>시야 연산 &amp; 뷰포트 제어</td><td>타깃(플레이어) 추적, 뷰포트 월드 Rect 산출, 타일맵 가시성 독립 컬링, 가시 객체 렌더 루프 구동</td><td><code>GetViewportWorldRect()</code>, <code>RenderVisibleTiles()</code>, <code>RenderVisibleGameObjects()</code></td></tr><tr><td><strong><code>ObjectManager</code></strong></td><td>객체 수명 &amp; 공간 색인</td><td>256×256 정적 2D 그리드(<code>m_spatialGrid</code>) 소유/관리, 뷰포트 영역과 교차하는 그리드 셀 1차 색인 + AABB 2차 정밀 컬링</td><td><code>QueryObjectsInRectArea()</code>, <code>UpdateObjectGrid()</code></td></tr><tr><td><strong><code>GameObject</code></strong></td><td>다형성 렌더링 진입점</td><td>매니저의 다형성 호출(<code>virtual void Render()</code>)을 수신하여 하위 컴포넌트로 O(1) 위임 (컴포넌트 선형 탐색 배제)</td><td><code>Entity::Render()</code>, <code>Item::Render()</code>, <code>Player::Render()</code></td></tr><tr><td><strong><code>SpriteRenderer</code></strong></td><td>스프라이트 변환 &amp; 커맨드화</td><td>스프라이트 비트맵 및 피벗 기준 발밑 정렬 Y값(<code>sortingY</code>) 계산 후 지연 렌더링 커맨드 생성</td><td><code>RenderManager::AddWorldObjectCommand()</code></td></tr><tr><td><strong><code>RenderManager</code></strong></td><td>지연 렌더 파이프라인</td><td>레이어별 커맨드 큐 버퍼링, 발밑 Y좌표 기준 오름차순 정렬(<code>std::stable_sort</code>), GDI+ 더블 버퍼링 일괄 Flush</td><td><code>BeginFrame()</code>, <code>Flush()</code></td></tr></tbody></table></div>
+<details class="pf-details">
+<summary>코드 보기: CameraManager.cpp & ObjectManager.cpp - 시야 쿼리 및 가시 객체 렌더링 위임</summary>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// 1. <span class="hljs-title class_">CameraManager</span>.cpp: 뷰포트 영역을 인자로 전달하여 <span class="hljs-title class_">ObjectManager</span> 공간 분할 쿼리 요청</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">CameraManager</span>::RenderVisibleGameObjects</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-title class_">ObjectManager</span>* objectManager = <span class="hljs-title class_">ObjectManager</span>::<span class="hljs-built_in">GetInstance</span>();
+    <span class="hljs-keyword hljs-control-flow">if</span> (!objectManager) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+    visibleBuffer.<span class="hljs-built_in">clear</span>();
+
+    <span class="hljs-comment">// 뷰포트 월드 <span class="hljs-title class_">Rect</span> 기반 공간 분할 그리드 쿼리 (가시 객체만 수집)</span>
+    objectManager-&gt;<span class="hljs-built_in">QueryObjectsInRectArea</span>(<span class="hljs-built_in">GetViewportWorldRect</span>(), visibleBuffer);
+
+    <span class="hljs-comment">// 수집된 가시 객체만 다형성 <span class="hljs-title function_">Render</span>() 호출</span>
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-title class_">GameObject</span>* obj : visibleBuffer) {
+        obj-&gt;<span class="hljs-built_in">Render</span>();
+        obj-&gt;<span class="hljs-built_in">RenderDebugOverlay</span>();
+    }
+}
+
+<span class="hljs-comment">// 2. <span class="hljs-title class_">ObjectManager</span>.cpp: 2D Spatial Grid 셀 인덱싱 및 AABB 가시성 필터링</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">ObjectManager</span>::QueryObjectsInRectArea</span><span class="hljs-params">(<span class="hljs-type">const</span> Gdiplus::RectF&amp; rectArea, std::vector&lt;<span class="hljs-title class_">GameObject</span>*&gt;&amp; targetOutObjects)</span> </span>{
+    <span class="hljs-keyword hljs-control-flow">if</span> (m_worldObjects.<span class="hljs-built_in">empty</span>()) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+    <span class="hljs-comment">// 뷰포트 사각형과 교차하는 그리드 인덱스 계산 (<span class="hljs-title function_">O</span>(1))</span>
+    <span class="hljs-type">int</span> startX = (std::max)(<span class="hljs-number">0</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">floor</span>(rectArea.X / GRID_CELL_SIZE));
+    <span class="hljs-type">int</span> endX   = (std::min)(GRID_WIDTH - <span class="hljs-number">1</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">ceil</span>((rectArea.X + rectArea.Width) / GRID_CELL_SIZE) - <span class="hljs-number">1</span>);
+    <span class="hljs-type">int</span> startY = (std::max)(<span class="hljs-number">0</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">floor</span>(rectArea.Y / GRID_CELL_SIZE));
+    <span class="hljs-type">int</span> endY   = (std::min)(GRID_HEIGHT - <span class="hljs-number">1</span>, (<span class="hljs-type">int</span>)<span class="hljs-built_in">ceil</span>((rectArea.Y + rectArea.Height) / GRID_CELL_SIZE) - <span class="hljs-number">1</span>);
+
+    <span class="hljs-keyword hljs-control-flow">if</span> (++m_spatialQueryStamp == <span class="hljs-number">0</span>) m_spatialQueryStamp = <span class="hljs-number">1</span>;
+
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> y = startY; y &lt;= endY; ++y) {
+        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-type">int</span> x = startX; x &lt;= endX; ++x) {
+            <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-keyword">auto</span>* obj : m_spatialGrid[x][y]) {
+                <span class="hljs-keyword hljs-control-flow">if</span> (obj-&gt;<span class="hljs-built_in">GetLastSpatialQueryStamp</span>() == m_spatialQueryStamp) <span class="hljs-keyword hljs-control-flow">continue</span>;
+                obj-&gt;<span class="hljs-built_in">SetLastSpatialQueryStamp</span>(m_spatialQueryStamp);
+                <span class="hljs-keyword hljs-control-flow">if</span> (!obj-&gt;<span class="hljs-built_in">IsEnabled</span>() || obj-&gt;<span class="hljs-built_in">IsDead</span>()) <span class="hljs-keyword hljs-control-flow">continue</span>;
+
+                <span class="hljs-comment">// 최종 AABB 뷰포트 교차 검사</span>
+                <span class="hljs-type">const</span> Gdiplus::RectF bounds = obj-&gt;<span class="hljs-built_in">GetBounds</span>();
+                <span class="hljs-keyword hljs-control-flow">if</span> (rectArea.X &lt; bounds.X + bounds.Width &amp;&amp; rectArea.X + rectArea.Width &gt; bounds.X &amp;&amp;
+                    rectArea.Y &lt; bounds.Y + bounds.Height &amp;&amp; rectArea.Y + rectArea.Height &gt; bounds.Y) {
+                    targetOutObjects.<span class="hljs-built_in">push_back</span>(obj);
+                }
+            }
+        }
+    }
+}</code></pre>
+</details>
+<details class="pf-details">
+<summary>코드 보기: Entity.cpp & SpriteRenderer.cpp - 다형성 위임 및 발밑 Y-Sorting 커맨드 생성</summary>
+<pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// 1. <span class="hljs-title class_">Entity</span>.cpp: <span class="hljs-title class_">GameObject</span> 다형성 호출을 받아 소유한 <span class="hljs-title class_">SpriteRenderer</span>에 <span class="hljs-title function_">O</span>(1) 위임</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">Entity</span>::Render</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-keyword hljs-control-flow">if</span> (!<span class="hljs-built_in">IsEnabled</span>() || !m_transform) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+    <span class="hljs-keyword hljs-control-flow">if</span> (m_spriteRenderer &amp;&amp; m_spriteRenderer-&gt;<span class="hljs-built_in">IsEnabled</span>()) {
+        m_spriteRenderer-&gt;<span class="hljs-built_in">Render</span>();
+    }
+}
+
+<span class="hljs-comment">// 2. <span class="hljs-title class_">SpriteRenderer</span>.cpp: 발밑 피벗 기준 sortingY 산출 및 지연 렌더링 명령 버퍼링</span>
+<span class="hljs-function"><span class="hljs-type">void</span> <span class="hljs-title"><span class="hljs-title class_">SpriteRenderer</span>::Render</span><span class="hljs-params">()</span> </span>{
+    <span class="hljs-title class_">Transform</span>* pTransform = m_owner-&gt;<span class="hljs-built_in">GetComponent</span>&lt;<span class="hljs-title class_">Transform</span>&gt;();
+    <span class="hljs-keyword hljs-control-flow">if</span> (!pTransform || !m_sprite || !m_sprite-&gt;bitmap) <span class="hljs-keyword hljs-control-flow">return</span>;
+
+    <span class="hljs-type">float</span> worldX = pTransform-&gt;<span class="hljs-built_in">GetX</span>();
+    <span class="hljs-type">float</span> worldY = pTransform-&gt;<span class="hljs-built_in">GetY</span>();
+    <span class="hljs-type">float</span> height = m_sprite-&gt;sourceRect.Height * pTransform-&gt;<span class="hljs-built_in">GetScaleY</span>();
+
+    <span class="hljs-comment">// 발밑 Pivot Y 기준 정렬 깊이 계산</span>
+    <span class="hljs-type">float</span> sortingY = worldY + (<span class="hljs-number">1.0f</span> - m_sprite-&gt;pivot.Y) * height;
+
+    <span class="hljs-comment">// <span class="hljs-title class_">RenderManager</span> 커맨드 큐에 월드 오브젝트 커맨드 적재</span>
+    <span class="hljs-title class_">RenderManager</span>::<span class="hljs-built_in">GetInstance</span>()-&gt;<span class="hljs-built_in">AddWorldObjectCommand</span>(
+        m_sprite-&gt;bitmap.<span class="hljs-built_in">get</span>(), 
+        m_sprite-&gt;sourceRect, 
+        worldX, worldY, 
+        pTransform-&gt;<span class="hljs-built_in">GetScaleX</span>(), pTransform-&gt;<span class="hljs-built_in">GetScaleY</span>(),
+        m_sprite-&gt;pivot.X, m_sprite-&gt;pivot.Y,
+        m_layer, sortingY, 
+        pTransform-&gt;<span class="hljs-built_in">GetDirection</span>(), 
+        tintColor, hasTint, m_preFlipped
+    );
+}</code></pre>
+</details>
 <details class="pf-details">
 <summary>코드 보기: RenderManager.cpp - Y-Sorting 및 일괄 렌더링 처리</summary>
 <pre class="hljs-pre"><code class="hljs language-cpp"><span class="hljs-comment">// <span class="hljs-title class_">RenderManager</span>.cpp - Y-Sorting 및 일괄 렌더링 처리</span>
@@ -818,7 +993,8 @@
 <li class="toc-list__item toc-list__item--h3"><a href="#11-컴포넌트-기반-객체-설계-component-based">1.1 컴포넌트 기반 객체 설계 (Component-Based)</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#12-중앙-집중식-매니저-패턴-singleton-managers">1.2 중앙 집중식 매니저 패턴 (Singleton Managers)</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#2-렌더링-시스템-및-파이프라인">2. 렌더링 시스템 및 파이프라인</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#21-렌더링-파이프라인-흐름">2.1 렌더링 파이프라인 흐름</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#21-렌더링-파이프라인-흐름-및-서브시스템-협력">2.1 렌더링 파이프라인 흐름 및 서브시스템 협력</a></li>
+<li class="toc-list__item toc-list__item--h4"><a href="#서브시스템-역할-분담-및-책임-매트릭스">서브시스템 역할 분담 및 책임 매트릭스</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#22-동적-타일-캐싱-및-가시-영역-렌더링">2.2 동적 타일 캐싱 및 가시 영역 렌더링</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#3-최적화-및-핵심-기술">3. 최적화 및 핵심 기술</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#31-공간-분할-기법-그리드-기반-컬링-grid-based-culling">3.1 공간 분할 기법: 그리드 기반 컬링 (Grid-based Culling)</a></li>

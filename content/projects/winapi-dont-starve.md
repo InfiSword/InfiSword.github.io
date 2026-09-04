@@ -100,6 +100,164 @@ tags: [C++, WinAPI, Optimization, Game Logic]
     .flow-arrow {
         color: #007bff; font-weight: bold; font-size: 1.5rem; margin: 10px 0;
     }
+
+    /* --- 1.1 Balanced 2-Column Component Grid --- */
+    .pf-fc-grid-2col {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 14px !important;
+        width: 100% !important;
+    }
+    @media (max-width: 600px) {
+        .pf-fc-grid-2col {
+            grid-template-columns: 1fr !important;
+        }
+    }
+
+    /* --- 1.2 Singleton Managers 2x2 Technical Cards --- */
+    .pf-mgr-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+        width: 100%;
+        margin-top: 10px;
+        text-align: left;
+    }
+    @media (max-width: 700px) {
+        .pf-mgr-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .pf-mgr-card {
+        background: #ffffff;
+        border: 1px solid #dce5f0;
+        border-radius: 12px;
+        padding: 20px 22px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    .pf-mgr-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: #2563eb;
+    }
+    .pf-mgr-card.is-render::before { background: #059669; }
+    .pf-mgr-card.is-resource::before { background: #d97706; }
+    .pf-mgr-card.is-camera::before { background: #0284c7; }
+    
+    .pf-mgr-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.09);
+        border-color: #93c5fd;
+    }
+    .pf-mgr-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        gap: 8px;
+    }
+    .pf-mgr-title {
+        font-family: 'Fira Code', monospace;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+    .pf-mgr-badge {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        white-space: nowrap;
+    }
+    .pf-mgr-badge.is-render { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+    .pf-mgr-badge.is-resource { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .pf-mgr-badge.is-camera { background: #f0f9ff; color: #0284c7; border-color: #bae6fd; }
+
+    .pf-mgr-subtitle {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #475569;
+        margin: 0 0 14px 0;
+        line-height: 1.45;
+    }
+    .pf-mgr-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 16px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .pf-mgr-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #334155;
+        line-height: 1.5;
+    }
+    .pf-mgr-bullet {
+        color: #2563eb;
+        font-family: 'Fira Code', monospace;
+        font-weight: 700;
+        font-size: 0.82rem;
+        margin-top: 1px;
+        flex-shrink: 0;
+    }
+    .pf-mgr-card.is-render .pf-mgr-bullet { color: #059669; }
+    .pf-mgr-card.is-resource .pf-mgr-bullet { color: #d97706; }
+    .pf-mgr-card.is-camera .pf-mgr-bullet { color: #0284c7; }
+
+    .pf-mgr-meta {
+        padding-top: 12px;
+        border-top: 1px dashed #e2e8f0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: auto;
+    }
+    .pf-mgr-tag {
+        font-family: 'Fira Code', monospace;
+        font-size: 0.72rem;
+        padding: 3px 7px;
+        border-radius: 4px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        color: #64748b;
+    }
+
+    @media (prefers-color-scheme: dark) {
+        .pf-mgr-card {
+            background: rgba(15, 23, 42, 0.75);
+            border-color: rgba(148, 163, 184, 0.18);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .pf-mgr-title { color: #f8fafc; }
+        .pf-mgr-subtitle { color: #94a3b8; }
+        .pf-mgr-item { color: #cbd5e1; }
+        .pf-mgr-meta { border-top-color: rgba(148, 163, 184, 0.15); }
+        .pf-mgr-tag {
+            background: rgba(15, 23, 42, 0.9);
+            border-color: rgba(148, 163, 184, 0.2);
+            color: #94a3b8;
+        }
+    }
 </style>
 
 게임 엔진에 의존하지 않고 C++와 WinAPI만을 이용해 완전 밑바닥부터 게임을 구축하는 데 도전한 프로젝트입니다. 게임 엔진의 추상화된 기능 뒤에 숨겨진 전체적인 실행 파이프라인을 깊이 있게 이해하고 스스로 설계해보고자 시작하였으며, 기존 게임인 'Don't Starve'의 핵심 시스템을 참고하여 제작했습니다.
@@ -201,26 +359,26 @@ tags: [C++, WinAPI, Optimization, Game Logic]
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
 
-    <!-- 4 Components Grid -->
-    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
+    <!-- 4 Components Grid: 2 Columns Balanced Layout -->
+    <div class="pf-fc-branch-grid pf-fc-grid-2col">
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">CORE</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">Transform</div>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">CORE</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">Transform</div>
         <div class="pf-fc-branch-desc">2D 위치(Position), 스케일, 바라보는 방향 연산</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">RENDER</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SpriteRenderer</div>
+        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">RENDER</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">SpriteRenderer</div>
         <div class="pf-fc-branch-desc">GDI+ 비트맵 렌더링 및 Y-Sorting 피벗 좌표 관리</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">PHYSICS</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">Collider</div>
+        <span class="pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">PHYSICS</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">Collider</div>
         <div class="pf-fc-branch-desc">AABB 충돌 박스 및 상호작용 트리거 검사</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">ANIM</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">Animator</div>
+        <span class="pf-fc-badge" style="background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe;">ANIM</span>
+        <div class="pf-fc-branch-title" style="margin-top: 6px;">Animator</div>
         <div class="pf-fc-branch-desc">스프라이트시트 클립 재생 및 프레임 이벤트 콜백</div>
       </div>
     </div>
@@ -259,37 +417,118 @@ T* GetComponent() const {
 
 시스템의 전역적인 상태 관리와 자원 공유를 위해 **싱글톤 기반 매니저**들을 구축했습니다.
 
-<div class="pf-visual-frame">
-<div class="pf-arch-diagram">
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">ObjectManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">객체 생명주기 관리</span>
-<span class="pf-arch-item">공간 분할 그리드 업데이트</span>
-</div>
-</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">RenderManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">커맨드 예약</span>
-<span class="pf-arch-item">레이어별 Y-Sorting 렌더링</span>
-</div>
-</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">ResourceManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">비트맵/스프라이트 캐싱</span>
-<span class="pf-arch-item">중복 로드 방지</span>
-</div>
-</div>
-<div class="pf-arch-layer">
-<div class="pf-arch-layer-title">CameraManager</div>
-<div class="pf-arch-layer-items">
-<span class="pf-arch-item">가시 영역 컬링</span>
-<span class="pf-arch-item">좌표계 변환 (World ↔ Screen)</span>
-</div>
-</div>
-</div>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart pf-flowchart-wide">
+
+    <!-- Global Core Hub Header -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title" style="color: #1d4ed8;">Engine Subsystem Core (Singleton Services)</h4>
+        <span class="pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">GLOBAL SERVICES HUB</span>
+      </div>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- 4 Managers 2x2 Technical Cards Grid -->
+    <div class="pf-mgr-grid">
+      <!-- 1. ObjectManager -->
+      <div class="pf-mgr-card">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">ObjectManager</h4>
+          <span class="pf-mgr-badge">ENTITY</span>
+        </div>
+        <p class="pf-mgr-subtitle">월드 엔티티 생명주기 및 2D 공간 분할(Spatial Partitioning) 제어</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>모든 <code>GameObject</code> 동적 생성·소멸 및 ID 고유성 보장</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>256×256 정적 그리드 배열 인덱싱 실시간 업데이트</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>가시 범위 내 활성 객체 풀링(Pooling) 및 순회 최적화</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 2. RenderManager -->
+      <div class="pf-mgr-card is-render">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">RenderManager</h4>
+          <span class="pf-mgr-badge is-render">RENDER</span>
+        </div>
+        <p class="pf-mgr-subtitle">커맨드 패턴 기반 지연 렌더링 및 발밑 Pivot Y-Sorting 정렬</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>프레임별 <code>DrawCommand</code> 생성 및 레이어 큐 버퍼링</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>깊이(Depth) 우선순위 Pivot Y 기준 <code>std::stable_sort</code> 정렬</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>배경·월드·UI 레이어 단위 GDI+ 더블 버퍼링 일괄 Flush</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 3. ResourceManager -->
+      <div class="pf-mgr-card is-resource">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">ResourceManager</h4>
+          <span class="pf-mgr-badge is-resource">ASSET</span>
+        </div>
+        <p class="pf-mgr-subtitle">GDI+ 비트맵 및 스프라이트 시트 해시맵 캐싱 및 중복 로드 방지</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>파일 경로 해시 기반 비트맵 메모리 캐싱 (Zero Duplicate)</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>애니메이션 스프라이트 시트 프레임 Rect 메타데이터 관리</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>씬 전환 및 프로그램 종료 시 안전한 GDI+ 리소스 일괄 해제</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 4. CameraManager -->
+      <div class="pf-mgr-card is-camera">
+        <div class="pf-mgr-head">
+          <h4 class="pf-mgr-title">CameraManager</h4>
+          <span class="pf-mgr-badge is-camera">CAMERA</span>
+        </div>
+        <p class="pf-mgr-subtitle">플레이어 시야 추적, 뷰포트 컬링 및 월드-스크린 좌표계 변환</p>
+        <ul class="pf-mgr-list">
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>플레이어 중심 선형 보간(Lerp) 부드러운 타깃 추적</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span><code>ObjectManager</code>에서 가시 범위 객체를 추적하여 렌더링</span>
+          </li>
+          <li class="pf-mgr-item">
+            <span class="pf-mgr-bullet">▸</span>
+            <span>World Coordinates ↔ Screen DC 좌표계 선형 변환 행렬</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
 </div>
 
 ---
@@ -299,58 +538,177 @@ T* GetComponent() const {
 
 GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 **커맨드 패턴 기반의 렌더링 파이프라인**을 구축했습니다. 매 프레임 모든 객체를 즉시 그리는 대신, 렌더링 명령을 레이어별로 수집하고 정렬한 뒤 일괄 실행(Flush)하는 방식을 취합니다.
 
-### 2.1 렌더링 파이프라인 흐름
+### 2.1 렌더링 파이프라인 흐름 및 서브시스템 협력
 
-렌더링 프로세스는 크게 **제출(Submission) -> 정렬(Sorting) -> 실행(Execution)**의 3단계로 구성됩니다.
+렌더링 파이프라인은 단순히 그리는 단계를 넘어, **시야 컬링 쿼리(Culling Query) → 다형성 커맨드 위임(Dispatch & Buffering) → 발밑 깊이 정렬(Y-Sorting) → 일괄 출력(Flush)**의 4단계 협력 프로세스로 정밀하게 구동됩니다.
 
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
 
     <div class="pf-fc-pill-start">
       <span class="pf-fc-mono-tag">TRIGGER</span>
-      <span>Render Loop Trigger (매 프레임 렌더링 시작)</span>
+      <span>Render Loop Trigger (SceneManager &rarr; GameScene::Render)</span>
     </div>
 
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
 
+    <!-- Step 1: 시야 계산 & 공간 분할 컬링 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">1. Submission (명령 제출)</h4>
-        <span class="pf-fc-badge">COLLECT</span>
+        <h4 class="pf-fc-title">1. Viewport Culling &amp; Spatial Query</h4>
+        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">SPATIAL GRID</span>
       </div>
-      <p class="pf-fc-desc">`GameObject::Render()` 호출 &rarr; `DrawCommand` 생성 후 `RenderManager` 큐에 예약</p>
+      <p class="pf-fc-desc"><code>CameraManager</code>가 뷰포트 월드 사각형 산출 &rarr; <code>ObjectManager</code>의 2D 공간 분할 그리드(256×256) 쿼리로 화면 내 가시 객체(<code>visibleBuffer</code>)만 선별 (타일맵은 <code>CameraManager</code> 독립 컬링)</p>
     </div>
 
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
 
+    <!-- Step 2: 다형성 디스패치 & 커맨드 제출 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">2. Sorting (정렬 단계)</h4>
+        <h4 class="pf-fc-title">2. Polymorphic Dispatch &amp; Buffering</h4>
+        <span class="pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">COMMAND DISPATCH</span>
+      </div>
+      <p class="pf-fc-desc"><code>CameraManager</code>가 가시 객체 <code>obj-&gt;Render()</code> 호출 &rarr; <code>Entity</code>/<code>Item</code>이 소유한 <code>SpriteRenderer::Render()</code>에 O(1) 위임 &rarr; 발밑 Pivot Y 기준 <code>DrawCommand</code> 생성 후 <code>RenderManager</code> 큐에 예약</p>
+    </div>
+
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- Step 3: Y-Sorting 정렬 -->
+    <div class="pf-fc-card pf-fc-compact">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-fc-title">3. Depth Sorting (발밑 기준 정렬)</h4>
         <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">Y-SORTING</span>
       </div>
-      <p class="pf-fc-desc">`RenderManager::Flush()` &rarr; 배경/오브젝트/UI 레이어 우선순위 분류 후 발밑(Pivot Y) 기준 오름차순 정렬</p>
+      <p class="pf-fc-desc"><code>RenderManager::Flush()</code> &rarr; 레이어별 분류(타일 &rarr; 월드 &rarr; UI) 후 동일 레이어 내에서 발밑(Pivot Y) 기준 <code>std::stable_sort</code> 정렬로 Top-down 2.5D 앞뒤 원근감 보장</p>
     </div>
 
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
 
+    <!-- Step 4: GDI+ 일괄 출력 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #16a34a;">3. Execution (일괄 출력)</h4>
+        <h4 class="pf-fc-title" style="color: #16a34a;">4. Batch Execution (일괄 출력)</h4>
         <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">GDI+ FLUSH</span>
       </div>
-      <p class="pf-fc-desc">정렬된 명령 버퍼를 순회하며 백버퍼 DC에 `Graphics::DrawImage()` 최종 출력</p>
+      <p class="pf-fc-desc">정렬된 명령 버퍼를 순회하며 백버퍼 DC에 <code>Graphics::DrawImage()</code> 일괄 출력 &rarr; 프레임 완료 시 화면 DC로 고속 전송(<code>BitBlt</code>)</p>
     </div>
 
   </div>
 </div>
 
-Top-down 뷰의 입체감을 위해 객체의 발밑(Pivot) 위치의 Y 좌표를 기준으로 정렬하여 출력함으로써 오브젝트 간의 앞뒤 관계를 정확히 표현합니다.
+#### 서브시스템 역할 분담 및 책임 매트릭스
+
+단일 책임 원칙(SRP)에 따라 각 매니저와 컴포넌트가 명확히 분업화되어 불필요한 결합도(Coupling)를 차단합니다.
+
+| 서브시스템 / 요소 | 주요 역할 (Role) | 렌더링 파이프라인 내 책임 (Pipeline Responsibility) | 핵심 메커니즘 / API |
+|---|---|---|---|
+| **`CameraManager`** | 시야 연산 &amp; 뷰포트 제어 | 타깃(플레이어) 추적, 뷰포트 월드 Rect 산출, 타일맵 가시성 독립 컬링, 가시 객체 렌더 루프 구동 | `GetViewportWorldRect()`, `RenderVisibleTiles()`, `RenderVisibleGameObjects()` |
+| **`ObjectManager`** | 객체 수명 &amp; 공간 색인 | 256×256 정적 2D 그리드(`m_spatialGrid`) 소유/관리, 뷰포트 영역과 교차하는 그리드 셀 1차 색인 + AABB 2차 정밀 컬링 | `QueryObjectsInRectArea()`, `UpdateObjectGrid()` |
+| **`GameObject`** | 다형성 렌더링 진입점 | 매니저의 다형성 호출(`virtual void Render()`)을 수신하여 하위 컴포넌트로 O(1) 위임 (컴포넌트 선형 탐색 배제) | `Entity::Render()`, `Item::Render()`, `Player::Render()` |
+| **`SpriteRenderer`** | 스프라이트 변환 &amp; 커맨드화 | 스프라이트 비트맵 및 피벗 기준 발밑 정렬 Y값(`sortingY`) 계산 후 지연 렌더링 커맨드 생성 | `RenderManager::AddWorldObjectCommand()` |
+| **`RenderManager`** | 지연 렌더 파이프라인 | 레이어별 커맨드 큐 버퍼링, 발밑 Y좌표 기준 오름차순 정렬(`std::stable_sort`), GDI+ 더블 버퍼링 일괄 Flush | `BeginFrame()`, `Flush()` |
+
+<details class="pf-details">
+<summary>코드 보기: CameraManager.cpp & ObjectManager.cpp - 시야 쿼리 및 가시 객체 렌더링 위임</summary>
+
+```cpp
+// 1. CameraManager.cpp: 뷰포트 영역을 인자로 전달하여 ObjectManager 공간 분할 쿼리 요청
+void CameraManager::RenderVisibleGameObjects() {
+    ObjectManager* objectManager = ObjectManager::GetInstance();
+    if (!objectManager) return;
+
+    visibleBuffer.clear();
+
+    // 뷰포트 월드 Rect 기반 공간 분할 그리드 쿼리 (가시 객체만 수집)
+    objectManager->QueryObjectsInRectArea(GetViewportWorldRect(), visibleBuffer);
+
+    // 수집된 가시 객체만 다형성 Render() 호출
+    for (GameObject* obj : visibleBuffer) {
+        obj->Render();
+        obj->RenderDebugOverlay();
+    }
+}
+
+// 2. ObjectManager.cpp: 2D Spatial Grid 셀 인덱싱 및 AABB 가시성 필터링
+void ObjectManager::QueryObjectsInRectArea(const Gdiplus::RectF& rectArea, std::vector<GameObject*>& targetOutObjects) {
+    if (m_worldObjects.empty()) return;
+
+    // 뷰포트 사각형과 교차하는 그리드 인덱스 계산 (O(1))
+    int startX = (std::max)(0, (int)floor(rectArea.X / GRID_CELL_SIZE));
+    int endX   = (std::min)(GRID_WIDTH - 1, (int)ceil((rectArea.X + rectArea.Width) / GRID_CELL_SIZE) - 1);
+    int startY = (std::max)(0, (int)floor(rectArea.Y / GRID_CELL_SIZE));
+    int endY   = (std::min)(GRID_HEIGHT - 1, (int)ceil((rectArea.Y + rectArea.Height) / GRID_CELL_SIZE) - 1);
+
+    if (++m_spatialQueryStamp == 0) m_spatialQueryStamp = 1;
+
+    for (int y = startY; y <= endY; ++y) {
+        for (int x = startX; x <= endX; ++x) {
+            for (auto* obj : m_spatialGrid[x][y]) {
+                if (obj->GetLastSpatialQueryStamp() == m_spatialQueryStamp) continue;
+                obj->SetLastSpatialQueryStamp(m_spatialQueryStamp);
+                if (!obj->IsEnabled() || obj->IsDead()) continue;
+
+                // 최종 AABB 뷰포트 교차 검사
+                const Gdiplus::RectF bounds = obj->GetBounds();
+                if (rectArea.X < bounds.X + bounds.Width && rectArea.X + rectArea.Width > bounds.X &&
+                    rectArea.Y < bounds.Y + bounds.Height && rectArea.Y + rectArea.Height > bounds.Y) {
+                    targetOutObjects.push_back(obj);
+                }
+            }
+        }
+    }
+}
+```
+</details>
+
+<details class="pf-details">
+<summary>코드 보기: Entity.cpp & SpriteRenderer.cpp - 다형성 위임 및 발밑 Y-Sorting 커맨드 생성</summary>
+
+```cpp
+// 1. Entity.cpp: GameObject 다형성 호출을 받아 소유한 SpriteRenderer에 O(1) 위임
+void Entity::Render() {
+    if (!IsEnabled() || !m_transform) return;
+
+    if (m_spriteRenderer && m_spriteRenderer->IsEnabled()) {
+        m_spriteRenderer->Render();
+    }
+}
+
+// 2. SpriteRenderer.cpp: 발밑 피벗 기준 sortingY 산출 및 지연 렌더링 명령 버퍼링
+void SpriteRenderer::Render() {
+    Transform* pTransform = m_owner->GetComponent<Transform>();
+    if (!pTransform || !m_sprite || !m_sprite->bitmap) return;
+
+    float worldX = pTransform->GetX();
+    float worldY = pTransform->GetY();
+    float height = m_sprite->sourceRect.Height * pTransform->GetScaleY();
+
+    // 발밑 Pivot Y 기준 정렬 깊이 계산
+    float sortingY = worldY + (1.0f - m_sprite->pivot.Y) * height;
+
+    // RenderManager 커맨드 큐에 월드 오브젝트 커맨드 적재
+    RenderManager::GetInstance()->AddWorldObjectCommand(
+        m_sprite->bitmap.get(), 
+        m_sprite->sourceRect, 
+        worldX, worldY, 
+        pTransform->GetScaleX(), pTransform->GetScaleY(),
+        m_sprite->pivot.X, m_sprite->pivot.Y,
+        m_layer, sortingY, 
+        pTransform->GetDirection(), 
+        tintColor, hasTint, m_preFlipped
+    );
+}
+```
+</details>
 
 <details class="pf-details">
 <summary>코드 보기: RenderManager.cpp - Y-Sorting 및 일괄 렌더링 처리</summary>
