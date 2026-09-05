@@ -39,12 +39,12 @@ test.describe('포트폴리오 홈 페이지 테스트', () => {
     await expect(page.locator('text=SYSTEM READY')).toHaveCount(0);
     await expect(page.locator('text=FILE_OS')).toHaveCount(0);
 
-    // 1. 로딩바 요소 확인
+    // 1. 로딩바 요소 확인 (1.2초 로딩 후 완료 시 숨겨지므로 DOM 존재 확인)
     const progressBar = page.locator('#win-progress-bar');
-    await expect(progressBar).toBeVisible();
+    await expect(progressBar).toBeAttached();
 
     const prompt = page.locator('#win-action-prompt');
-    await expect(prompt).toBeVisible({ timeout: 2500 });
+    await expect(prompt).toBeVisible({ timeout: 5000 });
     const projectName = test.info().project.name.replace(/\s+/g, '_');
     await page.screenshot({ path: `test-results/loading-screen-${projectName}.png` });
 

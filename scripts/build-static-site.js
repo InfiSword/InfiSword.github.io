@@ -38,6 +38,7 @@ const PROJECT_HERO_IMAGES = {
   "autonomous-racing-agent": "assets/images/Car Simulation/스크린샷 2026-04-27 105116.png",
   "slime-project": "assets/images/Slime/slide_40_img_31.png",
   "moonlight": "assets/images/MoonLight/slide_42_img_30.png",
+  "directx-pinball-game": "assets/images/Pinball/pinball_title.png",
 };
 
 function ensureDir(dir) {
@@ -632,7 +633,7 @@ function renderProject(sourceFile) {
   const parsed = stripFrontMatter(readText(sourceFile));
   let articleSource = parsed.body.replace(/<style\b[^>]*>[\s\S]*?<\/style>\s*/gi, "");
   // Rewrite root-relative asset URLs to relative path so file:// and web servers both work
-  articleSource = articleSource.replace(/(src|href)=["']\/(assets\/[^"']+)["']/gi, '$1="../../$2"');
+  articleSource = articleSource.replace(/(src|href|poster)=["']\/(assets\/[^"']+)["']/gi, '$1="../../$2"');
   const article = renderMarkdown(articleSource);
   const tags = Array.isArray(parsed.data.tags) ? parsed.data.tags : [];
   const title = parsed.data.title || path.basename(sourceFile, ".md");
