@@ -23,10 +23,6 @@
         <a href="../../index.html">Home</a>
         <a href="../../index.html#projects">Projects</a>
         <a href="mailto:seif4688@gmail.com">Contact</a>
-        <button type="button" id="win-lock-btn" class="site-nav-lock-btn" title="화면 잠금 (Win + L)" aria-label="화면 잠금">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-          <span>잠금</span>
-        </button>
       </nav>
     </div>
   </header>
@@ -113,6 +109,26 @@
 <h3 id="11-마스터-메타-시트-파이프라인-master-sheet-pipeline">1.1 마스터 메타 시트 파이프라인 (Master Sheet Pipeline)</h3>
 <p>시스템의 진입점인 <code>ServerCSV_ConvertData</code>는 마스터 구글 시트의 0번 인덱스(<code>gid=0</code>) 메타 시트를 우선 다운로드하여 전체 데이터 카탈로그를 파악합니다.</p>
 <ul><li><strong>메타 시트 4단 열 규격</strong>:</li><li><code>CSVDataType</code>: 대분류 카테고리 (<code>Define.CSVDataType</code> — <code>Quest</code>, <code>Region</code>, <code>Item</code>, <code>Game</code>, <code>Skill</code>, <code>Unit</code>)</li><li><code>Attribute</code>: 소분류 속성 키 (예: <code>Weapon</code>, <code>Armor</code>, <code>Monster</code>, <code>Active</code>, <code>Passive</code>, <code>Dialog</code> 등 18종)</li><li><code>Version</code>: 해당 테이블의 버전 식별자 (문자열 — 예: <code>&quot;1&quot;</code>, <code>&quot;4&quot;</code>, <code>&quot;7&quot;</code>)</li><li><code>Link</code>: 해당 시트의 구글 드라이브 CSV Export URL</li></ul>
+<div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
+<p>실제 연동 구글 스프레드시트 마스터 메타 시트 원본 (Live Master Meta Sheet)</p>
+        </div>
+        <span class="pf-fc-badge">MasterSheetURL (gid=0)</span>
+    </div>
+    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 18px 0; line-height: 1.6;">
+<p>월퍼킬 클라이언트 코드(<code>ServerCSV_ConvertData.cs</code>)의 <code>MasterSheetURL</code>을 통해 다운로드하는 <strong>실제 구글 스프레드시트 마스터 메타 시트(<code>WFCK_GameConfiguration</code>)</strong> 화면입니다. 18종의 데이터 카탈로그 및 실시간 테이블 버전, 개별 CSV 다운로드 링크가 중앙에서 관리됩니다.</p>
+    </p>
+    <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
+        <img src="../../assets/images/World%20First%20Kill/wfk_master_meta_sheet.png" alt="월퍼킬 마스터 메타 시트 원본 (WFCK_GameConfiguration)" style="width: 100%; height: auto; display: block;" loading="lazy">
+        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+<p>▲ ServerCSV_ConvertData가 최초 다운로드하는 gid=0 메타 시트 (19행: Unit_Monster 테이블 버전 및 개별 다운로드 Link 연동)</p>
+        </figcaption>
+    </figure>
+</div>
+<details class="pf-details">
+<summary>코드 보기: ServerCSV_ConvertData.cs 메타 시트 다운로드 및 2차원 카탈로그 구축</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// ServerCSV_ConvertData.cs: 메타 시트 다운로드 및 2차원 카탈로그 구축</span>
 <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword hljs-control-flow">async</span> <span class="hljs-title class_">Task</span>&lt;<span class="hljs-built_in">bool</span>&gt; <span class="hljs-title">DownloadMetaSheetAsync</span>()</span>
 {
@@ -141,6 +157,7 @@
     }
     <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">true</span>;
 }</code></pre>
+</details>
 <h3 id="12-조건부-증분-다운로드conditional-incremental-download-플로우">1.2 조건부 증분 다운로드(Conditional Incremental Download) 플로우</h3>
 <p>모든 CSV를 매번 새로 내려받지 않고, 로컬 캐시 버전과 서버 버전을 대조하여 <strong>변경된 파일만 네트워크로 전송받는 증분 파이프라인</strong>입니다:</p>
 <div class="pf-visual-frame pf-flowchart-frame">
@@ -235,7 +252,25 @@
 </details>
 <hr>
 <h2 id="2-실전-예시로-보는-리플렉션-csv-파싱-전개-과정" class="chapter-title">2. 실전 예시로 보는 리플렉션 CSV 파싱 전개 과정</h2>
-<p>월퍼킬의 파싱 엔진은 복잡한 내부 코드를 몰라도 <strong>"CSV 데이터 한 줄이 C# 객체로 어떻게 변환되어 인게임 딕셔너리에 도달하는가?"</strong>라는 데이터 흐름으로 직관적으로 이해할 수 있습니다. 18종의 테이블마다 수동 파서를 작성하지 않고, 제네릭과 리플렉션이 동작하는 실제 과정을 <code>Unit_Monster.csv</code>의 첫 번째 몬스터인 <strong>'덤불 골렘'</strong> 데이터를 예시로 전개합니다.</p>
+<p>월퍼킬의 파싱 엔진은 복잡한 내부 코드를 몰라도 <strong>"구글 시트에 적힌 기획 데이터 한 줄이 C# 객체로 어떻게 변환되어 인게임 몬스터에게 도달하는가?"</strong>라는 데이터 흐름으로 직관적으로 이해할 수 있습니다. 기획자가 구글 시트에서 몬스터 체력이나 공격력을 수정할 때마다 프로그래머가 C# 코드를 일일이 고치고 앱을 새로 빌드해야 한다면 라이브 서비스는 불가능합니다. 월퍼킬의 리플렉션 파서는 <strong>"구글 시트에 적힌 텍스트 한 줄을 읽어 게임 속 몬스터에게 살아 숨 쉬는 실제 스탯으로 부여하는 자동 변환 파이프라인"</strong>입니다. 18종의 데이터 테이블마다 수동 코드를 만들지 않고도 범용적으로 동작하는 실제 과정을 <code>Unit_Monster.csv</code>의 첫 번째 몬스터인 <strong>'덤불 골렘'</strong> 데이터를 예시로 한 단계씩 살펴봅니다.</p>
+<div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
+<p>실제 구글 스프레드시트 몬스터 기획 데이터 시트 원본 (WFCK_Unit)</p>
+        </div>
+        <span class="pf-fc-badge">DATA TABLE SHEET</span>
+    </div>
+    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
+<p>마스터 메타 시트의 개별 링크를 통해 다운로드되는 <strong>실제 몬스터 기획 데이터 시트(<code>WFCK_Unit</code>)</strong> 원본 화면입니다. 1행(Index 0)의 <code>덤불 골렘</code>에 정의된 27개 기획 필드가 아래 4단계 리플렉션 파싱 과정을 거쳐 <strong>C# 데이터 객체(<code>Data_Monster</code>)</strong>로 변환되며, 게임 속 덤불 골렘에게 실제 스탯(체력·공격력·이동속도 등)을 부여하게 됩니다.</p>
+    </p>
+    <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
+        <img src="../../assets/images/World%20First%20Kill/wfk_unit_monster_sheet.png" alt="월퍼킬 몬스터 기획 시트 원본 (WFCK_Unit - Unit_Monster.csv)" style="width: 100%; height: auto; display: block;" loading="lazy">
+        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+<p>▲ 실제 구글 시트 1행: Index 0 '덤불 골렘'의 27개 기획 스탯 컬럼 (C# 리플렉션 파서로 주입되는 원시 데이터)</p>
+        </figcaption>
+    </figure>
+</div>
 <h3 id="21-실제-몬스터-데이터-파싱-4단계-전개-execution-walkthrough">2.1 실제 몬스터 데이터 파싱 4단계 전개 (Execution Walkthrough)</h3>
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
@@ -245,9 +280,9 @@
       <span>Unit_Monster.csv 원시 데이터 (1행: 덤불 골렘)</span>
     </div>
     <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 10px 0; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; overflow-x: auto; color: #0f172a; line-height: 1.6;">
-      <div style="color: #64748b; margin-bottom: 4px;">// CSV 1행: Header</div>
+      <div style="color: #64748b; margin-bottom: 4px;">// CSV 1행: Header (시트의 기획 스탯 열 이름)</div>
       <div style="color: #2563eb; font-weight: 600;">Index, Name, Description, Target_Team, Target_Enemy, WarningDis, DropItem, SkillNum1, SkillNum2, MoveSpeed, AttackSkill, AD_Damage, ...</div>
-      <div style="color: #64748b; margin: 8px 0 4px 0;">// CSV 2행: Data Row (덤불 골렘)</div>
+      <div style="color: #64748b; margin: 8px 0 4px 0;">// CSV 2행: Data Row (덤불 골렘 원시 데이터)</div>
       <div style="color: #0f172a;">0, 덤불 골렘, "갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다.", 0, 3, 0, 1501001, -1, -1, 0.75, 0, 10, ...</div>
     </div>
     <div class="pf-fc-arrow">
@@ -256,11 +291,11 @@
     <!-- STEP 01 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">STEP 1. DTO 필드 분석 및 1:1 매핑 테이블 자동 구축 (SetupFieldDict)</h4>
+        <h4 class="pf-fc-title">[틀 맞추기] C# 데이터 변수와 시트 열(Header) 1:1 자동 대응시키기(SetupFieldDict)</h4>
         <span class="pf-fc-badge">REFLECTION</span>
       </div>
       <p class="pf-fc-desc">
-        <code>typeof(Data_Monster).GetFields()</code>로 수집된 C# 필드 선언 순서와 CSV 헤더 열 순서를 1:1 결합하여 인덱싱 사전을 구축합니다.
+<p>리플렉션(Reflection) 기술을 통해 C# <code>Data_Monster</code> 클래스에 어떤 변수들이 선언되어 있는지 스스로 읽어옵니다. 그런 다음 시트 첫 행의 열 이름(<code>Index</code>, <code>Name</code>, <code>AD_Damage</code> 등)과 C# 변수명을 1:1로 짝지어 <strong>"어떤 열의 값을 어떤 C# 변수에 넣어야 하는지"</strong>를 안내하는 매핑 사전을 자동으로 구축합니다.</p>
       </p>
       <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-family: 'Fira Code', monospace; font-size: 0.8rem;">
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
@@ -282,6 +317,49 @@
           <span style="color: #2563eb;">[11] AD_Damage</span> ➔ <strong>m_ad_Damage</strong>
         </div>
       </div>
+      <details class="pf-details" style="margin-top: 14px;">
+        <summary>코드 보기: SetupFieldDict() 1:1 매핑 로직 및 Data_Monster 클래스 선언</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">CSVParser</span>.cs: 리플렉션으로 FieldInfo[] 수집 및 SetupFieldDict 1:1 매핑 실행</span>
+Type myType = <span class="hljs-keyword">typeof</span>(T); <span class="hljs-comment">// typeof(Data_Monster)</span>
+FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</span>(
+    BindingFlags.NonPublic | BindingFlags.Instance | 
+    BindingFlags.Public | BindingFlags.Static
+);
+
+<span class="hljs-built_in">string</span>[] attributeColumnArray = csvIndexData[<span class="hljs-number">0</span>].<span class="hljs-title function_">Trim</span>().<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;,&#x27;</span>);
+<span class="hljs-title function_">SetupFieldDict</span>(attributeColumnArray, myFieldInfo);
+
+<span class="hljs-comment">// <span class="hljs-title function_">SetupFieldDict</span>() 구현: CSV 열 순서와 C# 필드명을 1:1 바인딩하는 매핑 사전 구축</span>
+<span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">SetupFieldDict</span>(<span class="hljs-params"><span class="hljs-built_in">string</span>[] attribute, FieldInfo[] fields</span>)</span>
+{
+    Data_Dict.<span class="hljs-title function_">Clear</span>();
+    DataIndex_Dict.<span class="hljs-title function_">Clear</span>();
+
+    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; attribute.Length; i++)
+    {
+        <span class="hljs-built_in">string</span> header = attribute[i].<span class="hljs-title function_">Trim</span>();
+        Data_Dict[header] = fields[i].Name; <span class="hljs-comment">// 예: Data_Dict[&quot;Name&quot;] = &quot;m_monsterName&quot;</span>
+        DataIndex_Dict[i] = header;        <span class="hljs-comment">// 예: DataIndex_Dict[1] = &quot;Name&quot;</span>
+    }
+}</code></pre>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// Data_Monster.cs: CSV 헤더 열 순서와 1:1로 매핑되는 C# DTO 필드 선언 구조</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Data_Monster</span> : <span class="hljs-title">BaseData</span>
+{
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_monsterIndex;      <span class="hljs-comment">// [0] Index</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">string</span> m_monsterName;    <span class="hljs-comment">// [1] Name</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">string</span> m_description;    <span class="hljs-comment">// [2] Description</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_target_Team;       <span class="hljs-comment">// [3] Target_Team</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_target_Enemy;      <span class="hljs-comment">// [4] Target_Enemy</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_WarningDis;        <span class="hljs-comment">// [5] WarningDis</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_dropItem;          <span class="hljs-comment">// [6] DropItem</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_skillNum1;         <span class="hljs-comment">// [7] SkillNum1</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_skillNum2;         <span class="hljs-comment">// [8] SkillNum2</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> m_addMoveSpeed;    <span class="hljs-comment">// [9] <span class="hljs-title function_">MoveSpeed </span>(float)</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_attackSkill;       <span class="hljs-comment">// [10] AttackSkill</span>
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">int</span> m_ad_Damage;         <span class="hljs-comment">// [11] AD_Damage</span>
+    <span class="hljs-comment">// ... 총 27개 기획 스탯 필드</span>
+}</code></pre>
+      </details>
     </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
@@ -289,11 +367,11 @@
     <!-- STEP 02 -->
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">STEP 2. 정규식 스마트 분할로 안전한 행 데이터 분리 (SmartSplit)</h4>
+        <h4 class="pf-fc-title">STEP 2. [안전하게 쪼개기] 쉼표가 섞여도 안심하는 정규식 스마트 분할 (SmartSplit)</h4>
         <span class="pf-fc-badge">SMART_SPLIT</span>
       </div>
       <p class="pf-fc-desc">
-<p>설명 컬럼 내부에 쉼표(<code>"갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의..."</code>)가 포함되어 있어도 열 인덱스가 밀리지 않도록 정규식(<code>(?:^|,)(?:&quot;(?&lt;val&gt;[^&quot;]&#42;)&quot;|(?&lt;val&gt;[^,&quot;]&#42;))</code>)을 적용하여 정확히 27개의 원시 문자열 요소로 안전하게 분리합니다.</p>
+<p>CSV 파일은 쉼표(<code>,</code>)로 열을 구분하지만, 덤불 골렘의 설명처럼 <em>"갓 깨어난 자연의 정령으로, 주변의 풀과..."</em>와 같이 글 안에 쉼표가 들어가 있으면 일반적인 자르기(<code>Split(',')</code>)로는 데이터 열 순서가 엉망으로 밀려버립니다. 이를 방지하기 위해 따옴표 속 쉼표는 문장으로 안전하게 보호하고, 데이터 구분용 쉼표만 정확히 골라내어 27개의 스탯 값을 오차 없이 안전하게 분리합니다.</p>
       </p>
     </div>
     <div class="pf-fc-arrow">
@@ -302,19 +380,19 @@
     <!-- STEP 03 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #93c5fd; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1e40af;">STEP 3. DTO 인스턴스 자동 생성 및 필드 타입 주입 (Binding)</h4>
+        <h4 class="pf-fc-title" style="color: #1e40af;">STEP 3. [스탯 담기] C# 몬스터 데이터 객체 생성 및 스탯 자동 주입 (Binding)</h4>
         <span class="pf-fc-badge">INJECTION</span>
       </div>
       <p class="pf-fc-desc">
-        <code>Activator.CreateInstance&lt;Data_Monster&gt;()</code>로 빈 객체를 생성한 뒤, 각 필드의 타입(<code>int</code>, <code>string</code>, <code>float</code>)에 맞춰 <code>SetFieldValue</code>가 자동 파싱하여 값을 직접 주입합니다.
+<p>스탯을 담아둘 빈 <code>Data_Monster</code> 객체(C# 데이터 바구니)를 메모리에 새로 생성합니다. 그리고 시트에서 읽어온 문자열을 각 변수 타입에 맞춰(이름은 <code>string</code>, 공격력은 <code>int</code> 정수, 이동속도는 <code>float</code> 소수점) 자동 변환하여 덤불 골렘의 각 변수 칸에 차곡차곡 채워 넣습니다.</p>
       </p>
       <div style="margin-top: 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; color: #0f172a; line-height: 1.6;">
-        <div>monster.m_monsterIndex = <strong>0</strong> <span style="color: #64748b;">(int.TryParse)</span></div>
-        <div>monster.m_monsterName = <strong>"덤불 골렘"</strong> <span style="color: #64748b;">(string)</span></div>
-        <div>monster.m_description = <strong>"갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다."</strong> <span style="color: #64748b;">(string)</span></div>
-        <div>monster.m_dropItem = <strong>1501001</strong>, monster.m_target_Enemy = <strong>3</strong> <span style="color: #64748b;">(int)</span></div>
-        <div>monster.m_addMoveSpeed = <strong>0.75f</strong> <span style="color: #64748b;">(float.TryParse)</span></div>
-        <div>monster.m_ad_Damage = <strong>10</strong>, monster.m_ground_Damage = <strong>10</strong> <span style="color: #64748b;">(int)</span></div>
+        <div>monster.m_monsterIndex = <strong>0</strong> <span style="color: #64748b;">(정수 int 자동 변환)</span></div>
+        <div>monster.m_monsterName = <strong>"덤불 골렘"</strong> <span style="color: #64748b;">(문자열 string)</span></div>
+        <div>monster.m_description = <strong>"갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다."</strong> <span style="color: #64748b;">(문자열 string)</span></div>
+        <div>monster.m_dropItem = <strong>1501001</strong>, monster.m_target_Enemy = <strong>3</strong> <span style="color: #64748b;">(정수 int)</span></div>
+        <div>monster.m_addMoveSpeed = <strong>0.75f</strong> <span style="color: #64748b;">(실수 float 자동 변환)</span></div>
+        <div>monster.m_ad_Damage = <strong>10</strong>, monster.m_ground_Damage = <strong>10</strong> <span style="color: #64748b;">(정수 int)</span></div>
       </div>
     </div>
     <div class="pf-fc-arrow">
@@ -323,110 +401,46 @@
     <!-- STEP 04 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #15803d;">STEP 4. DataManager 인게임 캐싱 (ServerDataLoad)</h4>
+        <h4 class="pf-fc-title" style="color: #15803d;">STEP 4. [인게임 보관] DataManager 등록으로 소환 시 즉시 꺼내쓰기(ServerDataLoad)</h4>
         <span class="pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">CACHED O(1)</span>
       </div>
       <p class="pf-fc-desc">
-<p>완성된 인스턴스를 몬스터 고유 키(<code>m_monsterIndex = 0</code>)와 함께 <code>Managers.Data.MonsterData[0]</code> 딕셔너리에 등록하여, 필드 스폰 및 전투 시스템에서 O(1)의 속도로 즉시 참조할 수 있도록 준비를 마칩니다.</p>
+<p>모든 스탯이 채워진 덤불 골렘 데이터 객체를 고유 식별 번호(<code>m_monsterIndex = 0</code>)와 함께 중앙 관리자인 <code>DataManager</code> 보관함에 등록합니다. 이제 필드에 덤불 골렘이 스폰되거나 전투가 일어날 때마다 <code>0</code>번 키값 하나로 0.0001초 만에(O(1)) 완벽한 스탯을 꺼내 몬스터에게 즉시 부여할 수 있게 됩니다.</p>
       </p>
-    </div>
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-    <div class="pf-fc-pill-end" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
-      <span class="pf-fc-mono-tag">READY</span>
-      <span>인게임 시스템(필드 몬스터 스폰, 실시간 전투, 피격 및 드롭 아이템 연산)에서 즉시 사용</span>
     </div>
   </div>
 </div>
-<h4 id="컬럼-슬라이스-기능-iscutcolumn-true">컬럼 슬라이스 기능 (<code>isCutColumn = true</code>)</h4>
-<p><code>Region_Resource.csv</code>와 같이 수십 개의 컬럼 중 특정 레벨/지역에 해당하는 열만 필요한 경우, 전체를 다 읽지 않고 <code>_startIndex</code>와 <code>_endIndex</code> 지정 범위(예: 0~5번 컬럼)만 슬라이스하여 DTO를 구성하는 오버로드를 탑재하여 불필요한 메모리 할당을 방지합니다.</p>
-<details class="pf-details">
-<summary>코드 보기: CSVParser 리플렉션 파싱 엔진 C# 소스 코드</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">CSVParser</span>.cs: 리플렉션 기반 제네릭 파싱 엔진 전문</span>
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">CSVParser</span></span>
-{
-    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt; Data_Dict = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>&gt;();
-    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">int</span>, <span class="hljs-built_in">string</span>&gt; DataIndex_Dict = <span class="hljs-keyword">new</span> <span class="hljs-title class_">Dictionary</span>&lt;<span class="hljs-built_in">int</span>, <span class="hljs-built_in">string</span>&gt;();
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title"><span class="hljs-title class_">List</span></span>&lt;<span class="hljs-title">T</span>&gt; <span class="hljs-title">parseCSV</span>&lt;<span class="hljs-title">T</span>&gt;(<span class="hljs-params"><span class="hljs-built_in">string</span> csvData, <span class="hljs-built_in">bool</span> isCutColumn, <span class="hljs-built_in">int</span> start, <span class="hljs-built_in">int</span> end</span>) <span class="hljs-keyword">where</span> T : BaseData, <span class="hljs-keyword">new</span>()</span>
-    {
-        <span class="hljs-keyword hljs-control-flow">if</span> (isCutColumn) <span class="hljs-keyword hljs-control-flow">return</span> parseCSV&lt;T&gt;(csvData, start, end);
-
-        <span class="hljs-title class_">List</span>&lt;T&gt; csvDataList = <span class="hljs-keyword">new</span> <span class="hljs-title class_">List</span>&lt;T&gt;();
-        Type myType = <span class="hljs-keyword">typeof</span>(T);
-        FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</span>(BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Public | BindingFlags.Static);
-
-        <span class="hljs-built_in">string</span>[] csvIndexData = csvData.<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;\n&#x27;</span>).<span class="hljs-title function_">Where</span>(x =&gt; !<span class="hljs-built_in">string</span>.<span class="hljs-title function_">IsNullOrWhiteSpace</span>(x)).<span class="hljs-title function_">ToArray</span>();
-        <span class="hljs-keyword hljs-control-flow">if</span> (csvData.Length == <span class="hljs-number">0</span>) <span class="hljs-keyword hljs-control-flow">return</span> <span class="hljs-literal">null</span>;
-
-        <span class="hljs-built_in">string</span>[] attributeColumnArray = csvIndexData[<span class="hljs-number">0</span>].<span class="hljs-title function_">Trim</span>().<span class="hljs-title function_">Split</span>(<span class="hljs-string">&#x27;,&#x27;</span>);
-        <span class="hljs-title function_">SetupFieldDict</span>(attributeColumnArray, myFieldInfo);
-
-        <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> rowIndex = <span class="hljs-number">1</span>; rowIndex &lt; csvIndexData.Length; rowIndex++)
-        {
-            <span class="hljs-built_in">string</span>[] column = <span class="hljs-title function_">SmartSplit</span>(csvIndexData[rowIndex].<span class="hljs-title function_">Trim</span>());
-            <span class="hljs-keyword hljs-control-flow">if</span> (column.Length == <span class="hljs-number">0</span> || <span class="hljs-built_in">string</span>.<span class="hljs-title function_">IsNullOrWhiteSpace</span>(column[<span class="hljs-number">0</span>])) <span class="hljs-keyword hljs-control-flow">continue</span>;
-
-            T objectData = Activator.CreateInstance&lt;T&gt;();
-
-            <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; column.Length; i++)
-            {
-                <span class="hljs-keyword hljs-control-flow">if</span> (DataIndex_Dict.<span class="hljs-title function_">TryGetValue</span>(i, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> attribute) &amp;&amp;
-                    Data_Dict.<span class="hljs-title function_">TryGetValue</span>(attribute, <span class="hljs-keyword">out</span> <span class="hljs-built_in">string</span> fieldName))
-                {
-                    FieldInfo fieldInfo = myType.<span class="hljs-title function_">GetField</span>(fieldName);
-                    <span class="hljs-keyword hljs-control-flow">if</span> (fieldInfo != <span class="hljs-literal">null</span>)
-                    {
-                        <span class="hljs-title function_">SetFieldValue</span>(objectData, fieldInfo, column[i]);
-                    }
-                }
-            }
-            csvDataList.<span class="hljs-title function_">Add</span>(objectData);
-        }
-        <span class="hljs-keyword hljs-control-flow">return</span> csvDataList;
-    }
-}</code></pre>
-</details>
 <hr>
 <h2 id="3-결정론적-난수-생성-및-seed-token-상태-복원-시스템" class="chapter-title">3. 결정론적 난수 생성 및 Seed / Token 상태 복원 시스템</h2>
 <p>로그라이크와 절차적 생성(Procedural Generation) 장르에서는 게임을 저장하고 불러왔을 때 <strong>현재 월드뿐만 아니라 앞으로 생성될 모든 미래 확률 상태(RNG Stream)까지 세이브 시점과 100% 동일하게 복원</strong>되어야 합니다. 월퍼킬은 대용량 JSON 직렬화의 한계를 극복하고, 마인크래프트의 월드 시드 메커니즘에서 착안하여 <strong>도메인 격리 + 고정 폭 토큰 인코딩 + Skip 루프 복원</strong> 아키텍처를 독자적으로 구축했습니다.</p>
 <h3 id="31-마인크래프트에서-착안한-발상-대용량-json-저장의-한계와-시드-압축">3.1 마인크래프트에서 착안한 발상 — 대용량 JSON 저장의 한계와 시드 압축</h3>
-<p>로그라이크 RPG는 던전 지형, 몬스터 스폰, 퀘스트 목록, 플레이어 클래스 및 스킬 조합 등 매 판 수많은 요소가 절차적으로 생성됩니다. 초기 설계 단계에서 이 방대한 상태 데이터를 통상적인 방식으로 저장할 때 심각한 문제에 직면했습니다:</p>
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%; text-align: left;">
-    <div style="background: #ffffff; border: 1px solid #fecaca; border-radius: 8px; padding: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 700; color: #dc2626;">CONVENTIONAL APPROACH</span>
-        <span class="pf-fc-badge" style="background: #fef2f2; color: #b91c1c; border-color: #fecaca;">대용량 JSON 저장</span>
-      </div>
-      <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #991b1b;">수천 개 객체 트리의 무차별 직렬화</h4>
-      <ul style="margin: 0; padding-left: 18px; font-size: 0.83rem; color: #64748b; line-height: 1.6;">
-        <li>던전 타일, 스킬 계수, 퀘스트 진행도 등을 전부 JSON에 기록</li>
-        <li>세이브 파일 크기 비대화 및 런타임 역직렬화(Parsing) 부하 증가</li>
-        <li>데이터 구조(DTO) 변경 시 세이브 데이터 호환성 마이그레이션 비용 발생</li>
-      </ul>
+<p>로그라이크 RPG는 던전 지형, 몬스터 스폰, 퀘스트 목록, 플레이어 클래스 및 스킬 조합 등 매 판 수많은 요소가 절차적으로 생성됩니다. 초기 설계 단계에서 해당 방대한 데이터를 직렬화/역직렬화로 저장하고 로드할 때 비효율적인 문제에 직면했으며, 이를 해결하기 위해 Seed 방식으로 맵을 생성하는 마인크래프트 게임에서 영감을 받아 시스템을 구현하고자 하였습니다.</p>
+<div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
+<p>마인크래프트의 결정론적 월드 생성 시드 메커니즘 (Minecraft World Seed)</p>
+        </div>
+        <span class="pf-fc-badge">PROCEDURAL GENERATION</span>
     </div>
-    <div style="background: #ffffff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 700; color: #2563eb;">WFK SEED-TOKEN APPROACH</span>
-        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">단일 시드 & 토큰 압축</span>
-      </div>
-      <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #1e40af;">결정론적 알고리즘 기반 순수 함수화</h4>
-      <ul style="margin: 0; padding-left: 18px; font-size: 0.83rem; color: #64748b; line-height: 1.6;">
-        <li>마인크래프트처럼 "단 하나의 시드(Seed)"로 월드와 스킬 규칙 재생성</li>
-        <li>오브젝트 인스턴스를 저장하지 않고 초기 시드 + 난수 진행 상태만 저장</li>
-        <li>수십 킬로바이트의 데이터를 <strong>단 1줄의 고정 폭 문자열 토큰</strong>으로 초압축</li>
-      </ul>
-    </div>
-  </div>
+    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
+<p>마인크래프트는 수 기가바이트에 달하는 3D 복셀(Voxel) 블록 좌표를 일일이 파일에 저장하지 않습니다. 오직 <strong>단 하나의 시드(Seed) 숫자</strong>를 의사 난수 생성기(PRNG)에 전달하여 산맥, 동굴, 바이옴을 동일하게 재현합니다. 월퍼킬은 이 원리를 절차적 RPG에 적용하여, 방대한 게임 객체를 직렬화하는 대신 <strong>초기 시드 번호와 난수 소비 진행도만으로 월드와 스킬을 100% 동일하게 복원</strong>하는 초경량 상태 복원 엔진을 설계했습니다.</p>
+    </p>
+    <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
+        <img src="../../assets/images/World%20First%20Kill/extracted_world_first_kill_slide29_shape45_Seed_Example.png" alt="마인크래프트 월드 생성 시드(Seed for the World Generator) 입력 화면 예시" style="width: 100%; height: auto; display: block;" loading="lazy">
+        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+<p>▲ 마인크래프트의 시드 입력 화면: 동일한 시드 값을 입력하면 언제나 동일한 월드 지형과 규칙이 결정론적으로 재현됨</p>
+        </figcaption>
+    </figure>
 </div>
 <h4 id="실시간-로그라이크-rpg에서의-핵심-딜레마와-해결">실시간 로그라이크 RPG에서의 핵심 딜레마와 해결</h4>
-<p>마인크래프트는 정적 지형을 사전에 일괄 생성하지만, 월퍼킬은 플레이어가 이동하고 대화하며 전투 스킬을 획득하는 과정에서 난수(RNG)가 실시간으로 계속 소비됩니다. 단순히 초기 시드값(<code>BaseSeed</code>)만 저장하면, 게임을 불러왔을 때 난수 발생기 포인터가 0으로 초기화되어 <strong>세이브 이후 생성될 미래의 스킬, 보상, 퀘스트가 세이브 이전의 원래 세계선과 영구히 어긋나는 심각한 비동기 결함</strong>이 발생합니다.</p>
+<p>마인크래프트는 정적 지형을 사전에 일괄 생성하지만, 월퍼킬은 플레이어가 이동하고 대화하며 전투 스킬을 획득하는 과정에서 난수(RNG)가 실시간으로 계속 소비됩니다. 단순히 초기 시드값(<code>BaseSeed</code>)만 저장하면, 게임을 불러왔을 때 난수 발생기 포인터가 0으로 초기화되어 <strong>세이브 이후 생성될 미래의 스킬, 보상, 퀘스트가 세이브 이전의 원래 세계선과 영구히 어긋나는 문제</strong>가 발생합니다.</p>
 <p>월퍼킬은 이를 해결하기 위해 <strong>루트 시드(<code>BaseSeed</code>)</strong>와 각 시스템별 <strong>누적 난수 소비 횟수(<code>Usage Count</code>)</strong>를 결합하여 압축하는 <strong>고정 폭 토큰(Token) 시스템</strong>을 구축했습니다.</p>
 <hr>
 <h3 id="32-도메인-격리-구조-및-splitmix64-해싱-아키텍처">3.2 도메인 격리 구조 및 SplitMix64 해싱 아키텍처</h3>
 <p>전역 <code>System.Random</code> 인스턴스를 하나만 공유하면 치명적인 문제가 발생합니다. 예를 들어 대화(Dialog)나 퀘스트에서 난수를 1회 소비하는 순간, 이후 생성되는 맵 타일이나 보상 아이템 드롭 결과가 완전히 뒤틀리게 됩니다(<strong>결합 교란, Coupling Interference</strong>). 이를 차단하기 위해 <code>GameSeed</code>는 목적별로 완벽히 독립된 서브 난수 스트림을 운영합니다.</p>
+<details class="pf-details">
+<summary>코드 보기: GameSeed.cs 목적별 서브 스트림 도메인 열거형 (Domain)</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>.cs: 목적별 서브 스트림 도메인 격리</span>
 <span class="hljs-keyword">public</span> <span class="hljs-built_in">enum</span> Domain : <span class="hljs-built_in">uint</span>
 {
@@ -434,39 +448,18 @@
     Class_Melee = <span class="hljs-number">100</span>, Class_Dexterity = <span class="hljs-number">101</span>, Class_Magic = <span class="hljs-number">102</span>, Class_Support = <span class="hljs-number">103</span>,
     Skill_Melee = <span class="hljs-number">200</span>, Skill_Dexterity = <span class="hljs-number">201</span>, Skill_Magic = <span class="hljs-number">202</span>, Skill_Support = <span class="hljs-number">203</span>,
 }</code></pre>
+</details>
 <h4 id="왜-단순-1-가산이-아닌-prng-기반-splitmix64를-채택했는가">왜 단순 <code>+1</code> 가산이 아닌, PRNG 기반 SplitMix64를 채택했는가?</h4>
-<p>단순히 <code>baseSeed + 1</code>, <code>baseSeed + domainId</code>와 같이 선형 오프셋을 더하는 방식은 언뜻 직관적이지만, 절차적 생성 게임에서는 치명적인 수학적 결함을 초래합니다:</p>
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%; text-align: left;">
-    <div style="background: #ffffff; border: 1px solid #fecaca; border-radius: 8px; padding: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 700; color: #dc2626;">NAIVE APPROACH</span>
-        <span class="pf-fc-badge" style="background: #fef2f2; color: #b91c1c; border-color: #fecaca;">단순 선형 가산 (+1, +ID)</span>
-      </div>
-      <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #991b1b;">선형 상관관계 및 난수열 동기화 결함</h4>
-      <ul style="margin: 0; padding-left: 18px; font-size: 0.83rem; color: #64748b; line-height: 1.6;">
-        <li><strong>Marsaglia 초평면 결함</strong>: <code>System.Random</code> 같은 선형 PRNG에 인접 시드(S, S+1)를 주입하면 초기 생성 수열 간에 강력한 선형 상관관계(Correlation) 발생</li>
-        <li><strong>도메인 결합 편향</strong>: 맵(1)과 리전(2)의 난수열이 평행 궤적을 그리며 지형 배치와 퀘스트 보상이 원치 않게 동기화되는 버그 유발</li>
-        <li><strong>눈사태 효과 부재</strong>: 입력 비트가 1개 바뀌어도 출력 비트가 1개만 변하여 난수 엔트로피 확산 불가</li>
-      </ul>
-    </div>
-    <div style="background: #ffffff; border: 1px solid #86efac; border-radius: 8px; padding: 16px;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.78rem; font-weight: 700; color: #15803d;">ADOPTED ARCHITECTURE</span>
-        <span class="pf-fc-badge" style="background: #f0fdf4; color: #166534; border-color: #86efac;">SplitMix64 비트 믹싱</span>
-      </div>
-      <h4 style="margin: 0 0 8px 0; font-size: 0.95rem; color: #166534;">PRNG 영감 비트 믹싱 &amp; 완전 도메인 격리</h4>
-      <ul style="margin: 0; padding-left: 18px; font-size: 0.83rem; color: #64748b; line-height: 1.6;">
-        <li><strong>검증된 PRNG 알고리즘</strong>: Java 8 <code>SplittableRandom</code> 및 David Stafford Mix13 비트 믹서 채택</li>
-        <li><strong>완벽한 눈사태 효과 (Avalanche Effect)</strong>: 도메인 ID가 단 1 차이나도 64비트 출력의 약 50%가 무작위 반전(Bit Flipping)</li>
-        <li><strong>독립 난수 세계선 확립</strong>: 인접한 도메인 식별자라도 상호 간 비트 상관관계가 0에 수렴하는 완벽히 독립된 32-bit 시드 도출</li>
-        <li><strong>Zero-Allocation 초고속 연산</strong>: 순수 CPU 레지스터 연산만으로 1~2ns 만에 완료되어 런타임 프레임 드랍 0%</li>
-      </ul>
-    </div>
-  </div>
-</div>
+<p>각 시스템(맵, 퀘스트, 스킬 등)마다 독립된 시드를 부여할 때, 가장 직관적인 방법은 기본 시드에 번호를 단순히 더하는 방식(<code>baseSeed + 1</code>, <code>baseSeed + domainId</code>)입니다. 하지만 절차적 생성 게임에서는 이 단순한 덧셈이 치명적인 문제를 초래할 수 있습니다.</p>
+<p>컴퓨터의 난수 생성기(<code>System.Random</code>)는 서로 인접한 시드값(예: 100과 101)을 주입받으면 초기에 생성되는 난수 패턴 역시 서로 닮은 궤적을 그리는 성질(선형 상관관계)이 있습니다. 이로 인해 맵 생성 난수와 퀘스트 난수가 서로 맞물려, 특정 지형이 생성될 때마다 항상 동일한 퀘스트나 보상이 함께 등장하는 식의 <strong>원치 않는 패턴 동기화 문제</strong>가 있었습니다.</p>
+<p>이러한 문제를 해결하기 위해서 난수 알고리즘인 <strong>SplitMix64 비트 믹싱 기법</strong>을 채택하였습니다.</p>
+<h4 style="font-size: 1.15rem; font-weight: 700; color: #0f172a; margin: 28px 0 12px 0;">SplitMix64 알고리즘의 원리와 도입 이점</h4>
+<p>SplitMix64는 자바(Java 8)나 고성능 난수 엔진에서 널리 검증된 64비트 비트 믹싱 알고리즘입니다. 숫자를 믹서기에 넣고 갈아버리듯, 비트들을 좌우로 밀고(Shift) 겹쳐가며(XOR) 거대한 소수(Prime Number)를 곱해 원래 숫자의 규칙성을 완전히 파괴합니다.</p>
+<ul><li><strong>완벽한 독립성 (눈사태 효과, Avalanche Effect)</strong>: 시스템 식별 번호가 <code>1</code>과 <code>2</code>처럼 바로 옆에 붙어 있는 숫자라도, 비트 믹싱을 거치면 결과 비트의 약 50%가 완전히 뒤바뀝니다. 따라서 맵 시드와 퀘스트 시드가 1 차이밖에 나지 않아도 서로 전혀 다른 무작위 세계를 만들어냅니다.</li><li><strong>시스템 간 상호 간섭 원천 차단</strong>: 맵 시스템에서 난수를 수백 번 소비하더라도 퀘스트나 전투 스킬의 생성 결과에는 단 1%의 영향도 미치지 않는 독립된 난수 스트림을 보장합니다.</li><li><strong>메모리 낭비 없는 초고속 연산 (Zero-Allocation)</strong>: 추가적인 객체 생성(GC 할당) 없이 순수 CPU 레지스터 안에서 비트 연산만으로 1~2나노초(10억 분의 1초) 만에 즉시 계산되어 게임 실행 속도에 전혀 영향을 주지 않습니다.</li></ul>
 <h4 id="splitmix64-기반-서브-시드-파생-파이프라인-derivesubseed">SplitMix64 기반 서브 시드 파생 파이프라인 (<code>DeriveSubSeed</code>)</h4>
-<p>루트 시드(<code>baseSeed</code>)와 도메인 Salt로부터 4단계 비트 파이프라인을 거쳐, 도메인 간 비트 상관관계를 완벽히 차단한 양수 32-bit 고유 서브 시드를 유도합니다:</p>
+<p>루트 시드(<code>baseSeed</code>)와 시스템 고유 번호(<code>salt</code>)를 결합하여, 시스템 간 비트 상관관계를 완벽히 차단한 32비트 양수 시드를 만들어내는 4단계 파이프라인입니다:</p>
+<details class="pf-details">
+<summary>코드 보기: GameSeed.cs SplitMix64 기반 서브 시드 유도 함수 (DeriveSubSeed)</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>.cs: SplitMix64 기반 서브 시드 유도 함수</span>
 <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-built_in">int</span> <span class="hljs-title">DeriveSubSeed</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> baseSeed, <span class="hljs-built_in">uint</span> salt</span>)</span>
 {
@@ -484,8 +477,9 @@
         <span class="hljs-keyword hljs-control-flow">return</span> (<span class="hljs-built_in">int</span>)(z &amp; <span class="hljs-number">0x7FFFFFFF</span>);
     }
 }</code></pre>
-<ul><li><strong>파이프라인 세부 동작 원리</strong>:</li></ul>
-<ol><li><strong>황금비 상수(<code>0x9E3779B97F4A7C15UL</code>) 가산</strong>: $2^{64} / \phi$(Fibonacci Hashing) 상수를 더해 시드값의 주기성을 파괴하고 비트 공간 전역에 균등한 분포를 강제합니다.</li><li><strong>도메인 솔트 소수 승산(<code>salt * 0x85EBCA6B</code>)</strong>: 인접한 도메인 ID(<code>1, 2, 3...</code>)에 대형 홀수 소수를 곱하여 하위 비트에 머물러 있는 식별자 비트를 상위 비트로 대규모 전위(Permutation)시킵니다.</li><li><strong>다단계 XOR-Shift 및 소수 곱셈 (<code>Mix13</code>)</strong>: 상위 비트와 하위 비트를 XOR로 교차 혼합한 뒤 거대한 64비트 소수(<code>0xBF58476D1CE4E5B9UL</code>, <code>0x94D049BB133111EBUL</code>)를 곱함으로써, 단 1비트의 입력 차이만으로도 결과 비트의 50%가 뒤바뀌는 <strong>완벽한 눈사태 효과(Avalanche Effect)</strong>를 달성합니다.</li><li><strong>양수 32-bit 마스킹 (<code>z &amp; 0x7FFFFFFF</code>)</strong>: C# <code>System.Random(int Seed)</code> 생성자에 음수 시드가 주입될 때 발생할 수 있는 런타임 예외 및 아키텍처별 동작 편차를 원천 차단하기 위해 최상위 부호 비트를 항상 0으로 고정합니다.</li></ol>
+</details>
+<ul><li><strong>4단계 비트 믹싱 파이프라인의 쉬운 동작 원리</strong>:</li></ul>
+<ol><li><strong>STEP 1. 황금비 상수 더하기 (규칙적인 패턴 깨뜨리기)</strong>: 수학에서 숫자를 가장 고르게 흩뜨려 놓는 '황금비율(Fibonacci)' 기반 상수(<code>0x9E3779B9...</code>)를 더해, 시드 번호가 가진 일정한 간격이나 연속적인 패턴을 1차적으로 깨뜨립니다.</li><li><strong>STEP 2. 도메인 고유 번호 흩뿌리기 (큰 소수 곱하기)</strong>: 맵, 퀘스트, 스킬 등 각 시스템의 고유 식별 번호(<code>salt</code>)에 거대한 홀수 소수(<code>0x85EBCA6B</code>)를 곱합니다. 1, 2, 3처럼 작은 번호들이 순식간에 수십억 단위의 거대한 숫자로 뻥튀기되면서 비트가 전체 자릿수로 넓게 퍼져나갑니다.</li><li><strong>STEP 3. 비트 반으로 쪼개서 뒤섞기 (XOR-Shift 믹싱)</strong>: 숫자의 앞부분 비트와 뒷부분 비트를 좌우로 밀고 겹쳐가며(XOR), 거대한 64비트 소수들을 곱해 골고루 반죽하듯 섞어줍니다. 이 단계를 거치면 원래 숫자가 단 1비트만 달라도 결과는 완전히 다른 무작위 숫자로 뒤바뀝니다.</li><li><strong>STEP 4. 안전한 양수 32비트 숫자로 완성 (부호 비트 정리)</strong>: 유니티 C#의 기본 난수 생성기(<code>System.Random</code>)는 음수 시드가 들어오면 예기치 못한 오작동이 발생할 수 있습니다. 따라서 맨 앞자리 부호 비트를 0으로 고정(<code>&amp; 0x7FFFFFFF</code>)하여 항상 안전하고 안정적인 양수 시드로 완성합니다.</li></ol>
 <h4 id="세이브-로드-2단계-파이프라인">세이브 / 로드 2단계 파이프라인</h4>
 <p><code>SaveLoadManager</code>와 <code>GameSeed</code> 간의 세이브 및 복원은 명확한 책임 분리로 수행됩니다:</p>
 <div class="pf-visual-frame pf-flowchart-frame">
@@ -564,6 +558,8 @@
 <hr>
 <h3 id="34-skip-루프-복원-메커니즘과-실제-인게임-스킬셋-복원-실증">3.4 Skip 루프 복원 메커니즘과 실제 인게임 스킬셋 복원 실증</h3>
 <p>세이브 파일을 불러올 때, 토큰에서 추출된 각 도메인의 누적 소비 횟수(<code>count</code>)만큼 <code>rng.Next()</code>를 고속 더미 호출(Skip)하여 난수 엔진의 내부 포인터를 세이브 시점으로 100% 동일하게 강제 이동시킵니다:</p>
+<details class="pf-details">
+<summary>코드 보기: GameSeed.cs 과거 난수 소비 지점으로 스트림 강제 롤백 (RestoreFromSnapshot)</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">GameSeed</span>.cs: 과거 난수 소비 지점으로 스트림 강제 롤백</span>
 <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RestoreFromSnapshot</span>(<span class="hljs-params"><span class="hljs-built_in">int</span> baseSeed, <span class="hljs-title class_">Dictionary</span>&lt;Domain, <span class="hljs-built_in">ulong</span>&gt; usageCounts</span>)</span>
 {
@@ -585,6 +581,7 @@
         domainUsageCounts[d] = count;
     }
 }</code></pre>
+</details>
 <h4 id="실제-인게임-실증-시드값에-따른-스킬셋-절차적-생성-결과-비교">실제 인게임 실증: 시드값에 따른 스킬셋 절차적 생성 결과 비교</h4>
 <p>월퍼킬의 플레이어 스킬은 시드와 난수 스트림에 의해 결정론적으로 판정됩니다. 따라서 <strong>개발자가 개별 스킬 객체를 세이브 데이터에 일일이 기록하지 않아도, 단 1줄의 <code>seedToken</code> 해석만으로 동일한 스킬셋이 100% 오차 없이 복원</strong>됩니다:</p>
 <div class="pf-seed-compare-grid">
@@ -597,9 +594,15 @@
     <div class="pf-seed-box">
       <div style="font-weight: 700; color: #1e40af; margin-bottom: 4px;">절차적 생성 스킬셋:</div>
       <div style="color: #334155; margin-bottom: 8px;">• 아군 대상 버프 스킬 조합 자동 구성</div>
-      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; color: #0f172a;">
+      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; color: #0f172a; margin-bottom: 10px;">
         <strong>[스킬 효과]</strong> "아군에게 스킬 사용 시 아군의 치명타 확률과 치명타 데미지를 증가시킵니다."
       </div>
+      <figure style="margin: 0; border-radius: 6px; overflow: hidden; border: 1px solid #bfdbfe; box-shadow: 0 2px 8px rgba(37, 99, 235, 0.08);">
+        <img src="../../assets/images/World%20First%20Kill/스크린샷%202026-05-19%20212720.png" alt="SEED A 인게임 스킬 툴팁 (치명타 버프 스킬셋)" style="width: 100%; height: auto; display: block;" loading="lazy">
+        <figcaption style="padding: 6px 10px; background: #eff6ff; border-top: 1px solid #bfdbfe; font-size: 0.74rem; color: #1e40af; font-family: 'Fira Code', monospace;">
+<p>▲ SEED A 인게임 실제 생성 스킬: 아군 치명타 버프 스킬셋</p>
+        </figcaption>
+      </figure>
     </div>
     <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; color: #475569;">
       <div>"baseSeed": 1459589277,</div>
@@ -615,9 +618,15 @@
     <div class="pf-seed-box">
       <div style="font-weight: 700; color: #991b1b; margin-bottom: 4px;">절차적 생성 스킬셋:</div>
       <div style="color: #334155; margin-bottom: 8px;">• 단일 타겟 물리 타격 스킬 조합 자동 구성</div>
-      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; color: #0f172a;">
+      <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 6px 10px; font-size: 0.8rem; color: #0f172a; margin-bottom: 10px;">
         <strong>[강타]</strong> "하나의 적에게 120%의 AD 데미지를 입힌다."
       </div>
+      <figure style="margin: 0; border-radius: 6px; overflow: hidden; border: 1px solid #fecaca; box-shadow: 0 2px 8px rgba(220, 38, 38, 0.08);">
+        <img src="../../assets/images/World%20First%20Kill/스크린샷%202026-05-19%20212644.png" alt="SEED B 인게임 스킬 툴팁 (120% AD 강타 스킬셋)" style="width: 100%; height: auto; display: block;" loading="lazy">
+        <figcaption style="padding: 6px 10px; background: #fef2f2; border-top: 1px solid #fecaca; font-size: 0.74rem; color: #991b1b; font-family: 'Fira Code', monospace;">
+<p>▲ SEED B 인게임 실제 생성 스킬: 단일 대상 120% AD 강타 스킬셋</p>
+        </figcaption>
+      </figure>
     </div>
     <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; color: #475569;">
       <div>"baseSeed": 1459589276,</div>
@@ -628,6 +637,24 @@
 <p style="font-size: 0.88rem; color: #334155; line-height: 1.6; margin-top: 10px;">
   <strong>실증 요약:</strong> 시드 번호 단 1의 차이(<code>...77</code> vs <code>...76</code>)만으로도 완전히 다른 직업 스킬셋(치명타 버프 vs 120% AD 물리 강타)이 수학적으로 유도되며, 저장 후 재로드 시에도 과거 누적 소비 지점(<code>...26</code> vs <code>...27</code>)으로 정확히 복원되어 인게임 런타임의 결정론적 무결성을 완벽히 증명했습니다.
 </p>
+<div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+            <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
+<p>포트폴리오 원본: Seed 비교 및 결정론적 데이터 복원 검증 슬라이드</p>
+        </div>
+        <span class="pf-fc-badge">PORTFOLIO ARCHIVE</span>
+    </div>
+    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
+<p>기획 및 개발 포트폴리오 발표 자료(14페이지)에 수록된 <strong>시드값 차이에 따른 데이터 생성 및 무결성 비교 원본</strong>입니다. 시드값 단 1의 차이(<code>...77</code> vs <code>...76</code>)로 완전히 다른 직업 스킬(치명타 버프 vs 물리 강타)이 파생되는 과정과, 세이브 토큰 디코딩을 통한 Skip 루프 복원 무결성을 도식화하여 실증했습니다.</p>
+    </p>
+    <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
+        <img src="../../assets/images/World%20First%20Kill/wfk_slide14_seed_comparison.png" alt="포트폴리오 14페이지: Seed 비교 예시로 데이터 비교 슬라이드" style="width: 100%; height: auto; display: block;" loading="lazy">
+        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+<p>▲ 포트폴리오 원본 슬라이드: Seed A(1459589277)와 Seed B(1459589276)의 절차적 스킬 생성 및 복원 데이터 실측 비교</p>
+        </figcaption>
+    </figure>
+</div>
 <details class="pf-details">
 <summary>코드 보기: SaveLoadManager의 시드 토큰 빌드 및 복원 소스 코드</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">SaveLoadManager</span>.cs: 시드 토큰 빌드 및 복원 구현</span>
@@ -698,7 +725,6 @@
 <li class="toc-list__item toc-list__item--h3"><a href="#12-조건부-증분-다운로드conditional-incremental-download-플로우">1.2 조건부 증분 다운로드(Conditional Incremental Download) 플로우</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#2-실전-예시로-보는-리플렉션-csv-파싱-전개-과정">2. 실전 예시로 보는 리플렉션 CSV 파싱 전개 과정</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#21-실제-몬스터-데이터-파싱-4단계-전개-execution-walkthrough">2.1 실제 몬스터 데이터 파싱 4단계 전개 (Execution Walkthrough)</a></li>
-<li class="toc-list__item toc-list__item--h4"><a href="#컬럼-슬라이스-기능-iscutcolumn-true">컬럼 슬라이스 기능 (`isCutColumn = true`)</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#3-결정론적-난수-생성-및-seed-token-상태-복원-시스템">3. 결정론적 난수 생성 및 Seed / Token 상태 복원 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#31-마인크래프트에서-착안한-발상-대용량-json-저장의-한계와-시드-압축">3.1 마인크래프트에서 착안한 발상 — 대용량 JSON 저장의 한계와 시드 압축</a></li>
 <li class="toc-list__item toc-list__item--h4"><a href="#실시간-로그라이크-rpg에서의-핵심-딜레마와-해결">실시간 로그라이크 RPG에서의 핵심 딜레마와 해결</a></li>

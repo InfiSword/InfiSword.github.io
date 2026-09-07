@@ -3,11 +3,6 @@ const { test, expect } = require('@playwright/test');
 test.describe('Autonomous Racing Agent 스크린샷 갤러리 테스트 (상세 포스트 & 모달)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const winScreen = page.locator('#win-lock-screen');
-    if (await winScreen.isVisible()) {
-      await winScreen.click();
-      await expect(winScreen).toBeHidden({ timeout: 3000 });
-    }
   });
 
   test('상세 포스트 페이지에서 Racing Agent 3종 스크린샷 갤러리가 올바르게 렌더링된다', async ({ page, isMobile }) => {

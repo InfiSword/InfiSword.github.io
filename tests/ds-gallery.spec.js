@@ -3,11 +3,6 @@ const { test, expect } = require('@playwright/test');
 test.describe('WinAPI Don\'t Starve 스크린샷 갤러리 테스트 (상세 포스트 & 모달)', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/');
-    const winScreen = page.locator('#win-lock-screen');
-    if (await winScreen.isVisible()) {
-      await winScreen.click();
-      await expect(winScreen).toBeHidden({ timeout: 3000 });
-    }
   });
 
   test('홈 카드 오른쪽 미디어가 타이틀 이미지를 표시하고 유튜브 링크를 가진다', async ({ page }) => {

@@ -25,49 +25,32 @@ test.describe('포트폴리오 홈 페이지 테스트', () => {
     await expect(projectsSection).toBeAttached();
   });
 
-  test('로딩바 완료 후 Enter 키를 눌러 포트폴리오로 정상 진입한다', async ({ page }) => {
+  test('접속 즉시 잠금/로그인 화면 없이 포트폴리오 Hero 섹션이 바로 노출된다', async ({ page }) => {
     await page.goto('/');
 
+    // 1. 잠금/로그인 화면 오버레이 및 잠금 버튼이 존재하지 않는지 확인
     const winScreen = page.locator('#win-lock-screen');
-    await expect(winScreen).toBeVisible();
+    await expect(winScreen).toHaveCount(0);
 
-    const userName = page.locator('.win-user-name');
-    await expect(userName).toContainText('이민혁');
+    const lockBtn = page.locator('#win-lock-btn');
+    await expect(lockBtn).toHaveCount(0);
 
-    // 상단 SYSTEM READY 배지가 제거되었는지 확인
-    await expect(page.locator('.win-system-badge')).toHaveCount(0);
-    await expect(page.locator('text=SYSTEM READY')).toHaveCount(0);
-    await expect(page.locator('text=FILE_OS')).toHaveCount(0);
+    // 2. 포트폴리오 Hero 타이틀 및 소개글이 즉시 노출되는지 확인
+    const heroTitle = page.locator('.pf-hero-title');
+    await expect(heroTitle).toBeVisible();
+    await expect(heroTitle).toContainText('이민혁');
 
-    // 1. 로딩바 요소 확인 (1.2초 로딩 후 완료 시 숨겨지므로 DOM 존재 확인)
-    const progressBar = page.locator('#win-progress-bar');
-    await expect(progressBar).toBeAttached();
+    const heroDesc = page.locator('.pf-hero-desc');
+    await expect(heroDesc).toBeVisible();
 
-    const prompt = page.locator('#win-action-prompt');
-    await expect(prompt).toBeVisible({ timeout: 5000 });
+    // 3. 외부 프로필 링크 노출 확인
+    const profileLinks = page.locator('.pf-profile-links');
+    await expect(profileLinks).toBeVisible();
+
+    const githubLink = page.locator('.pf-profile-link--primary');
+    await expect(githubLink).toHaveAttribute('href', 'https://github.com/InfiSword');
+
     const projectName = test.info().project.name.replace(/\s+/g, '_');
-    await page.screenshot({ path: `test-results/loading-screen-${projectName}.png` });
-
-    // 3. Enter 키 입력으로 언락
-    await page.keyboard.press('Enter');
-
-    // 4. 화면 퇴장 및 본문 포트폴리오 노출 확인
-    await expect(winScreen).toBeHidden({ timeout: 2500 });
-    const hero = page.locator('.pf-hero-title');
-    await expect(hero).toBeVisible();
-  });
-
-  test('화면 아무 곳이나 클릭 시 즉시 언락된다', async ({ page }) => {
-    await page.goto('/');
-
-    const winScreen = page.locator('#win-lock-screen');
-    await expect(winScreen).toBeVisible();
-
-    // 화면 아무 곳이나 클릭
-    await winScreen.click();
-
-    await expect(winScreen).toBeHidden({ timeout: 2000 });
-    const hero = page.locator('.pf-hero-title');
-    await expect(hero).toBeVisible();
+    await page.screenshot({ path: `test-results/home-direct-${projectName}.png` });
   });
 });

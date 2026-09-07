@@ -4,13 +4,6 @@ test.describe('크래프톤 정글 GameTech DirectX 11 핀볼 및 회고 테스�
   test('홈 화면에 04. TECHNICAL CHALLENGE & RETROSPECTIVE 섹션 및 프로젝트 카드가 렌더링된다', async ({ page }) => {
     await page.goto('/');
 
-    // 락스크린 해제
-    const winScreen = page.locator('#win-lock-screen');
-    if (await winScreen.isVisible()) {
-      await winScreen.click();
-      await expect(winScreen).toBeHidden({ timeout: 2000 });
-    }
-
     // 섹션 헤딩 확인
     const sectionHeading = page.locator('#tech-retrospective');
     await expect(sectionHeading).toBeAttached();
@@ -40,12 +33,6 @@ test.describe('크래프톤 정글 GameTech DirectX 11 핀볼 및 회고 테스�
 
   test('홈 화면 요약 모달(junglePinball)이 열리고 회고 요약 없이 핵심 아키텍처 4종만 정상 표시된다', async ({ page }) => {
     await page.goto('/');
-
-    const winScreen = page.locator('#win-lock-screen');
-    if (await winScreen.isVisible()) {
-      await winScreen.click();
-      await expect(winScreen).toBeHidden({ timeout: 2000 });
-    }
 
     // 모달 열기 버튼 클릭
     const openBtn = page.locator('[data-project="07"] button.pf-btn-modal');
@@ -103,20 +90,15 @@ test.describe('크래프톤 정글 GameTech DirectX 11 핀볼 및 회고 테스�
     const videoSource = demoVideo.locator('source');
     await expect(videoSource).toHaveAttribute('src', /GameTest.*\.mp4/);
 
-    // 챕터 타이틀 확인 (Dear ImGui 삭제 후 총 5개)
+    // 챕터 타이틀 확인 (면접 복기 섹션 삭제 후 총 4개)
     const chapters = page.locator('.chapter-title');
-    await expect(chapters).toHaveCount(5);
+    await expect(chapters).toHaveCount(4);
 
-    // 목차(TOC) 패널 확인 (다른 프로젝트들과 동일하게 H2 목차 항목 5개 생성)
+    // 목차(TOC) 패널 확인 (H2 목차 항목 4개)
     const toc = page.locator('.toc-panel');
     await expect(toc).toBeVisible();
     const tocH2 = toc.locator('.toc-list__item--h2');
-    await expect(tocH2).toHaveCount(5);
+    await expect(tocH2).toHaveCount(4);
     await expect(toc).not.toContainText('Dear ImGui');
-
-    // 5번 면접 복기 챕터 및 패널 확인
-    const retroPanels = page.locator('.pf-retrospective-panel');
-    await expect(retroPanels).toHaveCount(2);
-    await expect(page.locator('text=거울 보고 시선 처리 및 표정 훈련')).toBeVisible();
   });
 });

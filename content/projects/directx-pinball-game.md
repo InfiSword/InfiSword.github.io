@@ -203,6 +203,9 @@ hero_image: "assets/images/Pinball/pinball_title.png"
 ### 2.1 렌더러 아키텍처 (`URenderer`)
 상용 엔진 없이 DirectX 11 API를 직접 제어하기 위해 렌더링 라이프사이클을 담당하는 `URenderer` 클래스를 설계했습니다:
 
+<details class="pf-details">
+<summary>코드 보기: URenderer::Init — 렌더링 파이프라인 초기화</summary>
+
 ```cpp
 // URenderer 핵심 파이프라인 구조
 void URenderer::Init(HWND hWnd)
@@ -218,11 +221,16 @@ void URenderer::Init(HWND hWnd)
 }
 ```
 
+</details>
+
 1. **디바이스 및 스왑 체인 (`ID3D11Device`, `IDXGISwapChain`)**:  
    하드웨어 가속 플래그(`D3D_DRIVER_TYPE_HARDWARE`)와 더블 버퍼링 스왑 체인(`DXGI_SWAP_EFFECT_DISCARD`)을 구성했습니다.
 2. **상수 버퍼(Constant Buffer)를 통한 트랜스폼 전달**:  
    각 구체의 월드 좌표 오프셋(Location)과 반지름 스케일(Scale)을 16바이트 정렬된 구조체로 묶어 매 프레임 GPU 레지스터 `b0`으로 업데이트합니다.
    
+<details class="pf-details">
+<summary>코드 보기: URenderer::UpdateConstant — 상수 버퍼 GPU 전송</summary>
+
 ```cpp
 void URenderer::UpdateConstant(FVector offset, FVector scale)
 {
@@ -235,8 +243,13 @@ void URenderer::UpdateConstant(FVector offset, FVector scale)
 }
 ```
 
+</details>
+
 ### 2.2 HLSL 셰이더 구조 (`Shader.hlsl`)
 정점 셰이더에서 상수 버퍼의 오프셋과 스케일을 적용하여 투영 변환 없이 화면 정규화 좌표계(NDC [-1.0, 1.0]) 상에 구체 지오메트리를 직관적으로 배치합니다:
+
+<details class="pf-details">
+<summary>코드 보기: Shader.hlsl — 정점 셰이더 & 픽셀 셰이더 전체 구조</summary>
 
 ```hlsl
 cbuffer TransformData : register(b0)
@@ -273,6 +286,8 @@ float4 mainPS(PS_INPUT input) : SV_TARGET
 }
 ```
 
+</details>
+
 ---
 
 ## 3. 강체 탄성 충돌 물리 엔진 및 침투 해결 수식
@@ -286,6 +301,9 @@ $$v_{rel} = (\vec{v}_B - \vec{v}_A) \cdot \vec{n}$$
 $$J = \frac{-(1 + e) \cdot v_{rel}}{\frac{1}{m_A} + \frac{1}{m_B}}$$
 
 $$\vec{v}_A' = \vec{v}_A - \frac{J \cdot \vec{n}}{m_A}, \quad \vec{v}_B' = \vec{v}_B + \frac{J \cdot \vec{n}}{m_B}$$
+
+<details class="pf-details">
+<summary>코드 보기: UBall::HandlePrimitiveCollision — 충격량 기반 충돌 응답</summary>
 
 ```cpp
 // main.cpp: UBall::HandlePrimitiveCollision 발췌
@@ -308,9 +326,14 @@ otherBall->Velocity.y += impulse * ny / otherBall->Mass;
 otherBall->Velocity.z += impulse * nz / otherBall->Mass;
 ```
 
+</details>
+
 ### 3.2 질량비 기반 침투 깊이 위치 보정 (Penetration Depth Resolution)
 이산 시간 시뮬레이션(Discrete Time-step)에서 공들이 고속으로 이동할 때 한 프레임 사이에 두 공이 서로의 반경 안으로 파고드는 겹침 현상이 발생합니다.  
 이를 방지하기 위해 두 공의 질량비(Mass Ratio)를 산출하여 질량이 가벼운 공이 더 많은 거리를 밀려나도록 즉각적인 위치 보정을 가했습니다:
+
+<details class="pf-details">
+<summary>코드 보기: 질량비 침투 깊이 보정 (Penetration Depth Resolution)</summary>
 
 ```cpp
 const float overlap = Radius + otherBall->Radius - distance;
@@ -330,6 +353,8 @@ if (overlap > 0.0f)
 }
 ```
 
+</details>
+
 ---
 
 ## 4. 벽면 충돌 반발 계수 및 동적 버퍼 용량 관리
@@ -337,6 +362,9 @@ if (overlap > 0.0f)
 
 ### 4.1 경계면 충돌 및 에너지 감쇠 반발 (`HandleWallCollision`)
 뷰포트 정규화 좌표계($[-1.0, 1.0]$) 내에서 구체가 화면 밖으로 이탈하지 않도록 구체의 반경(Radius)을 고려한 경계 클램핑 및 법선 속도 반전 반발계수($e = 0.9$)를 구현했습니다:
+
+<details class="pf-details">
+<summary>코드 보기: UBall::HandleWallCollision — 벽면 충돌 및 에너지 감쇠 반발</summary>
 
 ```cpp
 void UBall::HandleWallCollision()
@@ -379,8 +407,13 @@ void UBall::HandleWallCollision()
 }
 ```
 
+</details>
+
 ### 4.2 C 스타일 동적 버퍼 2배 확장 아키텍처 (`EnsurePrimitiveCapacity`)
 표준 템플릿 라이브러리(STL)의 오버헤드를 배제하고 메모리 재할당 비용을 최적화하기 위해, 벡터의 기하급수적 확장(Exponential Growth, 2배 용량 증가) 패턴을 직접 C 포인터 배열로 설계했습니다:
+
+<details class="pf-details">
+<summary>코드 보기: EnsurePrimitiveCapacity — C 스타일 2배 동적 메모리 풀 확장</summary>
 
 ```cpp
 void EnsurePrimitiveCapacity(UPrimitive*** primitiveList, int* capacity, int requiredCapacity)
@@ -418,41 +451,6 @@ void EnsurePrimitiveCapacity(UPrimitive*** primitiveList, int* capacity, int req
 }
 ```
 
----
+</details>
 
-## 5. 면접 복기 및 성장 회고 (Retrospective & Post-Mortem)
-{: .chapter-title }
 
-<div class="pf-retrospective-panel warning">
-    <div class="pf-retro-badge">SELF REFLECTION // 아쉬웠던 점 및 솔직한 패인 분석</div>
-    <h3 style="color: #92400e; margin-top: 0;">1. 면접 현장에서 스스로에게 남은 큰 아쉬움</h3>
-    <p>
-        기술 과제 테스트 자체는 DirectX 11 파이프라인과 2D/3D 탄성 충돌 물리 로직까지 요구 사양을 정해진 시간 내에 오차 없이 완결지었습니다.
-        하지만 이어진 심층 기술 면접 과정에서 스스로에게 너무나도 큰 아쉬움이 남았습니다.<br><br>
-        면접관과 마주했을 때 <strong>극도의 긴장감으로 인해 시선 처리가 자연스럽지 못하고 불안정</strong>했으며, 질문을 받았을 때 머릿속으로는 알고 있는 개념과 구조임에도 불구하고 이를 차분하게 두괄식으로 정리하여 말하지 못하고 <strong>말을 횡설수설했던 점</strong>이 불합격의 가장 결정적인 이유였다고 솔직하게 복기합니다.
-    </p>
-</div>
-
-<div class="pf-retrospective-panel action">
-    <div class="pf-retro-badge">ACTION PLAN // 뼈아픈 실패를 극복하기 위한 개선 훈련</div>
-    <h3 style="color: #1e40af; margin-top: 0;">2. 교훈과 향후 면접 준비 및 발화 훈련 계획</h3>
-    <p>
-        코드로 구현할 수 있는 실력만큼이나, <strong>"자신이 작성한 코드와 아키텍처, 전공 지식을 타인에게 설득력 있고 명확하게 전달하는 소통 능력"</strong>이 엔지니어로서 얼마나 결정적인 역량인지 뼈저리게 체감했습니다.<br><br>
-        이 아쉬운 탈락의 경험을 단순한 좌절이 아닌 가장 값진 성장 동력으로 삼기 위해, 앞으로의 면접 준비는 아래와 같이 구체적인 행동 원칙을 세워 훈련하고 있습니다:
-    </p>
-    <ul style="margin: 14px 0 0 0; padding-left: 20px; line-height: 1.8;">
-        <li><strong>거울 보고 시선 처리 및 표정 훈련</strong>: 거울 및 모의 화상 카메라를 정면으로 응시하며 면접관과 아이컨택을 안정적으로 유지하고, 긴장으로 인해 시선이 흔들리지 않도록 반복 연습합니다.</li>
-        <li><strong>두괄식 답변 구조화 (PREP 기법)</strong>: 결론(Point) → 이유(Reason) → 구현 사례(Example) → 요약(Point) 순서로 머릿속 지식을 횡설수설하지 않고 1분 이내로 핵심만 전달하는 스피치 구조화 훈련을 진행합니다.</li>
-        <li><strong>CS 핵심 키워드 정리 노트</strong>: 그래픽스 파이프라인, 물리 적분법, 메모리 동적 할당 원리 등 핵심 지식을 구술 테스트 형태로 즉각 인출할 수 있도록 백지 복습법으로 체계화하고 있습니다.</li>
-    </ul>
-</div>
-
-<div class="pf-tech-callout">
-    <div class="pf-tech-callout-title">
-        <span>ENGINEERING PHILOSOPHY // 실패를 직시하는 개발자</span>
-    </div>
-    <p>
-        부족했던 점을 숨기지 않고 투명하게 인정하며, 실패의 원인을 정확히 메타인지(Metacognition)하고 행동으로 보완해 나가는 것 또한 훌륭한 게임 클라이언트 프로그래머가 갖추어야 할 중요한 소양이라고 믿습니다. 
-        크래프톤 정글 GameTech 시험에서 겪은 이 값진 반성은 향후 어떤 기술 면접과 협업 현장에서도 더 단단하고 신뢰받는 엔지니어로 성장하는 든든한 밑거름이 될 것입니다.
-    </p>
-</div>
