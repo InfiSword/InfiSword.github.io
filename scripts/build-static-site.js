@@ -38,7 +38,6 @@ const PROJECT_HERO_IMAGES = {
   "autonomous-racing-agent": "assets/images/Car Simulation/스크린샷 2026-04-27 105116.png",
   "slime-project": "assets/images/Slime/slide_40_img_31.png",
   "moonlight": "assets/images/MoonLight/slide_42_img_30.png",
-  "directx-pinball-game": "assets/images/Pinball/pinball_title.png",
 };
 
 function ensureDir(dir) {
