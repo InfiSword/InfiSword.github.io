@@ -3,7 +3,7 @@
 **Branch**: `main` (no branch change) | **Date**: 2026-10-20 | **Spec**: [spec.md](spec.md)
 
 ## Summary
-Rewrite only the introduction, overview and explanatory paragraphs of the existing Slime report. Explain contribution, transition order, common lifecycle, data-driven monster reuse and player composition. Preserve headings, all five source excerpts, gallery and styles.
+Rewrite the introduction and all explanatory paragraphs of the existing Slime report with a more direct problem, design and practical effect narrative. Explain contribution, transition order, common lifecycle, data-driven monster reuse and player composition. Preserve headings, all five source excerpts, gallery and styles. This revision is files-only, with no commit or push.
 
 ## Technical Context
 **Language/Version**: Markdown/HTML; Node >=18 static builder.
@@ -30,7 +30,7 @@ Pass before research and after design. The constitution remains a template; AGEN
 2. Keep the tested sentence that distinguishes monster FSM and player controller, along with existing anchors and evidence blocks.
 3. Build and inspect the diff for excerpt/gallery preservation.
 4. Run the existing complete browser suite and inspect desktop/mobile report screenshots.
-5. Deliver the rewritten local artifact and verification results; do not resume recovery.
+5. Deliver the rewritten local artifact and verification results. Leave edits uncommitted; do not push, deploy or resume recovery.
 
 ## Complexity Tracking
 No new runtime behavior or visual design. Existing browser assertions cover the unchanged interaction contract.

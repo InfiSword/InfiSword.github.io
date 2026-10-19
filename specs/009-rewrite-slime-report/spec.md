@@ -3,7 +3,7 @@
 **Feature Branch**: `main` (existing working branch)
 **Created**: 2026-10-20
 **Status**: Reviewed
-**Input**: Cancel deployment recovery and write the article again.
+**Input**: Rewrite the article again; edit files only, without committing or pushing.
 
 ## User Scenarios & Testing
 
@@ -33,6 +33,7 @@ A portfolio reader understands the author's contribution, shared state rules, mo
 - **FR-002**: Explain shared state lifecycle, monster transitions, behavior reuse and player composition accurately.
 - **FR-003**: Preserve five initially closed code examples, the gallery and the three-chapter structure.
 - **FR-004**: Stop recovery monitoring as explicitly requested; further recovery is outside this rewrite.
+- **FR-005**: Leave all edits uncommitted and do not push or deploy them.
 
 ## Success Criteria
 
@@ -47,3 +48,4 @@ A portfolio reader understands the author's contribution, shared state rules, mo
 - The article is the Slime Project report discussed throughout this conversation.
 - Keep previously requested essential code and concise scope; change prose, not game source or visual design.
 - Cancel recovery and its recurring checks. Do not resume stalled deployment recovery while writing.
+- This revision follows the user's explicit files-only instruction. The previous commit is not rewritten or reverted.

@@ -1,5 +1,15 @@
 # Validation
 
+## Files-only rewrite revision
+
+- Rewrote the introduction and all main explanatory paragraphs around shared state rules, behavior reuse and player composition.
+- npm run build: passed; npm test -- --reporter=line: 74 passed (28.3s) on desktop Chromium and Pixel 5.
+- All five code disclosures, gallery, styles and headings remain unchanged. Existing tests passed for collapsed defaults, pointer/keyboard interactions, contents links, prose length and no horizontal overflow.
+- Desktop overview and mobile expanded-code screenshots inspected.
+- All revision edits remain uncommitted. No push, deployment or recovery action was performed.
+
+## Earlier revision
+
 - Recovery heartbeat `pages`: PAUSED as requested.
 - npm run build: passed.
 - npm test -- --reporter=line: 74 passed across desktop Chromium and Pixel 5.
