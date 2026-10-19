@@ -93,14 +93,6 @@ tags: [Unity, AI, FSM, Design Pattern]
         color: #007bff; font-weight: bold; font-size: 1.5rem; margin: 10px 0;
     }
 
-    /* --- Transaction Flow --- */
-    .pf-transaction-flow {
-        display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-family: 'Fira Code', monospace;
-        gap: 12px; flex-wrap: wrap; margin: 20px 0;
-    }
-    .pf-flow-step { padding: 10px 18px; border: 1px solid #e1e4e8; border-radius: 6px; background: #fff; color: #333; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 1.4; }
-    .pf-flow-arrow { color: #007bff; font-weight: bold; font-size: 1.2rem; }
-    
     /* --- Grid Systems --- */
     .pf-grid {
         display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin: 25px 0;
@@ -176,7 +168,7 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
 ## 1. 프로젝트 개요
 {: .chapter-title }
 
-본 프로젝트는 복잡한 게임 로직을 디자인 패턴을 활용해 구조화하는 데 집중했습니다. 모든 캐릭터와 몬스터는 통일된 인터페이스를 공유하며, 기능 중심의 컴포지션 설계를 통해 유지보수성을 극대화했습니다.
+본 프로젝트는 복잡한 게임 로직을 디자인 패턴으로 구조화하는 데 집중했습니다. 몬스터와 플레이어는 공통 `State` 생명주기를 공유하고, 몬스터는 FSM으로 상태 전환을 관리합니다. 플레이어는 기능 중심의 컴포지션 설계로 이동·공격·대시를 조합합니다.
 
 <div class="pf-visual-frame">
     <div class="pf-grid">
@@ -189,8 +181,8 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
             <p class="pf-grid-desc">슬라임 움직임/공격<br>변신 능력 동적 교체 구현</p>
         </div>
         <div class="pf-grid-item">
-            <span class="pf-grid-label">보스 AI</span>
-            <p class="pf-grid-desc">델리게이트 기반 스킬<br>HP 단계별 패턴 업그레이드</p>
+            <span class="pf-grid-label">상태 데이터</span>
+            <p class="pf-grid-desc">ScriptableObject 기반<br>행동 설정과 전환 로직 분리</p>
         </div>
         <div class="pf-grid-item">
             <span class="pf-grid-label">일반 몬스터 AI</span>
@@ -218,7 +210,7 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
     <!-- START -->
     <div class="pf-fc-pill-start">
       <span class="pf-fc-mono-tag">TRIGGER</span>
-      <span>State Transition Request (상태 전환 요청)</span>
+      <span>Initial State Setup (최초 상태 설정)</span>
     </div>
 
     <!-- Arrow -->
@@ -232,7 +224,7 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
         <h4 class="pf-fc-title">1. State::Enter (상태 진입 및 초기화)</h4>
         <span class="pf-fc-badge">INIT</span>
       </div>
-      <p class="pf-fc-desc">상태 진입 시 애니메이션 트리거, 물리 속도 초기화, 타이머 리셋</p>
+      <p class="pf-fc-desc">몬스터 분기에서 애니메이션 bool 활성화와 시작 시간 기록, 행동 상태별 속도·플래그 초기화</p>
     </div>
 
     <!-- Arrow -->
@@ -338,9 +330,14 @@ public class FiniteStateMachine
 ```text
 State
 ├── Monster_State
-│   └── IdleState / MoveState / JumpState / Dash / AttackState 등
+│   ├── MoveState
+│   ├── JumpState
+│   └── Dash / AttackState 등
 └── Player_State
-    └── Player_Movement / Player_Attack / Player_Dash / Player_Dead
+    ├── Player_Movement
+    ├── Player_Attack
+    ├── Player_Dash
+    └── Player_Dead
 ```
 
 <details class="pf-details pf-shared-state-code">
@@ -360,178 +357,7 @@ public class State
 ```
 </details>
 
-`Player_State`는 공통 생명주기를 상속하고 `Player_Entity` 참조를 추가합니다. 플레이어 기능 클래스의 생성자와 `Player_Slime`의 호출 흐름은 유지하므로, 공통 타입을 사용하면서도 이동·공격·대시 기능을 각각 관리할 수 있습니다.
-
-<details class="pf-details pf-shared-state-code">
-<summary>코드 보기: Player_State.cs</summary>
-
-```csharp
-// Player modules share the State lifecycle while retaining a typed owner.
-public class Player_State : State
-{
-    protected Player_Entity entity;
-
-    public Player_State(Player_Entity entity)
-    {
-        this.entity = entity;
-    }
-}
-```
-</details>
-
----
-
-## 3. 플레이어 슬라임 및 변신 시스템
-{: .chapter-title }
-
-플레이어 슬라임의 움직임, 공격, 대시, 피격 처리를 구현했습니다. **컴포지션 패턴**을 활용하여 각 기능을 독립적인 클래스로 분리하고, `Player_Slime`에서 통합 관리합니다. 기능 클래스는 `Player_State`를 거쳐 공통 `State` 생명주기를 상속하며, 실행 시점은 플레이어 컨트롤러가 결정합니다.
-
-### 3.1 시스템 구조 (Composition Pattern)
-
-`Player_Slime`은 모든 컴포넌트의 허브 역할을 수행하며, 각 기능 모듈은 자신의 도메인 로직에 집중합니다.
-
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
-
-    <!-- Central Hub -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
-        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
-      </div>
-      <p class="pf-fc-desc">Player_State 기반 기능 객체 초기화 및 조건별 호출, 이동·공격·대시·사망 처리 통합 관리</p>
-    </div>
-
-    <!-- Arrow -->
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- 4 Modules Grid -->
-    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">MOVEMENT</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeMovement</div>
-        <div class="pf-fc-branch-desc">좌우 이동, 점프, 지면 감지 물리 로직</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">ATTACK</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeAttack</div>
-        <div class="pf-fc-branch-desc">포물선 원거리 투사체, 근접 타격 판정</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">DASH</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDash</div>
-        <div class="pf-fc-branch-desc">순간 가속 대시 및 무적 프레임 제어</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">LIFECYCLE</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDead</div>
-        <div class="pf-fc-branch-desc">사망 연출, 콜라이더 비활성화, UI 연동</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-### 3.2 변신 능력 시스템
-
-플레이어가 몬스터를 처치하면 해당 몬스터의 형태로 변신할 수 있습니다. 변신 시 각 형태의 고유 능력을 사용할 수 있으며, `Player_FormMovement`를 통해 특수 이동 로직이 활성화됩니다.
-
-*   **슬라임 (기본):** 원거리 포물선 공격, 대시 무적 프레임 활용.
-*   **토끼 (변신):** 더블 점프 및 벽 점프 능력 획득. `Rabbit_ability`와 연동하여 벽 점프 중 조작 제한 물리 로직 적용.
-
-<details class="pf-details">
-<summary>코드 보기: Player_Slime.cs - 초기화 로직</summary>
-
-```csharp
-// Player_Slime.cs에서 필드와 Start()를 발췌
-public class Player_Slime : Player_Entity
-{
-    public Player_SlimeMovement movement { get; private set; }
-    public Player_Attack attack { get; private set; }
-    public Player_Dash dash { get; private set; }
-    public Player_Dead dead { get; private set; }
-
-    [SerializeField] private D_PlayerMovement movementData;
-    [SerializeField] private D_PlayerAttack attackData;
-    [SerializeField] private D_PlayerDash dashData;
-    [SerializeField] private D_PlayerDead deadData;
-    [SerializeField] private Transform meleePos;
-
-    [SerializeField] private Player_HpBar hpBar;
-
-    private SpriteRenderer formSpriteRenderer;
-
-    protected override void Start()
-    {
-        base.Start();
-        formSpriteRenderer = GetComponent<SpriteRenderer>();
-
-        facingDirection = 1;
-        sensor = new Player_Sensor(this, sensorData, ForwardSensorPos, MiddleSensorPos, BackwardSensorPos);
-        movement = new Player_SlimeMovement(this, movementData, this);
-        attack = new Player_Attack(this, attackData, meleePos);
-        dash = new Player_Dash(this, dashData);
-        dead = new Player_Dead(this, deadData);
-    }
-}
-```
-</details>
-
----
-
-## 4. 보스 및 일반 몬스터 AI 시스템
-{: .chapter-title }
-
-보스 몬스터의 스킬 시스템을 **델리게이트 기반**으로 구현하여 확장 가능한 AI를 설계했습니다. HP 단계에 따라 스킬이 업그레이드되며, 거리와 상황에 따라 지능적인 패턴을 생성합니다.
-
-### 4.1 보스 AI 의사결정 및 스킬 시스템
-
-보스는 매 업데이트마다 플레이어와의 거리를 산출하고, 델리게이트 배열에 등록된 스킬 풀(Pool)에서 최적의 패턴을 선택하여 실행합니다.
-
-<div class="pf-visual-frame">
-    <div class="pf-transaction-flow">
-        <div class="pf-flow-step"><strong>1. Distance Calc</strong><br>플레이어 거리 및 방향 분석</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>2. Phase Check</strong><br>HP 50% 이하 스킬 업그레이드</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>3. Skill Select</strong><br>델리게이트 배열 랜덤 인덱싱</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>4. Action</strong><br>Invoke Skill Action</div>
-    </div>
-</div>
-
-<details class="pf-details">
-<summary>코드 보기: MainBossBear.cs - 델리게이트 기반 스킬 관리</summary>
-
-```csharp
-// MainBossBear.cs: 보스 스킬 시스템
-public class MainBossBear : BossBearSetting
-{
-    private delegate void BossBear_SkillAction();
-    private BossBear_SkillAction[] BossBear_Skills;
-
-    public bool IsSkillUpgrade; // HP 단계 플래그
-
-    public override void Start()
-    {
-        base.Start();
-        // 델리게이트 배열에 메서드 직접 할당
-        BossBear_Skills = new BossBear_SkillAction[4] { Rest, Smash, Dash, Rumbling };
-    }
-
-    private void RandomBossBearSkillState()
-    {
-        int RandomSkill_Index = Random.Range((int)BossBear_SkillEnum.Smash, (int)BossBear_SkillEnum.Skill_Max);
-        // 선택된 스킬 메서드 대리 호출
-        BossBear_Skills[RandomSkill_Index].Invoke();
-    }
-}
-```
-</details>
-
-### 4.2 일반 몬스터 AI 확장 사례
+**몬스터 공통 처리와 행동 확장**
 
 일반 몬스터의 행동 상태는 `State → Monster_State → 공통 행동 상태 → 몬스터별 상태` 순서로 확장합니다. `Monster_State`는 몬스터 엔티티와 FSM 참조를 보관하고, 진입 시 시작 시간 기록·애니메이션 활성화·센서 검사를 처리합니다. 플레이어의 `Player_State`와 같은 `State`를 공유하면서 몬스터에 필요한 동작을 별도로 유지합니다.
 
@@ -660,6 +486,296 @@ public class Bear_DashState : DashState
     public override void FinishDashing()
     {
         base.FinishDashing();
+    }
+}
+```
+</details>
+
+**플레이어 분기와 공통 호출 규약**
+
+`Player_State`는 공통 생명주기를 상속하고 `Player_Entity` 참조를 추가합니다. 플레이어 기능 클래스의 생성자와 `Player_Slime`의 호출 흐름은 유지하므로, 공통 타입을 사용하면서도 이동·공격·대시 기능을 각각 관리할 수 있습니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: Player_State.cs</summary>
+
+```csharp
+// Player modules share the State lifecycle while retaining a typed owner.
+public class Player_State : State
+{
+    protected Player_Entity entity;
+
+    public Player_State(Player_Entity entity)
+    {
+        this.entity = entity;
+    }
+}
+```
+</details>
+
+### 2.3 초기화부터 상태 전환까지의 실행 흐름
+
+곰 몬스터의 실제 실행 경로를 따라가면, 상태 객체를 만드는 시점과 현재 상태를 실행하는 주체를 구분할 수 있습니다.
+
+1. **상태머신 생성:** `BearMonster.Start()`가 `base.Start()`를 호출합니다. `Monster_Entity.Start()`에서 `FiniteStateMachine`을 만들고 물리·애니메이션·이벤트 전달용 참조를 연결합니다.
+2. **상태 객체 생성과 최초 진입:** 곰은 이동·대기·감지·돌진·탐색·점프·기절·사망 상태 객체를 한 번씩 생성합니다. 실제 시작 호출은 `stateMachine.Init(moveState)`이며, 이동 상태의 `Enter()`에서 이동 속도와 이동 시간을 설정합니다.
+3. **논리·물리 호출 분리:** `Monster_Entity.Update()`는 `currentState.LogicUpdate()`를, `FixedUpdate()`는 `currentState.PhysicsUpdate()`를 호출합니다. `Monster_State.PhysicsUpdate()`는 `DoChecks()`로 감지값을 갱신합니다. 두 루프의 호출 횟수가 항상 일대일인 것은 아닙니다.
+4. **조건 판단과 상태 교체:** `Bear_MoveState.LogicUpdate()`는 `base.LogicUpdate()`로 이동 시간 만료를 먼저 계산한 뒤 감지값과 타이머를 확인합니다. 조건이 맞으면 `ChangeState()`가 이전 상태 종료 → 현재 참조 교체 → 새 상태 진입 순서로 실행됩니다.
+
+상태 전환마다 객체를 다시 생성하지 않고 이미 만들어 둔 상태를 재사용합니다. 따라서 `Enter()`에서 타이머와 동작 플래그를 초기화하는 것이 중요합니다. 이 구현의 `Init()`과 `ChangeState()`에는 null 검사가 없으므로, 상태 객체와 엔티티 참조를 모두 준비한 뒤 최초 진입과 전환을 호출합니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: BearMonster.cs - 상태 생성과 최초 진입</summary>
+
+```csharp
+// BearMonster.cs의 Start() 발췌
+public override void Start()
+{
+    base.Start();
+
+    idleState = new Bear_IdleState(stateMachine, this, "idle", idleStateData, this);      // Idle상태를 추가
+    moveState = new Bear_MoveState(stateMachine, this, "move", moveStateData, this);      // Move상태를 추가
+    playerDetectedState = new Bear_PlayerDetectedState(stateMachine, this, "playerDetected", playerDetectedStateData, this);
+    dashState = new Bear_DashState(stateMachine, this, "dash", dashStateData, this);
+    lookForPlayerState = new Bear_LookForPlayerState(stateMachine, this, "lookForPlayer", lookForPlayerStateData, this);
+    jumpState = new Bear_JumpState(stateMachine, this, "jump", jumpStateData, this);
+    stunState = new Bear_StunState(stateMachine, this, "stun", stunStateData, this);
+    deadState = new Bear_DeadState(stateMachine, this, "dead", deadStateData, this);
+
+    stateMachine.Init(moveState);       // Entity에 존재하는 상태머신을 움직임 상태로 초기화시킴
+}
+```
+</details>
+
+**감지값 갱신과 전환 판단의 분리**
+
+`MoveState.DoChecks()`는 플레이어·벽·절벽·접지·점프 필요 여부를 읽어 필드에 저장합니다. 이 검사는 상태 진입 시와 물리 업데이트 시 수행되고, 곰의 논리 업데이트는 가장 최근에 저장된 값을 사용해 다음 동작을 결정합니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: MoveState.cs - 감지값 갱신</summary>
+
+```csharp
+// MoveState.cs의 DoChecks() 발췌
+public override void DoChecks()
+{
+    base.DoChecks();
+
+    isPlayerInMinAgroRange = entity.CheckPlayerInMinAgroRange();
+    isDetectingLedge = entity.CheckLedge();
+    isDetectingWall = entity.CheckWall();
+    isGrounded = entity.CheckGround();
+    isCheckJump = entity.CheckJump();
+}
+```
+</details>
+
+곰의 이동 상태는 다음 `if / else if` 순서로 조건을 평가합니다. 한 번의 판단에서 먼저 성립한 분기를 선택하며, 마지막 분기는 이동 상태를 유지한 채 진행 방향과 속도를 바꿉니다.
+
+| 순서 | 확인하는 상황 | 수행하는 동작 |
+| --- | --- | --- |
+| 1 | 플레이어가 최소 감지 범위 안에 있음 | 플레이어 감지 상태로 전환 |
+| 2 | 점프가 필요한 지형을 감지함 | 점프 상태로 전환 |
+| 3 | 정해진 이동 시간이 지남 | 대기 상태로 전환 |
+| 4 | 지상에서 벽 또는 절벽을 감지함 | 방향을 뒤집고 이동 속도를 다시 적용 |
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: Bear_MoveState.cs - 상태 전환 우선순위</summary>
+
+```csharp
+// Bear_MoveState.cs의 LogicUpdate() 발췌
+public override void LogicUpdate()
+{
+    base.LogicUpdate();
+    if (isPlayerInMinAgroRange)
+    {
+        stateMachine.ChangeState(bear.playerDetectedState);
+    }
+    else if (isCheckJump)
+    {
+        stateMachine.ChangeState(bear.jumpState);
+    }
+    else if (isMoveTimeOver)      // idle 시간이 끝나면
+    {
+        stateMachine.ChangeState(bear.idleState);      // move상태로 돌입
+    }
+    else if ((isDetectingWall || !isDetectingLedge) && isGrounded)
+    {
+        entity.Flip();
+        entity.SetVelocity(stateData.movementSpeed);    // 방향 재설정
+    }
+
+}
+```
+</details>
+
+### 2.4 상태 데이터와 애니메이션 이벤트 연결
+
+**행동 로직과 조정값 분리**
+
+이동 상태는 `D_MoveState`라는 `ScriptableObject`로 이동 속도와 최소·최대 이동 시간을 전달받습니다. `MoveState.Enter()`는 이 설정으로 속도를 적용하고 이동 시간을 뽑으며, `LogicUpdate()`가 `startTime`을 기준으로 만료 여부를 계산합니다. 같은 이동 로직을 여러 몬스터가 상속하면서 설정 에셋을 다르게 지정할 수 있습니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: D_MoveState.cs - 이동 상태 설정</summary>
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "newMoveStateData", menuName = "Data/State Data/Move Data")]
+public class D_MoveState : ScriptableObject
+{
+    public float minmoveTime = 3f;
+    public float maxmoveTime = 5f;
+
+    public float movementSpeed = 3f;
+}
+```
+</details>
+
+**애니메이션 타이밍을 상태 동작으로 전달**
+
+돌진 상태는 진입 즉시 돌진을 끝내는 대신, 애니메이션 이벤트가 실제 동작 시작·종료 시점을 알려 주도록 연결합니다.
+
+1. `Dash.Enter()`가 현재 돌진 상태를 `AnimationToStateMachine.dashState`에 연결하고, 완료·수행 플래그를 초기화합니다.
+2. 애니메이션의 `TriggerDashing()` 이벤트가 전달되면 `DashState`가 수행 플래그를 켜고 돌진 속도를 적용합니다. 곰의 상태는 여기에 물리 저항값을 추가합니다.
+3. `FinishDashing()` 이벤트는 완료 플래그를 켜고 수행 플래그와 속도를 정리합니다.
+4. 다음 논리 업데이트에서 `Bear_DashState`가 완료·수행 플래그를 확인하고, 플레이어 감지 여부에 따라 감지 또는 탐색 상태로 전환합니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: AnimationToStateMachine.cs - 애니메이션 이벤트 전달</summary>
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class AnimationToStateMachine : MonoBehaviour
+{
+    public AttackState attackState;
+
+    private void TriggerAttack()
+    {
+        attackState.TriggerAttack();
+    }
+    private void FinishAttack()
+    {
+        attackState.FinishAttack();
+    }
+
+    public Dash dashState;
+
+    private void TriggerDashing()
+    {
+       dashState.TriggerDashing();
+    }
+    private void FinishDashing()
+    {
+        dashState.FinishDashing();
+    }
+}
+```
+</details>
+
+**새 몬스터를 추가하는 순서**
+
+먼저 공통 행동 상태를 상속해 몬스터별 전환 조건을 작성하고, 필요한 상태 데이터 에셋을 지정합니다. 그다음 몬스터의 초기화 코드에서 상태 객체를 생성하고 시작 상태를 `Init()`에 전달합니다. 공격·돌진처럼 애니메이션 시점에 맞춰 실행할 동작은 이벤트 전달 클래스에 현재 상태를 연결합니다. 이렇게 공통 생명주기와 센서 처리는 재사용하고, 몬스터별 조건·설정·이벤트 연결을 확장합니다.
+
+
+---
+
+## 3. 플레이어 슬라임 및 변신 시스템
+{: .chapter-title }
+
+플레이어 슬라임의 움직임, 공격, 대시, 피격 처리를 구현했습니다. **컴포지션 패턴**을 활용하여 각 기능을 독립적인 클래스로 분리하고, `Player_Slime`에서 통합 관리합니다. 기능 클래스는 `Player_State`를 거쳐 공통 `State` 생명주기를 상속하며, 실행 시점은 플레이어 컨트롤러가 결정합니다.
+
+### 3.1 시스템 구조 (Composition Pattern)
+
+`Player_Slime`은 모든 컴포넌트의 허브 역할을 수행하며, 각 기능 모듈은 자신의 도메인 로직에 집중합니다.
+
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+
+    <!-- Central Hub -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
+      </div>
+      <p class="pf-fc-desc">Player_State 기반 기능 객체 초기화 및 조건별 호출, 이동·공격·대시·사망 처리 통합 관리</p>
+    </div>
+
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+
+    <!-- 4 Modules Grid -->
+    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">MOVEMENT</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeMovement</div>
+        <div class="pf-fc-branch-desc">좌우 이동, 점프, 지면 감지 물리 로직</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">ATTACK</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeAttack</div>
+        <div class="pf-fc-branch-desc">포물선 원거리 투사체, 근접 타격 판정</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">DASH</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDash</div>
+        <div class="pf-fc-branch-desc">순간 가속 대시 및 무적 프레임 제어</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">LIFECYCLE</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDead</div>
+        <div class="pf-fc-branch-desc">사망 연출, 콜라이더 비활성화, UI 연동</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+### 3.2 변신 능력 시스템
+
+플레이어가 몬스터를 처치하면 해당 몬스터의 형태로 변신할 수 있습니다. 변신 시 각 형태의 고유 능력을 사용할 수 있으며, `Player_FormMovement`를 통해 특수 이동 로직이 활성화됩니다.
+
+*   **슬라임 (기본):** 원거리 포물선 공격, 대시 무적 프레임 활용.
+*   **토끼 (변신):** 더블 점프 및 벽 점프 능력 획득. `Rabbit_ability`와 연동하여 벽 점프 중 조작 제한 물리 로직 적용.
+
+<details class="pf-details">
+<summary>코드 보기: Player_Slime.cs - 초기화 로직</summary>
+
+```csharp
+// Player_Slime.cs에서 필드와 Start()를 발췌
+public class Player_Slime : Player_Entity
+{
+    public Player_SlimeMovement movement { get; private set; }
+    public Player_Attack attack { get; private set; }
+    public Player_Dash dash { get; private set; }
+    public Player_Dead dead { get; private set; }
+
+    [SerializeField] private D_PlayerMovement movementData;
+    [SerializeField] private D_PlayerAttack attackData;
+    [SerializeField] private D_PlayerDash dashData;
+    [SerializeField] private D_PlayerDead deadData;
+    [SerializeField] private Transform meleePos;
+
+    [SerializeField] private Player_HpBar hpBar;
+
+    private SpriteRenderer formSpriteRenderer;
+
+    protected override void Start()
+    {
+        base.Start();
+        formSpriteRenderer = GetComponent<SpriteRenderer>();
+
+        facingDirection = 1;
+        sensor = new Player_Sensor(this, sensorData, ForwardSensorPos, MiddleSensorPos, BackwardSensorPos);
+        movement = new Player_SlimeMovement(this, movementData, this);
+        attack = new Player_Attack(this, attackData, meleePos);
+        dash = new Player_Dash(this, dashData);
+        dead = new Player_Dead(this, deadData);
     }
 }
 ```

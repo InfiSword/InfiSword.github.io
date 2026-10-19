@@ -1,0 +1,2 @@
+# Content Model
+The report has three chapters: overview, FSM, player systems. Section 2.2 contains the shared State, Player_State, Monster_State and concrete monster extensions. Section 2.3 describes the runtime trace; 2.4 covers data and animation events. Generated contents entries must match existing headings. Full source examples and explicitly labeled method excerpts are initially closed disclosures.

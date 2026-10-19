@@ -97,7 +97,7 @@
 </section>
 <hr>
 <h2 id="1-프로젝트-개요" class="chapter-title">1. 프로젝트 개요</h2>
-<p>본 프로젝트는 복잡한 게임 로직을 디자인 패턴을 활용해 구조화하는 데 집중했습니다. 모든 캐릭터와 몬스터는 통일된 인터페이스를 공유하며, 기능 중심의 컴포지션 설계를 통해 유지보수성을 극대화했습니다.</p>
+<p>본 프로젝트는 복잡한 게임 로직을 디자인 패턴으로 구조화하는 데 집중했습니다. 몬스터와 플레이어는 공통 <code>State</code> 생명주기를 공유하고, 몬스터는 FSM으로 상태 전환을 관리합니다. 플레이어는 기능 중심의 컴포지션 설계로 이동·공격·대시를 조합합니다.</p>
 <div class="pf-visual-frame">
     <div class="pf-grid">
         <div class="pf-grid-item">
@@ -109,8 +109,8 @@
             <p class="pf-grid-desc">슬라임 움직임/공격<br>변신 능력 동적 교체 구현</p>
         </div>
         <div class="pf-grid-item">
-            <span class="pf-grid-label">보스 AI</span>
-            <p class="pf-grid-desc">델리게이트 기반 스킬<br>HP 단계별 패턴 업그레이드</p>
+            <span class="pf-grid-label">상태 데이터</span>
+            <p class="pf-grid-desc">ScriptableObject 기반<br>행동 설정과 전환 로직 분리</p>
         </div>
         <div class="pf-grid-item">
             <span class="pf-grid-label">일반 몬스터 AI</span>
@@ -129,7 +129,7 @@
     <!-- START -->
     <div class="pf-fc-pill-start">
       <span class="pf-fc-mono-tag">TRIGGER</span>
-      <span>State Transition Request (상태 전환 요청)</span>
+      <span>Initial State Setup (최초 상태 설정)</span>
     </div>
     <!-- Arrow -->
     <div class="pf-fc-arrow">
@@ -141,7 +141,7 @@
         <h4 class="pf-fc-title">1. State::Enter (상태 진입 및 초기화)</h4>
         <span class="pf-fc-badge">INIT</span>
       </div>
-      <p class="pf-fc-desc">상태 진입 시 애니메이션 트리거, 물리 속도 초기화, 타이머 리셋</p>
+      <p class="pf-fc-desc">몬스터 분기에서 애니메이션 bool 활성화와 시작 시간 기록, 행동 상태별 속도·플래그 초기화</p>
     </div>
     <!-- Arrow -->
     <div class="pf-fc-arrow">
@@ -228,9 +228,14 @@
 <p><code>State</code>는 특정 엔티티나 애니메이션 파라미터에 의존하지 않는 공통 기반 클래스입니다. 기본 메서드는 부수 효과 없이 비어 있으며, 각 하위 클래스가 필요한 동작을 재정의합니다. 몬스터의 애니메이션 제어·시작 시간 기록·센서 검사는 <code>Monster_State</code>에서 처리합니다.</p>
 <pre class="hljs-pre"><code class="hljs language-text">State
 ├── Monster_State
-│   └── IdleState / MoveState / JumpState / Dash / AttackState 등
+│   ├── MoveState
+│   ├── JumpState
+│   └── Dash / AttackState 등
 └── Player_State
-    └── Player_Movement / Player_Attack / Player_Dash / Player_Dead</code></pre>
+    ├── Player_Movement
+    ├── Player_Attack
+    ├── Player_Dash
+    └── Player_Dead</code></pre>
 <details class="pf-details pf-shared-state-code">
 <summary>코드 보기: State.cs</summary>
 <pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// Shared lifecycle for monster states and player feature modules.</span>
@@ -244,143 +249,7 @@
     <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">DoChecks</span>()</span> { }
 }</code></pre>
 </details>
-<p><code>Player_State</code>는 공통 생명주기를 상속하고 <code>Player_Entity</code> 참조를 추가합니다. 플레이어 기능 클래스의 생성자와 <code>Player_Slime</code>의 호출 흐름은 유지하므로, 공통 타입을 사용하면서도 이동·공격·대시 기능을 각각 관리할 수 있습니다.</p>
-<details class="pf-details pf-shared-state-code">
-<summary>코드 보기: Player_State.cs</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Player</span> modules share the <span class="hljs-title class_">State</span> lifecycle while retaining a typed owner.</span>
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Player_State</span> : <span class="hljs-title"><span class="hljs-title class_">State</span></span>
-{
-    <span class="hljs-keyword">protected</span> Player_Entity entity;
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Player_State</span>(<span class="hljs-params">Player_Entity entity</span>)</span>
-    {
-        <span class="hljs-keyword">this</span>.entity = entity;
-    }
-}</code></pre>
-</details>
-<hr>
-<h2 id="3-플레이어-슬라임-및-변신-시스템" class="chapter-title">3. 플레이어 슬라임 및 변신 시스템</h2>
-<p>플레이어 슬라임의 움직임, 공격, 대시, 피격 처리를 구현했습니다. <strong>컴포지션 패턴</strong>을 활용하여 각 기능을 독립적인 클래스로 분리하고, <code>Player_Slime</code>에서 통합 관리합니다. 기능 클래스는 <code>Player_State</code>를 거쳐 공통 <code>State</code> 생명주기를 상속하며, 실행 시점은 플레이어 컨트롤러가 결정합니다.</p>
-<h3 id="31-시스템-구조-composition-pattern">3.1 시스템 구조 (Composition Pattern)</h3>
-<p><code>Player_Slime</code>은 모든 컴포넌트의 허브 역할을 수행하며, 각 기능 모듈은 자신의 도메인 로직에 집중합니다.</p>
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
-    <!-- Central Hub -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
-        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
-      </div>
-      <p class="pf-fc-desc">Player_State 기반 기능 객체 초기화 및 조건별 호출, 이동·공격·대시·사망 처리 통합 관리</p>
-    </div>
-    <!-- Arrow -->
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-    <!-- 4 Modules Grid -->
-    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">MOVEMENT</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeMovement</div>
-        <div class="pf-fc-branch-desc">좌우 이동, 점프, 지면 감지 물리 로직</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">ATTACK</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeAttack</div>
-        <div class="pf-fc-branch-desc">포물선 원거리 투사체, 근접 타격 판정</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">DASH</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDash</div>
-        <div class="pf-fc-branch-desc">순간 가속 대시 및 무적 프레임 제어</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge">LIFECYCLE</span>
-        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDead</div>
-        <div class="pf-fc-branch-desc">사망 연출, 콜라이더 비활성화, UI 연동</div>
-      </div>
-    </div>
-  </div>
-</div>
-<h3 id="32-변신-능력-시스템">3.2 변신 능력 시스템</h3>
-<p>플레이어가 몬스터를 처치하면 해당 몬스터의 형태로 변신할 수 있습니다. 변신 시 각 형태의 고유 능력을 사용할 수 있으며, <code>Player_FormMovement</code>를 통해 특수 이동 로직이 활성화됩니다.</p>
-<ul><li><strong>슬라임 (기본):</strong> 원거리 포물선 공격, 대시 무적 프레임 활용.</li><li><strong>토끼 (변신):</strong> 더블 점프 및 벽 점프 능력 획득. <code>Rabbit_ability</code>와 연동하여 벽 점프 중 조작 제한 물리 로직 적용.</li></ul>
-<details class="pf-details">
-<summary>코드 보기: Player_Slime.cs - 초기화 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Player_Slime</span>.cs에서 필드와 <span class="hljs-title function_">Start</span>()를 발췌</span>
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">Player_Slime</span></span> : <span class="hljs-title">Player_Entity</span>
-{
-    <span class="hljs-keyword">public</span> Player_SlimeMovement movement { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-    <span class="hljs-keyword">public</span> Player_Attack attack { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-    <span class="hljs-keyword">public</span> Player_Dash dash { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-    <span class="hljs-keyword">public</span> Player_Dead dead { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
-
-    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerMovement movementData;
-    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerAttack attackData;
-    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerDash dashData;
-    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerDead deadData;
-    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> <span class="hljs-title class_">Transform</span> meleePos;
-
-    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> Player_HpBar hpBar;
-
-    <span class="hljs-keyword">private</span> <span class="hljs-title class_">SpriteRenderer</span> formSpriteRenderer;
-
-    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Start</span>()</span>
-    {
-        <span class="hljs-keyword">base</span>.<span class="hljs-title function_">Start</span>();
-        formSpriteRenderer = GetComponent&lt;<span class="hljs-title class_">SpriteRenderer</span>&gt;();
-
-        facingDirection = <span class="hljs-number">1</span>;
-        sensor = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Sensor</span>(<span class="hljs-keyword">this</span>, sensorData, ForwardSensorPos, MiddleSensorPos, BackwardSensorPos);
-        movement = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_SlimeMovement</span>(<span class="hljs-keyword">this</span>, movementData, <span class="hljs-keyword">this</span>);
-        attack = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Attack</span>(<span class="hljs-keyword">this</span>, attackData, meleePos);
-        dash = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Dash</span>(<span class="hljs-keyword">this</span>, dashData);
-        dead = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Dead</span>(<span class="hljs-keyword">this</span>, deadData);
-    }
-}</code></pre>
-</details>
-<hr>
-<h2 id="4-보스-및-일반-몬스터-ai-시스템" class="chapter-title">4. 보스 및 일반 몬스터 AI 시스템</h2>
-<p>보스 몬스터의 스킬 시스템을 <strong>델리게이트 기반</strong>으로 구현하여 확장 가능한 AI를 설계했습니다. HP 단계에 따라 스킬이 업그레이드되며, 거리와 상황에 따라 지능적인 패턴을 생성합니다.</p>
-<h3 id="41-보스-ai-의사결정-및-스킬-시스템">4.1 보스 AI 의사결정 및 스킬 시스템</h3>
-<p>보스는 매 업데이트마다 플레이어와의 거리를 산출하고, 델리게이트 배열에 등록된 스킬 풀(Pool)에서 최적의 패턴을 선택하여 실행합니다.</p>
-<div class="pf-visual-frame">
-    <div class="pf-transaction-flow">
-        <div class="pf-flow-step"><strong>1. Distance Calc</strong><br>플레이어 거리 및 방향 분석</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>2. Phase Check</strong><br>HP 50% 이하 스킬 업그레이드</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>3. Skill Select</strong><br>델리게이트 배열 랜덤 인덱싱</div>
-        <div class="pf-flow-arrow">→</div>
-        <div class="pf-flow-step"><strong>4. Action</strong><br>Invoke Skill Action</div>
-    </div>
-</div>
-<details class="pf-details">
-<summary>코드 보기: MainBossBear.cs - 델리게이트 기반 스킬 관리</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">MainBossBear</span>.cs: 보스 스킬 시스템</span>
-<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">MainBossBear</span></span> : <span class="hljs-title">BossBearSetting</span>
-{
-    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-built_in">delegate</span> <span class="hljs-keyword">void</span> <span class="hljs-title">BossBear_SkillAction</span>()</span>;
-    <span class="hljs-keyword">private</span> BossBear_SkillAction[] BossBear_Skills;
-
-    <span class="hljs-keyword">public</span> <span class="hljs-built_in">bool</span> IsSkillUpgrade; <span class="hljs-comment">// HP 단계 플래그</span>
-
-    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Start</span>()</span>
-    {
-        <span class="hljs-keyword">base</span>.<span class="hljs-title function_">Start</span>();
-        <span class="hljs-comment">// 델리게이트 배열에 메서드 직접 할당</span>
-        BossBear_Skills = <span class="hljs-keyword">new</span> BossBear_SkillAction[<span class="hljs-number">4</span>] { Rest, Smash, Dash, Rumbling };
-    }
-
-    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">RandomBossBearSkillState</span>()</span>
-    {
-        <span class="hljs-built_in">int</span> RandomSkill_Index = <span class="hljs-title class_">Random</span>.<span class="hljs-title function_">Range</span>((<span class="hljs-built_in">int</span>)BossBear_SkillEnum.Smash, (<span class="hljs-built_in">int</span>)BossBear_SkillEnum.Skill_Max);
-        <span class="hljs-comment">// 선택된 스킬 메서드 대리 호출</span>
-        BossBear_Skills[RandomSkill_Index].<span class="hljs-title function_">Invoke</span>();
-    }
-}</code></pre>
-</details>
-<h3 id="42-일반-몬스터-ai-확장-사례">4.2 일반 몬스터 AI 확장 사례</h3>
+<p><strong>몬스터 공통 처리와 행동 확장</strong></p>
 <p>일반 몬스터의 행동 상태는 <code>State → Monster_State → 공통 행동 상태 → 몬스터별 상태</code> 순서로 확장합니다. <code>Monster_State</code>는 몬스터 엔티티와 FSM 참조를 보관하고, 진입 시 시작 시간 기록·애니메이션 활성화·센서 검사를 처리합니다. 플레이어의 <code>Player_State</code>와 같은 <code>State</code>를 공유하면서 몬스터에 필요한 동작을 별도로 유지합니다.</p>
 <ul><li><strong>Bear (돌진형):</strong> <code>Bear_DashState : DashState</code>로 돌진을 구현하고, 돌진 종료 후 플레이어 감지 여부에 따라 감지·탐색 상태로 전환합니다.</li><li><strong>Spider (도약형):</strong> <code>Spider_JumpState : JumpState</code>로 공중 이동을 처리하고, 착지 후 감지·이동 상태로 전환합니다.</li><li><strong>Ant (기본형):</strong> <code>Ant_MoveState</code>로 순찰·방향 전환을 처리하고, <code>Ant_MeleeAttackState</code>에서 공격 범위를 판정해 피해를 적용합니다.</li></ul>
 <details class="pf-details pf-shared-state-code">
@@ -500,6 +369,223 @@
     }
 }</code></pre>
 </details>
+<p><strong>플레이어 분기와 공통 호출 규약</strong></p>
+<p><code>Player_State</code>는 공통 생명주기를 상속하고 <code>Player_Entity</code> 참조를 추가합니다. 플레이어 기능 클래스의 생성자와 <code>Player_Slime</code>의 호출 흐름은 유지하므로, 공통 타입을 사용하면서도 이동·공격·대시 기능을 각각 관리할 수 있습니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: Player_State.cs</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Player</span> modules share the <span class="hljs-title class_">State</span> lifecycle while retaining a typed owner.</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Player_State</span> : <span class="hljs-title"><span class="hljs-title class_">State</span></span>
+{
+    <span class="hljs-keyword">protected</span> Player_Entity entity;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Player_State</span>(<span class="hljs-params">Player_Entity entity</span>)</span>
+    {
+        <span class="hljs-keyword">this</span>.entity = entity;
+    }
+}</code></pre>
+</details>
+<h3 id="23-초기화부터-상태-전환까지의-실행-흐름">2.3 초기화부터 상태 전환까지의 실행 흐름</h3>
+<p>곰 몬스터의 실제 실행 경로를 따라가면, 상태 객체를 만드는 시점과 현재 상태를 실행하는 주체를 구분할 수 있습니다.</p>
+<ol><li><strong>상태머신 생성:</strong> <code>BearMonster.Start()</code>가 <code>base.Start()</code>를 호출합니다. <code>Monster_Entity.Start()</code>에서 <code>FiniteStateMachine</code>을 만들고 물리·애니메이션·이벤트 전달용 참조를 연결합니다.</li><li><strong>상태 객체 생성과 최초 진입:</strong> 곰은 이동·대기·감지·돌진·탐색·점프·기절·사망 상태 객체를 한 번씩 생성합니다. 실제 시작 호출은 <code>stateMachine.Init(moveState)</code>이며, 이동 상태의 <code>Enter()</code>에서 이동 속도와 이동 시간을 설정합니다.</li><li><strong>논리·물리 호출 분리:</strong> <code>Monster_Entity.Update()</code>는 <code>currentState.LogicUpdate()</code>를, <code>FixedUpdate()</code>는 <code>currentState.PhysicsUpdate()</code>를 호출합니다. <code>Monster_State.PhysicsUpdate()</code>는 <code>DoChecks()</code>로 감지값을 갱신합니다. 두 루프의 호출 횟수가 항상 일대일인 것은 아닙니다.</li><li><strong>조건 판단과 상태 교체:</strong> <code>Bear_MoveState.LogicUpdate()</code>는 <code>base.LogicUpdate()</code>로 이동 시간 만료를 먼저 계산한 뒤 감지값과 타이머를 확인합니다. 조건이 맞으면 <code>ChangeState()</code>가 이전 상태 종료 → 현재 참조 교체 → 새 상태 진입 순서로 실행됩니다.</li></ol>
+<p>상태 전환마다 객체를 다시 생성하지 않고 이미 만들어 둔 상태를 재사용합니다. 따라서 <code>Enter()</code>에서 타이머와 동작 플래그를 초기화하는 것이 중요합니다. 이 구현의 <code>Init()</code>과 <code>ChangeState()</code>에는 null 검사가 없으므로, 상태 객체와 엔티티 참조를 모두 준비한 뒤 최초 진입과 전환을 호출합니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: BearMonster.cs - 상태 생성과 최초 진입</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// BearMonster.cs의 <span class="hljs-title function_">Start</span>() 발췌</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Start</span>()</span>
+{
+    <span class="hljs-keyword">base</span>.<span class="hljs-title function_">Start</span>();
+
+    idleState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_IdleState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;idle&quot;</span>, idleStateData, <span class="hljs-keyword">this</span>);      <span class="hljs-comment">// Idle상태를 추가</span>
+    moveState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_MoveState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;move&quot;</span>, moveStateData, <span class="hljs-keyword">this</span>);      <span class="hljs-comment">// Move상태를 추가</span>
+    playerDetectedState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_PlayerDetectedState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;playerDetected&quot;</span>, playerDetectedStateData, <span class="hljs-keyword">this</span>);
+    dashState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_DashState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;dash&quot;</span>, dashStateData, <span class="hljs-keyword">this</span>);
+    lookForPlayerState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_LookForPlayerState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;lookForPlayer&quot;</span>, lookForPlayerStateData, <span class="hljs-keyword">this</span>);
+    jumpState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_JumpState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;jump&quot;</span>, jumpStateData, <span class="hljs-keyword">this</span>);
+    stunState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_StunState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;stun&quot;</span>, stunStateData, <span class="hljs-keyword">this</span>);
+    deadState = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Bear_DeadState</span>(stateMachine, <span class="hljs-keyword">this</span>, <span class="hljs-string">&quot;dead&quot;</span>, deadStateData, <span class="hljs-keyword">this</span>);
+
+    stateMachine.<span class="hljs-title function_">Init</span>(moveState);       <span class="hljs-comment">// <span class="hljs-title class_">Entity</span>에 존재하는 상태머신을 움직임 상태로 초기화시킴</span>
+}</code></pre>
+</details>
+<p><strong>감지값 갱신과 전환 판단의 분리</strong></p>
+<p><code>MoveState.DoChecks()</code>는 플레이어·벽·절벽·접지·점프 필요 여부를 읽어 필드에 저장합니다. 이 검사는 상태 진입 시와 물리 업데이트 시 수행되고, 곰의 논리 업데이트는 가장 최근에 저장된 값을 사용해 다음 동작을 결정합니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: MoveState.cs - 감지값 갱신</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// MoveState.cs의 <span class="hljs-title function_">DoChecks</span>() 발췌</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">DoChecks</span>()</span>
+{
+    <span class="hljs-keyword">base</span>.<span class="hljs-title function_">DoChecks</span>();
+
+    isPlayerInMinAgroRange = entity.<span class="hljs-title function_">CheckPlayerInMinAgroRange</span>();
+    isDetectingLedge = entity.<span class="hljs-title function_">CheckLedge</span>();
+    isDetectingWall = entity.<span class="hljs-title function_">CheckWall</span>();
+    isGrounded = entity.<span class="hljs-title function_">CheckGround</span>();
+    isCheckJump = entity.<span class="hljs-title function_">CheckJump</span>();
+}</code></pre>
+</details>
+<p>곰의 이동 상태는 다음 <code>if / else if</code> 순서로 조건을 평가합니다. 한 번의 판단에서 먼저 성립한 분기를 선택하며, 마지막 분기는 이동 상태를 유지한 채 진행 방향과 속도를 바꿉니다.</p>
+<div class="pf-table-wrapper"><table class="pf-data-table"><thead><tr><th>순서</th><th>확인하는 상황</th><th>수행하는 동작</th></tr></thead><tbody><tr><td>1</td><td>플레이어가 최소 감지 범위 안에 있음</td><td>플레이어 감지 상태로 전환</td></tr><tr><td>2</td><td>점프가 필요한 지형을 감지함</td><td>점프 상태로 전환</td></tr><tr><td>3</td><td>정해진 이동 시간이 지남</td><td>대기 상태로 전환</td></tr><tr><td>4</td><td>지상에서 벽 또는 절벽을 감지함</td><td>방향을 뒤집고 이동 속도를 다시 적용</td></tr></tbody></table></div>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: Bear_MoveState.cs - 상태 전환 우선순위</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// Bear_MoveState.cs의 <span class="hljs-title function_">LogicUpdate</span>() 발췌</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">LogicUpdate</span>()</span>
+{
+    <span class="hljs-keyword">base</span>.<span class="hljs-title function_">LogicUpdate</span>();
+    <span class="hljs-keyword hljs-control-flow">if</span> (isPlayerInMinAgroRange)
+    {
+        stateMachine.<span class="hljs-title function_">ChangeState</span>(bear.playerDetectedState);
+    }
+    <span class="hljs-keyword hljs-control-flow">else</span> <span class="hljs-keyword hljs-control-flow">if</span> (isCheckJump)
+    {
+        stateMachine.<span class="hljs-title function_">ChangeState</span>(bear.jumpState);
+    }
+    <span class="hljs-keyword hljs-control-flow">else</span> <span class="hljs-keyword hljs-control-flow">if</span> (isMoveTimeOver)      <span class="hljs-comment">// idle 시간이 끝나면</span>
+    {
+        stateMachine.<span class="hljs-title function_">ChangeState</span>(bear.idleState);      <span class="hljs-comment">// move상태로 돌입</span>
+    }
+    <span class="hljs-keyword hljs-control-flow">else</span> <span class="hljs-keyword hljs-control-flow">if</span> ((isDetectingWall || !isDetectingLedge) &amp;&amp; isGrounded)
+    {
+        entity.<span class="hljs-title function_">Flip</span>();
+        entity.<span class="hljs-title function_">SetVelocity</span>(stateData.movementSpeed);    <span class="hljs-comment">// 방향 재설정</span>
+    }
+
+}</code></pre>
+</details>
+<h3 id="24-상태-데이터와-애니메이션-이벤트-연결">2.4 상태 데이터와 애니메이션 이벤트 연결</h3>
+<p><strong>행동 로직과 조정값 분리</strong></p>
+<p>이동 상태는 <code>D_MoveState</code>라는 <code>ScriptableObject</code>로 이동 속도와 최소·최대 이동 시간을 전달받습니다. <code>MoveState.Enter()</code>는 이 설정으로 속도를 적용하고 이동 시간을 뽑으며, <code>LogicUpdate()</code>가 <code>startTime</code>을 기준으로 만료 여부를 계산합니다. 같은 이동 로직을 여러 몬스터가 상속하면서 설정 에셋을 다르게 지정할 수 있습니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: D_MoveState.cs - 이동 상태 설정</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">using</span> System.Collections;
+<span class="hljs-keyword">using</span> System.Collections.Generic;
+<span class="hljs-keyword">using</span> UnityEngine;
+
+[<span class="hljs-meta"><span class="hljs-title function_">CreateAssetMenu</span>(fileName = <span class="hljs-string">&quot;newMoveStateData&quot;</span>, menuName = <span class="hljs-string">&quot;Data/<span class="hljs-title class_">State</span> Data/Move Data&quot;</span>)</span>]
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">D_MoveState</span> : <span class="hljs-title"><span class="hljs-title class_">ScriptableObject</span></span>
+{
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> minmoveTime = <span class="hljs-number">3f</span>;
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> maxmoveTime = <span class="hljs-number">5f</span>;
+
+    <span class="hljs-keyword">public</span> <span class="hljs-built_in">float</span> movementSpeed = <span class="hljs-number">3f</span>;
+}</code></pre>
+</details>
+<p><strong>애니메이션 타이밍을 상태 동작으로 전달</strong></p>
+<p>돌진 상태는 진입 즉시 돌진을 끝내는 대신, 애니메이션 이벤트가 실제 동작 시작·종료 시점을 알려 주도록 연결합니다.</p>
+<ol><li><code>Dash.Enter()</code>가 현재 돌진 상태를 <code>AnimationToStateMachine.dashState</code>에 연결하고, 완료·수행 플래그를 초기화합니다.</li><li>애니메이션의 <code>TriggerDashing()</code> 이벤트가 전달되면 <code>DashState</code>가 수행 플래그를 켜고 돌진 속도를 적용합니다. 곰의 상태는 여기에 물리 저항값을 추가합니다.</li><li><code>FinishDashing()</code> 이벤트는 완료 플래그를 켜고 수행 플래그와 속도를 정리합니다.</li><li>다음 논리 업데이트에서 <code>Bear_DashState</code>가 완료·수행 플래그를 확인하고, 플레이어 감지 여부에 따라 감지 또는 탐색 상태로 전환합니다.</li></ol>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: AnimationToStateMachine.cs - 애니메이션 이벤트 전달</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-keyword">using</span> System.Collections;
+<span class="hljs-keyword">using</span> System.Collections.Generic;
+<span class="hljs-keyword">using</span> UnityEngine;
+
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">AnimationToStateMachine</span> : <span class="hljs-title"><span class="hljs-title class_">MonoBehaviour</span></span>
+{
+    <span class="hljs-keyword">public</span> AttackState attackState;
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">TriggerAttack</span>()</span>
+    {
+        attackState.<span class="hljs-title function_">TriggerAttack</span>();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">FinishAttack</span>()</span>
+    {
+        attackState.<span class="hljs-title function_">FinishAttack</span>();
+    }
+
+    <span class="hljs-keyword">public</span> Dash dashState;
+
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">TriggerDashing</span>()</span>
+    {
+       dashState.<span class="hljs-title function_">TriggerDashing</span>();
+    }
+    <span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">FinishDashing</span>()</span>
+    {
+        dashState.<span class="hljs-title function_">FinishDashing</span>();
+    }
+}</code></pre>
+</details>
+<p><strong>새 몬스터를 추가하는 순서</strong></p>
+<p>먼저 공통 행동 상태를 상속해 몬스터별 전환 조건을 작성하고, 필요한 상태 데이터 에셋을 지정합니다. 그다음 몬스터의 초기화 코드에서 상태 객체를 생성하고 시작 상태를 <code>Init()</code>에 전달합니다. 공격·돌진처럼 애니메이션 시점에 맞춰 실행할 동작은 이벤트 전달 클래스에 현재 상태를 연결합니다. 이렇게 공통 생명주기와 센서 처리는 재사용하고, 몬스터별 조건·설정·이벤트 연결을 확장합니다.</p>
+<hr>
+<h2 id="3-플레이어-슬라임-및-변신-시스템" class="chapter-title">3. 플레이어 슬라임 및 변신 시스템</h2>
+<p>플레이어 슬라임의 움직임, 공격, 대시, 피격 처리를 구현했습니다. <strong>컴포지션 패턴</strong>을 활용하여 각 기능을 독립적인 클래스로 분리하고, <code>Player_Slime</code>에서 통합 관리합니다. 기능 클래스는 <code>Player_State</code>를 거쳐 공통 <code>State</code> 생명주기를 상속하며, 실행 시점은 플레이어 컨트롤러가 결정합니다.</p>
+<h3 id="31-시스템-구조-composition-pattern">3.1 시스템 구조 (Composition Pattern)</h3>
+<p><code>Player_Slime</code>은 모든 컴포넌트의 허브 역할을 수행하며, 각 기능 모듈은 자신의 도메인 로직에 집중합니다.</p>
+<div class="pf-visual-frame pf-flowchart-frame">
+  <div class="pf-flowchart">
+    <!-- Central Hub -->
+    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
+      <div class="pf-fc-card-header">
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
+      </div>
+      <p class="pf-fc-desc">Player_State 기반 기능 객체 초기화 및 조건별 호출, 이동·공격·대시·사망 처리 통합 관리</p>
+    </div>
+    <!-- Arrow -->
+    <div class="pf-fc-arrow">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
+    </div>
+    <!-- 4 Modules Grid -->
+    <div class="pf-fc-branch-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); width: 100%;">
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">MOVEMENT</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeMovement</div>
+        <div class="pf-fc-branch-desc">좌우 이동, 점프, 지면 감지 물리 로직</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">ATTACK</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeAttack</div>
+        <div class="pf-fc-branch-desc">포물선 원거리 투사체, 근접 타격 판정</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">DASH</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDash</div>
+        <div class="pf-fc-branch-desc">순간 가속 대시 및 무적 프레임 제어</div>
+      </div>
+      <div class="pf-fc-branch-item pf-fc-item-compact">
+        <span class="pf-fc-badge">LIFECYCLE</span>
+        <div class="pf-fc-branch-title" style="margin-top: 5px;">SlimeDead</div>
+        <div class="pf-fc-branch-desc">사망 연출, 콜라이더 비활성화, UI 연동</div>
+      </div>
+    </div>
+  </div>
+</div>
+<h3 id="32-변신-능력-시스템">3.2 변신 능력 시스템</h3>
+<p>플레이어가 몬스터를 처치하면 해당 몬스터의 형태로 변신할 수 있습니다. 변신 시 각 형태의 고유 능력을 사용할 수 있으며, <code>Player_FormMovement</code>를 통해 특수 이동 로직이 활성화됩니다.</p>
+<ul><li><strong>슬라임 (기본):</strong> 원거리 포물선 공격, 대시 무적 프레임 활용.</li><li><strong>토끼 (변신):</strong> 더블 점프 및 벽 점프 능력 획득. <code>Rabbit_ability</code>와 연동하여 벽 점프 중 조작 제한 물리 로직 적용.</li></ul>
+<details class="pf-details">
+<summary>코드 보기: Player_Slime.cs - 초기화 로직</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Player_Slime</span>.cs에서 필드와 <span class="hljs-title function_">Start</span>()를 발췌</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">Player_Slime</span></span> : <span class="hljs-title">Player_Entity</span>
+{
+    <span class="hljs-keyword">public</span> Player_SlimeMovement movement { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> Player_Attack attack { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> Player_Dash dash { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+    <span class="hljs-keyword">public</span> Player_Dead dead { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+
+    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerMovement movementData;
+    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerAttack attackData;
+    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerDash dashData;
+    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> D_PlayerDead deadData;
+    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> <span class="hljs-title class_">Transform</span> meleePos;
+
+    [<span class="hljs-meta">SerializeField</span>] <span class="hljs-keyword">private</span> Player_HpBar hpBar;
+
+    <span class="hljs-keyword">private</span> <span class="hljs-title class_">SpriteRenderer</span> formSpriteRenderer;
+
+    <span class="hljs-function"><span class="hljs-keyword">protected</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Start</span>()</span>
+    {
+        <span class="hljs-keyword">base</span>.<span class="hljs-title function_">Start</span>();
+        formSpriteRenderer = GetComponent&lt;<span class="hljs-title class_">SpriteRenderer</span>&gt;();
+
+        facingDirection = <span class="hljs-number">1</span>;
+        sensor = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Sensor</span>(<span class="hljs-keyword">this</span>, sensorData, ForwardSensorPos, MiddleSensorPos, BackwardSensorPos);
+        movement = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_SlimeMovement</span>(<span class="hljs-keyword">this</span>, movementData, <span class="hljs-keyword">this</span>);
+        attack = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Attack</span>(<span class="hljs-keyword">this</span>, attackData, meleePos);
+        dash = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Dash</span>(<span class="hljs-keyword">this</span>, dashData);
+        dead = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Dead</span>(<span class="hljs-keyword">this</span>, deadData);
+    }
+}</code></pre>
+</details>
         </section>
 <aside class="toc-panel" aria-label="목차">
 <div class="toc-panel__inner">
@@ -509,12 +595,11 @@
 <li class="toc-list__item toc-list__item--h2"><a href="#2-finitestatemachine-기반-상태-관리-시스템">2. FiniteStateMachine 기반 상태 관리 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#21-상태머신-구조-및-전환-플로우">2.1 상태머신 구조 및 전환 플로우</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#22-state-베이스-클래스">2.2 State 베이스 클래스</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#23-초기화부터-상태-전환까지의-실행-흐름">2.3 초기화부터 상태 전환까지의 실행 흐름</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#24-상태-데이터와-애니메이션-이벤트-연결">2.4 상태 데이터와 애니메이션 이벤트 연결</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#3-플레이어-슬라임-및-변신-시스템">3. 플레이어 슬라임 및 변신 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#31-시스템-구조-composition-pattern">3.1 시스템 구조 (Composition Pattern)</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#32-변신-능력-시스템">3.2 변신 능력 시스템</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#4-보스-및-일반-몬스터-ai-시스템">4. 보스 및 일반 몬스터 AI 시스템</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#41-보스-ai-의사결정-및-스킬-시스템">4.1 보스 AI 의사결정 및 스킬 시스템</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#42-일반-몬스터-ai-확장-사례">4.2 일반 몬스터 AI 확장 사례</a></li>
 </ol>
 </div>
 </aside>
