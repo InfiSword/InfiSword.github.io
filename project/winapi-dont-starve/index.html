@@ -120,8 +120,8 @@
     <!-- Container Header -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">GameObject (엔티티 컨테이너)</h4>
-        <span class="pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">ENTITY CONTAINER</span>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">GameObject (엔티티 컨테이너)</h4>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">ENTITY CONTAINER</span>
       </div>
       <p class="pf-fc-desc">고유 식별자(ID) 및 타입 관리, `std::vector&lt;std::unique_ptr&lt;Component&gt;&gt;` 소유 및 컴포넌트 생명주기 관리</p>
     </div>
@@ -132,22 +132,22 @@
     <!-- 4 Components Grid: 2 Columns Balanced Layout -->
     <div class="pf-fc-branch-grid pf-fc-grid-2col">
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">CORE</span>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">CORE</span>
         <div class="pf-fc-branch-title" style="margin-top: 6px;">Transform</div>
         <div class="pf-fc-branch-desc">2D 위치(Position), 스케일, 바라보는 방향 연산</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">RENDER</span>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">RENDER</span>
         <div class="pf-fc-branch-title" style="margin-top: 6px;">SpriteRenderer</div>
         <div class="pf-fc-branch-desc">GDI+ 비트맵 렌더링 및 Y-Sorting 피벗 좌표 관리</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">PHYSICS</span>
+        <span class="pf-diagram-accent-amber pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">PHYSICS</span>
         <div class="pf-fc-branch-title" style="margin-top: 6px;">Collider</div>
         <div class="pf-fc-branch-desc">AABB 충돌 박스 및 상호작용 트리거 검사</div>
       </div>
       <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-fc-badge" style="background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe;">ANIM</span>
+        <span class="pf-diagram-accent-purple pf-fc-badge" style="background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe;">ANIM</span>
         <div class="pf-fc-branch-title" style="margin-top: 6px;">Animator</div>
         <div class="pf-fc-branch-desc">스프라이트시트 클립 재생 및 프레임 이벤트 콜백</div>
       </div>
@@ -183,8 +183,8 @@
     <!-- Global Core Hub Header -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">Engine Subsystem Core (Singleton Services)</h4>
-        <span class="pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">GLOBAL SERVICES HUB</span>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Engine Subsystem Core (Singleton Services)</h4>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">GLOBAL SERVICES HUB</span>
       </div>
     </div>
     <!-- Arrow -->
@@ -302,7 +302,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title" style="word-break: keep-all;">1. 시야 연산 &amp; 공간 쿼리 (CameraManager &amp; ObjectManager)</h4>
-        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">SPATIAL QUERY</span>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">SPATIAL QUERY</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
         <code>CameraManager</code>가 현재 플레이어 중심의 유효 뷰포트(AABB)를 산출하면, 2D 공간 분할 그리드를 관리하는 <code>ObjectManager</code>가 화면 밖 객체를 O(1) 인덱싱으로 배제하고 가시 영역 내 후보군 선별
@@ -315,7 +315,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title" style="word-break: keep-all;">2. 선형 탐색 없는 책임 위임 (GameObject &amp; SpriteRenderer)</h4>
-        <span class="pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">POLYMORPHIC DISPATCH</span>
+        <span class="pf-diagram-accent-purple pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">POLYMORPHIC DISPATCH</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
 <p>선별된 가시 객체가 다형성 <code>Render()</code>를 호출받아, 무거운 컴포넌트 검색 없이 자신이 소유한 <code>SpriteRenderer</code>로 렌더링 책임을 즉각 위임</p>
@@ -328,7 +328,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title" style="word-break: keep-all;">3. 지연 드로우 커맨드 버퍼링 (SpriteRenderer &amp; RenderManager)</h4>
-        <span class="pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">COMMAND BUFFERING</span>
+        <span class="pf-diagram-accent-amber pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">COMMAND BUFFERING</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
 <p>화면에 비트맵을 즉시 그리지 않고, 발밑 접지면(Foot Pivot Y) 깊이 정보를 포함한 지연 그리기 명령(<code>DrawCommand</code>)을 생성하여 중앙 <code>RenderManager</code> 큐에 적재</p>
@@ -340,8 +340,8 @@
     <!-- Step 4: RenderManager::Flush() -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #16a34a; word-break: keep-all;">4. 발밑 깊이 정렬 및 일괄 출력 (RenderManager)</h4>
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">Y-SORT &amp; FLUSH</span>
+        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #16a34a; word-break: keep-all;">4. 발밑 깊이 정렬 및 일괄 출력 (RenderManager)</h4>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">Y-SORT &amp; FLUSH</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
 <p>적재된 명령들을 발밑 깊이 오름차순으로 일괄 정렬(Y-Sorting)한 뒤, GDI+ 백버퍼에 단 한 번의 순차 Flush로 출력하여 깊이 왜곡 없는 자연스러운 2.5D 입체감 구현</p>
@@ -362,7 +362,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title">1. 광역 그리드 셀 선별 (Broad Phase)</h4>
-        <span class="pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">O(1) // INDEXING</span>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">O(1) // INDEXING</span>
       </div>
       <p class="pf-fc-desc">
 <p>전체 맵의 2D 그리드 배열 중 카메라 뷰포트가 걸쳐 있는 활성 셀 범위(<code>[startX~endX]</code>, <code>[startY~endY]</code>)를 즉시 산출하여 화면 밖 수천 개 객체를 1차 배제</p>
@@ -374,8 +374,8 @@
     <!-- Step 2: Narrow Phase -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #16a34a;">2. 개별 객체 정밀 AABB 컬링 (Narrow Phase)</h4>
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">O(K) // CULLING</span>
+        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #16a34a;">2. 개별 객체 정밀 AABB 컬링 (Narrow Phase)</h4>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">O(K) // CULLING</span>
       </div>
       <p class="pf-fc-desc">
 <p>선별된 가시 셀 내부의 객체들만 순회하며, 개별 오브젝트의 실제 바운딩 박스(AABB)와 뷰포트 교차 여부를 최종 판정하여 가시 버퍼(<code>visibleBuffer</code>)에 수집</p>
@@ -749,7 +749,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title" style="word-break: keep-all !important;">2. 스프라이트 추출 및 주입</h4>
-        <span class="pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">SYNC // SET-SPRITE</span>
+        <span class="pf-diagram-accent-purple pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">SYNC // SET-SPRITE</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
         <code>Animator</code>가 데이터 컨테이너인 <code>AnimationClip</code>에서 해당 순번의 <code>Sprite</code> 객체를 꺼내, 타깃 <code>SpriteRenderer::SetSprite()</code>로 최신 스프라이트를 동기화 주입
@@ -762,7 +762,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title" style="word-break: keep-all !important;">3. 원본 비트맵 참조 &amp; 커맨드 적재</h4>
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">ZERO-COPY // COMMAND</span>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">ZERO-COPY // COMMAND</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
         <code>SpriteRenderer::Render()</code>가 주입받은 <code>Sprite</code>의 <code>sourceRect</code>와 원본 비트맵 포인터를 참조하고, 월드 위치(<code>Transform</code>) 및 발밑 피벗을 결합하여 <code>RenderManager</code> 큐에 지연 그리기 명령 등록
@@ -774,7 +774,7 @@
     <!-- Step 4: RenderManager Flush -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8; word-break: keep-all !important;">4. Y-Sorting 정렬 및 일괄 출력</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8; word-break: keep-all !important;">4. Y-Sorting 정렬 및 일괄 출력</h4>
         <span class="pf-fc-badge">BLIT // FLUSH</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
@@ -843,7 +843,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title" style="word-break: keep-all !important;">2. 단일 비트맵 공유 아키텍처</h4>
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">ZERO-COPY // MEMORY</span>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">ZERO-COPY // MEMORY</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
 <p>원본 비트맵 1장만 메모리에 유지하고, 분할된 모든 프레임은 잘라낼 좌표 영역(<code>sourceRect</code>)만 참조</p>
@@ -855,7 +855,7 @@
     <!-- Step 3: Pre-baked Flip -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8; word-break: keep-all !important;">3. 수평 반전 사전 캐싱</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8; word-break: keep-all !important;">3. 수평 반전 사전 캐싱</h4>
         <span class="pf-fc-badge">PRE-BAKE // FLIP</span>
       </div>
       <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
@@ -1084,8 +1084,8 @@ GOID_MONSTER_PIG 0.5 1 1 0 -80 -205 161 205 0 0 0</code></pre>
   <div class="pf-flowchart">
     <div class="pf-fc-card pf-fc-compact" style="border-color: #fde68a; background: #fffdf5;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #b45309;">1. DataManager::Init()</h4>
-        <span class="pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">OVERRIDES</span>
+        <h4 class="pf-diagram-accent-amber pf-fc-title" style="color: #b45309;">1. DataManager::Init()</h4>
+        <span class="pf-diagram-accent-amber pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">OVERRIDES</span>
       </div>
       <p class="pf-fc-desc"><code>object_resource_overrides.txt</code> 로드 ➔ 각 ID별 에디터에서 편집된 <strong>피벗 및 콜라이더 규격</strong>을 메모리 테이블에 덮어쓰기</p>
     </div>
@@ -1094,8 +1094,8 @@ GOID_MONSTER_PIG 0.5 1 1 0 -80 -205 161 205 0 0 0</code></pre>
     </div>
     <div class="pf-fc-card pf-fc-compact" style="border-color: #a7f3d0; background: #f6fef9;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #059669;">2. SceneManager::LoadAllMapData()</h4>
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">PARSE .DSM</span>
+        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #059669;">2. SceneManager::LoadAllMapData()</h4>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">PARSE .DSM</span>
       </div>
       <p class="pf-fc-desc">등록된 씬 테이블의 <code>.dsm</code> 파일 스트림 로드 ➔ <code># TILES</code>(타일맵), <code># PLAYER</code>(스폰), <code># OBJECTS</code>(엔티티 좌표) 섹션 분리</p>
     </div>
@@ -1104,7 +1104,7 @@ GOID_MONSTER_PIG 0.5 1 1 0 -80 -205 161 205 0 0 0</code></pre>
     </div>
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">3. ParseMapFileInto 동적 씬 바인딩</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">3. ParseMapFileInto 동적 씬 바인딩</h4>
         <span class="pf-fc-badge">WORLD INSTANTIATE</span>
       </div>
       <p class="pf-fc-desc">맵 오브젝트 생성 시 <code>DataManager</code>의 갱신된 피벗/콜라이더를 즉시 전달받아 <code>ObjectManager</code> 공간 그리드에 안전 등록</p>

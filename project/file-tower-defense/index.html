@@ -168,7 +168,7 @@
     <!-- 컴포넌트 인스펙터 설정 -->
     <div style="text-align: center;">
       <img src="../../assets/images/File%20Tower%20Defences/grid_layout_inspector.png" alt="GameObjectGridLayout Inspector Component" style="width: 100%; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25); box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
-      <div style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
+      <div class="pf-diagram-accent-blue" style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
         <strong>[컴포넌트]</strong> GameObjectGridLayout 인스펙터 설정<br>
         <span style="font-size: 0.8rem; color: #94a3b8;">(Columns: 14, Rows: 8, Fit To Screen: On, Bottom Offset Ratio: 0.1)</span>
       </div>
@@ -176,9 +176,9 @@
     <!-- 실제 인게임 월드 그리드 시각화 -->
     <div style="text-align: center;">
       <img src="../../assets/images/File%20Tower%20Defences/grid_layout_scene.png" alt="In-Game World Grid Visualization in Scene View" style="width: 100%; border-radius: 10px; border: 1px solid rgba(148, 163, 184, 0.25); box-shadow: 0 4px 16px rgba(0,0,0,0.06);">
-      <div style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
+      <div class="pf-diagram-accent-blue" style="color: #64748b; font-size: 0.85rem; margin-top: 10px; font-weight: 500; font-family: 'Fira Code', monospace; line-height: 1.5;">
         <strong>[실제 그리드]</strong> 초록색 격자선 = 인게임 실제 월드 그리드<br>
-        <span style="font-size: 0.8rem; color: #2563eb; font-weight: 600;">(하단 UI 여백 10% 제외 후 가용 영역 14×8 셀 자동 피팅)</span>
+        <span class="pf-diagram-accent-blue" style="font-size: 0.8rem; color: #2563eb; font-weight: 600;">(하단 UI 여백 10% 제외 후 가용 영역 14×8 셀 자동 피팅)</span>
       </div>
     </div>
   </div>
@@ -264,7 +264,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title">InteractionHandler (이벤트 일괄 디스패치)</h4>
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">MEDIATOR</span>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">MEDIATOR</span>
       </div>
     </div>
     <!-- Arrow -->
@@ -274,7 +274,7 @@
     <!-- STEP 05: IInteractable Objects -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">IInteractable Objects (OnClick / OnDrag / OnSelected 실행)</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">IInteractable Objects (OnClick / OnDrag / OnSelected 실행)</h4>
         <span class="pf-fc-badge">EXECUTION</span>
       </div>
     </div>
@@ -398,40 +398,40 @@
 <div class="pf-visual-frame" style="padding: 28px 20px; background: #f8fbff; border: 1px solid #dce8f6; border-radius: 16px;">
   <!-- LOCAL 3x3 SEARCH MATRIX -->
   <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
-    <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; font-weight: 800; color: #2563eb; letter-spacing: 0.5px; margin-bottom: 16px;">LOCAL 3×3 SEARCH MATRIX</span>
+    <span class="pf-diagram-accent-blue" style="font-family: 'Fira Code', monospace; font-size: 0.8rem; font-weight: 800; color: #2563eb; letter-spacing: 0.5px; margin-bottom: 16px;">LOCAL 3×3 SEARCH MATRIX</span>
     <div style="display: grid; grid-template-columns: repeat(3, 76px); grid-template-rows: repeat(3, 76px); gap: 8px;">
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, +1)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, +1)
       </div>
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(0, +1)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(0, +1)
       </div>
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, +1)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, +1)
       </div>
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, 0)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, 0)
       </div>
       <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); border: 2px solid #1e40af; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">
         <span style="font-family: 'Fira Code', monospace; font-size: 0.8rem; font-weight: 800;">Target</span>
         <span style="font-size: 0.62rem; opacity: 0.9; font-family: 'Fira Code', monospace;">(0, 0)</span>
       </div>
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, 0)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, 0)
       </div>
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, -1)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(-1, -1)
       </div>
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(0, -1)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(0, -1)
       </div>
-      <div style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
-        <span style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, -1)
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f0f7ff; border: 1.5px solid #bfdbfe; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: 'Fira Code', monospace; font-size: 0.8rem; color: #1e40af; font-weight: 700;">
+        <span class="pf-diagram-accent-blue" style="font-size: 0.62rem; color: #64748b; font-weight: 500;">dx, dy</span>(+1, -1)
       </div>
     </div>
-    <div style="display: flex; gap: 14px; margin-top: 16px; font-size: 0.76rem; color: #64748b; font-weight: 600;">
-      <span><strong style="color: #2563eb;">■</strong> Target (Center)</span>
-      <span><strong style="color: #93c5fd;">■</strong> dx, dy 오프셋 탐색 (9개 셀)</span>
+    <div class="pf-diagram-accent-blue" style="display: flex; gap: 14px; margin-top: 16px; font-size: 0.76rem; color: #64748b; font-weight: 600;">
+      <span><strong class="pf-diagram-accent-blue" style="color: #2563eb;">■</strong> Target (Center)</span>
+      <span><strong class="pf-diagram-accent-blue" style="color: #93c5fd;">■</strong> dx, dy 오프셋 탐색 (9개 셀)</span>
     </div>
   </div>
 </div>
@@ -469,44 +469,44 @@
   <!-- 플래그 상태 카드 그리드 -->
   <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
     <!-- Card 1: Occupied -->
-    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+    <div class="pf-diagram-surface" style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bfdbfe;">Occupied</span>
-        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">점유 셀</span>
+        <span class="pf-diagram-accent-blue pf-diagram-surface" style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #2563eb; background: #eff6ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bfdbfe;">Occupied</span>
+        <span class="pf-diagram-accent-blue" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">점유 셀</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">파일 유닛이 배치되어 있는 셀(<code>GetFileUnit() != null</code>)만을 탐색 대상으로 한정</p>
+      <p class="pf-diagram-accent-blue" style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">파일 유닛이 배치되어 있는 셀(<code>GetFileUnit() != null</code>)만을 탐색 대상으로 한정</p>
     </div>
     <!-- Card 2: NotOccupied -->
-    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+    <div class="pf-diagram-surface" style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #059669; background: #ecfdf5; padding: 2px 7px; border-radius: 5px; border: 1px solid #a7f3d0;">NotOccupied</span>
-        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">빈 셀</span>
+        <span class="pf-diagram-accent-green pf-diagram-surface" style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #059669; background: #ecfdf5; padding: 2px 7px; border-radius: 5px; border: 1px solid #a7f3d0;">NotOccupied</span>
+        <span class="pf-diagram-accent-blue" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">빈 셀</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">유닛이 배치되지 않은 빈 셀만을 필터링 (신규 유닛 설치 가능 공간 검증)</p>
+      <p class="pf-diagram-accent-blue" style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">유닛이 배치되지 않은 빈 셀만을 필터링 (신규 유닛 설치 가능 공간 검증)</p>
     </div>
     <!-- Card 3: Obstacle -->
-    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+    <div class="pf-diagram-surface" style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 2px 7px; border-radius: 5px; border: 1px solid #fecaca;">Obstacle</span>
-        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">장애물</span>
+        <span class="pf-diagram-accent-red pf-diagram-surface" style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #dc2626; background: #fef2f2; padding: 2px 7px; border-radius: 5px; border: 1px solid #fecaca;">Obstacle</span>
+        <span class="pf-diagram-accent-blue" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">장애물</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">시스템 장애물(<code>obstacleObject != null</code>)이 위치한 셀을 식별</p>
+      <p class="pf-diagram-accent-blue" style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">시스템 장애물(<code>obstacleObject != null</code>)이 위치한 셀을 식별</p>
     </div>
     <!-- Card 4: NotObstacle -->
-    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+    <div class="pf-diagram-surface" style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #0284c7; background: #f0f9ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bae6fd;">NotObstacle</span>
-        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">통과 가능</span>
+        <span class="pf-diagram-accent-blue pf-diagram-surface" style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #0284c7; background: #f0f9ff; padding: 2px 7px; border-radius: 5px; border: 1px solid #bae6fd;">NotObstacle</span>
+        <span class="pf-diagram-accent-blue" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">통과 가능</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">장애물이 없어 객체 배치 및 투사체 궤적 형성이 가능한 클린 셀</p>
+      <p class="pf-diagram-accent-blue" style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">장애물이 없어 객체 배치 및 투사체 궤적 형성이 가능한 클린 셀</p>
     </div>
     <!-- Card 5: None -->
-    <div style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
+    <div class="pf-diagram-surface" style="background: #ffffff; border: 1.5px solid #dce5f0; border-radius: 12px; padding: 14px 16px; box-shadow: 0 4px 12px rgba(37,99,235,0.03);">
       <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-        <span style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 7px; border-radius: 5px; border: 1px solid #cbd5e1;">None</span>
-        <span style="font-size: 0.72rem; color: #64748b; font-weight: 700;">전체 필터</span>
+        <span class="pf-diagram-accent-blue pf-diagram-surface" style="font-family: 'Fira Code', monospace; font-size: 0.82rem; font-weight: 800; color: #64748b; background: #f1f5f9; padding: 2px 7px; border-radius: 5px; border: 1px solid #cbd5e1;">None</span>
+        <span class="pf-diagram-accent-blue" style="font-size: 0.72rem; color: #64748b; font-weight: 700;">전체 필터</span>
       </div>
-      <p style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">조건 필터링 없이 레이아웃 내 모든 셀을 탐색 범위로 처리</p>
+      <p class="pf-diagram-accent-blue" style="font-size: 0.8rem; color: #475569; margin: 0; line-height: 1.45;">조건 필터링 없이 레이아웃 내 모든 셀을 탐색 범위로 처리</p>
     </div>
   </div>
 </div>
@@ -628,10 +628,10 @@
     <!-- STEP 02: 동기화 완료 및 라이프사이클 보장 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #cbd5e1; background: #ffffff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #0f172a;">Observer 기반 결합도 분리 (Decoupled Sync)</h4>
-        <span class="pf-fc-badge" style="background: #e2e8f0; color: #334155;">LIFECYCLE</span>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #0f172a;">Observer 기반 결합도 분리 (Decoupled Sync)</h4>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #e2e8f0; color: #334155;">LIFECYCLE</span>
       </div>
-      <p class="pf-fc-desc" style="color: #475569; margin: 0; font-size: 0.82rem; line-height: 1.5;">
+      <p class="pf-diagram-accent-blue pf-fc-desc" style="color: #475569; margin: 0; font-size: 0.82rem; line-height: 1.5;">
 <p>유닛 간 직접 참조 대신 <strong>FileGrid가 중계자(Subject)</strong> 역할을 수행하여, 유닛의 배치·진입·이탈·사망 시 버프 스탯이 누락 없이 자동 갱신 및 원복됩니다.</p>
       </p>
     </div>

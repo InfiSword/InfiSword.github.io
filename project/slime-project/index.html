@@ -150,7 +150,7 @@
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title">2. Execution Loop (프레임 업데이트)</h4>
-        <span class="pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">LOOP</span>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">LOOP</span>
       </div>
       <p class="pf-fc-desc"><strong>LogicUpdate():</strong> 입력·AI 로직 연산 &nbsp;|&nbsp; <strong>PhysicsUpdate():</strong> 물리 이동 및 충돌 판정</p>
     </div>
@@ -182,7 +182,7 @@
     <!-- STEP 04: Exit & Enter -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">3. State::Exit &amp; NewState::Enter (원자적 교체)</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">3. State::Exit &amp; NewState::Enter (원자적 교체)</h4>
         <span class="pf-fc-badge">TRANSACTION</span>
       </div>
       <p class="pf-fc-desc">이전 상태 정리(`Exit`) 완료 후 즉시 다음 상태(`Enter`) 활성화로 물리·애니메이션 상태 결함 방지</p>
@@ -270,8 +270,8 @@
     <!-- Central Hub -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
-        <span class="pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
+        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
       </div>
       <p class="pf-fc-desc">엔티티 생명주기 관리, 상태머신(FSM) 소유, 4대 도메인 컴포넌트 일괄 초기화 및 이벤트 디스패치</p>
     </div>

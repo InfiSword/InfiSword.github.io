@@ -3075,3 +3075,115 @@ code.hljs {
   margin-bottom: 10px;
 }
 
+/* Diagram labels stay readable regardless of the system color scheme. */
+.project-page .project-content .pf-visual-frame {
+  --diagram-text: #ffffff;
+  --diagram-surface: #0d1222;
+  --diagram-panel: #172238;
+  --diagram-label: #243752;
+  --diagram-blue: #93c5fd;
+  --diagram-green: #86efac;
+  --diagram-red: #fca5a5;
+  --diagram-purple: #c4b5fd;
+  --diagram-amber: #fde68a;
+  color: var(--diagram-text) !important;
+  background: var(--diagram-surface) !important;
+}
+
+.project-page .project-content .pf-visual-frame :where(:not(svg, svg *, pre, pre *)) {
+  color: inherit !important;
+}
+
+.project-page .project-content .pf-visual-frame svg :is(text, tspan):where(
+  :not([fill]), [fill="#cbd5e1"], [fill="#94a3b8"], [fill="#f8fafc"],
+  [fill="#ffffff"], [fill^="rgba(148, 163, 184"]
+) {
+  color: var(--diagram-text) !important;
+  fill: var(--diagram-text) !important;
+}
+
+.project-content .pf-visual-frame :is(
+  .pf-fc-card, .pf-fc-decision, .pf-fc-branch-item,
+  .pf-comp-box, .pf-bridge-arrow, .pf-arch-col, .pf-arch-node,
+  .pf-arch-layer, .pf-arch-item, .pf-grid-item, .pf-grid-cell,
+  .pf-domain-item, .pf-flow-step, .pf-logic-row, .pf-token-row,
+  .pf-mgr-card, .pf-token-cell, .pf-seed-card, .pf-seed-box,
+  .pf-details, .pf-diagram-surface
+) {
+  background: var(--diagram-panel) !important;
+}
+
+.project-content .pf-visual-frame :is(
+  .pf-fc-pill-start, .pf-fc-pill-end, .pf-fc-badge,
+  .pf-fc-decision-badge, .pf-fc-tag-yes, .pf-fc-tag-no,
+  .pf-fc-tag-state, .pf-fc-mono-tag, .pf-comp-badge,
+  .pf-comp-icon, .pf-bridge-pill, .pf-mgr-badge, .pf-mgr-chip,
+  .pf-seed-tag, .pf-arch-root-card, .pf-arch-tag-yes,
+  .pf-arch-tag-no, .pf-arch-tag-state
+) {
+  background: var(--diagram-label) !important;
+}
+
+.project-content .pf-visual-frame :not(pre) > code {
+  background: var(--diagram-label) !important;
+}
+
+.project-page .project-content .pf-visual-frame :not(pre) > code {
+  color: var(--diagram-blue) !important;
+}
+
+/* Preserve the original semantic emphasis using shades readable on dark panels. */
+.project-page .project-content .pf-visual-frame :is(
+  .pf-fc-pill-start, .pf-fc-badge, .pf-fc-mono-tag, .pf-fc-arrow,
+  .pf-arch-layer-title, .pf-grid-label, .pf-logic-label,
+  .pf-arch-tag-yes, .pf-comp-badge.new, .pf-comp-icon.new,
+  .pf-bridge-pill, .pf-bridge-arrow, .pf-mgr-badge, .pf-mgr-bullet,
+  .pf-token-cell-title, .pf-seed-tag, .pf-flow-arrow, .flow-arrow,
+  .pf-diagram-hud-val.is-camera, .pf-diagram-hud-val.is-ratio
+) {
+  color: var(--diagram-blue) !important;
+}
+
+.project-page .project-content .pf-visual-frame :is(
+  .pf-fc-pill-end, .pf-fc-pill-end .pf-fc-mono-tag, .pf-fc-tag-no,
+  .pf-arch-tag-no, .pf-mgr-badge.is-render,
+  .pf-mgr-card.is-render .pf-mgr-bullet, .pf-diagram-hud-val.is-rendered,
+  .pf-token-cell.accent-green .pf-token-cell-title
+) {
+  color: var(--diagram-green) !important;
+}
+
+.project-page .project-content .pf-visual-frame :is(
+  .pf-fc-tag-yes, .pf-comp-badge.old, .pf-comp-icon.old, .pf-seed-tag.tag-attack
+) {
+  color: var(--diagram-red) !important;
+}
+
+.project-page .project-content .pf-visual-frame :is(.pf-fc-tag-state, .pf-arch-tag-state) {
+  color: var(--diagram-purple) !important;
+}
+
+.project-page .project-content .pf-visual-frame :is(
+  .pf-fc-decision-badge, .pf-mgr-badge.is-resource,
+  .pf-mgr-card.is-resource .pf-mgr-bullet, .pf-diagram-hud-val.is-culled
+) {
+  color: var(--diagram-amber) !important;
+}
+
+/* Explicit emphasis in the article takes priority over the component default. */
+.project-page .project-content .pf-visual-frame .pf-diagram-accent-blue {
+  color: var(--diagram-blue) !important;
+}
+.project-page .project-content .pf-visual-frame .pf-diagram-accent-green {
+  color: var(--diagram-green) !important;
+}
+.project-page .project-content .pf-visual-frame .pf-diagram-accent-red {
+  color: var(--diagram-red) !important;
+}
+.project-page .project-content .pf-visual-frame .pf-diagram-accent-purple {
+  color: var(--diagram-purple) !important;
+}
+.project-page .project-content .pf-visual-frame .pf-diagram-accent-amber {
+  color: var(--diagram-amber) !important;
+}
+

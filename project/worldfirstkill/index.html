@@ -111,18 +111,18 @@
 <ul><li><strong>메타 시트 4단 열 규격</strong>:</li><li><code>CSVDataType</code>: 대분류 카테고리 (<code>Define.CSVDataType</code> — <code>Quest</code>, <code>Region</code>, <code>Item</code>, <code>Game</code>, <code>Skill</code>, <code>Unit</code>)</li><li><code>Attribute</code>: 소분류 속성 키 (예: <code>Weapon</code>, <code>Armor</code>, <code>Monster</code>, <code>Active</code>, <code>Passive</code>, <code>Dialog</code> 등 18종)</li><li><code>Version</code>: 해당 테이블의 버전 식별자 (문자열 — 예: <code>&quot;1&quot;</code>, <code>&quot;4&quot;</code>, <code>&quot;7&quot;</code>)</li><li><code>Link</code>: 해당 시트의 구글 드라이브 CSV Export URL</li></ul>
 <div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+        <div class="pf-diagram-accent-blue" style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
 <p>실제 연동 구글 스프레드시트 마스터 메타 시트 원본 (Live Master Meta Sheet)</p>
         </div>
         <span class="pf-fc-badge">MasterSheetURL (gid=0)</span>
     </div>
-    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 18px 0; line-height: 1.6;">
+    <p class="pf-diagram-accent-blue" style="font-size: 0.9rem; color: #475569; margin: 0 0 18px 0; line-height: 1.6;">
 <p>월퍼킬 클라이언트 코드(<code>ServerCSV_ConvertData.cs</code>)의 <code>MasterSheetURL</code>을 통해 다운로드하는 <strong>실제 구글 스프레드시트 마스터 메타 시트(<code>WFCK_GameConfiguration</code>)</strong> 화면입니다. 18종의 데이터 카탈로그 및 실시간 테이블 버전, 개별 CSV 다운로드 링크가 중앙에서 관리됩니다.</p>
     </p>
     <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
         <img src="../../assets/images/World%20First%20Kill/wfk_master_meta_sheet.png" alt="월퍼킬 마스터 메타 시트 원본 (WFCK_GameConfiguration)" style="width: 100%; height: auto; display: block;" loading="lazy">
-        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+        <figcaption class="pf-diagram-accent-blue pf-diagram-surface" style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
 <p>▲ ServerCSV_ConvertData가 최초 다운로드하는 gid=0 메타 시트 (19행: Unit_Monster 테이블 버전 및 개별 다운로드 Link 연동)</p>
         </figcaption>
     </figure>
@@ -181,16 +181,16 @@
     </div>
     <!-- Branch Grid -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%;">
-      <div class="pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
+      <div class="pf-diagram-surface pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
         <div class="pf-fc-card-header">
-          <h4 class="pf-fc-title" style="color: #166534;">[버전 일치] 로컬 캐시 즉시 로드</h4>
-          <span class="pf-fc-badge" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0;">CACHE_HIT</span>
+          <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #166534;">[버전 일치] 로컬 캐시 즉시 로드</h4>
+          <span class="pf-diagram-accent-green pf-fc-badge" style="background: #dcfce7; color: #15803d; border-color: #bbf7d0;">CACHE_HIT</span>
         </div>
         <p class="pf-fc-desc">`File.ReadAllText(localFilePath)` 호출. 네트워크 전송 0건, 즉시 로드 (로딩 0ms)</p>
       </div>
-      <div class="pf-fc-compact" style="border-color: #93c5fd; background: #f8fbff;">
+      <div class="pf-diagram-surface pf-fc-compact" style="border-color: #93c5fd; background: #f8fbff;">
         <div class="pf-fc-card-header">
-          <h4 class="pf-fc-title" style="color: #1e40af;">[버전 불일치/파일 없음] 서버 다운로드</h4>
+          <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1e40af;">[버전 불일치/파일 없음] 서버 다운로드</h4>
           <span class="pf-fc-badge">DOWNLOAD</span>
         </div>
         <p class="pf-fc-desc">`UnityWebRequest`로 비동기 다운로드 후 `File.WriteAllText`로 로컬 갱신 및 버전 업데이트</p>
@@ -199,7 +199,7 @@
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
     </div>
-    <div class="pf-fc-pill-end" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
+    <div class="pf-diagram-accent-blue pf-fc-pill-end" style="border-color: #3b82f6; background: #eff6ff; color: #1d4ed8;">
       <span class="pf-fc-mono-tag">COMPLETE</span>
       <span>SaveLocalVersions() 호출로 data_versions.json 저장 및 로드 완료</span>
     </div>
@@ -255,18 +255,18 @@
 <p>월퍼킬의 파싱 엔진은 복잡한 내부 코드를 몰라도 <strong>"구글 시트에 적힌 기획 데이터 한 줄이 C# 객체로 어떻게 변환되어 인게임 몬스터에게 도달하는가?"</strong>라는 데이터 흐름으로 직관적으로 이해할 수 있습니다. 기획자가 구글 시트에서 몬스터 체력이나 공격력을 수정할 때마다 프로그래머가 C# 코드를 일일이 고치고 앱을 새로 빌드해야 한다면 라이브 서비스는 불가능합니다. 월퍼킬의 리플렉션 파서는 <strong>"구글 시트에 적힌 텍스트 한 줄을 읽어 게임 속 몬스터에게 살아 숨 쉬는 실제 스탯으로 부여하는 자동 변환 파이프라인"</strong>입니다. 18종의 데이터 테이블마다 수동 코드를 만들지 않고도 범용적으로 동작하는 실제 과정을 <code>Unit_Monster.csv</code>의 첫 번째 몬스터인 <strong>'덤불 골렘'</strong> 데이터를 예시로 한 단계씩 살펴봅니다.</p>
 <div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+        <div class="pf-diagram-accent-blue" style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
 <p>실제 구글 스프레드시트 몬스터 기획 데이터 시트 원본 (WFCK_Unit)</p>
         </div>
         <span class="pf-fc-badge">DATA TABLE SHEET</span>
     </div>
-    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
+    <p class="pf-diagram-accent-blue" style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
 <p>마스터 메타 시트의 개별 링크를 통해 다운로드되는 <strong>실제 몬스터 기획 데이터 시트(<code>WFCK_Unit</code>)</strong> 원본 화면입니다. 1행(Index 0)의 <code>덤불 골렘</code>에 정의된 27개 기획 필드가 아래 4단계 리플렉션 파싱 과정을 거쳐 <strong>C# 데이터 객체(<code>Data_Monster</code>)</strong>로 변환되며, 게임 속 덤불 골렘에게 실제 스탯(체력·공격력·이동속도 등)을 부여하게 됩니다.</p>
     </p>
     <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
         <img src="../../assets/images/World%20First%20Kill/wfk_unit_monster_sheet.png" alt="월퍼킬 몬스터 기획 시트 원본 (WFCK_Unit - Unit_Monster.csv)" style="width: 100%; height: auto; display: block;" loading="lazy">
-        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+        <figcaption class="pf-diagram-accent-blue pf-diagram-surface" style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
 <p>▲ 실제 구글 시트 1행: Index 0 '덤불 골렘'의 27개 기획 스탯 컬럼 (C# 리플렉션 파서로 주입되는 원시 데이터)</p>
         </figcaption>
     </figure>
@@ -279,11 +279,11 @@
       <span class="pf-fc-mono-tag">INPUT DATA</span>
       <span>Unit_Monster.csv 원시 데이터 (1행: 덤불 골렘)</span>
     </div>
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 10px 0; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; overflow-x: auto; color: #0f172a; line-height: 1.6;">
-      <div style="color: #64748b; margin-bottom: 4px;">// CSV 1행: Header (시트의 기획 스탯 열 이름)</div>
-      <div style="color: #2563eb; font-weight: 600;">Index, Name, Description, Target_Team, Target_Enemy, WarningDis, DropItem, SkillNum1, SkillNum2, MoveSpeed, AttackSkill, AD_Damage, ...</div>
-      <div style="color: #64748b; margin: 8px 0 4px 0;">// CSV 2행: Data Row (덤불 골렘 원시 데이터)</div>
-      <div style="color: #0f172a;">0, 덤불 골렘, "갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다.", 0, 3, 0, 1501001, -1, -1, 0.75, 0, 10, ...</div>
+    <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin: 10px 0; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; overflow-x: auto; color: #0f172a; line-height: 1.6;">
+      <div class="pf-diagram-accent-blue" style="color: #64748b; margin-bottom: 4px;">// CSV 1행: Header (시트의 기획 스탯 열 이름)</div>
+      <div class="pf-diagram-accent-blue" style="color: #2563eb; font-weight: 600;">Index, Name, Description, Target_Team, Target_Enemy, WarningDis, DropItem, SkillNum1, SkillNum2, MoveSpeed, AttackSkill, AD_Damage, ...</div>
+      <div class="pf-diagram-accent-blue" style="color: #64748b; margin: 8px 0 4px 0;">// CSV 2행: Data Row (덤불 골렘 원시 데이터)</div>
+      <div class="pf-diagram-accent-blue" style="color: #0f172a;">0, 덤불 골렘, "갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다.", 0, 3, 0, 1501001, -1, -1, 0.75, 0, 10, ...</div>
     </div>
     <div class="pf-fc-arrow">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
@@ -298,23 +298,23 @@
 <p>리플렉션(Reflection) 기술을 통해 C# <code>Data_Monster</code> 클래스에 어떤 변수들이 선언되어 있는지 스스로 읽어옵니다. 그런 다음 시트 첫 행의 열 이름(<code>Index</code>, <code>Name</code>, <code>AD_Damage</code> 등)과 C# 변수명을 1:1로 짝지어 <strong>"어떤 열의 값을 어떤 C# 변수에 넣어야 하는지"</strong>를 안내하는 매핑 사전을 자동으로 구축합니다.</p>
       </p>
       <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; font-family: 'Fira Code', monospace; font-size: 0.8rem;">
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
-          <span style="color: #2563eb;">[0] Index</span> ➔ <strong>m_monsterIndex</strong>
+        <div class="pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span class="pf-diagram-accent-blue" style="color: #2563eb;">[0] Index</span> ➔ <strong>m_monsterIndex</strong>
         </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
-          <span style="color: #2563eb;">[1] Name</span> ➔ <strong>m_monsterName</strong>
+        <div class="pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span class="pf-diagram-accent-blue" style="color: #2563eb;">[1] Name</span> ➔ <strong>m_monsterName</strong>
         </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
-          <span style="color: #2563eb;">[2] Description</span> ➔ <strong>m_description</strong>
+        <div class="pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span class="pf-diagram-accent-blue" style="color: #2563eb;">[2] Description</span> ➔ <strong>m_description</strong>
         </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
-          <span style="color: #2563eb;">[6] DropItem</span> ➔ <strong>m_dropItem</strong>
+        <div class="pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span class="pf-diagram-accent-blue" style="color: #2563eb;">[6] DropItem</span> ➔ <strong>m_dropItem</strong>
         </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
-          <span style="color: #2563eb;">[9] MoveSpeed</span> ➔ <strong>m_addMoveSpeed (float)</strong>
+        <div class="pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span class="pf-diagram-accent-blue" style="color: #2563eb;">[9] MoveSpeed</span> ➔ <strong>m_addMoveSpeed (float)</strong>
         </div>
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
-          <span style="color: #2563eb;">[11] AD_Damage</span> ➔ <strong>m_ad_Damage</strong>
+        <div class="pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px;">
+          <span class="pf-diagram-accent-blue" style="color: #2563eb;">[11] AD_Damage</span> ➔ <strong>m_ad_Damage</strong>
         </div>
       </div>
       <details class="pf-details" style="margin-top: 14px;">
@@ -380,19 +380,19 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
     <!-- STEP 03 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #93c5fd; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1e40af;">STEP 3. [스탯 담기] C# 몬스터 데이터 객체 생성 및 스탯 자동 주입 (Binding)</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1e40af;">STEP 3. [스탯 담기] C# 몬스터 데이터 객체 생성 및 스탯 자동 주입 (Binding)</h4>
         <span class="pf-fc-badge">INJECTION</span>
       </div>
       <p class="pf-fc-desc">
 <p>스탯을 담아둘 빈 <code>Data_Monster</code> 객체(C# 데이터 바구니)를 메모리에 새로 생성합니다. 그리고 시트에서 읽어온 문자열을 각 변수 타입에 맞춰(이름은 <code>string</code>, 공격력은 <code>int</code> 정수, 이동속도는 <code>float</code> 소수점) 자동 변환하여 덤불 골렘의 각 변수 칸에 차곡차곡 채워 넣습니다.</p>
       </p>
-      <div style="margin-top: 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; color: #0f172a; line-height: 1.6;">
-        <div>monster.m_monsterIndex = <strong>0</strong> <span style="color: #64748b;">(정수 int 자동 변환)</span></div>
-        <div>monster.m_monsterName = <strong>"덤불 골렘"</strong> <span style="color: #64748b;">(문자열 string)</span></div>
-        <div>monster.m_description = <strong>"갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다."</strong> <span style="color: #64748b;">(문자열 string)</span></div>
-        <div>monster.m_dropItem = <strong>1501001</strong>, monster.m_target_Enemy = <strong>3</strong> <span style="color: #64748b;">(정수 int)</span></div>
-        <div>monster.m_addMoveSpeed = <strong>0.75f</strong> <span style="color: #64748b;">(실수 float 자동 변환)</span></div>
-        <div>monster.m_ad_Damage = <strong>10</strong>, monster.m_ground_Damage = <strong>10</strong> <span style="color: #64748b;">(정수 int)</span></div>
+      <div class="pf-diagram-accent-blue pf-diagram-surface" style="margin-top: 10px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 6px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.82rem; text-align: left; color: #0f172a; line-height: 1.6;">
+        <div>monster.m_monsterIndex = <strong>0</strong> <span class="pf-diagram-accent-blue" style="color: #64748b;">(정수 int 자동 변환)</span></div>
+        <div>monster.m_monsterName = <strong>"덤불 골렘"</strong> <span class="pf-diagram-accent-blue" style="color: #64748b;">(문자열 string)</span></div>
+        <div>monster.m_description = <strong>"갓 깨어난 자연의 정령으로, 주변의 풀과 덤불의 기운을 받아 태어났다."</strong> <span class="pf-diagram-accent-blue" style="color: #64748b;">(문자열 string)</span></div>
+        <div>monster.m_dropItem = <strong>1501001</strong>, monster.m_target_Enemy = <strong>3</strong> <span class="pf-diagram-accent-blue" style="color: #64748b;">(정수 int)</span></div>
+        <div>monster.m_addMoveSpeed = <strong>0.75f</strong> <span class="pf-diagram-accent-blue" style="color: #64748b;">(실수 float 자동 변환)</span></div>
+        <div>monster.m_ad_Damage = <strong>10</strong>, monster.m_ground_Damage = <strong>10</strong> <span class="pf-diagram-accent-blue" style="color: #64748b;">(정수 int)</span></div>
       </div>
     </div>
     <div class="pf-fc-arrow">
@@ -401,8 +401,8 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
     <!-- STEP 04 -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #15803d;">STEP 4. [인게임 보관] DataManager 등록으로 소환 시 즉시 꺼내쓰기(ServerDataLoad)</h4>
-        <span class="pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">CACHED O(1)</span>
+        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #15803d;">STEP 4. [인게임 보관] DataManager 등록으로 소환 시 즉시 꺼내쓰기(ServerDataLoad)</h4>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">CACHED O(1)</span>
       </div>
       <p class="pf-fc-desc">
 <p>모든 스탯이 채워진 덤불 골렘 데이터 객체를 고유 식별 번호(<code>m_monsterIndex = 0</code>)와 함께 중앙 관리자인 <code>DataManager</code> 보관함에 등록합니다. 이제 필드에 덤불 골렘이 스폰되거나 전투가 일어날 때마다 <code>0</code>번 키값 하나로 0.0001초 만에(O(1)) 완벽한 스탯을 꺼내 몬스터에게 즉시 부여할 수 있게 됩니다.</p>
@@ -417,18 +417,18 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
 <p>로그라이크 RPG는 던전 지형, 몬스터 스폰, 퀘스트 목록, 플레이어 클래스 및 스킬 조합 등 매 판 수많은 요소가 절차적으로 생성됩니다. 초기 설계 단계에서 해당 방대한 데이터를 직렬화/역직렬화로 저장하고 로드할 때 비효율적인 문제에 직면했으며, 이를 해결하기 위해 Seed 방식으로 맵을 생성하는 마인크래프트 게임에서 영감을 받아 시스템을 구현하고자 하였습니다.</p>
 <div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+        <div class="pf-diagram-accent-blue" style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
 <p>마인크래프트의 결정론적 월드 생성 시드 메커니즘 (Minecraft World Seed)</p>
         </div>
         <span class="pf-fc-badge">PROCEDURAL GENERATION</span>
     </div>
-    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
+    <p class="pf-diagram-accent-blue" style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
 <p>마인크래프트는 수 기가바이트에 달하는 3D 복셀(Voxel) 블록 좌표를 일일이 파일에 저장하지 않습니다. 오직 <strong>단 하나의 시드(Seed) 숫자</strong>를 의사 난수 생성기(PRNG)에 전달하여 산맥, 동굴, 바이옴을 동일하게 재현합니다. 월퍼킬은 이 원리를 절차적 RPG에 적용하여, 방대한 게임 객체를 직렬화하는 대신 <strong>초기 시드 번호와 난수 소비 진행도만으로 월드와 스킬을 100% 동일하게 복원</strong>하는 초경량 상태 복원 엔진을 설계했습니다.</p>
     </p>
     <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
         <img src="../../assets/images/World%20First%20Kill/extracted_world_first_kill_slide29_shape45_Seed_Example.png" alt="마인크래프트 월드 생성 시드(Seed for the World Generator) 입력 화면 예시" style="width: 100%; height: auto; display: block;" loading="lazy">
-        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+        <figcaption class="pf-diagram-accent-blue pf-diagram-surface" style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
 <p>▲ 마인크래프트의 시드 입력 화면: 동일한 시드 값을 입력하면 언제나 동일한 월드 지형과 규칙이 결정론적으로 재현됨</p>
         </figcaption>
     </figure>
@@ -487,7 +487,7 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
     <!-- SAVE ROW -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1e40af;">[SAVE] SaveSeedTokenToJson()</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1e40af;">[SAVE] SaveSeedTokenToJson()</h4>
         <span class="pf-fc-badge">SERIALIZE</span>
       </div>
       <p class="pf-fc-desc">
@@ -500,8 +500,8 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
     <!-- LOAD ROW -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #86efac; background: #f0fdf4;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #15803d;">[LOAD] TryLoadSeedToken() &amp; RestoreFromSnapshot()</h4>
-        <span class="pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">DESERIALIZE</span>
+        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #15803d;">[LOAD] TryLoadSeedToken() &amp; RestoreFromSnapshot()</h4>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #dcfce7; color: #166534; border-color: #bbf7d0;">DESERIALIZE</span>
       </div>
       <p class="pf-fc-desc">
 <p>JSON에서 토큰 문자열 로드 ➔ <code>RestoreSeedToken()</code>으로 <code>baseSeed</code> 및 도메인별 누적 카운트 복원 ➔ Skip 루프로 RNG 상태를 100% 동일하게 복구</p>
@@ -515,7 +515,7 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
 <div class="pf-visual-frame">
   <div style="text-align: left; margin-bottom: 12px;">
     <span class="pf-fc-mono-tag" style="background: #2563eb; color: #ffffff; font-weight: 700;">DATA ENCODING MAP</span>
-    <span style="font-size: 0.85rem; color: #64748b; margin-left: 8px;">실측 시드(1826533749) 기준 토큰 세그먼트 분할 맵</span>
+    <span class="pf-diagram-accent-blue" style="font-size: 0.85rem; color: #64748b; margin-left: 8px;">실측 시드(1826533749) 기준 토큰 세그먼트 분할 맵</span>
   </div>
   <div class="pf-token-block">
     <div class="pf-token-cell accent-blue">
@@ -539,9 +539,9 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
       <p class="pf-token-cell-desc"><strong>12자리 고정 폭</strong>: 해당 시스템의 누적 난수 소비 횟수 (최대 1조 회 지원)</p>
     </div>
   </div>
-  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-top: 14px; text-align: left;">
-    <div style="font-family: 'Fira Code', monospace; font-size: 0.78rem; color: #64748b; margin-bottom: 6px;">// 실제 로컬에 저장되는 seed_state.json 구조</div>
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.82rem; color: #0f172a; overflow-x: auto; line-height: 1.6;">
+  <div class="pf-diagram-surface" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-top: 14px; text-align: left;">
+    <div class="pf-diagram-accent-blue" style="font-family: 'Fira Code', monospace; font-size: 0.78rem; color: #64748b; margin-bottom: 6px;">// 실제 로컬에 저장되는 seed_state.json 구조</div>
+    <div class="pf-diagram-accent-blue pf-diagram-surface" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px 14px; font-family: 'Fira Code', monospace; font-size: 0.82rem; color: #0f172a; overflow-x: auto; line-height: 1.6;">
       <div>{</div>
       <div style="padding-left: 16px;">&quot;baseSeed&quot;: 1826533749,</div>
       <div style="padding-left: 16px;">&quot;seedToken&quot;: &quot;00000000001826533749014001000000000042...&quot;,</div>
@@ -549,7 +549,7 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
       <div>}</div>
     </div>
   </div>
-  <p style="margin: 12px 0 0 0; font-size: 0.84rem; color: #64748b; text-align: left;">
+  <p class="pf-diagram-accent-blue" style="margin: 12px 0 0 0; font-size: 0.84rem; color: #64748b; text-align: left;">
 <p>전체 토큰 구조: <code>[BaseSeed: 20자][Count: 3자] + { [DomainID: 3자][Usage: 12자] } &#42; N</code></p>
   </p>
 </div>
@@ -639,18 +639,18 @@ FieldInfo[] myFieldInfo = myType.<span class="hljs-title function_">GetFields</s
 </p>
 <div class="pf-visual-frame" style="text-align: left; padding: 24px; margin: 24px 0;">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
-        <div style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
+        <div class="pf-diagram-accent-blue" style="font-family: 'Fira Code', monospace; font-size: 0.95rem; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 8px;">
             <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #2563eb;"></span>
 <p>포트폴리오 원본: Seed 비교 및 결정론적 데이터 복원 검증 슬라이드</p>
         </div>
         <span class="pf-fc-badge">PORTFOLIO ARCHIVE</span>
     </div>
-    <p style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
+    <p class="pf-diagram-accent-blue" style="font-size: 0.9rem; color: #475569; margin: 0 0 16px 0; line-height: 1.6;">
 <p>기획 및 개발 포트폴리오 발표 자료(14페이지)에 수록된 <strong>시드값 차이에 따른 데이터 생성 및 무결성 비교 원본</strong>입니다. 시드값 단 1의 차이(<code>...77</code> vs <code>...76</code>)로 완전히 다른 직업 스킬(치명타 버프 vs 물리 강타)이 파생되는 과정과, 세이브 토큰 디코딩을 통한 Skip 루프 복원 무결성을 도식화하여 실증했습니다.</p>
     </p>
     <figure style="margin: 0; border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 4px 16px rgba(15, 23, 42, 0.05);">
         <img src="../../assets/images/World%20First%20Kill/wfk_slide14_seed_comparison.png" alt="포트폴리오 14페이지: Seed 비교 예시로 데이터 비교 슬라이드" style="width: 100%; height: auto; display: block;" loading="lazy">
-        <figcaption style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
+        <figcaption class="pf-diagram-accent-blue pf-diagram-surface" style="padding: 9px 14px; background: #f8fafc; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; font-family: 'Fira Code', monospace;">
 <p>▲ 포트폴리오 원본 슬라이드: Seed A(1459589277)와 Seed B(1459589276)의 절차적 스킬 생성 및 복원 데이터 실측 비교</p>
         </figcaption>
     </figure>

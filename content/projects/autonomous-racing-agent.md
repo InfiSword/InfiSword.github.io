@@ -233,7 +233,7 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
     <div class="pf-fc-card pf-fc-compact">
       <div class="pf-fc-card-header">
         <h4 class="pf-fc-title">SpawnPointManager / TrackData (런타임 트랙 관리)</h4>
-        <span class="pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">TRACK MANAGER</span>
+        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">TRACK MANAGER</span>
       </div>
       <p class="pf-fc-desc">체크포인트 인덱스 순서 배열 바인딩, 동적 스폰 그리드 위치 지정, 결승선(Finish) 통과 및 랩(Lap) 타임 기록</p>
     </div>
@@ -246,7 +246,7 @@ Unity ML-Agents를 활용하여 정해진 트랙을 안정적으로 주행하는
     <!-- STEP 03: SimcadeCarAgent_Auto -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="color: #1d4ed8;">SimcadeCarAgent_Auto (RL 에이전트 연동)</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">SimcadeCarAgent_Auto (RL 에이전트 연동)</h4>
         <span class="pf-fc-badge">RL AGENT</span>
       </div>
       <p class="pf-fc-desc">순차적 체크포인트 통과 감지 및 단계별 보상 지급, 역주행 방지 유도, 에피소드 종료 및 차량 리셋 제어</p>
