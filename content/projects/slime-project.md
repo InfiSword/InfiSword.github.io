@@ -179,6 +179,31 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
 
 순찰·탐색·공격을 독립된 행동 상태로 나누었습니다. **FSM은 현재 행동과 전환 흐름을 관리**하고, 각 상태는 자신에게 필요한 판단과 처리를 담당합니다. 행동을 추가하거나 수정할 때 관련 상태를 중심으로 변경할 수 있도록 구성했습니다.
 
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: FSM 상태 전환</summary>
+
+```csharp
+// FiniteStateMachine.cs
+public class FiniteStateMachine
+{
+    public State currentState { get; private set; }
+
+    public void Init(State startingState) // 유한상태머신을 초기화한다는 의미
+    {
+        currentState = startingState;     // 현재 상태 설정
+        currentState.Enter();             // 그 상태를 실행
+    }
+
+    public void ChangeState(State newState) // 상태 변경
+    {
+        currentState.Exit();                // 전의 상태를 종료하고
+        currentState = newState;            // 현재 상태를 업데이트
+        currentState.Enter();               // 현재 상태에 돌입
+    }
+}
+```
+</details>
+
 ### 2.2 State 베이스 클래스
 
 몬스터와 플레이어가 공통 `State`를 상속해 상태의 진입·실행·종료 규칙을 공유합니다. 대상별로 필요한 기능은 각 분기에서 확장합니다.
@@ -191,9 +216,97 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
 
 몬스터의 행동 전환은 FSM이, 플레이어의 기능 조합은 플레이어 컨트롤러가 관리합니다.
 
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 공통 State와 플레이어 분기</summary>
+
+```csharp
+// State.cs
+public class State
+{
+    public virtual void Enter() { }
+    public virtual void Exit() { }
+    public virtual void LogicUpdate() { }
+    public virtual void PhysicsUpdate() { }
+    public virtual void DoChecks() { }
+}
+
+// Player_State.cs
+public class Player_State : State
+{
+    protected Player_Entity entity;
+
+    public Player_State(Player_Entity entity)
+    {
+        this.entity = entity;
+    }
+}
+```
+</details>
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 몬스터 상태 진입·종료</summary>
+
+```csharp
+// Monster_State.cs: 공통 참조와 진입·종료 처리 발췌
+public class Monster_State : State
+{
+    protected FiniteStateMachine stateMachine;  // 상태머신
+    protected Monster_Entity entity;                    // 객체 (몬스터의 부모 객체)
+
+    protected float startTime;                  // 상태 시작 시간.
+
+    protected string animBoolName;              // 애니메이션에 따른 파라미터 이름
+
+    public Monster_State(FiniteStateMachine stateMachine, Monster_Entity entity, string animBoolName)
+    {
+        this.stateMachine = stateMachine;
+        this.entity = entity;
+        this.animBoolName = animBoolName;
+    }
+
+    public override void Enter()                     // 어떤 상태에 돌입했을 시,
+    {
+        startTime = Time.time;                      // 스타트 시간을 현재시간으로 설정
+        entity.anim.SetBool(animBoolName, true);    // 파라미터세팅
+        DoChecks();                                 // 체크해야될 요소 확인
+
+        Debug.Log("Enter: " +  animBoolName);
+    }
+    public override void Exit()
+    {
+        entity.anim.SetBool(animBoolName, false);   // 애니메이션 종료
+    }
+}
+```
+</details>
+
 ### 2.3 행동 재사용과 확장
 
 공통 이동·공격 행동을 바탕으로 곰의 돌진, 거미의 도약처럼 몬스터별 특징을 확장했습니다. 속도와 행동 시간은 별도 데이터로 관리해 **행동 규칙과 조정값을 분리**했습니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 공통 이동 로직</summary>
+
+```csharp
+// MoveState.cs: 데이터에 따른 이동 시작·시간 판단 발췌
+public override void Enter()
+{
+    base.Enter();
+    entity.SetVelocity(stateData.movementSpeed);        // move상태로 들어가면, 이동시작
+    isMoveTimeOver = false;
+    SetRandomMoveTime();
+}
+
+public override void LogicUpdate()
+{
+    base.LogicUpdate();
+    if (Time.time >= startTime + moveTime)   // move가 끝났다면
+    {
+        isMoveTimeOver = true;              //  move가 끝났다는 bool을 실행
+    }
+}
+```
+</details>
 
 ---
 
@@ -203,6 +316,18 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
 ### 3.1 기능 단위 조합
 
 이동·공격·대시를 독립된 기능으로 나누고 플레이어가 이를 조합하도록 구성했습니다. 기능 간 의존성을 줄여 새로운 동작이나 능력을 추가하기 쉽도록 설계했습니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 플레이어 기능 조합</summary>
+
+```csharp
+// Player_Slime.Start(): 기능 객체 초기화 부분 발췌
+movement = new Player_SlimeMovement(this, movementData, this);
+attack = new Player_Attack(this, attackData, meleePos);
+dash = new Player_Dash(this, dashData);
+dead = new Player_Dead(this, deadData);
+```
+</details>
 
 ### 3.2 변신 능력 시스템
 

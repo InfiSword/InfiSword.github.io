@@ -102,16 +102,121 @@
 <h2 id="2-finitestatemachine-기반-상태-관리-시스템" class="chapter-title">2. FiniteStateMachine 기반 상태 관리 시스템</h2>
 <h3 id="21-행동-상태와-전환-관리">2.1 행동 상태와 전환 관리</h3>
 <p>순찰·탐색·공격을 독립된 행동 상태로 나누었습니다. <strong>FSM은 현재 행동과 전환 흐름을 관리</strong>하고, 각 상태는 자신에게 필요한 판단과 처리를 담당합니다. 행동을 추가하거나 수정할 때 관련 상태를 중심으로 변경할 수 있도록 구성했습니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: FSM 상태 전환</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">FiniteStateMachine</span>.cs</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">FiniteStateMachine</span></span>
+{
+    <span class="hljs-keyword">public</span> <span class="hljs-title class_">State</span> currentState { <span class="hljs-keyword">get</span>; <span class="hljs-keyword">private</span> <span class="hljs-keyword">set</span>; }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Init</span>(<span class="hljs-params"><span class="hljs-title class_">State</span> startingState</span>) <span class="hljs-comment">// 유한상태머신을 초기화한다는 의미</span></span>
+    {
+        currentState = startingState;     <span class="hljs-comment">// 현재 상태 설정</span>
+        currentState.<span class="hljs-title function_">Enter</span>();             <span class="hljs-comment">// 그 상태를 실행</span>
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ChangeState</span>(<span class="hljs-params"><span class="hljs-title class_">State</span> newState</span>) <span class="hljs-comment">// 상태 변경</span></span>
+    {
+        currentState.<span class="hljs-title function_">Exit</span>();                <span class="hljs-comment">// 전의 상태를 종료하고</span>
+        currentState = newState;            <span class="hljs-comment">// 현재 상태를 업데이트</span>
+        currentState.<span class="hljs-title function_">Enter</span>();               <span class="hljs-comment">// 현재 상태에 돌입</span>
+    }
+}</code></pre>
+</details>
 <h3 id="22-state-베이스-클래스">2.2 State 베이스 클래스</h3>
 <p>몬스터와 플레이어가 공통 <code>State</code>를 상속해 상태의 진입·실행·종료 규칙을 공유합니다. 대상별로 필요한 기능은 각 분기에서 확장합니다.</p>
 <div class="pf-table-wrapper"><table class="pf-data-table"><thead><tr><th>구분</th><th>핵심 역할</th></tr></thead><tbody><tr><td>State</td><td>상태가 따르는 공통 생명주기 정의</td></tr><tr><td>Monster_State</td><td>몬스터의 감지·애니메이션 등 공통 처리</td></tr><tr><td>Player_State</td><td>플레이어의 이동·공격·대시 기능에 공통 기반 제공</td></tr></tbody></table></div>
 <p>몬스터의 행동 전환은 FSM이, 플레이어의 기능 조합은 플레이어 컨트롤러가 관리합니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 공통 State와 플레이어 분기</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">State</span>.cs</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title"><span class="hljs-title class_">State</span></span>
+{
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Enter</span>()</span> { }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Exit</span>()</span> { }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">LogicUpdate</span>()</span> { }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">PhysicsUpdate</span>()</span> { }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">virtual</span> <span class="hljs-keyword">void</span> <span class="hljs-title">DoChecks</span>()</span> { }
+}
+
+<span class="hljs-comment">// Player_State.cs</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Player_State</span> : <span class="hljs-title"><span class="hljs-title class_">State</span></span>
+{
+    <span class="hljs-keyword">protected</span> Player_Entity entity;
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Player_State</span>(<span class="hljs-params">Player_Entity entity</span>)</span>
+    {
+        <span class="hljs-keyword">this</span>.entity = entity;
+    }
+}</code></pre>
+</details>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 몬스터 상태 진입·종료</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// Monster_State.cs: 공통 참조와 진입·종료 처리 발췌</span>
+<span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title">Monster_State</span> : <span class="hljs-title"><span class="hljs-title class_">State</span></span>
+{
+    <span class="hljs-keyword">protected</span> <span class="hljs-title class_">FiniteStateMachine</span> stateMachine;  <span class="hljs-comment">// 상태머신</span>
+    <span class="hljs-keyword">protected</span> Monster_Entity entity;                    <span class="hljs-comment">// 객체 (몬스터의 부모 객체)</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">float</span> startTime;                  <span class="hljs-comment">// 상태 시작 시간.</span>
+
+    <span class="hljs-keyword">protected</span> <span class="hljs-built_in">string</span> animBoolName;              <span class="hljs-comment">// 애니메이션에 따른 파라미터 이름</span>
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-title">Monster_State</span>(<span class="hljs-params"><span class="hljs-title class_">FiniteStateMachine</span> stateMachine, Monster_Entity entity, <span class="hljs-built_in">string</span> animBoolName</span>)</span>
+    {
+        <span class="hljs-keyword">this</span>.stateMachine = stateMachine;
+        <span class="hljs-keyword">this</span>.entity = entity;
+        <span class="hljs-keyword">this</span>.animBoolName = animBoolName;
+    }
+
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Enter</span>()                     <span class="hljs-comment">// 어떤 상태에 돌입했을 시,</span></span>
+    {
+        startTime = <span class="hljs-title class_">Time</span>.time;                      <span class="hljs-comment">// 스타트 시간을 현재시간으로 설정</span>
+        entity.anim.<span class="hljs-title function_">SetBool</span>(animBoolName, <span class="hljs-literal">true</span>);    <span class="hljs-comment">// 파라미터세팅</span>
+        <span class="hljs-title function_">DoChecks</span>();                                 <span class="hljs-comment">// 체크해야될 요소 확인</span>
+
+        <span class="hljs-title class_">Debug</span>.<span class="hljs-title function_">Log</span>(<span class="hljs-string">&quot;Enter: &quot;</span> +  animBoolName);
+    }
+    <span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Exit</span>()</span>
+    {
+        entity.anim.<span class="hljs-title function_">SetBool</span>(animBoolName, <span class="hljs-literal">false</span>);   <span class="hljs-comment">// 애니메이션 종료</span>
+    }
+}</code></pre>
+</details>
 <h3 id="23-행동-재사용과-확장">2.3 행동 재사용과 확장</h3>
 <p>공통 이동·공격 행동을 바탕으로 곰의 돌진, 거미의 도약처럼 몬스터별 특징을 확장했습니다. 속도와 행동 시간은 별도 데이터로 관리해 <strong>행동 규칙과 조정값을 분리</strong>했습니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 공통 이동 로직</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// MoveState.cs: 데이터에 따른 이동 시작·시간 판단 발췌</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">Enter</span>()</span>
+{
+    <span class="hljs-keyword">base</span>.<span class="hljs-title function_">Enter</span>();
+    entity.<span class="hljs-title function_">SetVelocity</span>(stateData.movementSpeed);        <span class="hljs-comment">// move상태로 들어가면, 이동시작</span>
+    isMoveTimeOver = <span class="hljs-literal">false</span>;
+    <span class="hljs-title function_">SetRandomMoveTime</span>();
+}
+
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">override</span> <span class="hljs-keyword">void</span> <span class="hljs-title">LogicUpdate</span>()</span>
+{
+    <span class="hljs-keyword">base</span>.<span class="hljs-title function_">LogicUpdate</span>();
+    <span class="hljs-keyword hljs-control-flow">if</span> (<span class="hljs-title class_">Time</span>.time &gt;= startTime + moveTime)   <span class="hljs-comment">// move가 끝났다면</span>
+    {
+        isMoveTimeOver = <span class="hljs-literal">true</span>;              <span class="hljs-comment">//  move가 끝났다는 bool을 실행</span>
+    }
+}</code></pre>
+</details>
 <hr>
 <h2 id="3-플레이어-슬라임-및-변신-시스템" class="chapter-title">3. 플레이어 슬라임 및 변신 시스템</h2>
 <h3 id="31-기능-단위-조합">3.1 기능 단위 조합</h3>
 <p>이동·공격·대시를 독립된 기능으로 나누고 플레이어가 이를 조합하도록 구성했습니다. 기능 간 의존성을 줄여 새로운 동작이나 능력을 추가하기 쉽도록 설계했습니다.</p>
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 플레이어 기능 조합</summary>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Player_Slime</span>.<span class="hljs-title function_">Start</span>(): 기능 객체 초기화 부분 발췌</span>
+movement = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_SlimeMovement</span>(<span class="hljs-keyword">this</span>, movementData, <span class="hljs-keyword">this</span>);
+attack = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Attack</span>(<span class="hljs-keyword">this</span>, attackData, meleePos);
+dash = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Dash</span>(<span class="hljs-keyword">this</span>, dashData);
+dead = <span class="hljs-keyword">new</span> <span class="hljs-title function_">Player_Dead</span>(<span class="hljs-keyword">this</span>, deadData);</code></pre>
+</details>
 <h3 id="32-변신-능력-시스템">3.2 변신 능력 시스템</h3>
 <p>몬스터를 처치하면 해당 형태의 능력을 활용할 수 있습니다. 기본 슬라임은 원거리 공격과 대시를, 토끼 형태는 더블 점프와 벽 점프를 사용해 전투와 이동 방식을 바꿉니다.</p>
         </section>
