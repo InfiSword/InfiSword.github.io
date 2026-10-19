@@ -3192,3 +3192,67 @@ code.hljs {
   color: var(--diagram-amber) !important;
 }
 
+/* WorldFirstKill report: process flows and source disclosures */
+.project-content .wfk-flow {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    list-style: none;
+    padding: 0;
+    margin: 24px 0;
+    counter-reset: wfk-step;
+}
+.project-content .wfk-flow li {
+    min-width: 0;
+    margin: 0;
+    padding: 14px 0;
+    border-top: 1px solid var(--border);
+    counter-increment: wfk-step;
+}
+.project-content .wfk-flow li::before {
+    content: counter(wfk-step, decimal-leading-zero);
+    display: block;
+    margin-bottom: 8px;
+    font-family: 'Fira Code', monospace;
+    color: var(--accent);
+}
+.project-content .wfk-flow strong { display: block; margin-bottom: 6px; }
+.project-content .wfk-flow span { display: block; font-size: 1rem; line-height: 1.65; }
+.project-content .wfk-structure { table-layout: fixed; margin: 24px 0; }
+.project-content .wfk-structure th:first-child { width: 38%; }
+.project-content .wfk-structure code { white-space: normal; overflow-wrap: anywhere; }
+.project-content .wfk-code > summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -3px;
+}
+.project-content .wfk-example { margin: 24px 0; }
+.project-content .wfk-example a { display: block; }
+.project-content .wfk-example a:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+}
+.project-content .wfk-example img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+.project-content .wfk-example figcaption {
+    margin-top: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.project-content .wfk-example-pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+    margin: 24px 0;
+}
+.project-content .wfk-example-pair .wfk-example { min-width: 0; margin: 0; }
+@media (max-width: 720px) {
+    .project-content .wfk-flow { grid-template-columns: 1fr; gap: 0; }
+    .project-content .wfk-structure th:first-child { width: 42%; }
+    .project-content .wfk-example-pair { grid-template-columns: 1fr; }
+}
