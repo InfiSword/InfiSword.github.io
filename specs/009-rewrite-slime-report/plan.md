@@ -3,7 +3,7 @@
 **Branch**: `main` (no branch change) | **Date**: 2026-10-20 | **Spec**: [spec.md](spec.md)
 
 ## Summary
-Rewrite the introduction and all explanatory paragraphs of the existing Slime report with a more direct problem, design and practical effect narrative. Explain contribution, transition order, common lifecycle, data-driven monster reuse and player composition. Preserve headings, all five source excerpts, gallery and styles. This revision is files-only, with no commit or push.
+Rewrite the introduction and all explanatory paragraphs of the existing Slime report with a more direct problem, design and practical effect narrative. Explain contribution, transition order, common lifecycle, data-driven monster reuse and player composition. Preserve headings, the existing five source excerpts, gallery and styles. Add one native disclosure in section 3.2 with Rabbit_ability.OnKeyboard from the actual game project. This revision is files-only, with no commit or push.
 
 ## Technical Context
 **Language/Version**: Markdown/HTML; Node >=18 static builder.
@@ -31,6 +31,12 @@ Pass before research and after design. The constitution remains a template; AGEN
 3. Build and inspect the diff for excerpt/gallery preservation.
 4. Run the existing complete browser suite and inspect desktop/mobile report screenshots.
 5. Deliver the rewritten local artifact and verification results. Leave edits uncommitted; do not push, deploy or resume recovery.
+
+## Section 3.2 Code Example
+
+- Read Rabbit_ability.cs without editing the game source. Use the real OnKeyboard method showing the Space input guard, wall jump velocity, timer and facing update.
+- Label the excerpt as rabbit wall jump input handling, retaining the existing pf-details/pf-shared-state-code control and focus treatment.
+- Extend the existing six-example count and interaction checks; build and run the complete desktop/mobile suite.
 
 ## Complexity Tracking
 No new runtime behavior or visual design. Existing browser assertions cover the unchanged interaction contract.

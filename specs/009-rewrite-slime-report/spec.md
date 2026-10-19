@@ -3,7 +3,7 @@
 **Feature Branch**: `main` (existing working branch)
 **Created**: 2026-10-20
 **Status**: Reviewed
-**Input**: Rewrite the article again; edit files only, without committing or pushing.
+**Input**: Rewrite the article, then add one relevant code example to section 3.2; edit files only, without committing or pushing.
 
 ## User Scenarios & Testing
 
@@ -12,7 +12,7 @@
 A portfolio reader understands the author's contribution, shared state rules, monster behavior extension and player ability composition without reading source code.
 
 **Why this priority**: The preceding requests call for broad, concise explanations with optional essential code.
-**Independent Test**: Read the article with every example closed, then open and close all five examples.
+**Independent Test**: Read the article with every example closed, then open and close all six examples.
 
 **Acceptance Scenarios**:
 
@@ -31,7 +31,7 @@ A portfolio reader understands the author's contribution, shared state rules, mo
 
 - **FR-001**: Rewrite the introduction and explanatory prose around the author's contribution and design decisions.
 - **FR-002**: Explain shared state lifecycle, monster transitions, behavior reuse and player composition accurately.
-- **FR-003**: Preserve five initially closed code examples, the gallery and the three-chapter structure.
+- **FR-003**: Preserve the existing five code examples, gallery and three-chapter structure; add one initially closed example of the rabbit form's wall jump in section 3.2.
 - **FR-004**: Stop recovery monitoring as explicitly requested; further recovery is outside this rewrite.
 - **FR-005**: Leave all edits uncommitted and do not push or deploy them.
 
@@ -40,7 +40,7 @@ A portfolio reader understands the author's contribution, shared state rules, mo
 ### Measurable Outcomes
 
 - **SC-001**: Main chapter prose excluding code remains at most 1,600 characters.
-- **SC-002**: All five examples open and close on desktop and mobile using pointer and keyboard.
+- **SC-002**: All six examples start closed and open and close on desktop and mobile using pointer and keyboard.
 - **SC-003**: All contents links resolve and neither device has page-level horizontal overflow.
 
 ## Assumptions
@@ -49,3 +49,4 @@ A portfolio reader understands the author's contribution, shared state rules, mo
 - Keep previously requested essential code and concise scope; change prose, not game source or visual design.
 - Cancel recovery and its recurring checks. Do not resume stalled deployment recovery while writing.
 - This revision follows the user's explicit files-only instruction. The previous commit is not rewritten or reverted.
+- The new example is an excerpt from Rabbit_ability.cs in the actual game project. Game sources are read only.

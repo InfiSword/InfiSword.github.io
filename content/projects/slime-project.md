@@ -332,3 +332,27 @@ dead = new Player_Dead(this, deadData);
 ### 3.2 변신 능력 시스템
 
 처치한 몬스터의 형태로 변신하면 사용할 수 있는 능력이 달라집니다. 기본 슬라임은 원거리 공격과 대시를, 토끼 형태는 더블 점프와 벽 점프를 사용합니다. 변신에 따른 이동·전투 능력의 차이를 통해 플레이어가 지형과 적에 맞는 형태를 선택하도록 구성했습니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 토끼 형태의 벽 점프</summary>
+
+토끼 형태가 벽을 타고 내려오는 중 점프 입력을 받으면, 벽 반대 방향으로 뛰어오르고 캐릭터의 방향을 맞춥니다.
+
+```csharp
+// Rabbit_ability.cs: 벽 점프 입력 처리 발췌
+public void OnKeyboard()
+{
+    if (Input.GetKeyDown(KeyCode.Space) && isWallSliding && !isWallJumping)
+    {
+        isWallJumping = true;
+        player.rb.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
+        wallJumpingCounter = wallJumpingDurtion;
+
+        if (player.facingDirection != wallJumpingDirection)
+        {
+            player.Flip();
+        }
+    }
+}
+```
+</details>

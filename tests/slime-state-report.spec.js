@@ -12,13 +12,14 @@ test('간결한 핵심 설명을 유지하며 관련 코드를 접어서 제공�
   ]);
   const content = page.locator('.project-content');
   const details = content.locator('details.pf-shared-state-code');
-  await expect(details).toHaveCount(5);
+  await expect(details).toHaveCount(6);
   const declarations = [
     'public class FiniteStateMachine',
     'public class State',
     'public class Monster_State : State',
     'public override void Enter()',
     'movement = new Player_SlimeMovement',
+    'public void OnKeyboard()',
   ];
   for (let index = 0; index < declarations.length; index++) {
     await expect(details.nth(index)).not.toHaveAttribute('open');
@@ -63,7 +64,7 @@ test('간결한 목차와 상태 역할 표를 데스크톱과 모바일에서 �
   await expect(table).toContainText('Player_State');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('concise-state-overview.png') });
-  for (const label of ['FSM 상태 전환', '공통 State와 플레이어 분기', '몬스터 상태 진입·종료', '공통 이동 로직', '플레이어 기능 조합']) {
+  for (const label of ['FSM 상태 전환', '공통 State와 플레이어 분기', '몬스터 상태 진입·종료', '공통 이동 로직', '플레이어 기능 조합', '토끼 형태의 벽 점프']) {
     const summary = page.getByText(`코드 보기: ${label}`, { exact: true });
     const details = summary.locator('..');
     await summary.click();
@@ -76,8 +77,8 @@ test('간결한 목차와 상태 역할 표를 데스크톱과 모바일에서 �
     await expect(details).toHaveAttribute('open', '');
     expect(await summary.evaluate(element => getComputedStyle(element).outlineWidth)).toBe('2px');
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-    if (label === '공통 State와 플레이어 분기') {
-      await page.screenshot({ path: testInfo.outputPath('key-state-code-open.png') });
+    if (label === '공통 State와 플레이어 분기' || label === '토끼 형태의 벽 점프') {
+      await page.screenshot({ path: testInfo.outputPath(label === '토끼 형태의 벽 점프' ? 'rabbit-wall-jump-code-open.png' : 'key-state-code-open.png') });
     }
     await page.keyboard.press('Enter');
     await expect(details).not.toHaveAttribute('open');
