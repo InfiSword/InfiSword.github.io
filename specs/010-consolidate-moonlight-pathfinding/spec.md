@@ -3,7 +3,7 @@
 **Feature Branch**: `main` (existing branch)
 **Created**: 2026-10-20
 **Status**: Reviewed
-**Input**: Remove MoonLight chapters 4 and 5 and briefly connect their relevant content to the pathfinding chapter.
+**Input**: Keep the consolidated MoonLight report and add two collapsible core code examples in section 3.4 comparing customer and staff use of A*. Do not commit.
 
 ## User Scenarios & Testing
 
@@ -19,12 +19,13 @@ A portfolio reader reads the spatial data and pathfinding explanation, then sees
 1. Given the report and contents list, chapters 4 and 5 and their standalone diagrams/code are absent.
 2. Given the pathfinding chapter, a brief customer/staff comparison explains destination selection, travel and the handoff back to behavior after movement.
 3. Given the existing screenshots and code controls, they remain readable and usable on desktop and mobile.
+4. Given section 3.4, the customer and staff examples can be opened separately or together to compare shared A* requests and movement handoff.
 
 ### Edge Cases
 
 - Distinguish route computation from selecting destinations, reserving resources and advancing behavior.
 - Preserve existing chapter 1/2/3 links; remove obsolete chapter 4/5 contents links.
-- Keep the summary short instead of reproducing detailed AI states or serving code.
+- Keep the summary short instead of reproducing detailed AI states or serving code. Optional examples show only the route request and movement handoff.
 
 ## Requirements
 
@@ -35,14 +36,15 @@ A portfolio reader reads the spatial data and pathfinding explanation, then sees
 - **FR-003**: Preserve the gallery, spatial data chapter and existing pathfinding code examples.
 - **FR-004**: Avoid attributing destination choice or occupancy management to the route search itself.
 - **FR-005**: Modify files only; no commit, push, deployment or game-source edits.
+- **FR-006**: Add adjacent initially closed customer and staff code examples from the actual game project, showing FindPath, path validity checks and the corresponding movement call. Label omitted logging accurately.
 
 ## Success Criteria
 
 ### Measurable Outcomes
 
 - **SC-001**: Exactly three numbered chapters remain, with no broken contents links.
-- **SC-002**: The integrated relationship summary consists of at most two short paragraphs and one two-row comparison table, under 500 characters in total.
-- **SC-003**: Seven gallery images and four retained code disclosures remain usable on desktop and mobile without page-level horizontal overflow.
+- **SC-002**: The integrated relationship summary outside the optional code disclosures consists of at most two short paragraphs and one two-row comparison table, under 500 characters in total.
+- **SC-003**: Seven gallery images and six code disclosures (four retained plus the two new examples) remain usable on desktop and mobile without page-level horizontal overflow.
 
 ## Assumptions
 

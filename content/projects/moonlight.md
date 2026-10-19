@@ -444,3 +444,47 @@ List<Grid> RetracePath(Grid startNode, Grid endNode)
 | 직원 | 대기 위치 → 조리 도구 → 손님 | 주문 큐에 맞는 도구를 예약하고, 서빙 후 반환 |
 
 이동이 끝나면 착석·조리·서빙 등 다음 행동으로 전환합니다. 목적지 선택과 자원 점유는 AI가, 이동 가능한 셀을 잇는 경로 계산은 A*가 담당하도록 나누었습니다.
+
+<details class="pf-details">
+<summary>코드 보기: 손님의 A* 경로 요청</summary>
+
+선택한 의자나 출구 위치까지의 경로를 계산하고, 유효한 경로를 손님 이동 컴포넌트에 전달합니다.
+
+```csharp
+// CustomerAI.cs: MoveToPosition 발췌 (로그 생략)
+public void MoveToPosition(Vector3 targetPos)
+{
+    currentPath = Pathfinding.instance.FindPath(transform.position, targetPos);
+    if (currentPath != null && currentPath.Count > 0)
+    {
+        customerMovement.MovingTo(currentPath);
+    }
+    else
+    {
+        currentPath = null;
+    }
+}
+```
+</details>
+
+<details class="pf-details">
+<summary>코드 보기: 직원의 A* 경로 요청</summary>
+
+조리 도구나 손님 위치까지 같은 A*로 경로를 계산합니다. 이동 컴포넌트에 `isCook` 값을 함께 전달해 조리 도구로 향하는 이동을 구분합니다.
+
+```csharp
+// Staff_AI.cs: MoveToPosition 발췌 (로그 생략)
+public void MoveToPosition(Vector3 targetPos, bool isCook = false)
+{
+    currentPath = Pathfinding.instance.FindPath(transform.position, targetPos);
+    if (currentPath != null && currentPath.Count > 0)
+    {
+        movement.MovingTo(currentPath, isCook);
+    }
+    else
+    {
+        currentPath = null;
+    }
+}
+```
+</details>

@@ -396,6 +396,40 @@
 <p>손님과 직원은 행동 상태에서 목적지를 정하고, 같은 A* 길찾기로 이동 경로를 계산합니다.</p>
 <div class="pf-table-wrapper"><table class="pf-data-table"><thead><tr><th>대상</th><th>주요 이동 경로</th><th>행동·점유 관리</th></tr></thead><tbody><tr><td>손님</td><td>입구 → 의자 → 출구</td><td>빈 좌석을 선택·점유하고, 식사 후 반환</td></tr><tr><td>직원</td><td>대기 위치 → 조리 도구 → 손님</td><td>주문 큐에 맞는 도구를 예약하고, 서빙 후 반환</td></tr></tbody></table></div>
 <p>이동이 끝나면 착석·조리·서빙 등 다음 행동으로 전환합니다. 목적지 선택과 자원 점유는 AI가, 이동 가능한 셀을 잇는 경로 계산은 A*가 담당하도록 나누었습니다.</p>
+<details class="pf-details">
+<summary>코드 보기: 손님의 A* 경로 요청</summary>
+<p>선택한 의자나 출구 위치까지의 경로를 계산하고, 유효한 경로를 손님 이동 컴포넌트에 전달합니다.</p>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">CustomerAI</span>.cs: MoveToPosition 발췌 (로그 생략)</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">MoveToPosition</span>(<span class="hljs-params"><span class="hljs-title class_">Vector3</span> targetPos</span>)</span>
+{
+    currentPath = <span class="hljs-title class_">Pathfinding</span>.instance.<span class="hljs-title function_">FindPath</span>(transform.position, targetPos);
+    <span class="hljs-keyword hljs-control-flow">if</span> (currentPath != <span class="hljs-literal">null</span> &amp;&amp; currentPath.Count &gt; <span class="hljs-number">0</span>)
+    {
+        customerMovement.<span class="hljs-title function_">MovingTo</span>(currentPath);
+    }
+    <span class="hljs-keyword hljs-control-flow">else</span>
+    {
+        currentPath = <span class="hljs-literal">null</span>;
+    }
+}</code></pre>
+</details>
+<details class="pf-details">
+<summary>코드 보기: 직원의 A* 경로 요청</summary>
+<p>조리 도구나 손님 위치까지 같은 A*로 경로를 계산합니다. 이동 컴포넌트에 <code>isCook</code> 값을 함께 전달해 조리 도구로 향하는 이동을 구분합니다.</p>
+<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">Staff_AI</span>.cs: MoveToPosition 발췌 (로그 생략)</span>
+<span class="hljs-function"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title">MoveToPosition</span>(<span class="hljs-params"><span class="hljs-title class_">Vector3</span> targetPos, <span class="hljs-built_in">bool</span> isCook = <span class="hljs-literal">false</span></span>)</span>
+{
+    currentPath = <span class="hljs-title class_">Pathfinding</span>.instance.<span class="hljs-title function_">FindPath</span>(transform.position, targetPos);
+    <span class="hljs-keyword hljs-control-flow">if</span> (currentPath != <span class="hljs-literal">null</span> &amp;&amp; currentPath.Count &gt; <span class="hljs-number">0</span>)
+    {
+        movement.<span class="hljs-title function_">MovingTo</span>(currentPath, isCook);
+    }
+    <span class="hljs-keyword hljs-control-flow">else</span>
+    {
+        currentPath = <span class="hljs-literal">null</span>;
+    }
+}</code></pre>
+</details>
         </section>
 <aside class="toc-panel" aria-label="목차">
 <div class="toc-panel__inner">
