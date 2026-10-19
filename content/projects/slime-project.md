@@ -106,7 +106,7 @@ tags: [Unity, AI, FSM, Design Pattern]
     .pf-grid-desc { color: #555; font-size: 0.85rem; line-height: 1.6; }
 </style>
 
-Slime Project는 몬스터의 능력을 얻어 전투와 지형을 공략하는 2D 액션 퍼즐 플랫포머입니다. **플레이어의 조작·변신 시스템과 상태머신 기반 몬스터 AI**를 구현했습니다.
+Slime Project는 몬스터와 전투하고 지형을 탐색하는 2D 액션 퍼즐 플랫포머입니다. **상태머신 기반 몬스터 AI와 플레이어의 이동·공격·대시 기능**을 구현했습니다.
 
 <section id="gallery" class="pf-ftd-post-gallery-section">
     <div class="pf-ftd-section-header">
@@ -168,7 +168,7 @@ Slime Project는 몬스터의 능력을 얻어 전투와 지형을 공략하는 
 ## 1. 프로젝트 개요
 {: .chapter-title }
 
-몬스터의 행동 패턴과 플레이어의 변신 능력이 늘어나도 공통 로직을 재사용할 수 있도록 설계했습니다. **행동별 처리를 상태 단위로 분리**하고, 몬스터와 플레이어가 따르는 기본 규칙을 공통 State로 정리했습니다. 이를 바탕으로 몬스터별 패턴과 플레이어의 이동·공격·대시 기능을 확장했습니다.
+몬스터의 행동 패턴과 플레이어 기능이 늘어나도 공통 로직을 재사용할 수 있도록 설계했습니다. **행동별 처리를 상태 단위로 분리**하고, 몬스터와 플레이어가 따르는 기본 규칙을 공통 State로 정리했습니다. 이를 바탕으로 몬스터별 패턴과 플레이어의 이동·공격·대시 기능을 확장했습니다.
 
 ---
 
@@ -213,8 +213,6 @@ public class FiniteStateMachine
 | State | 모든 상태가 따르는 공통 생명주기 |
 | Monster_State | 몬스터 참조와 감지·애니메이션 공통 처리 |
 | Player_State | 플레이어 참조를 사용하는 기능별 상태의 기반 |
-
-몬스터의 행동 전환은 FSM이, 플레이어의 기능 조합은 플레이어 컨트롤러가 관리합니다.
 
 <details class="pf-details pf-shared-state-code">
 <summary>코드 보기: 공통 State와 플레이어 분기</summary>
@@ -308,14 +306,33 @@ public override void LogicUpdate()
 ```
 </details>
 
----
+### 2.4 몬스터와 플레이어의 기능 단위 조합
 
-## 3. 플레이어 슬라임 및 변신 시스템
-{: .chapter-title }
+몬스터와 플레이어 모두 **행동별 로직을 독립된 단위로 분리**하고, 공통 State의 규칙을 바탕으로 구현했습니다. 몬스터의 행동 전환은 FSM이, 플레이어의 기능 조합은 플레이어 컨트롤러가 관리합니다.
 
-### 3.1 기능 단위 조합
+| 구분 | 몬스터 | 플레이어 |
+| --- | --- | --- |
+| 행동 구성 | 이동·탐색·공격 상태로 분리 | 이동·공격·대시 기능 객체로 분리 |
+| 실행 관리 | FSM이 현재 상태를 전환 | 컨트롤러가 입력과 상황에 따라 기능 호출 |
+| 확장 방식 | 공통 상태를 상속해 몬스터별 패턴 추가 | 필요한 기능 객체를 조합해 동작 구성 |
 
-이동·공격·대시는 각 기능 객체가 처리하고, 플레이어 컨트롤러가 입력과 현재 상황에 따라 실행을 조율합니다. 플레이어의 기능들도 공통 State를 기반으로 구성했습니다. 기능별 구현을 나누어 이동 방식을 바꾸거나 공격 동작을 수정할 때 해당 기능을 중심으로 작업할 수 있도록 했습니다.
+몬스터는 각 상태에 행동과 전환 조건을 모으고, 플레이어는 기능 객체가 개별 처리를 담당하도록 했습니다. 공통 규칙을 유지하면서도 대상별 실행 흐름에 맞춰 기능을 관리할 수 있습니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: 몬스터 상태 조합</summary>
+
+행동별 상태 객체에 같은 FSM을 전달하고, 처음 실행할 상태를 지정합니다.
+
+```csharp
+// BearMonster.Start(): 주요 상태 생성·초기화 부분 발췌
+idleState = new Bear_IdleState(stateMachine, this, "idle", idleStateData, this);
+moveState = new Bear_MoveState(stateMachine, this, "move", moveStateData, this);
+dashState = new Bear_DashState(stateMachine, this, "dash", dashStateData, this);
+deadState = new Bear_DeadState(stateMachine, this, "dead", deadStateData, this);
+
+stateMachine.Init(moveState);
+```
+</details>
 
 <details class="pf-details pf-shared-state-code">
 <summary>코드 보기: 플레이어 기능 조합</summary>
@@ -326,33 +343,5 @@ movement = new Player_SlimeMovement(this, movementData, this);
 attack = new Player_Attack(this, attackData, meleePos);
 dash = new Player_Dash(this, dashData);
 dead = new Player_Dead(this, deadData);
-```
-</details>
-
-### 3.2 변신 능력 시스템
-
-처치한 몬스터의 형태로 변신하면 사용할 수 있는 능력이 달라집니다. 기본 슬라임은 원거리 공격과 대시를, 토끼 형태는 더블 점프와 벽 점프를 사용합니다. 변신에 따른 이동·전투 능력의 차이를 통해 플레이어가 지형과 적에 맞는 형태를 선택하도록 구성했습니다.
-
-<details class="pf-details pf-shared-state-code">
-<summary>코드 보기: 토끼 형태의 벽 점프</summary>
-
-토끼 형태가 벽을 타고 내려오는 중 점프 입력을 받으면, 벽 반대 방향으로 뛰어오르고 캐릭터의 방향을 맞춥니다.
-
-```csharp
-// Rabbit_ability.cs: 벽 점프 입력 처리 발췌
-public void OnKeyboard()
-{
-    if (Input.GetKeyDown(KeyCode.Space) && isWallSliding && !isWallJumping)
-    {
-        isWallJumping = true;
-        player.rb.velocity = new Vector2(wallJumpingDirection * wallJumpingPower.x, wallJumpingPower.y);
-        wallJumpingCounter = wallJumpingDurtion;
-
-        if (player.facingDirection != wallJumpingDirection)
-        {
-            player.Flip();
-        }
-    }
-}
 ```
 </details>

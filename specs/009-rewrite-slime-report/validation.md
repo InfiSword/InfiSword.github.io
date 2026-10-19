@@ -1,5 +1,23 @@
 # Validation
 
+## Section 2.4 monster composition example
+
+- Added an initially closed monster composition disclosure directly before the existing player example. The selected BearMonster.Start() statements create idle, move, dash and dead states and select moveState as the initial state.
+- Source check confirms every displayed statement exists in the actual game source, ignoring comments and whitespace. No game files were changed.
+- npm run build: passed. npm test -- --reporter=line: 74 passed (25.5s) across desktop Chromium and Pixel 5.
+- All six examples passed initial-closed, click/tap, Enter, Space, visible-focus and no-overflow checks. The section 2.4 examples were verified to stay open together, with screenshots captured for both.
+- Expanded monster example screenshots inspected on desktop and mobile. Existing comparison, player example and two-chapter structure are preserved.
+- Edits remain uncommitted. No push or deployment performed.
+
+## Chapter 2 composition comparison
+
+- Removed chapter 3, transformation prose and rabbit wall jump disclosure. Updated intro/overview to match the behavior-management focus.
+- Added section 2.4 with a monster/player comparison of behavior units, execution management and extension. Moved the original player composition excerpt there without changing its code.
+- Source comparison confirms the remaining five disclosures and gallery are unchanged.
+- npm run build: passed. npm test -- --reporter=line: 74 passed (24.7s) after narrowing the new subsection-heading assertion to generated headings instead of including the gallery title.
+- Verified the two-chapter outline, section 2.4 anchor and comparison table, five collapsed examples, pointer/keyboard interactions and no page overflow on desktop and Pixel 5. Comparison screenshots inspected on both devices.
+- Edits remain uncommitted; no push, deployment or game-source changes.
+
 ## Section 3.2 rabbit wall jump example
 
 - Added one initially closed code example in section 3.2, using Rabbit_ability.OnKeyboard from the actual project without modifying game files.
