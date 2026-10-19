@@ -231,87 +231,9 @@
 }</code></pre>
 </details>
 <hr>
-<h2 id="3-정교한-보상-설계-reward-engineering" class="chapter-title">3. 정교한 보상 설계 (Reward Engineering)</h2>
-<p>에이전트가 단순히 전진하는 것을 넘어, 사고 없이 효율적으로 주행하도록 <strong>다층적 보상 시스템</strong>을 설계했습니다.</p>
-<h3 id="31-목표-지향-보상-goal-oriented">3.1 목표 지향 보상 (Goal-Oriented)</h3>
-<p>에이전트가 트랙의 흐름에 따라 체크포인트를 순차적으로 정복하도록 유도합니다.</p>
-<div class="reward-container">
-    <div class="reward-box positive">
-        <div class="reward-title">Positive Rewards</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-<p>• 체크포인트 통과: +1.0 (정밀 도달 확인)<br> • Finish 라인 통과: +10.0 (최종 목표 달성)<br> • 거리 감소 보상: 매 프레임 목표에 근접 시 비례 보상<br> • 방향 정렬 보상: 차량 전방과 목표 방향 일치 시 가점</p>
-        </div>
-    </div>
-    <div class="reward-box negative">
-        <div class="reward-title">Negative Penalties</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-<p>• 잘못된 체크포인트: -0.5 (역주행/우회 방지)<br> • 시간 페널티: 매 프레임 -0.001 (빠른 완주 유도)<br> • 체크포인트 타임아웃: 30초 내 미도달 시 에피소드 종료</p>
-        </div>
-    </div>
-</div>
-<h3 id="32-안전성-및-복구-보상-safety-recovery">3.2 안전성 및 복구 보상 (Safety & Recovery)</h3>
-<p>차량이 벽에 충돌하거나 멈추는 등의 비효율적 상황을 최소화하도록 설계된 시스템입니다.</p>
-<div class="reward-container">
-    <div class="reward-box negative">
-        <div class="reward-title">Safety Penalties</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-<p>• 벽 충돌: -1.0 (즉각적 물리 충돌 발생 시)<br> • 벽 근접 페널티: 거리에 따라 비선형적 감점<br> • 역주행 페널티: 목표와 150도 이상 차이 시 -0.2 (per frame)<br> • 미끄러짐(Slip): 드리프트 임계값 초과 시 비례 감점</p>
-        </div>
-    </div>
-    <div class="reward-box info">
-        <div class="reward-title">Recovery & Exit</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-<p>• 벽 탈출 후진: +0.01 (복구를 위한 전략적 행동)<br> • 정지 감지: 2초 이상 속도 0.5 미만 시 감점<br> • 뒤집힘 감지: 160도 이상 기울어짐 5초 지속 시 종료<br> • 맵 이탈: FallZone 도달 시 -5.0 및 에피소드 종료</p>
-        </div>
-    </div>
-</div>
-<p><strong>통합 보상 계산 및 페널티 부여 로직</strong> 목표 지점을 향한 거리 보상, 방향 정렬(Dot Product), 그리고 전방/후방 레이캐스트 센서를 활용한 벽 근접 페널티를 종합적으로 계산하는 핵심 함수입니다.</p>
-<details class="pf-details">
-<summary>코드 보기: 벽 근접 페널티 및 역주행 감지 로직</summary>
-<pre class="hljs-pre"><code class="hljs language-csharp"><span class="hljs-comment">// <span class="hljs-title class_">SimcadeCarAgent_Auto</span>.cs: 보상 계산 로직</span>
-<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">CalculateRewards</span>()</span> {
-    <span class="hljs-comment">// 1. 기본 시간 페널티 (빠른 완주 유도)</span>
-    <span class="hljs-title function_">AddReward</span>(timePenalty);
-
-    <span class="hljs-title class_">Vector3</span> targetPosition = <span class="hljs-title function_">GetTargetPosition</span>();
-    <span class="hljs-built_in">float</span> distanceToTarget = <span class="hljs-title class_">Vector3</span>.<span class="hljs-title function_">Distance</span>(transform.position, targetPosition); 
-
-    <span class="hljs-keyword hljs-control-flow">if</span> (targetPosition != transform.position) {
-        <span class="hljs-comment">// 2. 방향 정렬 보상 (목표 방향과 현재 차량의 전방 방향 일치도)</span>
-        <span class="hljs-title class_">Vector3</span> targetDirection = (targetPosition - transform.position).normalized;
-        <span class="hljs-built_in">float</span> directionDot = <span class="hljs-title class_">Vector3</span>.<span class="hljs-title function_">Dot</span>(transform.forward, targetDirection);
-        <span class="hljs-title function_">AddReward</span>(directionDot * directionAlignmentRewardFactor);
-
-        <span class="hljs-comment">// 3. 거리 기반 보상 (가까워질수록 보상)</span>
-        <span class="hljs-built_in">float</span> distanceChange = lastDistanceToTarget - distanceToTarget;
-        <span class="hljs-built_in">float</span> weight = (<span class="hljs-title class_">Vector3</span>.<span class="hljs-title function_">Dot</span>(rb.linearVelocity, transform.forward) &gt; <span class="hljs-number">0.1f</span>) ? <span class="hljs-number">1.0f</span> : <span class="hljs-number">0.5f</span>;
-        <span class="hljs-title function_">AddReward</span>(distanceChange * distanceRewardFactor * weight);
-        
-        lastDistanceToTarget = distanceToTarget;
-    }
-
-    <span class="hljs-comment">// 4. 벽 근접 페널티 (레이캐스트 활용)</span>
-    <span class="hljs-keyword hljs-control-flow">if</span> (!isStuckInWall) {
-        <span class="hljs-title function_">ApplyProximityPenalty</span>(wallRayDirections, wallLayer, wallProximityDistance, proximityPenalty);
-    }
-}
-
-<span class="hljs-comment">// 레이캐스트 기반 근접 페널티 계산</span>
-<span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">ApplyProximityPenalty</span>(<span class="hljs-params"><span class="hljs-title class_">Vector3</span>[] directions, LayerMask layer, <span class="hljs-built_in">float</span> distance, <span class="hljs-built_in">float</span> penaltyCoefficient</span>)</span> {
-    <span class="hljs-keyword hljs-control-flow">for</span> (<span class="hljs-built_in">int</span> i = <span class="hljs-number">0</span>; i &lt; directions.Length; i++) {
-        <span class="hljs-title class_">Vector3</span> worldRayDir = transform.<span class="hljs-title function_">TransformDirection</span>(directions[i]);
-        <span class="hljs-keyword hljs-control-flow">if</span> (<span class="hljs-title class_">Physics</span>.<span class="hljs-title function_">Raycast</span>(transform.position, worldRayDir, <span class="hljs-keyword">out</span> <span class="hljs-title class_">RaycastHit</span> hit, distance, layer)) {
-            <span class="hljs-comment">// 거리가 가까울수록 더 큰 페널티를 부여하여 충돌 회피 유도</span>
-            <span class="hljs-built_in">float</span> penalty = penaltyCoefficient * (<span class="hljs-number">1f</span> - (hit.distance / distance));
-            <span class="hljs-title function_">AddReward</span>(penalty * <span class="hljs-title class_">Time</span>.fixedDeltaTime);
-        }
-    }
-}</code></pre>
-</details>
-<hr>
-<h2 id="4-환경-감지-및-행동-결정-아키텍처" class="chapter-title">4. 환경 감지 및 행동 결정 아키텍처</h2>
+<h2 id="3-환경-감지-및-행동-결정-아키텍처" class="chapter-title">3. 환경 감지 및 행동 결정 아키텍처</h2>
 <p>에이전트는 주변 환경을 입체적으로 인식하기 위해 <strong>총 36차원의 관측(Observation) 데이터</strong>를 수집하며, 이를 기반으로 물리적인 제어를 수행합니다.</p>
-<h3 id="41-레이캐스트-기반-환경-센싱">4.1 레이캐스트 기반 환경 센싱</h3>
+<h3 id="31-레이캐스트-기반-환경-센싱">3.1 레이캐스트 기반 환경 센싱</h3>
 <p>에이전트가 도로의 폭, 곡률, 장애물과의 거리를 정확히 파악하도록 다방향 레이캐스트 시스템을 구축했습니다.</p>
 <div class="pf-visual-frame">
     <a href="https://www.youtube.com/watch?v=OGb1UzntLnI" target="_blank" rel="noopener noreferrer" aria-label="Autonomous Racing Agent 유튜브 영상 보기"><img src="../../assets/images/Car%20Simulation/스크린샷%202026-04-27%20105116.png" alt="Raycast Sensor Visualization" style="width: 100%; border-radius: 8px;"></a>
@@ -339,7 +261,7 @@
 </div>
 </div>
 </div>
-<h3 id="42-인지-행동-지연-없는-직접-제어-direct-action-control">4.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)</h3>
+<h3 id="32-인지-행동-지연-없는-직접-제어-direct-action-control">3.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)</h3>
 <p>초기 학습 단계에서는 급격한 조향 지터링(Jittering)을 방지하기 위해 프레임 간 조향값의 변화량을 제한하는 <strong>입력 보정(Action Smoothing)</strong> 알고리즘을 테스트했습니다. 그러나 차량의 반응성을 떨어뜨려 코너링에서 에이전트의 의도가 지연되는 현상이 확인되었습니다.</p>
 <div class="pf-visual-frame">
     <img src="../../assets/images/Car%20Simulation/mlagent_3.png" alt="Direct Control Visualization" style="width: 100%; border-radius: 8px;">
@@ -377,12 +299,9 @@
 <li class="toc-list__item toc-list__item--h2"><a href="#1-프로젝트-개요">1. 프로젝트 개요</a></li>
 <li class="toc-list__item toc-list__item--h2"><a href="#2-체크포인트-기반-네비게이션-시스템">2. 체크포인트 기반 네비게이션 시스템</a></li>
 <li class="toc-list__item toc-list__item--h3"><a href="#21-시스템-아키텍처">2.1 시스템 아키텍처</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#3-정교한-보상-설계-reward-engineering">3. 정교한 보상 설계 (Reward Engineering)</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#31-목표-지향-보상-goal-oriented">3.1 목표 지향 보상 (Goal-Oriented)</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#32-안전성-및-복구-보상-safety-recovery">3.2 안전성 및 복구 보상 (Safety &amp; Recovery)</a></li>
-<li class="toc-list__item toc-list__item--h2"><a href="#4-환경-감지-및-행동-결정-아키텍처">4. 환경 감지 및 행동 결정 아키텍처</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#41-레이캐스트-기반-환경-센싱">4.1 레이캐스트 기반 환경 센싱</a></li>
-<li class="toc-list__item toc-list__item--h3"><a href="#42-인지-행동-지연-없는-직접-제어-direct-action-control">4.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)</a></li>
+<li class="toc-list__item toc-list__item--h2"><a href="#3-환경-감지-및-행동-결정-아키텍처">3. 환경 감지 및 행동 결정 아키텍처</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#31-레이캐스트-기반-환경-센싱">3.1 레이캐스트 기반 환경 센싱</a></li>
+<li class="toc-list__item toc-list__item--h3"><a href="#32-인지-행동-지연-없는-직접-제어-direct-action-control">3.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)</a></li>
 </ol>
 </div>
 </aside>

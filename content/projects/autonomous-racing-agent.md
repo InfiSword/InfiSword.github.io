@@ -61,14 +61,6 @@ tags: [Machine Learning, ML-Agents, AI, Unity, Reinforcement Learning]
         font-size: 0.85rem; color: #0056b3; text-align: center;
     }
 
-    /* --- Reward Engineering --- */
-    .reward-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 15px; margin: 20px 0; }
-    .reward-box { padding: 18px; border-radius: 8px; text-align: center; }
-    .reward-box.positive { border: 2px solid #28a745; background: rgba(40, 167, 69, 0.02); }
-    .reward-box.negative { border: 2px solid #ff7b72; background: rgba(255, 123, 114, 0.02); }
-    .reward-box.info { border: 2px solid #007bff; background: rgba(0, 123, 255, 0.02); }
-    .reward-title { font-weight: 700; margin-bottom: 12px; font-family: 'Fira Code'; font-size: 0.95rem; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-
     /* --- Code Details --- */
     details.pf-details {
         margin: 20px 0;
@@ -345,117 +337,12 @@ private void CheckpointPassed(int checkpointIndex)
 
 ---
 
-## 3. 정교한 보상 설계 (Reward Engineering)
-{: .chapter-title }
-
-에이전트가 단순히 전진하는 것을 넘어, 사고 없이 효율적으로 주행하도록 **다층적 보상 시스템**을 설계했습니다.
-
-### 3.1 목표 지향 보상 (Goal-Oriented)
-
-에이전트가 트랙의 흐름에 따라 체크포인트를 순차적으로 정복하도록 유도합니다.
-
-<div class="reward-container">
-    <div class="reward-box positive">
-        <div class="reward-title">Positive Rewards</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-            • 체크포인트 통과: +1.0 (정밀 도달 확인)<br>
-            • Finish 라인 통과: +10.0 (최종 목표 달성)<br>
-            • 거리 감소 보상: 매 프레임 목표에 근접 시 비례 보상<br>
-            • 방향 정렬 보상: 차량 전방과 목표 방향 일치 시 가점
-        </div>
-    </div>
-    <div class="reward-box negative">
-        <div class="reward-title">Negative Penalties</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-            • 잘못된 체크포인트: -0.5 (역주행/우회 방지)<br>
-            • 시간 페널티: 매 프레임 -0.001 (빠른 완주 유도)<br>
-            • 체크포인트 타임아웃: 30초 내 미도달 시 에피소드 종료
-        </div>
-    </div>
-</div>
-
-### 3.2 안전성 및 복구 보상 (Safety & Recovery)
-
-차량이 벽에 충돌하거나 멈추는 등의 비효율적 상황을 최소화하도록 설계된 시스템입니다.
-
-<div class="reward-container">
-    <div class="reward-box negative">
-        <div class="reward-title">Safety Penalties</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-            • 벽 충돌: -1.0 (즉각적 물리 충돌 발생 시)<br>
-            • 벽 근접 페널티: 거리에 따라 비선형적 감점<br>
-            • 역주행 페널티: 목표와 150도 이상 차이 시 -0.2 (per frame)<br>
-            • 미끄러짐(Slip): 드리프트 임계값 초과 시 비례 감점
-        </div>
-    </div>
-    <div class="reward-box info">
-        <div class="reward-title">Recovery & Exit</div>
-        <div style="text-align: left; font-size: 0.85rem; color: #555;">
-            • 벽 탈출 후진: +0.01 (복구를 위한 전략적 행동)<br>
-            • 정지 감지: 2초 이상 속도 0.5 미만 시 감점<br>
-            • 뒤집힘 감지: 160도 이상 기울어짐 5초 지속 시 종료<br>
-            • 맵 이탈: FallZone 도달 시 -5.0 및 에피소드 종료
-        </div>
-    </div>
-</div>
-
-**통합 보상 계산 및 페널티 부여 로직**
-목표 지점을 향한 거리 보상, 방향 정렬(Dot Product), 그리고 전방/후방 레이캐스트 센서를 활용한 벽 근접 페널티를 종합적으로 계산하는 핵심 함수입니다.
-
-<details class="pf-details">
-<summary>코드 보기: 벽 근접 페널티 및 역주행 감지 로직</summary>
-
-```csharp
-// SimcadeCarAgent_Auto.cs: 보상 계산 로직
-private void CalculateRewards() {
-    // 1. 기본 시간 페널티 (빠른 완주 유도)
-    AddReward(timePenalty);
-
-    Vector3 targetPosition = GetTargetPosition();
-    float distanceToTarget = Vector3.Distance(transform.position, targetPosition); 
-
-    if (targetPosition != transform.position) {
-        // 2. 방향 정렬 보상 (목표 방향과 현재 차량의 전방 방향 일치도)
-        Vector3 targetDirection = (targetPosition - transform.position).normalized;
-        float directionDot = Vector3.Dot(transform.forward, targetDirection);
-        AddReward(directionDot * directionAlignmentRewardFactor);
-
-        // 3. 거리 기반 보상 (가까워질수록 보상)
-        float distanceChange = lastDistanceToTarget - distanceToTarget;
-        float weight = (Vector3.Dot(rb.linearVelocity, transform.forward) > 0.1f) ? 1.0f : 0.5f;
-        AddReward(distanceChange * distanceRewardFactor * weight);
-        
-        lastDistanceToTarget = distanceToTarget;
-    }
-
-    // 4. 벽 근접 페널티 (레이캐스트 활용)
-    if (!isStuckInWall) {
-        ApplyProximityPenalty(wallRayDirections, wallLayer, wallProximityDistance, proximityPenalty);
-    }
-}
-
-// 레이캐스트 기반 근접 페널티 계산
-private void ApplyProximityPenalty(Vector3[] directions, LayerMask layer, float distance, float penaltyCoefficient) {
-    for (int i = 0; i < directions.Length; i++) {
-        Vector3 worldRayDir = transform.TransformDirection(directions[i]);
-        if (Physics.Raycast(transform.position, worldRayDir, out RaycastHit hit, distance, layer)) {
-            // 거리가 가까울수록 더 큰 페널티를 부여하여 충돌 회피 유도
-            float penalty = penaltyCoefficient * (1f - (hit.distance / distance));
-            AddReward(penalty * Time.fixedDeltaTime);
-        }
-    }
-}
-```
-</details>
-
----
-
-## 4. 환경 감지 및 행동 결정 아키텍처
+## 3. 환경 감지 및 행동 결정 아키텍처
 {: .chapter-title }
 
 에이전트는 주변 환경을 입체적으로 인식하기 위해 **총 36차원의 관측(Observation) 데이터**를 수집하며, 이를 기반으로 물리적인 제어를 수행합니다.
 
-### 4.1 레이캐스트 기반 환경 센싱
+### 3.1 레이캐스트 기반 환경 센싱
 
 에이전트가 도로의 폭, 곡률, 장애물과의 거리를 정확히 파악하도록 다방향 레이캐스트 시스템을 구축했습니다.
 
@@ -487,7 +374,7 @@ private void ApplyProximityPenalty(Vector3[] directions, LayerMask layer, float 
 </div>
 </div>
 
-### 4.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)
+### 3.2 인지-행동 지연 없는 직접 제어 (Direct Action Control)
 
 초기 학습 단계에서는 급격한 조향 지터링(Jittering)을 방지하기 위해 프레임 간 조향값의 변화량을 제한하는 **입력 보정(Action Smoothing)** 알고리즘을 테스트했습니다. 그러나 차량의 반응성을 떨어뜨려 코너링에서 에이전트의 의도가 지연되는 현상이 확인되었습니다.
 

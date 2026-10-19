@@ -204,11 +204,13 @@ Slime Project는 하드코어 액션 퍼즐 플랫포머 게임으로, **FiniteS
 ## 2. FiniteStateMachine 기반 상태 관리 시스템
 {: .chapter-title }
 
-모든 몬스터와 게임 엔티티의 행동을 **FiniteStateMachine** 패턴으로 관리하는 시스템을 구현했습니다. `State` 베이스 클래스를 통해 각 상태의 Enter/Exit/LogicUpdate/PhysicsUpdate 라이프사이클을 체계적으로 관리합니다.
+몬스터와 플레이어의 상태 클래스가 공통 `State`를 상속하도록 구성했습니다. `Enter` / `Exit` / `LogicUpdate` / `PhysicsUpdate` / `DoChecks` 호출 규약을 공유하고, 몬스터는 `Monster_State`, 플레이어는 `Player_State`에서 각 대상에 필요한 참조와 동작을 확장합니다. **공통 기반 클래스를 공유하되 상태 인스턴스는 각 객체가 따로 관리합니다.**
+
+몬스터는 **FiniteStateMachine**이 현재 상태의 전환과 업데이트를 관리합니다. 플레이어는 이동·공격·대시·사망 기능 객체를 조합하고 `Player_Slime`이 조건에 따라 직접 호출하여 기존 조작 방식을 유지합니다.
 
 ### 2.1 상태머신 구조 및 전환 플로우
 
-FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 상태의 Exit와 새 상태의 Enter를 자동으로 호출하여 물리 및 애니메이션 상태의 정합성을 보장합니다.
+몬스터가 사용하는 `FiniteStateMachine`은 공통 `State` 타입으로 현재 상태를 보관합니다. 상태 전환 시 이전 상태의 `Exit`를 호출한 뒤 새 상태의 `Enter`를 호출합니다. 아래 전환 흐름은 몬스터 FSM에 해당하며, 플레이어 기능 객체의 호출은 `Player_Slime`이 담당합니다.
 
 <div class="pf-visual-frame pf-flowchart-frame">
   <div class="pf-flowchart">
@@ -244,7 +246,7 @@ FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 �
         <h4 class="pf-fc-title">2. Execution Loop (프레임 업데이트)</h4>
         <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #2563eb; border-color: #bfdbfe;">LOOP</span>
       </div>
-      <p class="pf-fc-desc"><strong>LogicUpdate():</strong> 입력·AI 로직 연산 &nbsp;|&nbsp; <strong>PhysicsUpdate():</strong> 물리 이동 및 충돌 판정</p>
+      <p class="pf-fc-desc"><strong>LogicUpdate():</strong> AI 로직 연산 &nbsp;|&nbsp; <strong>PhysicsUpdate():</strong> 물리 이동 및 충돌 판정</p>
     </div>
 
     <!-- Arrow -->
@@ -278,10 +280,10 @@ FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 �
     <!-- STEP 04: Exit & Enter -->
     <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
       <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">3. State::Exit &amp; NewState::Enter (원자적 교체)</h4>
+        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">3. State::Exit &amp; NewState::Enter (순차 전환)</h4>
         <span class="pf-fc-badge">TRANSACTION</span>
       </div>
-      <p class="pf-fc-desc">이전 상태 정리(`Exit`) 완료 후 즉시 다음 상태(`Enter`) 활성화로 물리·애니메이션 상태 결함 방지</p>
+      <p class="pf-fc-desc">이전 상태의 Exit() 호출 후 새 상태의 Enter() 호출로 종료와 진입 순서 유지</p>
     </div>
 
     <!-- END -->
@@ -291,37 +293,39 @@ FiniteStateMachine은 현재 상태를 관리하고, 상태 전환 시 이전 �
 
     <div class="pf-fc-pill-end">
       <span class="pf-fc-mono-tag">STABLE</span>
-      <span>예외 없는 안정적 FSM 상태 라이프사이클 완성</span>
+      <span>몬스터 FSM의 상태 종료·진입 순서 일관성 유지</span>
     </div>
 
   </div>
 </div>
 
 **상태머신 핵심 로직**
-상태머신 초기화 및 안전한 상태 전환을 보장하는 핵심 로직입니다.
+몬스터 상태머신의 초기화와 Exit → Enter 호출 순서를 구현한 실제 코드입니다.
 
 <details class="pf-details">
 <summary>코드 보기: FiniteStateMachine.cs</summary>
 
 ```csharp
-// FiniteStateMachine.cs: 상태머신 핵심 로직
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+// 적들의 상태를 추적하고, 상태에 따른 올바른 코드를 실행시킨다
 public class FiniteStateMachine
 {
-    public State currentState { get; private set; } 
+    public State currentState { get; private set; }
 
-    // 상태머신 초기화: 시작 상태 설정 및 Enter() 호출
-    public void Init(State startingState) 
+    public void Init(State startingState) // 유한상태머신을 초기화한다는 의미
     {
         currentState = startingState;     // 현재 상태 설정
-        currentState.Enter();             // 시작 상태 진입
+        currentState.Enter();             // 그 상태를 실행
     }
 
-    // 상태 전환: 이전 상태 종료 후 새 상태 진입
-    public void ChangeState(State newState) 
+    public void ChangeState(State newState) // 상태 변경
     {
-        currentState.Exit();                // 이전 상태 종료
-        currentState = newState;            // 새 상태로 전환
-        currentState.Enter();               // 새 상태 진입
+        currentState.Exit();                // 전의 상태를 종료하고
+        currentState = newState;            // 현재 상태를 업데이트
+        currentState.Enter();               // 현재 상태에 돌입
     }
 }
 ```
@@ -329,44 +333,47 @@ public class FiniteStateMachine
 
 ### 2.2 State 베이스 클래스
 
-모든 상태는 `State` 베이스 클래스를 상속받아 구현됩니다. 각 상태는 애니메이션 파라미터 제어와 상태 시작 시간 기록 등을 자동으로 처리합니다.
+`State`는 특정 엔티티나 애니메이션 파라미터에 의존하지 않는 공통 기반 클래스입니다. 기본 메서드는 부수 효과 없이 비어 있으며, 각 하위 클래스가 필요한 동작을 재정의합니다. 몬스터의 애니메이션 제어·시작 시간 기록·센서 검사는 `Monster_State`에서 처리합니다.
 
-<details class="pf-details">
+```text
+State
+├── Monster_State
+│   └── IdleState / MoveState / JumpState / Dash / AttackState 등
+└── Player_State
+    └── Player_Movement / Player_Attack / Player_Dash / Player_Dead
+```
+
+<details class="pf-details pf-shared-state-code">
 <summary>코드 보기: State.cs</summary>
 
 ```csharp
-// State.cs: 모든 상태의 베이스 클래스
+// Shared lifecycle for monster states and player feature modules.
+// Owner-specific data and side effects belong to the specialized branches.
 public class State
 {
-    protected FiniteStateMachine stateMachine;  // 상태머신 참조
-    protected Entity entity;                    // 엔티티 참조
-    protected float startTime;                  // 상태 시작 시간
-    protected string animBoolName;              // 애니메이션 파라미터 이름
+    public virtual void Enter() { }
+    public virtual void Exit() { }
+    public virtual void LogicUpdate() { }
+    public virtual void PhysicsUpdate() { }
+    public virtual void DoChecks() { }
+}
+```
+</details>
 
-    public virtual void Enter()                     // 상태 진입 시 호출
-    {
-        startTime = Time.time;                      // 시작 시간 기록
-        entity.anim.SetBool(animBoolName, true);    // 애니메이션 트리거
-        DoChecks();                                 // 상태 전환 조건 확인
-    }
-    
-    public virtual void Exit()                     // 상태 종료 시 호출
-    {
-        entity.anim.SetBool(animBoolName, false);   // 애니메이션 종료
-    }
-    
-    public virtual void LogicUpdate()         // Update()에서 호출
-    {
-    }
-    
-    public virtual void PhysicsUpdate()      // FixedUpdate()에서 호출
-    {
-        DoChecks();                                 // 물리 업데이트마다 조건 확인
-    }
+`Player_State`는 공통 생명주기를 상속하고 `Player_Entity` 참조를 추가합니다. 플레이어 기능 클래스의 생성자와 `Player_Slime`의 호출 흐름은 유지하므로, 공통 타입을 사용하면서도 이동·공격·대시 기능을 각각 관리할 수 있습니다.
 
-    public virtual void DoChecks()          // 상태 전환 조건 확인
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: Player_State.cs</summary>
+
+```csharp
+// Player modules share the State lifecycle while retaining a typed owner.
+public class Player_State : State
+{
+    protected Player_Entity entity;
+
+    public Player_State(Player_Entity entity)
     {
-        // 플레이어 감지, 벽/절벽 감지 등
+        this.entity = entity;
     }
 }
 ```
@@ -377,7 +384,7 @@ public class State
 ## 3. 플레이어 슬라임 및 변신 시스템
 {: .chapter-title }
 
-플레이어 슬라임의 움직임, 공격, 대시, 피격 처리를 구현했습니다. **컴포지션 패턴**을 활용하여 각 기능을 독립적인 클래스로 분리하고, `Player_Slime`에서 통합 관리합니다.
+플레이어 슬라임의 움직임, 공격, 대시, 피격 처리를 구현했습니다. **컴포지션 패턴**을 활용하여 각 기능을 독립적인 클래스로 분리하고, `Player_Slime`에서 통합 관리합니다. 기능 클래스는 `Player_State`를 거쳐 공통 `State` 생명주기를 상속하며, 실행 시점은 플레이어 컨트롤러가 결정합니다.
 
 ### 3.1 시스템 구조 (Composition Pattern)
 
@@ -392,7 +399,7 @@ public class State
         <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Player_Slime (중앙 제어 허브)</h4>
         <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">CONTROLLER HUB</span>
       </div>
-      <p class="pf-fc-desc">엔티티 생명주기 관리, 상태머신(FSM) 소유, 4대 도메인 컴포넌트 일괄 초기화 및 이벤트 디스패치</p>
+      <p class="pf-fc-desc">Player_State 기반 기능 객체 초기화 및 조건별 호출, 이동·공격·대시·사망 처리 통합 관리</p>
     </div>
 
     <!-- Arrow -->
@@ -438,20 +445,35 @@ public class State
 <summary>코드 보기: Player_Slime.cs - 초기화 로직</summary>
 
 ```csharp
-// Player_Slime.cs: 플레이어 슬라임 메인 클래스
+// Player_Slime.cs에서 필드와 Start()를 발췌
 public class Player_Slime : Player_Entity
 {
     public Player_SlimeMovement movement { get; private set; }
     public Player_Attack attack { get; private set; }
     public Player_Dash dash { get; private set; }
+    public Player_Dead dead { get; private set; }
+
+    [SerializeField] private D_PlayerMovement movementData;
+    [SerializeField] private D_PlayerAttack attackData;
+    [SerializeField] private D_PlayerDash dashData;
+    [SerializeField] private D_PlayerDead deadData;
+    [SerializeField] private Transform meleePos;
+
+    [SerializeField] private Player_HpBar hpBar;
+
+    private SpriteRenderer formSpriteRenderer;
 
     protected override void Start()
     {
         base.Start();
-        // 각 기능 컴포넌트 초기화 (Composition)
+        formSpriteRenderer = GetComponent<SpriteRenderer>();
+
+        facingDirection = 1;
+        sensor = new Player_Sensor(this, sensorData, ForwardSensorPos, MiddleSensorPos, BackwardSensorPos);
         movement = new Player_SlimeMovement(this, movementData, this);
         attack = new Player_Attack(this, attackData, meleePos);
         dash = new Player_Dash(this, dashData);
+        dead = new Player_Dead(this, deadData);
     }
 }
 ```
@@ -511,8 +533,134 @@ public class MainBossBear : BossBearSetting
 
 ### 4.2 일반 몬스터 AI 확장 사례
 
-일반 몬스터들은 공통의 `Enemy_State`를 상속받아 고유한 행동 패턴을 가집니다.
+일반 몬스터의 행동 상태는 `State → Monster_State → 공통 행동 상태 → 몬스터별 상태` 순서로 확장합니다. `Monster_State`는 몬스터 엔티티와 FSM 참조를 보관하고, 진입 시 시작 시간 기록·애니메이션 활성화·센서 검사를 처리합니다. 플레이어의 `Player_State`와 같은 `State`를 공유하면서 몬스터에 필요한 동작을 별도로 유지합니다.
 
-*   **Bear (돌진형):** `DashState`를 통한 강력한 물리 충격 기반 공격.
-*   **Spider (매복형):** `JumpState`를 활용한 공중 도약 및 플레이어 타겟팅 낙하 공격.
-*   **Ant (기본형):** 정형화된 순찰 및 근접 공격 루틴 수행.
+*   **Bear (돌진형):** `Bear_DashState : DashState`로 돌진을 구현하고, 돌진 종료 후 플레이어 감지 여부에 따라 감지·탐색 상태로 전환합니다.
+*   **Spider (도약형):** `Spider_JumpState : JumpState`로 공중 이동을 처리하고, 착지 후 감지·이동 상태로 전환합니다.
+*   **Ant (기본형):** `Ant_MoveState`로 순찰·방향 전환을 처리하고, `Ant_MeleeAttackState`에서 공격 범위를 판정해 피해를 적용합니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: Monster_State.cs - 몬스터 공통 기반</summary>
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+// 적들의 상태가 가져야 하는 모든 기능을 포함하는 상태 클래스, 여러 상태들은 이 state클래스를 상속받음
+// 적 클래스에서 해당 상태의 객체를 생성하고 유한상태 머신을 이용하여 우리가 어떤 상태인지를 추적한다.
+public class Monster_State : State
+{
+    protected FiniteStateMachine stateMachine;  // 상태머신
+    protected Monster_Entity entity;                    // 객체 (몬스터의 부모 객체)
+
+    protected float startTime;                  // 상태 시작 시간.
+
+    protected string animBoolName;              // 애니메이션에 따른 파라미터 이름
+
+    public Monster_State(FiniteStateMachine stateMachine, Monster_Entity entity, string animBoolName)
+    {
+        this.stateMachine = stateMachine;
+        this.entity = entity;
+        this.animBoolName = animBoolName;
+    }
+
+    public override void Enter()                     // 어떤 상태에 돌입했을 시,
+    {
+        startTime = Time.time;                      // 스타트 시간을 현재시간으로 설정
+        entity.anim.SetBool(animBoolName, true);    // 파라미터세팅
+        DoChecks();                                 // 체크해야될 요소 확인
+
+        Debug.Log("Enter: " +  animBoolName);
+    }
+    public override void Exit()
+    {
+        entity.anim.SetBool(animBoolName, false);   // 애니메이션 종료
+    }
+    public override void LogicUpdate()
+    {
+
+    }
+    public override void PhysicsUpdate()
+    {
+        DoChecks();
+    }
+
+    public override void DoChecks()          // 주기적으로 체크하기 위해 존재하는 함수
+    {
+
+    }
+
+}
+```
+</details>
+
+곰의 돌진 상태는 `DashState → Dash → Monster_State → State` 상속 경로를 사용합니다. 아래 실제 코드에서 공통 돌진 로직을 호출하고, 곰 전용 상태 전환과 물리 저항값을 추가합니다.
+
+<details class="pf-details pf-shared-state-code">
+<summary>코드 보기: Bear_DashState.cs - 몬스터별 확장</summary>
+
+```csharp
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Bear_DashState : DashState
+{
+    private BearMonster bear;
+    public Bear_DashState(FiniteStateMachine stateMachine, Monster_Entity entity, string animBoolName, D_DashState stateData, BearMonster bear) : base(stateMachine, entity, animBoolName, stateData)
+    {
+        this.bear = bear;
+    }
+
+    public override void DoChecks()
+    {
+        base.DoChecks();
+    }
+
+    public override void Enter()
+    {
+        base.Enter();
+        bear.atsm.dashState = this;
+    }
+
+    public override void Exit()
+    {
+        base.Exit();
+    }
+
+    public override void LogicUpdate()
+    {
+        base.LogicUpdate();
+
+        if (isAnimatioonFinished && !performDashAction)
+        {
+            entity.rb.drag = 0;
+            if (isPlayerInMinAgroRange)    // 플레이어가 존재한다면
+            {
+                stateMachine.ChangeState(bear.playerDetectedState); // 플레이어가 감지되었는가?
+            }
+            else
+            {
+                stateMachine.ChangeState(bear.lookForPlayerState);  // 플레이어 탐색
+            }
+        }
+    }
+
+    public override void PhysicsUpdate()
+    {
+        base.PhysicsUpdate();
+    }
+
+    public override void TriggerDashing()
+    {
+        base.TriggerDashing();
+        entity.rb.drag = stateData.dashDragValue;
+    }
+    public override void FinishDashing()
+    {
+        base.FinishDashing();
+    }
+}
+```
+</details>

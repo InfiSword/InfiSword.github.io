@@ -91,7 +91,7 @@ test.describe('Autonomous Racing Agent 스크린샷 갤러리 테스트 (상세 
     await expect(modal).toBeHidden();
   });
 
-  test('상세 포스트 페이지에서 5번 학습 설정 섹션이 존재하지 않고 4번 섹션으로 깔끔하게 종료된다', async ({ page, isMobile }) => {
+  test('상세 포스트 페이지에서 보상 설계 및 학습 설정 섹션이 없고 3번 섹션으로 종료된다', async ({ page, isMobile }) => {
     await page.goto('/project/autonomous-racing-agent/');
 
     // 5번 섹션 및 관련 텍스트가 페이지 내에 존재하지 않는지 검증
@@ -104,11 +104,15 @@ test.describe('Autonomous Racing Agent 스크린샷 갤러리 테스트 (상세 
     const section5Toc = page.locator('.toc-list a[href="#5-학습-설정-및-일반화-성능-확보"]');
     await expect(section5Toc).toHaveCount(0);
 
-    // 4번 섹션은 정상 노출 확인
-    const section4Heading = page.locator('[id="4-환경-감지-및-행동-결정-아키텍처"]');
-    await expect(section4Heading).toBeVisible();
+    // 보상 설계 챕터와 목차 항목 제거 확인
+    await expect(page.getByText('정교한 보상 설계', { exact: false })).toHaveCount(0);
+    await expect(page.locator('.reward-container, .reward-box')).toHaveCount(0);
 
-    // 4.2 액션 매핑 코드 토글 확인
+    // 번호를 조정한 마지막 섹션 정상 노출 확인
+    const section3Heading = page.locator('[id="3-환경-감지-및-행동-결정-아키텍처"]');
+    await expect(section3Heading).toBeVisible();
+
+    // 3.2 액션 매핑 코드 토글 확인
     const directActionSummary = page.locator('summary:has-text("코드 보기: 즉각적 행동 매핑 로직")');
     await expect(directActionSummary).toBeVisible();
 
