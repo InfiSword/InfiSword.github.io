@@ -3193,7 +3193,7 @@ code.hljs {
 }
 
 /* WorldFirstKill report: process flows and source disclosures */
-.project-content .wfk-flow {
+.project-content :is(.wfk-flow, .ds-flow) {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 20px;
@@ -3202,43 +3202,73 @@ code.hljs {
     margin: 24px 0;
     counter-reset: wfk-step;
 }
-.project-content .wfk-flow li {
+.project-content :is(.wfk-flow, .ds-flow) li {
     min-width: 0;
     margin: 0;
     padding: 14px 0;
     border-top: 1px solid var(--border);
     counter-increment: wfk-step;
 }
-.project-content .wfk-flow li::before {
+.project-content :is(.wfk-flow, .ds-flow) li::before {
     content: counter(wfk-step, decimal-leading-zero);
     display: block;
     margin-bottom: 8px;
     font-family: 'Fira Code', monospace;
     color: var(--accent);
 }
-.project-content .wfk-flow strong { display: block; margin-bottom: 6px; }
-.project-content .wfk-flow span { display: block; font-size: 1rem; line-height: 1.65; }
-.project-content .wfk-structure { table-layout: fixed; margin: 24px 0; }
-.project-content .wfk-structure th:first-child { width: 38%; }
-.project-content .wfk-structure code { white-space: normal; overflow-wrap: anywhere; }
-.project-content .wfk-code > summary:focus-visible {
+.project-content :is(.wfk-flow, .ds-flow) strong { display: block; margin-bottom: 6px; }
+.project-content :is(.wfk-flow, .ds-flow) span { display: block; font-size: 1rem; line-height: 1.65; }
+.project-content :is(.wfk-structure, .ds-structure) { table-layout: fixed; margin: 24px 0; }
+.project-content :is(.wfk-structure, .ds-structure) th:first-child { width: 38%; }
+.project-content :is(.wfk-structure, .ds-structure) code { white-space: normal; overflow-wrap: anywhere; }
+.project-content :is(.wfk-code, .ds-code) > summary:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: -3px;
 }
-.project-content .wfk-example { margin: 24px 0; }
-.project-content .wfk-example a { display: block; }
-.project-content .wfk-example a:focus-visible {
+.project-content :is(.wfk-code, .wfk-source, .ds-code) .hljs-comment {
+    color: rgba(212, 212, 212, 0.7) !important;
+}
+.project-content :is(.wfk-code, .wfk-source, .ds-code) .hljs-comment * {
+    color: inherit !important;
+}
+.project-content .wfk-token-example { margin: 24px 0; }
+.project-content #domain-initialization + h3 { margin-top: 72px; }
+.project-content :is(.wfk-domain-structures, .wfk-comparison, .wfk-rationale, .ds-viewer-guide) {
+    margin: 24px 0;
+    padding: 24px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg);
+    min-width: 0;
+}
+.project-content :is(.wfk-domain-structures, .wfk-comparison, .wfk-rationale, .ds-viewer-guide) > :first-child { margin-top: 0; }
+.project-content :is(.wfk-domain-structures, .wfk-comparison, .wfk-rationale, .ds-viewer-guide) > :last-child { margin-bottom: 0; }
+.project-content .wfk-token-table { table-layout: fixed; margin: 16px 0; }
+.project-content .wfk-token-table caption {
+    margin-bottom: 12px;
+    text-align: left;
+    line-height: 1.6;
+}
+.project-content .wfk-token-table th:first-child { width: 62%; }
+.project-content .wfk-token-table :not(pre) > code {
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+.project-content :is(.wfk-example, .ds-example) { margin: 24px 0; }
+.project-content .wfk-seed-screen { max-width: 480px; }
+.project-content :is(.wfk-example, .ds-example) a { display: block; }
+.project-content :is(.wfk-example, .ds-example) a:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 4px;
 }
-.project-content .wfk-example img {
+.project-content :is(.wfk-example, .ds-example) img {
     display: block;
     width: 100%;
     height: auto;
     border: 1px solid var(--border);
     border-radius: 8px;
 }
-.project-content .wfk-example figcaption {
+.project-content :is(.wfk-example, .ds-example) figcaption {
     margin-top: 8px;
     color: var(--muted);
     font-size: 0.9rem;
@@ -3252,7 +3282,24 @@ code.hljs {
 }
 .project-content .wfk-example-pair .wfk-example { min-width: 0; margin: 0; }
 @media (max-width: 720px) {
-    .project-content .wfk-flow { grid-template-columns: 1fr; gap: 0; }
-    .project-content .wfk-structure th:first-child { width: 42%; }
+    .project-content :is(.wfk-domain-structures, .wfk-comparison, .wfk-rationale, .ds-viewer-guide) { padding: 16px; }
+    .project-content :is(.wfk-flow, .ds-flow) { grid-template-columns: 1fr; gap: 0; }
+    .project-content :is(.wfk-structure, .ds-structure) th:first-child { width: 42%; }
     .project-content .wfk-example-pair { grid-template-columns: 1fr; }
 }
+
+/* Keep the original Pig sheet visible without dominating the animation summary. */
+.project-content .ds-sprite-sheet img {
+    max-height: 360px;
+    object-fit: contain;
+    background: var(--bg);
+}
+
+/* Keyboard focus for the restored spatial-query viewer. */
+#ds-grid-diagram #ds-sim-viewport-drag:focus-visible { outline: none; }
+#ds-grid-diagram #ds-sim-viewport-drag:focus-visible #ds-viewport-rect { stroke: #fff; stroke-width: 4; }
+
+/* Larger text in the spatial-query viewer. */
+#ds-grid-diagram .pf-diagram-hud-label { font-size: 0.9rem; }
+#ds-grid-diagram .pf-diagram-hud-val { font-size: 1rem; }
+#ds-grid-diagram .pf-diagram-btn { font-size: 0.95rem; min-height: 40px; padding: 8px 12px; }

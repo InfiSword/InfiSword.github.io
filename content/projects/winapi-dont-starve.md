@@ -5,262 +5,7 @@ permalink: "/project/winapi-dont-starve/"
 tags: [C++, WinAPI, Optimization, Game Logic]
 ---
 
-<style>
-    /* --- Premium Report Layout Styles --- */
-    
-    .chapter-title {
-        font-size: 2.2rem;
-        color: #fff !important;
-        background: linear-gradient(90deg, #007bff 0%, #58A6FF 100%);
-        padding: 25px 35px;
-        border-radius: 12px;
-        margin-top: 60px !important;
-        margin-bottom: 40px !important;
-        box-shadow: 0 10px 30px rgba(0, 123, 255, 0.15);
-        display: flex;
-        align-items: center;
-        border: none !important;
-    }
-    .chapter-title::before {
-        content: "CHAPTER.";
-        font-family: 'Fira Code', monospace;
-        font-size: 0.9rem;
-        letter-spacing: 2px;
-        margin-right: 15px;
-        opacity: 0.8;
-    }
-
-    .pf-visual-frame {
-        width: 100%; padding: 35px; background: #fcfcfc;
-        border: 1px solid #e1e4e8; border-radius: 16px;
-        margin: 30px 0; text-align: center;
-        box-shadow: inset 0 2px 10px rgba(0,0,0,0.02);
-    }
-    .pf-arch-diagram {
-        display: flex; flex-direction: column; gap: 20px; margin: 25px 0;
-    }
-    .pf-arch-layer {
-        padding: 20px 25px; border: 1px solid #e1e4e8; border-radius: 8px;
-        background: #fff; position: relative; text-align: center;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    }
-    .pf-arch-layer::before {
-        content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
-        background: #007bff; border-radius: 8px 0 0 8px;
-    }
-    .pf-arch-layer-title {
-        color: #007bff; font-weight: 700; margin-bottom: 10px;
-        font-family: 'Fira Code', monospace; font-size: 0.95rem; text-align: center;
-    }
-    .pf-arch-layer-items {
-        display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; justify-content: center;
-    }
-    .pf-arch-item {
-        padding: 6px 14px; background: rgba(0, 123, 255, 0.08);
-        border: 1px solid rgba(0, 123, 255, 0.3); border-radius: 6px;
-        font-size: 0.85rem; color: #0056b3; text-align: center;
-    }
-
-    /* --- Code Details --- */
-    details.pf-details {
-        margin: 20px 0;
-        border: 1px solid #e1e4e8;
-        border-radius: 8px;
-        background: #f8f9fa;
-        overflow: hidden;
-    }
-    details.pf-details summary {
-        padding: 15px 20px;
-        font-weight: 700;
-        color: #007bff;
-        cursor: pointer;
-        outline: none;
-        background: #fff;
-        display: flex;
-        align-items: center;
-    }
-
-    .highlight-box {
-        background: #f0f7ff;
-        border-left: 5px solid #007bff;
-        padding: 20px;
-        margin: 20px 0;
-        border-radius: 0 8px 8px 0;
-    }
-
-    /* --- Transaction Flow --- */
-    .pf-transaction-flow {
-        display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-family: 'Fira Code', monospace;
-        gap: 12px; flex-wrap: wrap; margin: 20px 0;
-    }
-    .pf-flow-step { padding: 10px 18px; border: 1px solid #e1e4e8; border-radius: 6px; background: #fff; color: #333; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); line-height: 1.4; }
-    .pf-flow-arrow { color: #007bff; font-weight: bold; font-size: 1.2rem; }
-
-    /* --- Flow Arrows --- */
-    .flow-arrow {
-        color: #007bff; font-weight: bold; font-size: 1.5rem; margin: 10px 0;
-    }
-
-    /* --- 1.1 Balanced 2-Column Component Grid --- */
-    .pf-fc-grid-2col {
-        display: grid !important;
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 14px !important;
-        width: 100% !important;
-    }
-    @media (max-width: 600px) {
-        .pf-fc-grid-2col {
-            grid-template-columns: 1fr !important;
-        }
-    }
-
-    /* --- 1.2 Singleton Managers 2x2 Technical Cards --- */
-    .pf-mgr-grid {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 16px;
-        width: 100%;
-        margin-top: 10px;
-        text-align: left;
-    }
-    @media (max-width: 700px) {
-        .pf-mgr-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    .pf-mgr-card {
-        background: #ffffff;
-        border: 1px solid #dce5f0;
-        border-radius: 12px;
-        padding: 20px 22px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
-        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    .pf-mgr-card::before {
-        content: "";
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        background: #2563eb;
-    }
-    .pf-mgr-card.is-render::before { background: #059669; }
-    .pf-mgr-card.is-resource::before { background: #d97706; }
-    .pf-mgr-card.is-camera::before { background: #0284c7; }
-    
-    .pf-mgr-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 24px rgba(37, 99, 235, 0.09);
-        border-color: #93c5fd;
-    }
-    .pf-mgr-head {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        margin-bottom: 8px;
-        gap: 8px;
-    }
-    .pf-mgr-title {
-        font-family: 'Fira Code', monospace;
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: #0f172a;
-        margin: 0;
-    }
-    .pf-mgr-badge {
-        font-family: 'Fira Code', monospace;
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-        padding: 3px 8px;
-        border-radius: 4px;
-        background: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
-        white-space: nowrap;
-    }
-    .pf-mgr-badge.is-render { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
-    .pf-mgr-badge.is-resource { background: #fffbeb; color: #b45309; border-color: #fde68a; }
-    .pf-mgr-badge.is-camera { background: #f0f9ff; color: #0284c7; border-color: #bae6fd; }
-
-    .pf-mgr-subtitle {
-        font-size: 0.88rem;
-        font-weight: 600;
-        color: #475569;
-        margin: 0 0 14px 0;
-        line-height: 1.45;
-    }
-    .pf-mgr-list {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 16px 0;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    .pf-mgr-item {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        font-size: 0.85rem;
-        color: #334155;
-        line-height: 1.5;
-    }
-    .pf-mgr-bullet {
-        color: #2563eb;
-        font-family: 'Fira Code', monospace;
-        font-weight: 700;
-        font-size: 0.82rem;
-        margin-top: 1px;
-        flex-shrink: 0;
-    }
-    .pf-mgr-card.is-render .pf-mgr-bullet { color: #059669; }
-    .pf-mgr-card.is-resource .pf-mgr-bullet { color: #d97706; }
-    .pf-mgr-card.is-camera .pf-mgr-bullet { color: #0284c7; }
-
-    .pf-mgr-meta {
-        padding-top: 12px;
-        border-top: 1px dashed #e2e8f0;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: auto;
-    }
-    .pf-mgr-tag {
-        font-family: 'Fira Code', monospace;
-        font-size: 0.72rem;
-        padding: 3px 7px;
-        border-radius: 4px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        color: #64748b;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        .pf-mgr-card {
-            background: rgba(15, 23, 42, 0.75);
-            border-color: rgba(148, 163, 184, 0.18);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-        }
-        .pf-mgr-title { color: #f8fafc; }
-        .pf-mgr-subtitle { color: #94a3b8; }
-        .pf-mgr-item { color: #cbd5e1; }
-        .pf-mgr-meta { border-top-color: rgba(148, 163, 184, 0.15); }
-        .pf-mgr-tag {
-            background: rgba(15, 23, 42, 0.9);
-            border-color: rgba(148, 163, 184, 0.2);
-            color: #94a3b8;
-        }
-    }
-</style>
-
-게임 엔진에 의존하지 않고 C++와 WinAPI만을 이용해 완전 밑바닥부터 게임을 구축하는 데 도전한 프로젝트입니다. 게임 엔진의 추상화된 기능 뒤에 숨겨진 전체적인 실행 파이프라인을 깊이 있게 이해하고 스스로 설계해보고자 시작하였으며, 기존 게임인 'Don't Starve'의 핵심 시스템을 참고하여 제작했습니다.
+C++와 WinAPI로 Don't Starve의 핵심 시스템을 모사한 프로젝트입니다. **객체 구성, 화면에 필요한 객체를 골라 그리는 처리, 애니메이션 이벤트, 에디터 데이터 로드**를 직접 구현했습니다.
 
 <section id="gallery" class="pf-ftd-post-gallery-section">
     <div class="pf-ftd-section-header">
@@ -333,66 +78,28 @@ tags: [C++, WinAPI, Optimization, Game Logic]
     </div>
 </section>
 
----
+## 1. 객체 구성과 화면 처리
 
-## 1. 주요 시스템 아키텍처
-{: .chapter-title }
+### 1.1 기능을 조합하는 GameObject
 
-### 1.1 컴포넌트 기반 객체 설계 (Component-Based)
+플레이어, 몬스터, 자원 오브젝트는 **`GameObject`를 바탕으로 필요한 기능을 조합**합니다. 위치는 `Transform`, 이미지는 `SpriteRenderer`, 충돌은 `Collider`, 동작 재생은 `Animator`가 담당합니다. 공통 기능을 분리해 객체마다 같은 코드를 반복하지 않고 재사용할 수 있도록 구성했습니다.
 
-단일 상속의 복잡성을 피하고 객체 지향적인 유연성을 극대화하기 위해 **컴포넌트 기반 구조**를 채택했습니다. 모든 게임 객체(`GameObject`)는 기능 단위의 컴포넌트를 소유하며, 실행 시점에 필요한 기능을 동적으로 탈부착할 수 있습니다.
+<table class="ds-structure">
+<thead><tr><th scope="col">클래스</th><th scope="col">역할</th></tr></thead>
+<tbody>
+<tr><th scope="row"><code>GameObject</code></th><td>컴포넌트를 소유하고 객체의 갱신·렌더링을 연결</td></tr>
+<tr><th scope="row"><code>ObjectManager</code></th><td>객체 생성·삭제와 공간 그리드 조회</td></tr>
+<tr><th scope="row"><code>CameraManager</code></th><td>카메라에 보이는 월드 범위를 계산해 렌더링 대상 조회</td></tr>
+<tr><th scope="row"><code>RenderManager</code></th><td>그리기 요청을 레이어와 깊이 순서로 정렬해 출력</td></tr>
+</tbody>
+</table>
 
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
+<details class="pf-details ds-code" id="ds-components">
+<summary>코드 보기: 컴포넌트 추가와 조회</summary>
 
-    <!-- Container Header -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">GameObject (엔티티 컨테이너)</h4>
-        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">ENTITY CONTAINER</span>
-      </div>
-      <p class="pf-fc-desc">고유 식별자(ID) 및 타입 관리, `std::vector&lt;std::unique_ptr&lt;Component&gt;&gt;` 소유 및 컴포넌트 생명주기 관리</p>
-    </div>
-
-    <!-- Arrow -->
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- 4 Components Grid: 2 Columns Balanced Layout -->
-    <div class="pf-fc-branch-grid pf-fc-grid-2col">
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;">CORE</span>
-        <div class="pf-fc-branch-title" style="margin-top: 6px;">Transform</div>
-        <div class="pf-fc-branch-desc">2D 위치(Position), 스케일, 바라보는 방향 연산</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">RENDER</span>
-        <div class="pf-fc-branch-title" style="margin-top: 6px;">SpriteRenderer</div>
-        <div class="pf-fc-branch-desc">GDI+ 비트맵 렌더링 및 Y-Sorting 피벗 좌표 관리</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-diagram-accent-amber pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">PHYSICS</span>
-        <div class="pf-fc-branch-title" style="margin-top: 6px;">Collider</div>
-        <div class="pf-fc-branch-desc">AABB 충돌 박스 및 상호작용 트리거 검사</div>
-      </div>
-      <div class="pf-fc-branch-item pf-fc-item-compact">
-        <span class="pf-diagram-accent-purple pf-fc-badge" style="background: #f5f3ff; color: #7c3aed; border-color: #ddd6fe;">ANIM</span>
-        <div class="pf-fc-branch-title" style="margin-top: 6px;">Animator</div>
-        <div class="pf-fc-branch-desc">스프라이트시트 클립 재생 및 프레임 이벤트 콜백</div>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-이러한 구조를 통해 새로운 객체를 생성할 때 상속 계층에 얽매이지 않고 유연하게 기능을 조립할 수 있습니다.
-
-<details class="pf-details">
-<summary>코드 보기: GameObject.h - 컴포넌트 추가 및 획득 핵심 로직</summary>
+`AddComponent`는 기능을 생성해 `unique_ptr`로 소유하고, 호출한 객체에는 접근용 포인터를 반환합니다. `GetComponent`는 요청한 타입의 기능을 찾습니다.
 
 ```cpp
-// GameObject.h - 컴포넌트 추가 및 획득 핵심 로직
 template <typename T, typename... Args>
 T* AddComponent(Args&&... args) {
     auto newComponent = std::make_unique<T>(this, std::forward<Args>(args)...);
@@ -411,282 +118,79 @@ T* GetComponent() const {
     return nullptr;
 }
 ```
+
 </details>
 
-### 1.2 중앙 집중식 매니저 패턴 (Singleton Managers)
+### 1.2 필요한 객체만 골라 순서대로 그리기
 
-시스템의 전역적인 상태 관리와 자원 공유를 위해 **싱글톤 기반 매니저**들을 구축했습니다.
+**그리드는 셀마다 `std::vector<GameObject*>`를 갖는 2차원 배열**로 관리합니다. 셀 크기는 월드 좌표 기준 `256`이며, `m_spatialGrid[x][y]`에는 해당 칸에 속한 객체의 포인터를 보관합니다. 객체는 중심 위치에 해당하는 셀에 등록하고, 이동해 셀이 바뀌면 기존 셀에서 제거한 뒤 새 셀에 넣습니다.
 
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart pf-flowchart-wide">
+화면에 보이는 객체를 찾을 때는 **카메라의 월드 영역을 셀 좌표 범위로 바꾸고, 그 범위의 셀만 순회**합니다. 비활성·삭제 예정 객체를 제외하고, 각 객체의 사각형이 화면 영역과 실제로 겹치는지(AABB) 검사해 렌더링 대상에 담습니다.
 
-    <!-- Global Core Hub Header -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #3b82f6; background: #eff6ff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">Engine Subsystem Core (Singleton Services)</h4>
-        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #dbeafe; color: #1e40af; border-color: #93c5fd;">GLOBAL SERVICES HUB</span>
-      </div>
-    </div>
+<ol class="ds-flow" aria-label="월드 렌더링 처리 흐름">
+<li><strong>화면 범위 계산</strong><span>카메라 위치로 월드 좌표의 가시 영역 계산</span></li>
+<li><strong>가시 객체 조회</strong><span>그리드 후보 조회 후 사각형 겹침 검사</span></li>
+<li><strong>그리기 요청 수집</strong><span>스프라이트와 위치·레이어·깊이를 전달</span></li>
+<li><strong>정렬 후 출력</strong><span>레이어별 깊이 순서로 GDI+에 그리기</span></li>
+</ol>
 
-    <!-- Arrow -->
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
+`SpriteRenderer`는 화면에 그릴 정보를 만들고, `RenderManager`는 이를 모아 출력합니다. 객체마다 즉시 그리는 방식에서 순서 관리를 분리해, 타일·월드 객체·UI의 겹침을 일관되게 처리합니다.
 
-    <!-- 4 Managers 2x2 Technical Cards Grid -->
-    <div class="pf-mgr-grid">
-      <!-- 1. ObjectManager -->
-      <div class="pf-mgr-card">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">ObjectManager</h4>
-          <span class="pf-mgr-badge">ENTITY</span>
-        </div>
-        <p class="pf-mgr-subtitle">월드 엔티티 생명주기 및 2D 공간 분할(Spatial Partitioning) 제어</p>
-        <ul class="pf-mgr-list">
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>모든 <code>GameObject</code> 동적 생성·소멸 및 ID 고유성 보장</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>256×256 정적 그리드 배열 인덱싱 실시간 업데이트</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>가시 범위 내 활성 객체 풀링(Pooling) 및 순회 최적화</span>
-          </li>
-        </ul>
-      </div>
+**셀별 객체 목록 — `ObjectManager`**
 
-      <!-- 2. RenderManager -->
-      <div class="pf-mgr-card is-render">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">RenderManager</h4>
-          <span class="pf-mgr-badge is-render">RENDER</span>
-        </div>
-        <p class="pf-mgr-subtitle">커맨드 패턴 기반 지연 렌더링 및 발밑 Pivot Y-Sorting 정렬</p>
-        <ul class="pf-mgr-list">
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>프레임별 <code>DrawCommand</code> 생성 및 레이어 큐 버퍼링</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>깊이(Depth) 우선순위 Pivot Y 기준 <code>std::stable_sort</code> 정렬</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>배경·월드·UI 레이어 단위 GDI+ 더블 버퍼링 일괄 Flush</span>
-          </li>
-        </ul>
-      </div>
+배열의 두 인덱스는 셀의 X·Y 좌표이며, 각 `vector`가 그 셀의 객체 목록입니다. 배열 크기는 맵 크기와 셀 크기로 정합니다.
 
-      <!-- 3. ResourceManager -->
-      <div class="pf-mgr-card is-resource">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">ResourceManager</h4>
-          <span class="pf-mgr-badge is-resource">ASSET</span>
-        </div>
-        <p class="pf-mgr-subtitle">GDI+ 비트맵 및 스프라이트 시트 해시맵 캐싱 및 중복 로드 방지</p>
-        <ul class="pf-mgr-list">
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>파일 경로 해시 기반 비트맵 메모리 캐싱 (Zero Duplicate)</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>애니메이션 스프라이트 시트 프레임 Rect 메타데이터 관리</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>씬 전환 및 프로그램 종료 시 안전한 GDI+ 리소스 일괄 해제</span>
-          </li>
-        </ul>
-      </div>
+<div id="ds-grid-storage">
 
-      <!-- 4. CameraManager -->
-      <div class="pf-mgr-card is-camera">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">CameraManager</h4>
-          <span class="pf-mgr-badge is-camera">CAMERA</span>
-        </div>
-        <p class="pf-mgr-subtitle">플레이어 시야 추적, 뷰포트 컬링 및 월드-스크린 좌표계 변환</p>
-        <ul class="pf-mgr-list">
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>플레이어 중심 선형 보간(Lerp) 부드러운 타깃 추적</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span><code>ObjectManager</code>에서 가시 범위 객체를 추적하여 렌더링</span>
-          </li>
-          <li class="pf-mgr-item">
-            <span class="pf-mgr-bullet">▸</span>
-            <span>World Coordinates ↔ Screen DC 좌표계 선형 변환 행렬</span>
-          </li>
-        </ul>
-      </div>
-    </div>
+**그리드 자료구조**
 
-  </div>
+```cpp
+static constexpr int GRID_CELL_SIZE = 256;
+static constexpr int GRID_WIDTH = (MAP_WIDTH * TILE_SIZE / GRID_CELL_SIZE) + 2;
+static constexpr int GRID_HEIGHT = (MAP_HEIGHT * TILE_SIZE / GRID_CELL_SIZE) + 2;
+
+std::vector<GameObject*> m_spatialGrid[GRID_WIDTH][GRID_HEIGHT];
+```
+
 </div>
 
----
+**화면과 겹치는 객체 찾기 — `QueryObjectsInRectArea`**
 
-## 2. 렌더링 시스템 및 파이프라인
-{: .chapter-title }
+**화면에 걸친 셀 순회 → 활성 객체 확인 → 화면과 겹치면 결과에 추가**하는 흐름입니다. `startX`~`endX`, `startY`~`endY`는 카메라 영역에 해당하는 셀 범위이며, `rectArea`는 카메라가 보는 월드 사각형입니다.
 
-GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 **커맨드 패턴 기반의 렌더링 파이프라인**을 구축했습니다. 매 프레임 모든 객체를 즉시 그리는 대신, 렌더링 명령을 레이어별로 수집하고 정렬한 뒤 일괄 실행(Flush)하는 방식을 취합니다.
+<div id="ds-cell-range">
 
-### 2.1 렌더링 파이프라인 흐름
+<div id="ds-grid-diagram">
 
-카메라 뷰포트 컬링부터 발밑 Pivot Y 깊이 정렬, GDI+ 백버퍼 일괄 출력(`Flush`)까지의 4단계 렌더링 파이프라인 실행 순서 전개도입니다.
+<div class="ds-viewer-guide" id="ds-viewer-guide">
 
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
+**뷰어 조작법**
 
-    <div class="pf-fc-pill-start">
-      <span class="pf-fc-mono-tag">TRIGGER</span>
-      <span>SceneManager &rarr; GameScene::Render()</span>
-    </div>
+파란 점선의 카메라 영역을 **마우스나 손가락으로 드래그**해 이동합니다. 키보드는 **Tab으로 카메라 영역을 선택한 뒤 방향키**로 이동하며, **리셋 버튼 또는 Home 키**로 초기 상태로 돌아갑니다.
 
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 1: CameraManager & ObjectManager -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all;">1. 시야 연산 &amp; 공간 쿼리 (CameraManager &amp; ObjectManager)</h4>
-        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">SPATIAL QUERY</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
-        <code>CameraManager</code>가 현재 플레이어 중심의 유효 뷰포트(AABB)를 산출하면, 2D 공간 분할 그리드를 관리하는 <code>ObjectManager</code>가 화면 밖 객체를 O(1) 인덱싱으로 배제하고 가시 영역 내 후보군 선별
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 2: GameObject & SpriteRenderer -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all;">2. 선형 탐색 없는 책임 위임 (GameObject &amp; SpriteRenderer)</h4>
-        <span class="pf-diagram-accent-purple pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">POLYMORPHIC DISPATCH</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
-        선별된 가시 객체가 다형성 <code>Render()</code>를 호출받아, 무거운 컴포넌트 검색 없이 자신이 소유한 <code>SpriteRenderer</code>로 렌더링 책임을 즉각 위임
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 3: SpriteRenderer & RenderManager -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all;">3. 지연 드로우 커맨드 버퍼링 (SpriteRenderer &amp; RenderManager)</h4>
-        <span class="pf-diagram-accent-amber pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">COMMAND BUFFERING</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
-        화면에 비트맵을 즉시 그리지 않고, 발밑 접지면(Foot Pivot Y) 깊이 정보를 포함한 지연 그리기 명령(<code>DrawCommand</code>)을 생성하여 중앙 <code>RenderManager</code> 큐에 적재
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 4: RenderManager::Flush() -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #16a34a; word-break: keep-all;">4. 발밑 깊이 정렬 및 일괄 출력 (RenderManager)</h4>
-        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">Y-SORT &amp; FLUSH</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
-        적재된 명령들을 발밑 깊이 오름차순으로 일괄 정렬(Y-Sorting)한 뒤, GDI+ 백버퍼에 단 한 번의 순차 Flush로 출력하여 깊이 왜곡 없는 자연스러운 2.5D 입체감 구현
-      </p>
-    </div>
-
-  </div>
-</div>
-
-### 2.2 렌더링 파이프라인 속 서브시스템 협력
-
-단일 책임 원칙(SRP)에 따라 각 매니저와 컴포넌트가 명확히 책임을 분담하며, 유기적인 상호작용을 통해 렌더링 파이프라인을 구동합니다.
-
-| 서브시스템 | 주요 역할 (Role) | 파이프라인 내 책임 (Responsibility) |
-|---|---|---|
-| **`CameraManager`** | 시야 연산 &amp; 뷰포트 제어 | 타깃(플레이어) 추적, 가시 뷰포트 산출 및 가시 객체 렌더링 루프 총괄 |
-| **`ObjectManager`** | 객체 수명 &amp; 공간 색인 | 2D 공간 분할 그리드 인덱싱 및 뷰포트 교차 객체 선별 컬링 |
-| **`GameObject`** | 다형성 렌더링 진입점 | 렌더링 다형성 호출 수신 및 소유 렌더러 컴포넌트로 O(1) 위임 |
-| **`SpriteRenderer`** | 스프라이트 변환 &amp; 커맨드화 | 발밑 피벗(Foot Pivot) 기준 깊이값 계산 및 지연 그리기 명령(DrawCommand) 생성 |
-| **`RenderManager`** | 지연 렌더 파이프라인 총괄 | 드로우 커맨드 큐 버퍼링, 발밑 깊이 오름차순 정렬(Y-Sorting) 및 GDI+ 백버퍼 일괄 Flush |
-
----
-
-## 3. 최적화 및 핵심 기술
-{: .chapter-title }
-
-### 3.1 공간 분할 기법: 그리드 기반 컬링 (Grid-based Culling)
-
-월드에 수천 개의 오브젝트가 존재할 때, 모든 객체에 대해 매 프레임 업데이트와 충돌 검사(Brute-force, `O(N)`)를 수행하면 심각한 성능 저하가 발생합니다. 이를 방지하기 위해 맵 전체를 256x256 픽셀 크기의 **정적 2D 그리드 배열(Spatial Partitioning)**로 분할했습니다.
-
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
-
-    <!-- Step 1: Broad Phase -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title">1. 광역 그리드 셀 선별 (Broad Phase)</h4>
-        <span class="pf-diagram-accent-blue pf-fc-badge" style="background: #eff6ff; color: #1d4ed8; border-color: #93c5fd;">O(1) // INDEXING</span>
-      </div>
-      <p class="pf-fc-desc">
-        전체 맵의 2D 그리드 배열 중 카메라 뷰포트가 걸쳐 있는 활성 셀 범위(<code>[startX~endX]</code>, <code>[startY~endY]</code>)를 즉시 산출하여 화면 밖 수천 개 객체를 1차 배제
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 2: Narrow Phase -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #bbf7d0; background: #fdfffe;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #16a34a;">2. 개별 객체 정밀 AABB 컬링 (Narrow Phase)</h4>
-        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">O(K) // CULLING</span>
-      </div>
-      <p class="pf-fc-desc">
-        선별된 가시 셀 내부의 객체들만 순회하며, 개별 오브젝트의 실제 바운딩 박스(AABB)와 뷰포트 교차 여부를 최종 판정하여 가시 버퍼(<code>visibleBuffer</code>)에 수집
-      </p>
-    </div>
-
-  </div>
 </div>
 
 <div class="pf-visual-frame pf-diagram-frame">
   <div class="pf-diagram-toolbar">
     <div class="pf-diagram-hud">
       <div class="pf-diagram-hud-item">
-        <span class="pf-diagram-hud-label">Camera</span>
+        <span class="pf-diagram-hud-label">카메라</span>
         <span id="ds-sim-cam" class="pf-diagram-hud-val is-camera">X: 1244, Y: 726</span>
       </div>
       <div class="pf-diagram-hud-item">
-        <span class="pf-diagram-hud-label">Active Cells</span>
+        <span class="pf-diagram-hud-label">활성 셀</span>
         <span id="ds-sim-cells" class="pf-diagram-hud-val">12 / 30</span>
       </div>
       <div class="pf-diagram-hud-item">
-        <span class="pf-diagram-hud-label">Rendered</span>
+        <span class="pf-diagram-hud-label">렌더링</span>
         <span id="ds-sim-rendered" class="pf-diagram-hud-val is-rendered">14</span>
       </div>
       <div class="pf-diagram-hud-item">
-        <span class="pf-diagram-hud-label">Culled</span>
+        <span class="pf-diagram-hud-label">제외</span>
         <span id="ds-sim-culled" class="pf-diagram-hud-val is-culled">28</span>
       </div>
       <div class="pf-diagram-hud-item">
-        <span class="pf-diagram-hud-label">Reduction</span>
+        <span class="pf-diagram-hud-label">제외 비율</span>
         <span id="ds-sim-ratio" class="pf-diagram-hud-val is-ratio">67%</span>
       </div>
     </div>
@@ -698,7 +202,7 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
     </div>
   </div>
 
-  <svg viewBox="0 0 940 910" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" style="display: block; min-width: 640px; font-family: 'Noto Sans KR', sans-serif;">
+  <svg viewBox="0 0 940 910" width="100%" height="auto" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ds-viewer-title ds-viewer-desc" style="display: block; min-width: 640px; font-family: 'Noto Sans KR', sans-serif;"><title id="ds-viewer-title">그리드 셀 조회와 뷰포트 컬링 뷰어</title><desc id="ds-viewer-desc">카메라를 움직이면 활성 셀 범위와 객체의 렌더링 여부가 바뀝니다. 초록 점은 렌더링, 주황 점은 활성 셀 안이지만 카메라 밖이어서 제외, 회색 점은 비활성 셀의 객체입니다.</desc>
     <defs>
       <!-- Background pattern for 128px tiles -->
       <pattern id="tile-pattern" width="60" height="42.5" patternUnits="userSpaceOnUse">
@@ -739,8 +243,8 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
     <rect width="940" height="910" rx="14" fill="#080d1a" />
 
     <!-- Header / Title -->
-    <text x="30" y="32" fill="#7dd3fc" font-family="'Fira Code', monospace" font-size="11" font-weight="700" letter-spacing="1.5">SPATIAL PARTITIONING // 2-PHASE CULLING ARCHITECTURE</text>
-    <text x="30" y="56" fill="#f8fafc" font-size="17" font-weight="800" letter-spacing="-0.3">카메라 뷰포트 교차 그리드 산출 및 내부 오브젝트 선별 도식 (뷰포트 드래그 지원)</text>
+    <text x="30" y="32" fill="#7dd3fc" font-family="'Fira Code', monospace" font-size="14" font-weight="700" letter-spacing="1.5">그리드 조회와 화면 겹침 검사</text>
+    <text x="30" y="56" fill="#f8fafc" font-size="20" font-weight="800" letter-spacing="-0.3">카메라를 움직여 객체의 포함·제외 확인</text>
 
     <!-- Base Grid Map Area (X: 30 ~ 910, Y: 75 ~ 550, Width: 880, Height: 475) -->
     <!-- 6 cols x 5 rows, Col width: 146.67px, Row height: 95px -->
@@ -752,8 +256,8 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
 
     <!-- Active Grid Label Tag -->
     <g id="ds-active-grid-tag" transform="translate(184, 143)">
-      <rect id="ds-active-grid-tag-bg" width="240" height="23" rx="4" fill="rgba(37, 99, 235, 0.4)" stroke="rgba(96, 165, 250, 0.55)" stroke-width="1" />
-      <text id="ds-active-grid-tag-txt" x="8" y="16" fill="#bfdbfe" font-size="10.5" font-weight="700">활성 그리드 12개 셀 (Broad Phase 산출)</text>
+      <rect id="ds-active-grid-tag-bg" width="260" height="30" rx="4" fill="rgba(37, 99, 235, 0.4)" stroke="rgba(96, 165, 250, 0.55)" stroke-width="1" />
+      <text id="ds-active-grid-tag-txt" x="8" y="21" fill="#bfdbfe" font-size="15" font-weight="700">화면과 겹치는 셀 12개</text>
     </g>
 
     <!-- Grid Lines (Vertical, 6 cols: 30, 176.67, 323.33, 470, 616.67, 763.33, 910) -->
@@ -771,44 +275,44 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
 
     <!-- Cell Coordinate Labels (Fira Code) -->
     <!-- Row 0 (Y: 75..170) -->
-    <text class="ds-cell-coord" data-col="0" data-row="0" x="40" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(1, 1)</text>
-    <text class="ds-cell-coord" data-col="1" data-row="0" x="187" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(2, 1)</text>
-    <text class="ds-cell-coord" data-col="2" data-row="0" x="333" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(3, 1)</text>
-    <text class="ds-cell-coord" data-col="3" data-row="0" x="480" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(4, 1)</text>
-    <text class="ds-cell-coord" data-col="4" data-row="0" x="627" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(5, 1)</text>
-    <text class="ds-cell-coord" data-col="5" data-row="0" x="773" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(6, 1)</text>
+    <text class="ds-cell-coord" data-col="0" data-row="0" x="40" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(1, 1)</text>
+    <text class="ds-cell-coord" data-col="1" data-row="0" x="187" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(2, 1)</text>
+    <text class="ds-cell-coord" data-col="2" data-row="0" x="333" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(3, 1)</text>
+    <text class="ds-cell-coord" data-col="3" data-row="0" x="480" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(4, 1)</text>
+    <text class="ds-cell-coord" data-col="4" data-row="0" x="627" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(5, 1)</text>
+    <text class="ds-cell-coord" data-col="5" data-row="0" x="773" y="98" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(6, 1)</text>
 
     <!-- Row 1 (Y: 170..265) -->
-    <text class="ds-cell-coord" data-col="0" data-row="1" x="40" y="193" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(1, 2)</text>
-    <text class="ds-cell-coord" data-col="1" data-row="1" x="187" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(2, 2)</text>
-    <text class="ds-cell-coord" data-col="2" data-row="1" x="333" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(3, 2)</text>
-    <text class="ds-cell-coord" data-col="3" data-row="1" x="480" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(4, 2)</text>
-    <text class="ds-cell-coord" data-col="4" data-row="1" x="627" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(5, 2)</text>
-    <text class="ds-cell-coord" data-col="5" data-row="1" x="773" y="193" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(6, 2)</text>
+    <text class="ds-cell-coord" data-col="0" data-row="1" x="40" y="193" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(1, 2)</text>
+    <text class="ds-cell-coord" data-col="1" data-row="1" x="187" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(2, 2)</text>
+    <text class="ds-cell-coord" data-col="2" data-row="1" x="333" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(3, 2)</text>
+    <text class="ds-cell-coord" data-col="3" data-row="1" x="480" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(4, 2)</text>
+    <text class="ds-cell-coord" data-col="4" data-row="1" x="627" y="193" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(5, 2)</text>
+    <text class="ds-cell-coord" data-col="5" data-row="1" x="773" y="193" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(6, 2)</text>
 
     <!-- Row 2 (Y: 265..360) -->
-    <text class="ds-cell-coord" data-col="0" data-row="2" x="40" y="288" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(1, 3)</text>
-    <text class="ds-cell-coord" data-col="1" data-row="2" x="187" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(2, 3)</text>
-    <text class="ds-cell-coord" data-col="2" data-row="2" x="333" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(3, 3)</text>
-    <text class="ds-cell-coord" data-col="3" data-row="2" x="480" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(4, 3)</text>
-    <text class="ds-cell-coord" data-col="4" data-row="2" x="627" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(5, 3)</text>
-    <text class="ds-cell-coord" data-col="5" data-row="2" x="773" y="288" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(6, 3)</text>
+    <text class="ds-cell-coord" data-col="0" data-row="2" x="40" y="288" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(1, 3)</text>
+    <text class="ds-cell-coord" data-col="1" data-row="2" x="187" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(2, 3)</text>
+    <text class="ds-cell-coord" data-col="2" data-row="2" x="333" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(3, 3)</text>
+    <text class="ds-cell-coord" data-col="3" data-row="2" x="480" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(4, 3)</text>
+    <text class="ds-cell-coord" data-col="4" data-row="2" x="627" y="288" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(5, 3)</text>
+    <text class="ds-cell-coord" data-col="5" data-row="2" x="773" y="288" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(6, 3)</text>
 
     <!-- Row 3 (Y: 360..455) -->
-    <text class="ds-cell-coord" data-col="0" data-row="3" x="40" y="383" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(1, 4)</text>
-    <text class="ds-cell-coord" data-col="1" data-row="3" x="187" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(2, 4)</text>
-    <text class="ds-cell-coord" data-col="2" data-row="3" x="333" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(3, 4)</text>
-    <text class="ds-cell-coord" data-col="3" data-row="3" x="480" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(4, 4)</text>
-    <text class="ds-cell-coord" data-col="4" data-row="3" x="627" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="11" font-weight="700">(5, 4)</text>
-    <text class="ds-cell-coord" data-col="5" data-row="3" x="773" y="383" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(6, 4)</text>
+    <text class="ds-cell-coord" data-col="0" data-row="3" x="40" y="383" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(1, 4)</text>
+    <text class="ds-cell-coord" data-col="1" data-row="3" x="187" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(2, 4)</text>
+    <text class="ds-cell-coord" data-col="2" data-row="3" x="333" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(3, 4)</text>
+    <text class="ds-cell-coord" data-col="3" data-row="3" x="480" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(4, 4)</text>
+    <text class="ds-cell-coord" data-col="4" data-row="3" x="627" y="383" fill="#60a5fa" font-family="'Fira Code', monospace" font-size="16" font-weight="700">(5, 4)</text>
+    <text class="ds-cell-coord" data-col="5" data-row="3" x="773" y="383" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(6, 4)</text>
 
     <!-- Row 4 (Y: 455..550) -->
-    <text class="ds-cell-coord" data-col="0" data-row="4" x="40" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(1, 5)</text>
-    <text class="ds-cell-coord" data-col="1" data-row="4" x="187" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(2, 5)</text>
-    <text class="ds-cell-coord" data-col="2" data-row="4" x="333" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(3, 5)</text>
-    <text class="ds-cell-coord" data-col="3" data-row="4" x="480" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(4, 5)</text>
-    <text class="ds-cell-coord" data-col="4" data-row="4" x="627" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(5, 5)</text>
-    <text class="ds-cell-coord" data-col="5" data-row="4" x="773" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="11" font-weight="600">(6, 5)</text>
+    <text class="ds-cell-coord" data-col="0" data-row="4" x="40" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(1, 5)</text>
+    <text class="ds-cell-coord" data-col="1" data-row="4" x="187" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(2, 5)</text>
+    <text class="ds-cell-coord" data-col="2" data-row="4" x="333" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(3, 5)</text>
+    <text class="ds-cell-coord" data-col="3" data-row="4" x="480" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(4, 5)</text>
+    <text class="ds-cell-coord" data-col="4" data-row="4" x="627" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(5, 5)</text>
+    <text class="ds-cell-coord" data-col="5" data-row="4" x="773" y="478" fill="rgba(148, 163, 184, 0.45)" font-family="'Fira Code', monospace" font-size="16" font-weight="600">(6, 5)</text>
 
     <!-- OBJECTS LAYER (50 Objects distributed over 30 cells) -->
     <g id="ds-sim-objects">
@@ -867,10 +371,10 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
 
     <!-- TALLER INTERACTIVE VIEWPORT GROUP (420 x 230 px) -->
     <!-- X: 260 to 680 (width 420), Y: 195 to 425 (height 230) -->
-    <g id="ds-sim-viewport-drag">
+    <g id="ds-sim-viewport-drag" tabindex="0" role="group" aria-label="카메라 뷰포트: 드래그 또는 방향키로 이동, Home으로 초기화">
       <rect id="ds-viewport-rect" x="260" y="195" width="420" height="230" rx="6" fill="rgba(56, 189, 248, 0.08)" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="8 6" filter="url(#glow-blue)" />
-      <rect id="ds-viewport-badge-bg" x="266" y="201" width="225" height="24" rx="4" fill="#0284c7" />
-      <text id="ds-viewport-badge-txt" x="274" y="217" fill="#ffffff" font-family="'Fira Code', monospace" font-size="10.5" font-weight="700">VIEWPORT (1200×780) ✥ DRAG</text>
+      <rect id="ds-viewport-badge-bg" x="266" y="201" width="300" height="30" rx="4" fill="#0284c7" />
+      <text id="ds-viewport-badge-txt" x="274" y="221" fill="#ffffff" font-family="'Fira Code', monospace" font-size="15" font-weight="700">카메라 영역 · 드래그로 이동</text>
     </g>
 
     <!-- CALLOUT ANNOTATIONS & LEADER LINES -->
@@ -878,19 +382,19 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
       <!-- Callout 1: Inside Grid + Passed Viewport Culling (Green) -->
       <path d="M 430 305 L 430 145 L 495 145" fill="none" stroke="#22c55e" stroke-width="1.8" marker-start="url(#arrow-green)" />
       <rect x="500" y="130" width="315" height="28" rx="4" fill="#0f172a" stroke="#22c55e" stroke-width="1.2" />
-      <text x="510" y="148" fill="#86efac" font-size="11.5" font-weight="700">그리드 내부 O + 뷰포트 컬링 통과 → 최종 렌더링</text>
+      <text x="510" y="148" fill="#86efac" font-size="15.5" font-weight="700">활성 셀 안 + 화면 안 → 렌더링</text>
 
       <!-- Callout 2: Inside Grid + Failed Viewport Culling (Amber) -->
       <path d="M 210 292 L 175 292 L 175 250 L 170 250" fill="none" stroke="#f59e0b" stroke-width="1.8" marker-start="url(#arrow-amber)" />
-      <rect x="18" y="235" width="155" height="42" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2" />
-      <text x="25" y="253" fill="#fde68a" font-size="11" font-weight="700">그리드 내부 O + 뷰포트 X</text>
-      <text x="25" y="269" fill="#cbd5e1" font-size="9.5" font-weight="500">뷰포트 컬링(AABB)에서 탈락</text>
+      <rect x="18" y="235" width="180" height="48" rx="4" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2" />
+      <text x="25" y="254" fill="#fde68a" font-size="14" font-weight="700">활성 셀 안 · 화면 밖</text>
+      <text x="25" y="277" fill="#cbd5e1" font-size="12.5" font-weight="500">겹침 검사에서 제외</text>
 
       <!-- Callout 3: Outside Grid (Slate) -->
       <path d="M 790 490 L 730 490 L 730 520 L 700 520" fill="none" stroke="#64748b" stroke-width="1.8" marker-start="url(#arrow-slate)" />
-      <rect x="740" y="455" width="150" height="42" rx="4" fill="#0f172a" stroke="#64748b" stroke-width="1.2" />
-      <text x="747" y="473" fill="#cbd5e1" font-size="11" font-weight="700">그리드 외부 (비활성 셀)</text>
-      <text x="747" y="489" fill="#94a3b8" font-size="9.5" font-weight="500">컬링 루프 자체 생략 O(1)</text>
+      <rect x="740" y="455" width="150" height="48" rx="4" fill="#0f172a" stroke="#64748b" stroke-width="1.2" />
+      <text x="747" y="473" fill="#cbd5e1" font-size="14" font-weight="700">비활성 셀</text>
+      <text x="747" y="496" fill="#94a3b8" font-size="12.5" font-weight="500">객체 검사 건너뜀</text>
     </g>
 
     <!-- BOTTOM TECHNICAL SUMMARY / LEGEND (Full Width, 3 Spacious Rows with Line Breaks) -->
@@ -900,712 +404,225 @@ GDI+ 환경에서 대규모 오브젝트를 효율적으로 출력하기 위해 
     <g transform="translate(52, 592)">
       <circle cx="12" cy="12" r="9" fill="#22c55e" stroke="#15803d" stroke-width="2.5" filter="url(#glow-green)" />
       <circle cx="12" cy="12" r="3" fill="#ffffff" />
-      <text x="36" y="18" fill="#86efac" font-size="15.5" font-weight="700"><tspan font-family="'Fira Code', monospace">[1]</tspan> 공간 분할 기법 그리드 내부 &amp; 뷰포트 컬링 통과 (최종 렌더링):</text>
-      <text x="36" y="44" fill="#cbd5e1" font-size="14" font-weight="500">공간 분할 기법 그리드 내부의 1차 광역 셀 탐색을 통과한 후,</text>
-      <text x="36" y="68" fill="#cbd5e1" font-size="14" font-weight="500">뷰포트 컬링(Narrow Phase AABB 검사)까지 통과하여 최종 렌더링 파이프라인(Draw Call)에 수집됩니다.</text>
+      <text x="36" y="18" fill="#86efac" font-size="24" font-weight="700">[1] 화면 안 객체 → 렌더링</text>
+      <text x="36" y="60" fill="#cbd5e1" font-size="21" font-weight="500">활성 셀에 속하고 카메라와 겹치는 객체를 그립니다.</text>
     </g>
 
     <!-- Row 2: Amber -->
     <g transform="translate(52, 692)">
       <circle cx="12" cy="12" r="8.5" fill="#f59e0b" stroke="#b45309" stroke-width="2" filter="url(#glow-amber)" />
-      <text x="36" y="18" fill="#fde68a" font-size="15.5" font-weight="700"><tspan font-family="'Fira Code', monospace">[2]</tspan> 공간 분할 기법 그리드 내부 &amp; 뷰포트 컬링 탈락 (AABB 제외):</text>
-      <text x="36" y="44" fill="#cbd5e1" font-size="14" font-weight="500">공간 분할 기법 그리드 내부의 활성 셀에는 포함되었으나,</text>
-      <text x="36" y="68" fill="#cbd5e1" font-size="14" font-weight="500">실제 카메라 시야 바깥에 위치하여 뷰포트 컬링(2차 AABB 판정)에서 즉시 렌더링 대상에서 제외됩니다.</text>
+      <text x="36" y="18" fill="#fde68a" font-size="24" font-weight="700">[2] 화면 밖 객체 → 제외</text>
+      <text x="36" y="60" fill="#cbd5e1" font-size="21" font-weight="500">활성 셀 안에 있어도 카메라와 겹치지 않으면 제외합니다.</text>
     </g>
 
     <!-- Row 3: Slate -->
     <g transform="translate(52, 792)">
       <circle cx="12" cy="12" r="7" fill="#1e293b" stroke="#64748b" stroke-width="1.8" />
-      <text x="36" y="18" fill="#94a3b8" font-size="15.5" font-weight="700"><tspan font-family="'Fira Code', monospace">[3]</tspan> 공간 분할 기법 그리드 외부 (뷰포트 컬링 이전 원천 배제):</text>
-      <text x="36" y="44" fill="#94a3b8" font-size="14" font-weight="500">카메라 뷰포트가 걸치지 않아 공간 분할 기법 그리드 내부에 속하지 않으므로,</text>
-      <text x="36" y="68" fill="#94a3b8" font-size="14" font-weight="500">뷰포트 컬링 검사 루프에 진입하지 않고 O(1) 인덱스 계산 단계에서 원천 배제됩니다.</text>
+      <text x="36" y="18" fill="#94a3b8" font-size="24" font-weight="700">[3] 비활성 셀의 객체 → 검사 건너뜀</text>
+      <text x="36" y="60" fill="#94a3b8" font-size="21" font-weight="500">카메라가 걸치지 않는 셀은 객체 검사에서 건너뜁니다.</text>
     </g>
   </svg>
 </div>
 
-#### 3.1.1 동적 오브젝트의 그리드 이동 처리
+</div>
 
-플레이어나 몬스터처럼 실시간으로 월드를 이동하는 동적 객체는 좌표가 변경될 때마다 자신이 속한 공간 분할 그리드 셀의 소속을 동기화해야 합니다.
+</div>
 
-하지만 매 프레임 무조건 기존 셀에서 객체를 빼내고 새 셀로 재등록하게 되면, 빈번한 탐색과 재할당으로 인해서 비효율적입니다. 특히 256×256 픽셀 크기의 그리드 셀은 캐릭터의 1프레임 이동량에 비해 매우 넓기 때문에, 대부분의 프레임 동안 객체는 동일한 셀 내부에서 머무릅니다.
+아래는 조회 흐름을 간단히 표현한 예시입니다. 원본의 사각형 비교식은 두 영역의 겹침을 확인하는 GDI+의 `IntersectsWith`로 표현했습니다.
 
-따라서 객체가 **셀의 경계를 실제로 넘어섰을 때만** 다른 셀로 배치시켜 렌더링 판단을 하도록 설계했습니다.
-
-
-#### 3.1.2 오브젝트 그리드 추가/제거 및 선언 구조 (Spatial Lifecycle Management)
-오브젝트가 새로 생성되거나 소멸할 때, 해당 오브젝트를 그리드 시스템에 안전하게 등록하고 지워주는 과정이 필수적입니다. 또한, 월드의 크기와 타일 크기에 맞추어 그리드의 너비와 높이를 런타임 최적화를 위해 상수로 정의했습니다.
-
-<details class="pf-details">
-<summary>코드 보기: ObjectManager.h - 공간 분할 시스템 헤더 정의</summary>
+<details class="pf-details ds-code" id="ds-grid-query">
+<summary>코드 보기: 화면 영역 조회</summary>
 
 ```cpp
-// ObjectManager.h - 공간 분할 시스템의 선언부
-class ObjectManager {
-public:
-    void UpdateObjectGrid(GameObject* pObj);
-    void AddToGrid(GameObject* pObj);
-    void RemoveFromGrid(GameObject* pObj);
+for (int y = startY; y <= endY; ++y) {
+    for (int x = startX; x <= endX; ++x) {
+        for (auto* obj : m_spatialGrid[x][y]) {
+            if (!obj->IsEnabled() || obj->IsDead()) continue;
 
-private:
-    // 256px 정사각형 셀 기준의 정적 그리드 크기 정의
-    static constexpr int GRID_CELL_SIZE = 256;
-    static constexpr int GRID_WIDTH = (MAP_WIDTH * TILE_SIZE / GRID_CELL_SIZE) + 2;
-    static constexpr int GRID_HEIGHT = (MAP_HEIGHT * TILE_SIZE / GRID_CELL_SIZE) + 2;
-
-    // 2D 공간 분할 그리드 (각 셀마다 속한 오브젝트 포인터 벡터 관리)
-    std::vector<GameObject*> m_spatialGrid[GRID_WIDTH][GRID_HEIGHT];
-    uint32_t m_spatialQueryStamp = 1;
-};
-```
-</details>
-
-<details class="pf-details">
-<summary>코드 보기: ObjectManager.cpp - 그리드 추가 및 삭제 구현</summary>
-
-```cpp
-// ObjectManager.cpp - 객체 생성 시 그리드 등록
-void ObjectManager::AddToGrid(GameObject* pObj)
-{
-    if (!pObj || pObj->GetType() == GO_TYPE_UI) return;
-
-    Gdiplus::RectF bounds = pObj->GetBounds();
-    int x = (int)floor((bounds.X + bounds.Width * 0.5f) / GRID_CELL_SIZE);
-    int y = (int)floor((bounds.Y + bounds.Height * 0.5f) / GRID_CELL_SIZE);
-
-    x = (std::max<int>)(0, (std::min<int>)(GRID_WIDTH - 1, x));
-    y = (std::max<int>)(0, (std::min<int>)(GRID_HEIGHT - 1, y));
-
-    m_spatialGrid[x][y].push_back(pObj);
-    pObj->SetGridCell(x, y);
-}
-
-// ObjectManager.cpp - 객체 소멸 시 그리드 제거
-void ObjectManager::RemoveFromGrid(GameObject* pObj)
-{
-    if (!pObj) return;
-    int x = pObj->GetGridCellX();
-    int y = pObj->GetGridCellY();
-
-    if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
-        std::vector<GameObject*>& cell = m_spatialGrid[x][y];
-        cell.erase(std::remove(cell.begin(), cell.end(), pObj), cell.end());
-        pObj->SetGridCell(-1, -1);
+            if (rectArea.IntersectsWith(obj->GetBounds())) {
+                targetOutObjects.push_back(obj);
+            }
+        }
     }
 }
 ```
+
 </details>
----
 
-## 4. 애니메이션 시스템 및 이벤트 콜백
-{: .chapter-title }
+결과 목록인 `targetOutObjects`를 렌더링에 사용합니다. 실제 구현에서는 셀 범위를 맵 경계 안으로 제한하고, 조회 번호로 같은 객체의 중복 검사도 방지합니다.
 
-`Animator`와 `AnimationClip`을 분리하여 고도로 제어 가능한 프레임 기반 애니메이션 시스템을 구축했습니다. 특히, 애니메이션의 시각적 흐름과 게임의 논리적 흐름(데미지 판정, 사운드 재생 등)을 일치시키기 위해 **프레임 이벤트 콜백(Frame Event Callback)** 시스템을 도입했습니다.
+<details class="pf-details ds-code" id="ds-visible-rendering">
+<summary>코드 보기: 가시 객체 조회와 그리기 순서</summary>
 
-### 4.1 애니메이션 시스템 구조 및 핵심 객체 관계
+**`CameraManager` — 화면에 보이는 객체의 렌더링 요청**
 
-애니메이션 재생과 렌더링 책임을 분리하여, 객체의 상태 전이(FSM)와 시각적 프레임 재생, 실제 화면 출력이 느슨하게 결합된(Decoupled) 컴포넌트 아키텍처를 구축했습니다. 각 컴포넌트는 다음과 같이 역할을 분담합니다.
-
-<div class="pf-visual-frame" style="padding: 24px; margin-bottom: 24px;">
-  <div class="pf-arch-overview">
-    <div class="pf-mgr-grid">
-      <!-- 1. Sprite -->
-      <div class="pf-mgr-card is-camera">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">Sprite</h4>
-          <span class="pf-mgr-badge is-camera">DATA</span>
-        </div>
-        <p class="pf-mgr-subtitle" style="margin-bottom: 0; font-weight: 500; line-height: 1.55;">
-          렌더링에 필요한 단일 프레임 이미지와, 시트의 절단 영역(<code>sourceRect</code>) 및 피벗 좌표를 보관
-        </p>
-      </div>
-
-      <!-- 2. AnimationClip -->
-      <div class="pf-mgr-card is-resource">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">AnimationClip</h4>
-          <span class="pf-mgr-badge is-resource">SEQUENCE</span>
-        </div>
-        <p class="pf-mgr-subtitle" style="margin-bottom: 0; font-weight: 500; line-height: 1.55;">
-          특정 동작을 이루는 스프라이트 시퀀스와 재생 속도, 프레임별 이벤트 데이터를 보관
-        </p>
-      </div>
-
-      <!-- 3. Animator -->
-      <div class="pf-mgr-card">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">Animator</h4>
-          <span class="pf-mgr-badge">CONTROLLER</span>
-        </div>
-        <p class="pf-mgr-subtitle" style="margin-bottom: 0; font-weight: 500; line-height: 1.55;">
-          캐릭터 상태에 알맞은 클립을 선택하고, 경과 시간에 맞춰 현재 재생할 스프라이트를 제어 및 동기화
-        </p>
-      </div>
-
-      <!-- 4. SpriteRenderer -->
-      <div class="pf-mgr-card is-render">
-        <div class="pf-mgr-head">
-          <h4 class="pf-mgr-title">SpriteRenderer</h4>
-          <span class="pf-mgr-badge is-render">RENDER</span>
-        </div>
-        <p class="pf-mgr-subtitle" style="margin-bottom: 0; font-weight: 500; line-height: 1.55;">
-          지정된 스프라이트의 절단 영역을 가져와, 발밑 피벗 기준 깊이 정렬 후 화면에 최종 래스터 출력
-        </p>
-      </div>
-    </div>
-  </div>
-</div>
-
-#### 매 프레임 이미지 참조 및 렌더링 파이프라인
-
-게임 루프가 동작하는 동안 `Update` 단계(시간 누적 및 스프라이트 교체)와 `Render` 단계(커맨드 버퍼링 및 일괄 출력)를 거쳐, 각 객체들이 어떻게 상호작용하며 화면에 프레임을 렌더링하는지 나타낸 실행 순서도입니다.
-
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
-
-    <!-- Start Pill -->
-    <div class="pf-fc-pill-start">
-      <span class="pf-fc-mono-tag">GAME LOOP</span>
-      <span>Update() &rarr; Render() Pipeline</span>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 1: Animator Update -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all;">1. 시간 누적 및 순번 도출</h4>
-        <span class="pf-fc-badge">ANIMATOR // UPDATE</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all; line-height: 1.6;">
-        <code>Animator::Update(dt)</code>가 재생 경과 시간(<code>m_elapsed</code>)을 누적하고, 클립 총 재생 시간 대비 현재 출력할 프레임 순번(<code>currentFrameIndex</code>)을 도출
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 2: Extract & SetSprite -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all !important;">2. 스프라이트 추출 및 주입</h4>
-        <span class="pf-diagram-accent-purple pf-fc-badge" style="background: #fdf4ff; color: #a21caf; border-color: #f0abfc;">SYNC // SET-SPRITE</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
-        <code>Animator</code>가 데이터 컨테이너인 <code>AnimationClip</code>에서 해당 순번의 <code>Sprite</code> 객체를 꺼내, 타깃 <code>SpriteRenderer::SetSprite()</code>로 최신 스프라이트를 동기화 주입
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 3: SpriteRenderer Command Buffering -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all !important;">3. 원본 비트맵 참조 &amp; 커맨드 적재</h4>
-        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">ZERO-COPY // COMMAND</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
-        <code>SpriteRenderer::Render()</code>가 주입받은 <code>Sprite</code>의 <code>sourceRect</code>와 원본 비트맵 포인터를 참조하고, 월드 위치(<code>Transform</code>) 및 발밑 피벗을 결합하여 <code>RenderManager</code> 큐에 지연 그리기 명령 등록
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 4: RenderManager Flush -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8; word-break: keep-all !important;">4. Y-Sorting 정렬 및 일괄 출력</h4>
-        <span class="pf-fc-badge">BLIT // FLUSH</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
-        <code>RenderManager::Flush()</code>가 큐에 수집된 명령들을 발밑 접지면(Y) 오름차순으로 일괄 정렬(Y-Sorting)한 뒤, 백버퍼에 원본 시트 비트맵 영역만 순차 래스터 렌더링
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- End Pill -->
-    <div class="pf-fc-pill-end">
-      <span class="pf-fc-mono-tag">OUTPUT</span>
-      <span>GDI+ Double Buffering &rarr; Screen Present (Zero-Flicker)</span>
-    </div>
-
-  </div>
-</div>
-
-### 4.2 스프라이트 시트 슬라이싱 파싱 (Pig 몬스터 사례)
-
-게임 내 수십 종의 몬스터와 캐릭터 애니메이션을 효율적으로 처리하기 위해 `SpriteSheet` 클래스를 통한 **그리드 기반 자동 슬라이싱 및 비트맵 공유 시스템**을 구축했습니다. 프로젝트 내 실제 돼지 몬스터(`GOID_MONSTER_PIG`)의 리소스 파싱 과정을 통해 스프라이트 시트가 어떻게 메모리에 적재되고 프레임 단위로 분할되는지 살펴봅니다.
-
-<div class="pf-pig-compare-grid">
-  <div class="pf-pig-card is-sheet">
-    <div class="pf-pig-card-head">
-      <h4 class="pf-pig-title">pig_pigman_idle_loop_down.png</h4>
-      <span class="pf-pig-badge">IDLE // 4x9 (33 FRAMES)</span>
-    </div>
-    <div class="pf-pig-img-box">
-      <img src="/assets/images/Dont%20Starve/Pig/pig_pigman_idle_loop_down.png" alt="돼지 몬스터 대기 모션 스프라이트 시트 (pig_pigman_idle_loop_down.png)">
-    </div>
-    <p class="pf-pig-caption">실제 하향 대기(Idle) 애니메이션 시트 (4열 &times; 9행, 총 33프레임으로 패킹된 고해상도 아틀라스)</p>
-    <div class="pf-pig-meta">
-      <div>SPEC: 4 Columns x 9 Rows / Total 33 Active Frames</div>
-      <div>ACTION: PigState::IDLE (DIR_DOWN) / Loop: true (0.03s)</div>
-    </div>
-  </div>
-
-  <div class="pf-pig-card is-sheet">
-    <div class="pf-pig-card-head">
-      <h4 class="pf-pig-title">pig_pigman_walk_loop_down.png</h4>
-      <span class="pf-pig-badge">WALK // 4x11 (41 FRAMES)</span>
-    </div>
-    <div class="pf-pig-img-box">
-      <img src="/assets/images/Dont%20Starve/Pig/pig_pigman_walk_loop_down.png" alt="돼지 몬스터 이동 모션 스프라이트 시트 (pig_pigman_walk_loop_down.png)">
-    </div>
-    <p class="pf-pig-caption">실제 하향 이동(Walk) 애니메이션 시트 (4열 &times; 11행, 총 41프레임으로 패킹된 고해상도 아틀라스)</p>
-    <div class="pf-pig-meta">
-      <div>SPEC: 4 Columns x 11 Rows / Total 41 Active Frames</div>
-      <div>ACTION: PigState::WALK (DIR_DOWN) / Loop: true (0.03s)</div>
-    </div>
-  </div>
-</div>
-
-#### 스프라이트 시트 3단계 파싱 파이프라인
-
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
-
-    <!-- Step 1: Auto-Size Slice -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all !important;">1. 프레임 규격 자동 슬라이싱</h4>
-        <span class="pf-fc-badge">AUTO-SIZE // SLICE</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
-        <code>RegisterAnimation</code> 호출 시 원본 해상도와 행/열 정보를 바탕으로 1프레임 크기를 자동 계산 및 분할
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 2: Zero-Copy Bitmap Share -->
-    <div class="pf-fc-card pf-fc-compact">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-fc-title" style="word-break: keep-all !important;">2. 단일 비트맵 공유 아키텍처</h4>
-        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">ZERO-COPY // MEMORY</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
-        원본 비트맵 1장만 메모리에 유지하고, 분할된 모든 프레임은 잘라낼 좌표 영역(<code>sourceRect</code>)만 참조
-      </p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <!-- Step 3: Pre-baked Flip -->
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8; word-break: keep-all !important;">3. 수평 반전 사전 캐싱</h4>
-        <span class="pf-fc-badge">PRE-BAKE // FLIP</span>
-      </div>
-      <p class="pf-fc-desc" style="word-break: keep-all !important; line-height: 1.6;">
-        좌측 방향(<code>DIR_LEFT</code>) 비트맵을 로딩 단계에서 미리 반전 캐싱하여 런타임 행렬 연산 없이 즉시 출력
-      </p>
-    </div>
-
-  </div>
-</div>
-
-1. **프레임 규격 자동 산출 및 슬라이싱 (`RegisterAnimation`)**: 돼지 몬스터처럼 상태마다 프레임 수(대기 33프레임, 이동 41프레임 등)가 다를 때, 프레임의 가로·세로 크기를 일일이 수동 입력하지 않아도 엔진이 원본 이미지 해상도와 열 개수를 읽어 1프레임 크기를 자동으로 역산합니다. 이를 통해 새로운 모션 시트가 추가되더라도 코드 수정 없이 유연하게 애니메이션을 등록할 수 있습니다.
-2. **단일 비트맵 공유 아키텍처 (Zero Duplicate Memory)**: 수십 개의 애니메이션 프레임을 개별 이미지로 잘라내어 복사하면 메모리가 급증합니다. 따라서 원본 비트맵 1장만을 메모리에 유지(`std::shared_ptr`)하고, 각 프레임은 원본 비트맵 안에서 오려낼 사각형 좌표(`sourceRect`)와 중심점(`pivot`) 정보만 참조하게 하여 메모리 복제 비용을 0바이트로 실현했습니다.
-3. **수평 반전(Horizontal Flip) 사전 캐싱**: 좌우 대칭 형태의 모션을 런타임에 매 프레임 변환 행렬로 뒤집으면 WinAPI 소프트웨어 렌더링에 적지 않은 CPU 오버헤드가 발생합니다. 따라서 좌측 방향(`DIR_LEFT`) 애니메이션은 로딩 시점에 비트맵을 미리 수평 반전하여 캐싱해 두고, 렌더링 루프에서는 추가 연산 없이 초고속 래스터 출력(`BitBlt`)을 유지하도록 설계했습니다.
-
-<details class="pf-details">
-<summary>코드 보기: SpriteSheet.cpp - 자동 슬라이싱 및 프레임 파싱 핵심 구현</summary>
+`QueryObjectsInRectArea`가 그리드 조회와 최종 겹침 검사를 수행하고, 결과를 재사용 버퍼에 담습니다.
 
 ```cpp
-// SpriteSheet.cpp - CreateFromFile 핵심 슬라이싱 및 비트맵 공유 로직
-std::shared_ptr<SpriteSheet> SpriteSheet::CreateFromFile(
-    const std::wstring& filePath, int frameWidth, int frameHeight,
-    int cols, int totalFrames, float pivotX, float pivotY, bool flipHorizontal)
-{
-    auto sheet = std::shared_ptr<SpriteSheet>(new SpriteSheet());
-    auto bitmap = std::make_shared<Gdiplus::Bitmap>(filePath.c_str());
-    if (bitmap->GetLastStatus() != Gdiplus::Ok) return nullptr;
+std::vector<GameObject*>& visibleBuffer = m_queryBuffer;
+visibleBuffer.clear();
+objectManager->QueryObjectsInRectArea(GetViewportWorldRect(), visibleBuffer);
 
-    int sheetWidth = bitmap->GetWidth();
-    int sheetHeight = bitmap->GetHeight();
-
-    // frameWidth/frameHeight가 0이면 cols와 totalFrames로 동적 자동 계산
-    int finalFrameWidth = frameWidth;
-    int finalFrameHeight = frameHeight;
-    if (finalFrameWidth <= 0 && cols > 0) {
-        finalFrameWidth = sheetWidth / cols;
-    }
-    if (finalFrameHeight <= 0 && cols > 0 && totalFrames > 0) {
-        int totalRows = (totalFrames + cols - 1) / cols;
-        finalFrameHeight = sheetHeight / totalRows;
-    }
-
-    // 단일 원본 비트맵 포인터를 공유하며 33개 프레임의 UV sourceRect만 생성
-    sheet->m_bitmap = bitmap;
-    for (int i = 0; i < totalFrames; ++i) {
-        int col = i % cols;
-        int row = i / cols;
-
-        Gdiplus::Rect sourceRect(col * finalFrameWidth, row * finalFrameHeight, 
-                                 finalFrameWidth, finalFrameHeight);
-        sheet->m_sprites.push_back(std::make_shared<Sprite>(bitmap, sourceRect, pivotX, pivotY));
-    }
-    return sheet;
+for (GameObject* obj : visibleBuffer) {
+    obj->Render();
 }
 ```
-</details>
 
-### 4.3 람다 캡처를 활용한 이벤트 바인딩 및 프레임 이벤트 콜백 실행
+**`RenderManager::Flush` — 레이어별 정렬과 출력**
 
-객체(Player 등) 초기화 시점에 `RegisterAnimation`을 통해 애니메이션 클립을 생성하고, 특정 프레임 번호에 이벤트 키 문자열(`eventName`)을 등록합니다. 애니메이션 진행 중 해당 프레임에 도달하면 `std::function` 람다 캡처로 바인딩된 콜백 함수가 즉시 발동하여 타격 판정(`OnChopHit`), 효과음 재생(`SoundManager::PlaySFX`), 상태 전이(`OnChopEnd`) 등의 게임 로직을 유기적으로 연계합니다.
-
-<details class="pf-details">
-<summary>코드 보기: Player.cpp - 도끼질(Chop) 애니메이션 이벤트 바인딩 및 콜백 실행 예시</summary>
+같은 레이어에서는 `zOrder`가 작은 요청부터 그립니다. `ExecuteDrawCommand`가 요청 종류에 따라 이미지·텍스트 등을 GDI+로 출력하고, 사용한 목록은 비웁니다.
 
 ```cpp
-// Player.cpp - 도끼질 애니메이션 설정 및 이벤트 콜백 바인딩
-const int CHOP_HIT_FRAME = 4; // 도끼가 나무에 맞는 프레임
+for (int i = LAYER_TILE_BACKGROUND; i < LAYER_COUNT; ++i) {
+    if (m_layerCommands[i].empty()) continue;
 
-// 클립에 이벤트 프레임 등록
-AnimationClip* clip = m_animator->GetAnimationClip((int)PlayerState::CHOP, dir);
+    std::stable_sort(m_layerCommands[i].begin(), m_layerCommands[i].end(),
+        [](const DrawCommand& a, const DrawCommand& b) {
+            if (a.zOrder != b.zOrder) return a.zOrder < b.zOrder;
+            return a.layer < b.layer;
+        });
+
+    for (const auto& cmd : m_layerCommands[i]) {
+        ExecuteDrawCommand(pGraphics, cmd);
+    }
+    m_layerCommands[i].clear();
+}
+```
+
+</details>
+
+## 2. 애니메이션과 행동 연결
+
+### 2.1 이미지에서 동작으로
+
+**스프라이트 시트를 프레임으로 나누고, 상태와 방향에 맞는 동작을 재생**합니다. `SpriteSheet`가 이미지 영역을 분리하고, `AnimationClip`이 프레임과 재생 시간을 보관합니다. `Animator`는 경과 시간에 맞춰 표시할 스프라이트를 `SpriteRenderer`에 전달합니다.
+
+예를 들어 Pig의 아래 방향 대기는 4열 시트의 33개 프레임을 등록해 반복 재생합니다. 다른 상태도 같은 구조에서 이미지와 재생 설정을 바꿔 사용합니다.
+
+<figure class="ds-example ds-sprite-sheet">
+<a href="/assets/images/Dont%20Starve/Pig/pig_pigman_idle_loop_down.png" target="_blank" rel="noopener noreferrer"><img src="/assets/images/Dont%20Starve/Pig/pig_pigman_idle_loop_down.png" alt="Pig 아래 방향 대기 애니메이션의 4열 스프라이트 시트" width="644" height="1539" loading="lazy" decoding="async"></a>
+<figcaption>Pig 대기 시트 — 이미지 영역을 프레임으로 나누어 하나의 반복 동작으로 재생합니다.</figcaption>
+</figure>
+
+### 2.2 동작의 타격 시점에 게임 로직 실행
+
+도끼질은 애니메이션 재생과 실제 나무 타격이 같은 시점에 일어나야 합니다. 이를 위해 **특정 프레임에 이름 있는 이벤트를 등록하고 콜백으로 행동을 연결**했습니다. `chop_hit`에서는 효과음과 타격 처리를, `chop_end`에서는 행동 종료를 실행합니다.
+
+**동작 선택 → 재생 시간 갱신 → 이벤트 프레임 확인 → 타격·종료 콜백 실행** 순서입니다. 한 번의 갱신에서 여러 프레임을 지나쳐도 그 사이의 이벤트를 확인하도록 구성했습니다.
+
+<details class="pf-details ds-code" id="ds-frame-events">
+<summary>코드 보기: 도끼질 프레임과 타격 이벤트 연결</summary>
+
+플레이어의 CHOP 클립에 타격 프레임 `4`와 종료 프레임 `35`를 등록합니다. `Animator`가 해당 프레임을 지나갈 때 등록된 콜백을 호출합니다.
+
+```cpp
+const int CHOP_HIT_FRAME = 4;
+const int CHOP_LAST_FRAME = 35;
+AnimationClip* clip = m_animator->GetAnimationClip((int)PlayerState::CHOP, (Direction)dir);
 if (clip) {
     clip->AddEventFrame(CHOP_HIT_FRAME, L"chop_hit");
     clip->AddEventFrame(CHOP_LAST_FRAME, L"chop_end");
-
-    // 이벤트 콜백 람다 바인딩: 프레임 이벤트 검사 시 바인딩된 콜백 자동 실행
     clip->SetEventCallback([this](int frameIndex, const std::wstring& eventName) {
         if (eventName == L"chop_hit") {
             SoundManager::GetInstance()->PlaySFX(L"Resource/Sound/PlayerSound/Chop_tree.wav");
-            this->OnChopHit(); // 타겟 나무에 데미지 적용
+            this->OnChopHit();
         }
         else if (eventName == L"chop_end") {
-            this->OnChopEnd(); // 상태 전이
+            this->OnChopEnd();
         }
     });
 }
 ```
+
 </details>
 
----
+## 3. 에디터와 데이터 반영
 
-## 5. 자체 제작 에디터와 데이터 파이프라인 (DontStarve_Editor & Data Pipeline)
-{: .chapter-title }
+### 3.1 오브젝트의 기준점과 충돌 영역 편집
 
-방대한 오픈월드 맵과 수십 종의 오브젝트, 충돌체, 애니메이션 피벗을 하드코딩 없이 기획·제작하기 위해 독립 WinAPI 프로젝트로 **전용 비주얼 에디터인 `DontStarve_Editor`를 자체 개발**했습니다. 에디터에서 시각적으로 조정한 오브젝트 및 맵 데이터는 파일 시스템을 통해 게임 클라이언트(`DontStarve_Client`)에 재컴파일 없이 즉각 동기화되는 완전한 **데이터 주도(Data-Driven) 파이프라인**을 제공합니다.
+자체 제작한 **ObjectEditor**에서 이미지를 보며 피벗(배치 기준점)과 박스·원형 콜라이더를 조정합니다. 저장한 값은 `object_resource_overrides.txt`에서 객체 ID별로 관리합니다. 게임 시작 시 `DataManager`가 기본 리소스 설정에 이 값을 덮어써, 설정 변경을 클라이언트 재컴파일 없이 반영합니다.
 
-### 5.1 듀얼 모드 에디터 런처 (EditorLauncher)
+<figure class="ds-example ">
+<a href="/assets/images/Dont%20Starve/Editor/Object/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-09-04%20231012.png" target="_blank" rel="noopener noreferrer"><img src="/assets/images/Dont%20Starve/Editor/Object/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-09-04%20231012.png" alt="ObjectEditor에서 Pig의 피벗과 박스 콜라이더를 편집하는 화면" width="1190" height="816" loading="lazy" decoding="async"></a>
+<figcaption>ObjectEditor — 선택한 객체의 기준점과 충돌 영역을 이미지 위에서 조정합니다.</figcaption>
+</figure>
 
-단일 WinAPI 프로세스 내에서 `IEditorScreen` 인터페이스 다형성을 활용하여, 윈도우 파괴 및 재생성 없이 **맵 에디터(`MapEditor`)와 오브젝트 에디터(`ObjectEditor`)**를 즉각 스위칭할 수 있는 런처 환경을 제공합니다.
+<details class="pf-details ds-code" id="ds-object-settings">
+<summary>코드 보기: ID별 피벗과 콜라이더 설정 반영</summary>
 
-<div class="pf-editor-shot-grid is-single">
-  <div class="pf-editor-shot-card is-launcher">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">EditorLauncher 실행 화면</h4>
-      <span class="pf-editor-shot-badge">LAUNCHER // WINAPI_GUI</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/스크린샷%202026-09-04%20230443.png" alt="DontStarve Editor Launcher 화면">
-    </div>
-    <p class="pf-editor-shot-caption">GDI+ 더블 버퍼링 기반의 버튼 인터페이스로 <code>Map Editor</code>(맵 타일/배치)와 <code>Object Editor</code>(피벗/콜라이더)를 원클릭 전환</p>
-  </div>
-</div>
-
----
-
-### 5.2 오브젝트 에디터: 시각적 피벗 & 콜라이더 기즈모 편집 (ObjectEditor)
-
-엔티티의 스프라이트 원화를 뷰포트에 실시간으로 띄우고, 마우스 드래그 및 정밀 입력 다이얼로그를 통해 **발밑 피벗(Foot Pivot)**과 **충돌체(Box/Circle Collider)**를 직관적으로 편집할 수 있는 비주얼 툴셋입니다.
-
-<div class="pf-editor-shot-grid is-single">
-  <div class="pf-editor-shot-card is-object">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">ObjectEditor 메인 작업 인터페이스</h4>
-      <span class="pf-editor-shot-badge">VIEWPORT // INSPECTOR</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/Object/스크린샷%202026-09-04%20231012.png" alt="ObjectEditor 작업 화면 (돼지 몬스터 선택 상태)">
-    </div>
-    <p class="pf-editor-shot-caption">우측 오브젝트 팔레트에서 돼지 몬스터(<code>GOID_MONSTER_PIG</code>)를 선택한 상태로, 현재 피벗 <code>(0.5, 1)</code> 및 박스 콜라이더 오프셋과 단축키 HUD를 실시간 디스플레이</p>
-  </div>
-</div>
-
-#### 1. 발밑 피벗(Foot Pivot) 시각적 편집
-Top-Down 쿼터뷰에서 캐릭터와 장애물 간의 앞뒤 렌더링 순서(Y-Sorting)는 **'발이 바닥에 닿는 접지 기준점(Foot Pivot)'**에 의해 결정됩니다. 에디터에서는 마우스 드래그로 초록색 십자선 기즈모를 자유롭게 이동시키거나, <kbd>P</kbd> 키를 눌러 $0.0 \sim 1.0$ 정규화 수치를 직접 입력할 수 있습니다.
-
-<div class="pf-editor-shot-grid is-single">
-  <div class="pf-editor-shot-card is-object">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">발밑 피벗 기즈모 및 정밀 입력 다이얼로그</h4>
-      <span class="pf-editor-shot-badge">PIVOT // Y-SORTING_BASE</span>
-    </div>
-    <div class="pf-editor-shot-box" style="background: #1e293b;">
-      <img src="/assets/images/Dont%20Starve/Editor/Object/스크린샷%202026-09-04%20231102.png" alt="피벗 입력 다이얼로그 및 발밑 십자선 기즈모">
-    </div>
-    <p class="pf-editor-shot-caption">스프라이트 최하단 접지선에 맞춰 <code>Pivot X: 0.500, Pivot Y: 1.000</code>을 설정하여 완벽한 Y-Sorting 기준점 확립</p>
-  </div>
-</div>
-
-#### 2. Box 및 Circle 콜라이더 기즈모 편집
-오브젝트의 실제 물리적 부피와 피격 판정 범위를 설정하기 위해 사각형(Box)과 원형(Circle) 기즈모를 실시간 드래그로 조절합니다.
-
-<div class="pf-editor-shot-grid">
-  <div class="pf-editor-shot-card is-object">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">Box Collider 8방향 리사이즈</h4>
-      <span class="pf-editor-shot-badge">AABB // 4-CORNER_HANDLE</span>
-    </div>
-    <div class="pf-editor-shot-box" style="background: #1e293b;">
-      <img src="/assets/images/Dont%20Starve/Editor/Object/스크린샷%202026-09-04%20231036.png" alt="Box Collider 조절 핸들">
-    </div>
-    <p class="pf-editor-shot-caption">붉은색 스프라이트 외곽선 내부에 초록색 박스 콜라이더를 배치하고, 4개 모서리 핸들을 드래그하여 실제 몸체 영역에 피팅</p>
-  </div>
-
-  <div class="pf-editor-shot-card is-object">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">Circle Collider 반경 조절</h4>
-      <span class="pf-editor-shot-badge">CIRCLE // RADIUS_HANDLE</span>
-    </div>
-    <div class="pf-editor-shot-box" style="background: #1e293b;">
-      <img src="/assets/images/Dont%20Starve/Editor/Object/스크린샷%202026-09-04%20231117.png" alt="Circle Collider 조절 핸들">
-    </div>
-    <p class="pf-editor-shot-caption"><kbd>B</kbd> 키로 원형 충돌체로 전환 후, 중심점 핸들과 외곽 반지름 핸들을 드래그하여 회전 대칭 충돌체 설정</p>
-  </div>
-</div>
-
-#### 3. GameData 오버라이드 텍스트 직렬화
-오브젝트 에디터에서 시각적으로 조정한 **발밑 피벗(Foot Pivot) 좌표**와 **콜라이더(Box/Circle Collider)의 오프셋 및 크기 데이터**는 `GameData/object_resource_overrides.txt` 파일로 직렬화되어 디스크에 영구 저장됩니다. 상단 [저장하기] 버튼 또는 <kbd>Ctrl+S</kbd>를 누르면 `EditorResourceManager::SaveAllObjectResourceOverrides()`가 호출되어 아래와 같은 텍스트 규격으로 기록됩니다:
-
-```text
-# object_resource_overrides.txt - pivot and collider from Object Editor
-# IDName pivotX pivotY hasCollider colliderType offsetX offsetY width height centerX centerY radius
-GOID_MONSTER_PIG 0.5 1 1 0 -80 -205 161 205 0 0 0
-```
-
----
-
-### 5.3 맵 에디터: 타일/오브젝트 배치와 맵 입출력 (.dsm) (MapEditor)
-
-넓은 월드 맵을 구축하고 게임 내 지형 타일과 몬스터·오브젝트 스폰 위치를 직관적으로 설계할 수 있는 비주얼 맵 빌더입니다.
-
-#### 1. 맵 만들기 (타일 및 오브젝트 팔레트 배치)
-우측 수직 팔레트 인터페이스를 통해 상단 지형 타일(흙, 잔디, 늪지대 등)과 하단 게임 오브젝트(풀, 묘목, 상록수, 돼지, 돼지집, 베리덤불 등)를 마우스로 자유롭게 선택하여 맵 위에 실시간으로 배치할 수 있습니다.
-
-<div class="pf-editor-shot-grid">
-  <div class="pf-editor-shot-card is-map">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">우측 팔레트 타일 선택 &amp; 3x3 지형 페인팅</h4>
-      <span class="pf-editor-shot-badge">PALETTE // TILE_PAINT</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/Map/스크린샷%202026-09-04%20230610.png" alt="우측 팔레트 타일 선택 및 3x3 브러시 지형 페인팅">
-    </div>
-    <p class="pf-editor-shot-caption">우측 팔레트 상단에서 흙 타일(<code>TILEID_DIRT_00</code>)을 선택한 후, 초록색 3x3 브러시 영역으로 넓은 면적의 지형을 신속하게 칠하고 플레이어 시작 지점(초록 원 <code>P</code>)을 지정</p>
-  </div>
-
-  <div class="pf-editor-shot-card is-map">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">오브젝트 팔레트 선택 &amp; 자연물 군집 배치</h4>
-      <span class="pf-editor-shot-badge">PALETTE // PROP_PLACEMENT</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/Map/스크린샷%202026-09-04%20233102.png" alt="오브젝트 팔레트 선택 및 상록수와 풀 군집 배치 화면">
-    </div>
-    <p class="pf-editor-shot-caption">우측 팔레트에서 풀(<code>GOID_PROP_GRASS</code>)과 상록수(<code>GOID_PROP_EVERGREEN</code>)를 선택해 칠해진 흙 타일 위에 원하는 밀도로 식생을 자연스럽게 배치한 모습</p>
-  </div>
-</div>
-
-#### 2. 맵 세이브 & 로드하기 (.dsm 파일 입출력 및 보스 씬 복원)
-에디터 상단 메뉴 `파일(F) -> 저장 / 열기`를 통해 완성된 맵을 독자적인 포맷인 Don't Starve Map(`.dsm`) 파일로 디스크에 저장하거나 언제든 다시 불러올 수 있습니다. WinAPI 표준 공용 대화상자(`GetSaveFileName`, `GetOpenFileName`)를 기반으로 입출력 스트림을 제어합니다.
-
-<div class="pf-editor-shot-grid">
-  <div class="pf-editor-shot-card is-map">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">.dsm 맵 파일 저장 대화상자</h4>
-      <span class="pf-editor-shot-badge">FILE_SAVE // DSM_EXPORT</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/Map/스크린샷%202026-09-04%20233136.png" alt="맵 파일 저장 대화상자 (Map_Example.dsm)">
-    </div>
-    <p class="pf-editor-shot-caption">작업한 맵의 타일 배열, 플레이어 스폰 위치, 배치된 모든 오브젝트 좌표를 <code>Map_Example.dsm</code>이라는 파일명으로 직렬화하여 저장</p>
-  </div>
-
-  <div class="pf-editor-shot-card is-map">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">.dsm 맵 파일 열기 대화상자</h4>
-      <span class="pf-editor-shot-badge">FILE_LOAD // DSM_IMPORT</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/Map/스크린샷%202026-09-04%20233205.png" alt="맵 파일 열기 대화상자 (Map_Example.dsm 선택 및 프리셋 목록)">
-    </div>
-    <p class="pf-editor-shot-caption">저장된 <code>Map_Example.dsm</code>을 비롯해 기존에 사전 제작된 필드 및 보스 스테이지 맵 파일 목록을 선택하여 즉시 역직렬화 로드</p>
-  </div>
-</div>
-
-실제 맵 에디터로 설계 및 저장된 뒤 불러와 플레이되는 대표적인 인게임 씬의 예시로 **하운드 습격 필드(`01_BossHound.dsm`)**와 **거미 여왕 보스 아레나(`02_BossSpiderQueen.dsm`)**가 있습니다:
-
-<div class="pf-editor-shot-grid">
-  <div class="pf-editor-shot-card is-map">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">하운드 무리 인카운터 필드 (01_BossHound.dsm)</h4>
-      <span class="pf-editor-shot-badge">SCENE_EXAMPLE // HOUND_FIELD</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/Map/스크린샷%202026-09-04%20230725.png" alt="하운드 몬스터 무리 스폰 배치 로드 결과">
-    </div>
-    <p class="pf-editor-shot-caption">플레이어 스폰 마커(<code>P</code>)를 중심으로 노멀 하운드, 레드 하운드, 아이스 하운드가 긴장감 있게 분산 배치된 맵을 로드한 화면</p>
-  </div>
-
-  <div class="pf-editor-shot-card is-map">
-    <div class="pf-editor-shot-head">
-      <h4 class="pf-editor-shot-title">거미 여왕 보스 아레나 (02_BossSpiderQueen.dsm)</h4>
-      <span class="pf-editor-shot-badge">SCENE_EXAMPLE // SPIDER_QUEEN</span>
-    </div>
-    <div class="pf-editor-shot-box">
-      <img src="/assets/images/Dont%20Starve/Editor/Map/스크린샷%202026-09-04%20230811.png" alt="거미 여왕 보스전 맵 로드 결과">
-    </div>
-    <p class="pf-editor-shot-caption">중앙의 보스 거미 여왕(<code>GOID_MONSTER_SPIDERQUEEN</code>)과 외곽에 배치된 복수의 거미집(코쿤) 스폰 기지 구조가 완벽하게 복원 로드된 화면</p>
-  </div>
-</div>
-
----
-
-### 5.4 인게임 클라이언트 데이터 로드 파이프라인 (Client Data Binding)
-
-에디터에서 저장한 `object_resource_overrides.txt`와 `.dsm` 맵 파일은 **클라이언트 소스 코드를 단 한 줄도 재컴파일하지 않고** 게임 실행 시 아래의 3단계 파이프라인을 통해 인게임 월드로 완벽하게 구체화됩니다.
-
-<div class="pf-visual-frame pf-flowchart-frame">
-  <div class="pf-flowchart">
-
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #fde68a; background: #fffdf5;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-amber pf-fc-title" style="color: #b45309;">1. DataManager::Init()</h4>
-        <span class="pf-diagram-accent-amber pf-fc-badge" style="background: #fffbeb; color: #b45309; border-color: #fde68a;">OVERRIDES</span>
-      </div>
-      <p class="pf-fc-desc"><code>object_resource_overrides.txt</code> 로드 ➔ 각 ID별 에디터에서 편집된 <strong>피벗 및 콜라이더 규격</strong>을 메모리 테이블에 덮어쓰기</p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #a7f3d0; background: #f6fef9;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-green pf-fc-title" style="color: #059669;">2. SceneManager::LoadAllMapData()</h4>
-        <span class="pf-diagram-accent-green pf-fc-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">PARSE .DSM</span>
-      </div>
-      <p class="pf-fc-desc">등록된 씬 테이블의 <code>.dsm</code> 파일 스트림 로드 ➔ <code># TILES</code>(타일맵), <code># PLAYER</code>(스폰), <code># OBJECTS</code>(엔티티 좌표) 섹션 분리</p>
-    </div>
-
-    <div class="pf-fc-arrow">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-    </div>
-
-    <div class="pf-fc-card pf-fc-compact" style="border-color: #bfdbfe; background: #f8fbff;">
-      <div class="pf-fc-card-header">
-        <h4 class="pf-diagram-accent-blue pf-fc-title" style="color: #1d4ed8;">3. ParseMapFileInto 동적 씬 바인딩</h4>
-        <span class="pf-fc-badge">WORLD INSTANTIATE</span>
-      </div>
-      <p class="pf-fc-desc">맵 오브젝트 생성 시 <code>DataManager</code>의 갱신된 피벗/콜라이더를 즉시 전달받아 <code>ObjectManager</code> 공간 그리드에 안전 등록</p>
-    </div>
-
-  </div>
-</div>
-
-<details class="pf-details">
-<summary>코드 보기: DataManager.cpp - 오브젝트 오버라이드 데이터 덮어쓰기 로직</summary>
+설정 파일을 읽어 기존 리소스 ID를 찾고, 해당 ID의 피벗과 충돌 영역을 갱신합니다. 각 객체는 초기화할 때 이 설정을 조회해 사용합니다.
 
 ```cpp
-// DataManager.cpp - GameData/object_resource_overrides.txt 로드 및 id별 피벗/콜라이더 주입
-void DataManager::Init()
-{
-    // 1. 코드 기본 테이블 로드
-    for (size_t i = 0; i < DataTable::ObjectResourceCount; ++i) {
-        const auto& entry = DataTable::ObjectResourceTable[i];
-        m_objectResources[entry.id] = { entry.id, entry.baseDir, entry.imageName };
-    }
-
-    // 2. 에디터에서 저장된 오버라이드 텍스트 파일을 파싱하여 실시간 덮어쓰기
-    ResourcePathUtils::ParseObjectResourceOverridesFile(L"GameData/object_resource_overrides.txt",
-        [this](GameObjectID id, const ResourcePathUtils::ObjectResourceDef& overrideDef) {
-            auto it = m_objectResources.find(id);
-            if (it != m_objectResources.end()) {
-                it->second.pivotX = overrideDef.pivotX;
-                it->second.pivotY = overrideDef.pivotY;
-                it->second.hasCollider = overrideDef.hasCollider;
-                it->second.colliderType = overrideDef.colliderType;
-                it->second.colliderOffsetX = overrideDef.colliderOffsetX;
-                it->second.colliderOffsetY = overrideDef.colliderOffsetY;
-                it->second.colliderWidth = overrideDef.colliderWidth;
-                it->second.colliderHeight = overrideDef.colliderHeight;
-                it->second.colliderRadius = overrideDef.colliderRadius;
-            }
-        });
-}
+ResourcePathUtils::ParseObjectResourceOverridesFile(
+    L"GameData/object_resource_overrides.txt",
+    [this](GameObjectID id, const ResourcePathUtils::ObjectResourceDef& overrideDef) {
+        auto it = m_objectResources.find(id);
+        if (it != m_objectResources.end()) {
+            it->second.pivotX = overrideDef.pivotX;
+            it->second.pivotY = overrideDef.pivotY;
+            it->second.hasCollider = overrideDef.hasCollider;
+            it->second.colliderType = overrideDef.colliderType;
+            it->second.colliderOffsetX = overrideDef.colliderOffsetX;
+            it->second.colliderOffsetY = overrideDef.colliderOffsetY;
+            it->second.colliderWidth = overrideDef.colliderWidth;
+            it->second.colliderHeight = overrideDef.colliderHeight;
+            it->second.colliderCenterX = overrideDef.colliderCenterX;
+            it->second.colliderCenterY = overrideDef.colliderCenterY;
+            it->second.colliderRadius = overrideDef.colliderRadius;
+        }
+    });
 ```
+
 </details>
 
-<details class="pf-details">
-<summary>코드 보기: SceneManager.cpp & Function.h - .dsm 맵 파싱 및 오버라이드 결합</summary>
+### 3.2 맵 배치에서 게임 월드 생성까지
+
+**MapEditor**는 `.dsm` 파일에 **맵 크기, 시작 위치, 타일, 객체, 이동 가능 영역을 구간별로 저장**합니다. 클라이언트는 파일을 읽어 맵 데이터를 구성하고, 오브젝트의 ID와 좌표로 실제 게임 객체를 생성합니다. 배치 정보와 오브젝트별 설정을 분리해, 같은 종류의 객체가 공통 설정을 사용하도록 했습니다.
+
+<ol class="ds-flow" aria-label="에디터 데이터 반영 흐름">
+<li><strong>배치·설정 편집</strong><span>타일·객체·시작 위치와 피벗·충돌 영역 조정</span></li>
+<li><strong>파일 저장</strong><span>맵은 .dsm, 객체 설정은 별도 텍스트로 저장</span></li>
+<li><strong>클라이언트 로드</strong><span>객체 설정을 갱신하고 맵의 섹션별 데이터를 해석</span></li>
+<li><strong>게임 객체 생성</strong><span>ID·좌표로 객체를 만들고 초기화 시 공통 설정 사용</span></li>
+</ol>
+
+<figure class="ds-example ">
+<a href="/assets/images/Dont%20Starve/Editor/Map/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-09-04%20230610.png" target="_blank" rel="noopener noreferrer"><img src="/assets/images/Dont%20Starve/Editor/Map/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-09-04%20230610.png" alt="MapEditor에서 타일을 칠하고 플레이어 시작 위치를 배치한 화면" width="1189" height="827" loading="lazy" decoding="async"></a>
+<figcaption>MapEditor — 타일을 칠하고 플레이어 시작 위치와 오브젝트를 배치합니다.</figcaption>
+</figure>
+
+<details class="pf-details ds-code" id="ds-map-loading">
+<summary>코드 보기: 맵의 ID·좌표 읽기와 객체 생성</summary>
+
+**맵 해석 — `ParseMapFileInto`**
+
+`.dsm`의 OBJECTS 구간에서 읽은 ID와 좌표를 `MapData`에 담습니다. 타일과 플레이어 시작 위치도 각각의 구간에서 읽습니다.
 
 ```cpp
-// SceneManager.cpp - DataManager의 리소스 정보를 전달하며 맵 파싱 수행
-bool SceneManager::ParseMapFile(const std::wstring& mapFileName, MapData& outMapData)
-{
-    auto getObjectResourceInfo = [](GameObjectID id) -> const ResourcePathUtils::ObjectResourceDef* {
-        return DataManager::GetInstance()->GetObjectResourceInfo(id);
-    };
-    return ResourcePathUtils::ParseMapFileInto(mapFileName, outMapData, getObjectResourceInfo);
-}
+GameObjectID objID = EnumTables::GetGameObjectID(id.c_str());
+if (objID != GOID_NONE) {
+    float objX = std::stof(x);
+    float objY = std::stof(y);
 
-// Function.h - ParseMapFileInto: .dsm 텍스트 섹션 파싱 및 오브젝트 스폰
-template<typename GetObjectResourceInfoFunc>
-inline bool ParseMapFileInto(const std::wstring& mapFileName, MapData& outMapData, GetObjectResourceInfoFunc getObjectResourceInfo)
-{
-    std::wifstream file(mapFileName);
-    if (!file.is_open()) return false;
-
-    std::wstring line;
-    enum Section { NONE, METADATA, PLAYER, TILES, OBJECTS } section = NONE;
-
-    while (std::getline(file, line)) {
-        if (line.empty() || line[0] == L'#') {
-            if (line.find(L"# PLAYER") != std::wstring::npos) section = PLAYER;
-            else if (line.find(L"# TILES") != std::wstring::npos) section = TILES;
-            else if (line.find(L"# OBJECTS") != std::wstring::npos) section = OBJECTS;
-            continue;
-        }
-
-        if (section == OBJECTS) {
-            std::wstringstream ss(line);
-            std::wstring idStr, xStr, yStr;
-            if (std::getline(ss, idStr, L',') && std::getline(ss, xStr, L',') && std::getline(ss, yStr, L',')) {
-                GameObjectID objID = EnumTables::GetGameObjectID(idStr.c_str());
-                if (objID != GOID_NONE) {
-                    const auto* pRes = getObjectResourceInfo(objID); // 에디터에서 수정한 피벗/콜라이더 획득
-                    outMapData.gameObjects.push_back({ objID, std::stof(xStr), std::stof(yStr), pRes });
-                }
-            }
-        }
-    }
-    file.close();
-    return true;
+    ResourcePathUtils::ObjectResourceDef objData;
+    objData.id = objID;
+    objData.x = objX;
+    objData.y = objY;
+    outMapData.gameObjects.push_back(objData);
 }
 ```
+
+**월드 생성 — `GameScene::CreateGameObjectsFromMapData`**
+
+저장된 객체를 순회하며 다음 호출로 생성합니다. 객체의 종류는 ID로 결정하고, 위치는 맵에서 읽은 값을 사용합니다.
+
+```cpp
+objectManager->CreateObject(id, objData.x, objData.y);
+```
+
 </details>
+
+<figure class="ds-example ">
+<a href="/assets/images/Dont%20Starve/Editor/Map/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-09-04%20230811.png" target="_blank" rel="noopener noreferrer"><img src="/assets/images/Dont%20Starve/Editor/Map/%EC%8A%A4%ED%81%AC%EB%A6%B0%EC%83%B7%202026-09-04%20230811.png" alt="저장한 맵을 불러와 SpiderQueen과 플레이어를 표시한 인게임 화면" width="1066" height="627" loading="lazy" decoding="async"></a>
+<figcaption>클라이언트 실행 화면 — 저장한 맵의 배치 정보로 게임 월드를 구성합니다.</figcaption>
+</figure>

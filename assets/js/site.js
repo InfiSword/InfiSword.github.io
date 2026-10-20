@@ -284,9 +284,9 @@
     const container = document.querySelector('.pf-diagram-frame');
     if (!container) return;
 
-    const svg = container.querySelector('svg');
     const viewportDrag = document.getElementById('ds-sim-viewport-drag');
     const viewportRect = document.getElementById('ds-viewport-rect');
+    const svg = viewportRect?.ownerSVGElement;
     const viewportBadgeBg = document.getElementById('ds-viewport-badge-bg');
     const viewportBadgeTxt = document.getElementById('ds-viewport-badge-txt');
     const activeGridBox = document.getElementById('ds-active-grid-box');
@@ -360,7 +360,7 @@
       }
       if (viewportBadgeTxt) {
         viewportBadgeTxt.setAttribute('x', curX + 14);
-        viewportBadgeTxt.setAttribute('y', curY + 22);
+        viewportBadgeTxt.setAttribute('y', curY + 26);
       }
 
       // 2. Broad Phase: Calculate overlapping columns & rows
@@ -404,11 +404,11 @@
       const cellCount = (maxCol - minCol + 1) * (maxRow - minRow + 1);
       if (activeGridTag) {
         const tagX = Math.max(30, Math.min(activeLeft + 6, 650));
-        const tagY = activeTop > 105 ? activeTop - 27 : activeBottom + 6;
+        const tagY = activeTop > 115 ? activeTop - 37 : activeBottom + 8;
         activeGridTag.setAttribute('transform', `translate(${tagX}, ${tagY})`);
       }
       if (activeGridTagTxt) {
-        activeGridTagTxt.textContent = `활성 그리드 ${cellCount}개 셀 (Broad Phase 산출)`;
+        activeGridTagTxt.textContent = `화면과 겹치는 셀 ${cellCount}개`;
       }
 
       // 5. Update Grid Cell Coordinates
@@ -536,6 +536,19 @@
 
     viewportDrag.addEventListener('pointerup', onPointerUp);
     viewportDrag.addEventListener('pointercancel', onPointerUp);
+
+    viewportDrag.addEventListener('keydown', function (e) {
+      const step = e.shiftKey ? 40 : 10;
+      const moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };
+      if (e.key === 'Home') {
+        e.preventDefault();
+        updateSimulation(DEFAULT_X, DEFAULT_Y);
+      } else if (moves[e.key]) {
+        e.preventDefault();
+        const [dx, dy] = moves[e.key];
+        updateSimulation(curX + dx, curY + dy);
+      }
+    });
 
     // Reset Button
     if (btnReset) {
